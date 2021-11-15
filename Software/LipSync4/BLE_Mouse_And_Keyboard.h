@@ -1,0 +1,280 @@
+#include <bluefruit.h>
+  
+#define MOUSE_LEFT 1
+#define MOUSE_RIGHT 2
+#define MOUSE_MIDDLE 4
+#define MOUSE_ALL (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)
+
+BLEDis bledis;
+BLEHidAdafruit blehid;
+bool needsInitialization= true;
+
+uint8_t const _ascii2keycode[128][2] = {HID_ASCII_TO_KEYCODE};
+
+class LipSyncBLEMouse {
+  private:
+    void mouseReport(signed char b, signed char x, signed char y, signed char wheel = 0,signed char pan = 0); 
+  public:
+    inline LipSyncBLEMouse(void);
+    inline void begin(char* s = "LipSync");
+    inline void end(void);
+    inline void move(signed char x, signed char y);
+    inline void moveAll(signed char x, signed char y, signed char wheel = 0,signed char pan = 0); 
+    inline void scroll(signed char wheel = 0);
+    inline void pan(signed char pan = 0); 
+    inline void click(uint8_t b = MOUSE_LEFT);
+    inline void press(uint8_t b = MOUSE_LEFT);   // press LEFT by default
+    inline void release(uint8_t b = MOUSE_LEFT); // release LEFT by default
+    inline bool isPressed(uint8_t b = MOUSE_LEFT); // check LEFT by default
+	  inline bool isConnected(void);
+  protected:
+    uint8_t _buttons;
+    void buttons(uint8_t b);
+};
+
+typedef struct
+{
+  uint8_t modifiers;
+  uint8_t reserved;
+  uint8_t keys[6];
+} KeyReport;
+
+
+class LipSyncBLEKeyboard : public Print
+{
+	private:
+		KeyReport _keyReport;
+		void keyboardReport(KeyReport* keys);
+	public:
+		inline LipSyncBLEKeyboard(void);
+		inline void begin(char* s = "LipSync");
+		inline void end(void);
+		inline size_t write(uint8_t k);
+		inline size_t write(const uint8_t *buffer, size_t size);
+		inline size_t press(uint8_t m, uint8_t k);
+		inline size_t release(uint8_t m, uint8_t k);
+		inline void releaseAll(void);
+		inline bool isConnected(void);
+};
+
+
+void initializeBluefruit(char* s) {
+  Bluefruit.begin();
+  Bluefruit.Periph.setConnInterval(9, 16); // min = 9*1.25=11.25 ms, max = 16*1.25=20ms
+  Bluefruit.setTxPower(4);    // Check bluefruit.h for supported values
+  Bluefruit.setName(s);
+  bledis.setManufacturer("Adafruit Industries");
+  bledis.setModel("Bluefruit Feather 52");
+  bledis.begin();
+  blehid.begin();
+  Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
+  Bluefruit.Advertising.addTxPower();
+  Bluefruit.Advertising.addAppearance(BLE_APPEARANCE_HID_KEYBOARD);
+  Bluefruit.Advertising.addAppearance(BLE_APPEARANCE_HID_MOUSE);
+  Bluefruit.Advertising.addService(blehid);
+  Bluefruit.Advertising.addName();
+  Bluefruit.Advertising.restartOnDisconnect(true);
+  Bluefruit.Advertising.setInterval(32, 244);    // in unit of 0.625 ms
+  Bluefruit.Advertising.setFastTimeout(30);      // number of seconds in fast mode
+  Bluefruit.Advertising.start(0);                // 0 = Don't stop advertising after n seconds
+}
+
+
+/*****************************
+ *   MOUSE SECTION
+ *****************************/ 
+
+LipSyncBLEMouse::LipSyncBLEMouse(void)
+{
+
+}
+
+void LipSyncBLEMouse::begin(char* s)
+{
+  _buttons = 0;
+  if(needsInitialization) {
+    initializeBluefruit(s);
+    needsInitialization= false;
+  }
+}
+
+
+void LipSyncBLEMouse::end(void)
+{
+}
+
+void LipSyncBLEMouse::mouseReport(int8_t b, int8_t x, int8_t y, int8_t wheel, int8_t pan) 
+{
+    blehid.mouseReport(b, x, y, wheel, pan);
+}
+
+void LipSyncBLEMouse::move(int8_t x, int8_t y) 
+{
+    mouseReport(_buttons, x, y, 0, 0);
+}
+void LipSyncBLEMouse::moveAll(int8_t x, int8_t y, int8_t wheel, int8_t pan) 
+{
+    mouseReport(_buttons, x, y, wheel, pan);
+}
+
+void LipSyncBLEMouse::scroll(int8_t wheel) 
+{
+    mouseReport(_buttons, 0, 0, wheel, 0);
+}
+
+void LipSyncBLEMouse::pan(int8_t pan) 
+{
+    mouseReport(_buttons, 0, 0, 0, pan);
+}
+
+void LipSyncBLEMouse::click(uint8_t b)
+{
+	_buttons = b;
+	mouseReport(_buttons, 0, 0, 0, 0);
+	_buttons = 0;
+	mouseReport(_buttons, 0, 0, 0, 0);
+}
+
+void LipSyncBLEMouse::buttons(uint8_t b)
+{
+	if (b != _buttons)
+	{
+	  _buttons = b;
+	  mouseReport(_buttons, 0, 0, 0, 0);
+	}
+}
+
+void LipSyncBLEMouse::press(uint8_t b) 
+{
+	buttons(_buttons | b);
+}
+
+void LipSyncBLEMouse::release(uint8_t b)
+{
+	buttons(_buttons & ~b);
+}
+
+bool LipSyncBLEMouse::isPressed(uint8_t b)
+{
+	if ((b & _buttons) > 0) 
+	  return true;
+	return false;
+}
+
+bool LipSyncBLEMouse::isConnected(void) {
+  return Bluefruit.connected();
+}
+/*****************************
+ *   KEYBOARD SECTION
+ *****************************/ 
+
+LipSyncBLEKeyboard::LipSyncBLEKeyboard(void) 
+{
+}
+
+void LipSyncBLEKeyboard::begin(char* s)
+{
+  if(needsInitialization) {
+    initializeBluefruit(s);
+    needsInitialization= false;
+  }
+}
+
+void LipSyncBLEKeyboard::end(void)
+{
+}
+
+void LipSyncBLEKeyboard::keyboardReport(KeyReport* keys)
+{
+  blehid.keyboardReport(keys->modifiers, keys->keys);
+  delay(2);  
+}
+
+
+size_t LipSyncBLEKeyboard::press(uint8_t m, uint8_t k) 
+{
+	uint8_t i;
+	_keyReport.modifiers = m;
+
+	//Add key if the it's not already present and if there is an empty spot.
+	if (_keyReport.keys[0] != k && _keyReport.keys[1] != k && 
+	  _keyReport.keys[2] != k && _keyReport.keys[3] != k &&
+	  _keyReport.keys[4] != k && _keyReport.keys[5] != k) {
+	  
+	  for (i=0; i<6; i++) {
+		if (_keyReport.keys[i] == 0x00) {
+		  _keyReport.keys[i] = k;
+		  break;
+		}
+	  }
+	  if (i == 6) {
+		setWriteError();
+		return 0;
+	  } 
+	}
+	keyboardReport(&_keyReport);
+	return 1;
+}
+
+
+size_t LipSyncBLEKeyboard::release(uint8_t m, uint8_t k) 
+{
+	uint8_t i;
+	_keyReport.modifiers = 0x00;
+	//Check to see if the key is present and clear it if it exists.
+	for (i=0; i<6; i++) {
+	  if (0 != k && _keyReport.keys[i] == k) {
+		_keyReport.keys[i] = 0x00;
+	  }
+	}
+	keyboardReport(&_keyReport);
+	return 1;
+}
+
+void LipSyncBLEKeyboard::releaseAll(void)
+{
+	_keyReport.keys[0] = 0;
+	_keyReport.keys[1] = 0; 
+	_keyReport.keys[2] = 0;
+	_keyReport.keys[3] = 0; 
+	_keyReport.keys[4] = 0;
+	_keyReport.keys[5] = 0; 
+	_keyReport.modifiers = 0;
+	keyboardReport(&_keyReport);
+}
+  
+size_t LipSyncBLEKeyboard::write(uint8_t c)
+{
+  uint8_t keycode = 0;
+  uint8_t modifier = 0;
+  uint8_t uch = (uint8_t)c;
+  
+  if (_ascii2keycode[c][0]) {
+    modifier = KEYBOARD_MODIFIER_LEFTSHIFT;
+  }
+  
+  keycode = _ascii2keycode[uch][1];
+  
+  uint8_t p = press(modifier, keycode);  // Keydown
+  release(modifier, keycode);            // Keyup
+	return p;              // Return the result of press() 
+}
+
+size_t LipSyncBLEKeyboard::write(const uint8_t *buffer, size_t size) {
+	size_t n = 0;
+	while (size--) {
+	  if (*buffer != '\r') {
+		if (write(*buffer)) {
+		  n++;
+		} else {
+		  break;
+		}
+	  }
+	  buffer++;
+	}
+	return n;
+}
+
+bool LipSyncBLEKeyboard::isConnected(void) {
+  return Bluefruit.connected();
+}
