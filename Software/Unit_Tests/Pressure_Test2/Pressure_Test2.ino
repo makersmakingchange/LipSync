@@ -66,18 +66,6 @@ typedef struct {
 } sapLedStruct;
 
 
-/*
-typedef struct { 
-  uint8_t sapActionNumber;
-  uint8_t sapActionState;
-  uint8_t sapActionLedState;
-  uint8_t sapActionLedNumber;
-  uint8_t sapActionColorNumber;
-  unsigned long sapActionStartTime;
-  unsigned long sapActionEndTime;
-} sapActionStruct;
-*/
-
 typedef struct { 
   uint8_t sapActionNumber;
   uint8_t sapActionState;
@@ -88,18 +76,6 @@ typedef struct {
 
 int sapActionSize;
 int ledStateArraySize;
-
-/*
-const sapActionStruct sapActionProperty[] {
-    {OUTPUT_NOTHING,            SAP_MAIN_STATE_NONE, LED_ACTION_OFF,    0,LED_CLR_NONE,   0,0},
-    {OUTPUT_LEFT_CLICK,         SAP_MAIN_STATE_SIP , LED_ACTION_BLINK,  1,LED_CLR_RED,    0,1000},
-    {OUTPUT_RIGHT_CLICK,        SAP_MAIN_STATE_PUFF, LED_ACTION_BLINK,  3,LED_CLR_BLUE,   0,1000},
-    {OUTPUT_DRAG,               SAP_MAIN_STATE_SIP , LED_ACTION_BLINK,  1,LED_CLR_YELLOW, 1000,3000},
-    {OUTPUT_SCROLL,             SAP_MAIN_STATE_PUFF, LED_ACTION_BLINK,  3,LED_CLR_GREEN,  1000,3000},
-    {OUTPUT_MIDDLE_CLICK,       SAP_MAIN_STATE_SIP , LED_ACTION_BLINK,  2,LED_CLR_ORANGE,  3000,5000},
-    {OUTPUT_CURSOR_HOME_RESET,  SAP_MAIN_STATE_PUFF, LED_ACTION_BLINK,  2,LED_CLR_PURPLE,  3000,5000}
-};
-*/
 
 const sapActionStruct sapActionProperty[] {
     {OUTPUT_NOTHING,            SAP_MAIN_STATE_NONE, {LED_ACTION_OFF,0,LED_CLR_NONE,LED_ACTION_OFF,0,LED_CLR_NONE},   0,0},
@@ -234,34 +210,6 @@ void loop() {
 
   //printSipAndPuffData();
 
-
-  //Output action logic
-  /*
-  for (int i=0; i < sapActionSize; i++) {
-    if(sapActionState.mainState==sapActionProperty[i].sapActionState && 
-      sapActionState.secondaryState == SAP_SEC_STATE_RELEASED &&
-      sapActionState.elapsedTime >= sapActionProperty[i].sapActionStartTime &&
-      sapActionState.elapsedTime < sapActionProperty[i].sapActionEndTime){
-      
-      performSapAction(i,
-      sapActionProperty[i].sapActionLedState.sapLedEndAction,
-      sapActionProperty[i].sapActionLedState.sapLedEndNumber,
-      sapActionProperty[i].sapActionLedState.sapLedEndColor);
-      
-      break;
-    }
-    else if(sapActionState.mainState==sapActionProperty[i].sapActionState && 
-      sapActionState.secondaryState == SAP_SEC_STATE_STARTED &&
-      sapActionState.elapsedTime >= sapActionProperty[i].sapActionStartTime &&
-      sapActionState.elapsedTime < sapActionProperty[i].sapActionEndTime){
-        
-      led.setLedColorById(sapActionProperty[i].sapActionLedState.sapLedStartNumber, 
-      sapActionProperty[i].sapActionLedState.sapLedStartColor, 
-      LED_BRIGHTNESS); 
-      break;
-    }
-  }
-  */
 
   //Output action logic
 
