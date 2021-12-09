@@ -11,11 +11,11 @@ bool needsInitialization= true;
 
 uint8_t const _ascii2keycode[128][2] = {HID_ASCII_TO_KEYCODE};
 
-class LipSyncBLEMouse {
+class LSBLEMouse {
   private:
     void mouseReport(signed char b, signed char x, signed char y, signed char wheel = 0,signed char pan = 0); 
   public:
-    inline LipSyncBLEMouse(void);
+    inline LSBLEMouse(void);
     inline void begin(char* s = "LipSync");
     inline void end(void);
     inline void move(signed char x, signed char y);
@@ -40,13 +40,13 @@ typedef struct
 } KeyReport;
 
 
-class LipSyncBLEKeyboard : public Print
+class LSBLEKeyboard : public Print
 {
 	private:
 		KeyReport _keyReport;
 		void keyboardReport(KeyReport* keys);
 	public:
-		inline LipSyncBLEKeyboard(void);
+		inline LSBLEKeyboard(void);
 		inline void begin(char* s = "LipSync");
 		inline void end(void);
 		inline size_t write(uint8_t k);
@@ -84,12 +84,12 @@ void initializeBluefruit(char* s) {
  *   MOUSE SECTION
  *****************************/ 
 
-LipSyncBLEMouse::LipSyncBLEMouse(void)
+LSBLEMouse::LSBLEMouse(void)
 {
 
 }
 
-void LipSyncBLEMouse::begin(char* s)
+void LSBLEMouse::begin(char* s)
 {
   _buttons = 0;
   if(needsInitialization) {
@@ -99,35 +99,35 @@ void LipSyncBLEMouse::begin(char* s)
 }
 
 
-void LipSyncBLEMouse::end(void)
+void LSBLEMouse::end(void)
 {
 }
 
-void LipSyncBLEMouse::mouseReport(int8_t b, int8_t x, int8_t y, int8_t wheel, int8_t pan) 
+void LSBLEMouse::mouseReport(int8_t b, int8_t x, int8_t y, int8_t wheel, int8_t pan) 
 {
     blehid.mouseReport(b, x, y, wheel, pan);
 }
 
-void LipSyncBLEMouse::move(int8_t x, int8_t y) 
+void LSBLEMouse::move(int8_t x, int8_t y) 
 {
     mouseReport(_buttons, x, y, 0, 0);
 }
-void LipSyncBLEMouse::moveAll(int8_t x, int8_t y, int8_t wheel, int8_t pan) 
+void LSBLEMouse::moveAll(int8_t x, int8_t y, int8_t wheel, int8_t pan) 
 {
     mouseReport(_buttons, x, y, wheel, pan);
 }
 
-void LipSyncBLEMouse::scroll(int8_t wheel) 
+void LSBLEMouse::scroll(int8_t wheel) 
 {
     mouseReport(_buttons, 0, 0, wheel, 0);
 }
 
-void LipSyncBLEMouse::pan(int8_t pan) 
+void LSBLEMouse::pan(int8_t pan) 
 {
     mouseReport(_buttons, 0, 0, 0, pan);
 }
 
-void LipSyncBLEMouse::click(uint8_t b)
+void LSBLEMouse::click(uint8_t b)
 {
 	_buttons = b;
 	mouseReport(_buttons, 0, 0, 0, 0);
@@ -135,7 +135,7 @@ void LipSyncBLEMouse::click(uint8_t b)
 	mouseReport(_buttons, 0, 0, 0, 0);
 }
 
-void LipSyncBLEMouse::buttons(uint8_t b)
+void LSBLEMouse::buttons(uint8_t b)
 {
 	if (b != _buttons)
 	{
@@ -144,35 +144,35 @@ void LipSyncBLEMouse::buttons(uint8_t b)
 	}
 }
 
-void LipSyncBLEMouse::press(uint8_t b) 
+void LSBLEMouse::press(uint8_t b) 
 {
 	buttons(_buttons | b);
 }
 
-void LipSyncBLEMouse::release(uint8_t b)
+void LSBLEMouse::release(uint8_t b)
 {
 	buttons(_buttons & ~b);
 }
 
-bool LipSyncBLEMouse::isPressed(uint8_t b)
+bool LSBLEMouse::isPressed(uint8_t b)
 {
 	if ((b & _buttons) > 0) 
 	  return true;
 	return false;
 }
 
-bool LipSyncBLEMouse::isConnected(void) {
+bool LSBLEMouse::isConnected(void) {
   return Bluefruit.connected();
 }
 /*****************************
  *   KEYBOARD SECTION
  *****************************/ 
 
-LipSyncBLEKeyboard::LipSyncBLEKeyboard(void) 
+LSBLEKeyboard::LSBLEKeyboard(void) 
 {
 }
 
-void LipSyncBLEKeyboard::begin(char* s)
+void LSBLEKeyboard::begin(char* s)
 {
   if(needsInitialization) {
     initializeBluefruit(s);
@@ -180,18 +180,18 @@ void LipSyncBLEKeyboard::begin(char* s)
   }
 }
 
-void LipSyncBLEKeyboard::end(void)
+void LSBLEKeyboard::end(void)
 {
 }
 
-void LipSyncBLEKeyboard::keyboardReport(KeyReport* keys)
+void LSBLEKeyboard::keyboardReport(KeyReport* keys)
 {
   blehid.keyboardReport(keys->modifiers, keys->keys);
   delay(2);  
 }
 
 
-size_t LipSyncBLEKeyboard::press(uint8_t m, uint8_t k) 
+size_t LSBLEKeyboard::press(uint8_t m, uint8_t k) 
 {
 	uint8_t i;
 	_keyReport.modifiers = m;
@@ -217,7 +217,7 @@ size_t LipSyncBLEKeyboard::press(uint8_t m, uint8_t k)
 }
 
 
-size_t LipSyncBLEKeyboard::release(uint8_t m, uint8_t k) 
+size_t LSBLEKeyboard::release(uint8_t m, uint8_t k) 
 {
 	uint8_t i;
 	_keyReport.modifiers = 0x00;
@@ -231,7 +231,7 @@ size_t LipSyncBLEKeyboard::release(uint8_t m, uint8_t k)
 	return 1;
 }
 
-void LipSyncBLEKeyboard::releaseAll(void)
+void LSBLEKeyboard::releaseAll(void)
 {
 	_keyReport.keys[0] = 0;
 	_keyReport.keys[1] = 0; 
@@ -243,7 +243,7 @@ void LipSyncBLEKeyboard::releaseAll(void)
 	keyboardReport(&_keyReport);
 }
   
-size_t LipSyncBLEKeyboard::write(uint8_t c)
+size_t LSBLEKeyboard::write(uint8_t c)
 {
   uint8_t keycode = 0;
   uint8_t modifier = 0;
@@ -260,7 +260,7 @@ size_t LipSyncBLEKeyboard::write(uint8_t c)
 	return p;              // Return the result of press() 
 }
 
-size_t LipSyncBLEKeyboard::write(const uint8_t *buffer, size_t size) {
+size_t LSBLEKeyboard::write(const uint8_t *buffer, size_t size) {
 	size_t n = 0;
 	while (size--) {
 	  if (*buffer != '\r') {
@@ -275,6 +275,6 @@ size_t LipSyncBLEKeyboard::write(const uint8_t *buffer, size_t size) {
 	return n;
 }
 
-bool LipSyncBLEKeyboard::isConnected(void) {
+bool LSBLEKeyboard::isConnected(void) {
   return Bluefruit.connected();
 }

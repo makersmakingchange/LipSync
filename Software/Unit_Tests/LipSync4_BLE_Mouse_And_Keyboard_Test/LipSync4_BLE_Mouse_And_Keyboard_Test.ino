@@ -1,7 +1,7 @@
 #include "BLE_Mouse_And_Keyboard.h"
 
-LipSyncBLEMouse lipSyncMouse;
-LipSyncBLEKeyboard lipSyncKeyboard;
+LSBLEMouse lipSyncMouse;
+LSBLEKeyboard lipSyncKeyboard;
 
 // the setup function runs once when you press reset or power the board
 void setup()
