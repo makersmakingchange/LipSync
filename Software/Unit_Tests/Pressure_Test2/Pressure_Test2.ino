@@ -1,5 +1,6 @@
 #include <Arduino.h>
-#include "Adafruit_TinyUSB.h"
+#include "LSUSB_Mouse_And_Keyboard.h"
+
 #include <Wire.h>  
 #include <StopWatch.h>
 
@@ -101,9 +102,12 @@ LSPressure ps;                  //Starts an instance of the LSPressure object
 
 LSOutput led;                   //Starts an instance of the LSOutput led object
 
+LSMouse mouse;                  //Starts an instance of the usb mouse object
 
 
 void setup() {
+
+  mouse.begin();
   
   Serial.begin(115200);
   // Wait until serial port is opened
@@ -391,16 +395,19 @@ void performSapAction(int action, int ledState, int ledNumber, int ledColor) {
 
 void cursorLeftClick(void) {
   Serial.println("Left Click");
+  mouse.click(MOUSE_LEFT);
   delay(100);
 }
 
 void cursorRightClick(void) {
   Serial.println("Right Click");  
+  mouse.click(MOUSE_RIGHT);
   delay(100);
 }
 
 void cursorMiddleClick(void) {
   Serial.println("Middle Click");  
+  mouse.click(MOUSE_MIDDLE);
   delay(100);
 }
 
