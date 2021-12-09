@@ -20,11 +20,11 @@ uint8_t const desc_hid_report[] =
 };
 
 
-class LipSyncMouse {
+class LSMouse {
   private:
     void mouseReport(signed char b, signed char x, signed char y, signed char wheel = 0,signed char pan = 0); 
   public:
-    inline LipSyncMouse(void);
+    inline LSMouse(void);
     inline void begin(void);
     inline void end(void);
 	  inline void wakeup(void);
@@ -51,13 +51,13 @@ typedef struct
 } KeyReport;
 
 
-class LipSyncKeyboard : public Print
+class LSKeyboard : public Print
 {
 	private:
 		KeyReport _keyReport;
 		void keyboardReport(KeyReport* keys);
 	public:
-		inline LipSyncKeyboard(void);
+		inline LSKeyboard(void);
 		inline void begin(void);
 		inline void end(void);
 		inline void wakeup(void);
@@ -75,7 +75,7 @@ class LipSyncKeyboard : public Print
  *   MOUSE SECTION
  *****************************/ 
 
-LipSyncMouse::LipSyncMouse(void)
+LSMouse::LSMouse(void)
 {
   _buttons = 0;
   this->usb_hid.setPollInterval(1);
@@ -83,51 +83,51 @@ LipSyncMouse::LipSyncMouse(void)
 
 }
 
-void LipSyncMouse::begin(void)
+void LSMouse::begin(void)
 {
   this->usb_hid.begin();
   while( !USBDevice.mounted() ) delay(1);
 }
 
 
-void LipSyncMouse::end(void)
+void LSMouse::end(void)
 {
 }
 
-void LipSyncMouse::wakeup(void)
+void LSMouse::wakeup(void)
 {
 	if ( USBDevice.suspended() )  {
       USBDevice.remoteWakeup();
     }
 }
 
-void LipSyncMouse::mouseReport(int8_t b, int8_t x, int8_t y, int8_t wheel, int8_t pan) 
+void LSMouse::mouseReport(int8_t b, int8_t x, int8_t y, int8_t wheel, int8_t pan) 
 {
 	wakeup();
     while(!isReady()) delay(1);
     usb_hid.mouseReport(RID_MOUSE,b,x,y,wheel,pan);
 }
 
-void LipSyncMouse::move(int8_t x, int8_t y) 
+void LSMouse::move(int8_t x, int8_t y) 
 {
     mouseReport(_buttons, x, y, 0, 0);
 }
-void LipSyncMouse::moveAll(int8_t x, int8_t y, int8_t wheel, int8_t pan) 
+void LSMouse::moveAll(int8_t x, int8_t y, int8_t wheel, int8_t pan) 
 {
     mouseReport(_buttons, x, y, wheel, pan);
 }
 
-void LipSyncMouse::scroll(int8_t wheel) 
+void LSMouse::scroll(int8_t wheel) 
 {
     mouseReport(_buttons, 0, 0, wheel, 0);
 }
 
-void LipSyncMouse::pan(int8_t pan) 
+void LSMouse::pan(int8_t pan) 
 {
     mouseReport(_buttons, 0, 0, 0, pan);
 }
 
-void LipSyncMouse::click(uint8_t b)
+void LSMouse::click(uint8_t b)
 {
   _buttons = b;
   mouseReport(_buttons, 0, 0, 0, 0);
@@ -135,7 +135,7 @@ void LipSyncMouse::click(uint8_t b)
   mouseReport(_buttons, 0, 0, 0, 0);
 }
 
-void LipSyncMouse::buttons(uint8_t b)
+void LSMouse::buttons(uint8_t b)
 {
 	if (b != _buttons)
 	{
@@ -144,24 +144,24 @@ void LipSyncMouse::buttons(uint8_t b)
 	}
 }
 
-void LipSyncMouse::press(uint8_t b) 
+void LSMouse::press(uint8_t b) 
 {
 	buttons(_buttons | b);
 }
 
-void LipSyncMouse::release(uint8_t b)
+void LSMouse::release(uint8_t b)
 {
 	buttons(_buttons & ~b);
 }
 
-bool LipSyncMouse::isPressed(uint8_t b)
+bool LSMouse::isPressed(uint8_t b)
 {
 	if ((b & _buttons) > 0) 
 	  return true;
 	return false;
 }
 
-bool LipSyncMouse::isReady(void)
+bool LSMouse::isReady(void)
 {
 	if (usb_hid.ready()) 
 	  return true;
@@ -172,11 +172,11 @@ bool LipSyncMouse::isReady(void)
  *   KEYBOARD SECTION
  *****************************/ 
 
-LipSyncKeyboard::LipSyncKeyboard(void) 
+LSKeyboard::LSKeyboard(void) 
 {
 }
 
-void LipSyncKeyboard::begin(void)
+void LSKeyboard::begin(void)
 {
 	usb_hid.setPollInterval(2);
 	usb_hid.setReportDescriptor(desc_hid_report, sizeof(desc_hid_report));
@@ -184,11 +184,11 @@ void LipSyncKeyboard::begin(void)
 	while( !USBDevice.mounted() ) delay(1);
 }
 
-void LipSyncKeyboard::end(void)
+void LSKeyboard::end(void)
 {
 }
 
-void LipSyncKeyboard::keyboardReport(KeyReport* keys)
+void LSKeyboard::keyboardReport(KeyReport* keys)
 {
 	wakeup();
 	while(!isReady()) delay(1);
@@ -196,14 +196,14 @@ void LipSyncKeyboard::keyboardReport(KeyReport* keys)
 	delay(2);
 }
 
-void LipSyncKeyboard::wakeup(void)
+void LSKeyboard::wakeup(void)
 {
 	if ( USBDevice.suspended() )  {
       USBDevice.remoteWakeup();
     }
 }
 
-size_t LipSyncKeyboard::press(uint8_t m, uint8_t k) 
+size_t LSKeyboard::press(uint8_t m, uint8_t k) 
 {
 	uint8_t i;
 	_keyReport.modifiers = m;
@@ -229,7 +229,7 @@ size_t LipSyncKeyboard::press(uint8_t m, uint8_t k)
 }
 
 
-size_t LipSyncKeyboard::release(uint8_t m, uint8_t k) 
+size_t LSKeyboard::release(uint8_t m, uint8_t k) 
 {
 	uint8_t i;
 	_keyReport.modifiers = 0x00;
@@ -243,7 +243,7 @@ size_t LipSyncKeyboard::release(uint8_t m, uint8_t k)
 	return 1;
 }
 
-void LipSyncKeyboard::releaseAll(void)
+void LSKeyboard::releaseAll(void)
 {
 	_keyReport.keys[0] = 0;
 	_keyReport.keys[1] = 0; 
@@ -255,7 +255,7 @@ void LipSyncKeyboard::releaseAll(void)
 	keyboardReport(&_keyReport);
 }
   
-size_t LipSyncKeyboard::write(uint8_t c)
+size_t LSKeyboard::write(uint8_t c)
 {
   uint8_t keycode = 0;
   uint8_t modifier = 0;
@@ -272,7 +272,7 @@ size_t LipSyncKeyboard::write(uint8_t c)
 	return p;              // Return the result of press() 
 }
 
-size_t LipSyncKeyboard::write(const uint8_t *buffer, size_t size) {
+size_t LSKeyboard::write(const uint8_t *buffer, size_t size) {
 	size_t n = 0;
 	while (size--) {
 	  if (*buffer != '\r') {
@@ -287,7 +287,7 @@ size_t LipSyncKeyboard::write(const uint8_t *buffer, size_t size) {
 	return n;
 }
 
-bool LipSyncKeyboard::isReady(void)
+bool LSKeyboard::isReady(void)
 {
 	if (usb_hid.ready()) 
 	  return true;

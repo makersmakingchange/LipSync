@@ -1,7 +1,7 @@
-#include "TinyUSB_Mouse_And_Keyboard.h"
+#include "LSUSB_Mouse_And_Keyboard.h"
 
-LipSyncMouse lipSyncMouse;
-LipSyncKeyboard lipSyncKeyboard;
+LSMouse lipSyncMouse;
+LSKeyboard lipSyncKeyboard;
 
 // the setup function runs once when you press reset or power the board
 void setup()
