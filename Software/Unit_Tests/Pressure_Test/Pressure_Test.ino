@@ -238,12 +238,12 @@ void readPressure() {
 
 void printPressureData() {
 
-  Serial.print(" main: "); Serial.print(sapActionState.mainState);Serial.print(", ");
-  Serial.print(" secondary: "); Serial.print(sapActionState.secondaryState);Serial.print(", ");
-  Serial.print(" time: "); Serial.print(sapActionState.elapsedTime);Serial.print(", ");
+  Serial.print(" myBMPpres: "); Serial.print(myBMPpres);Serial.print(", ");
+  Serial.print(" myLPSpres: "); Serial.print(myLPSpres);Serial.print(", ");
+  Serial.print(" myRawPres: "); Serial.print(myRawPres);Serial.print(", ");
   
   Serial.println();
- 
+
 }
 
 
@@ -261,10 +261,10 @@ void setSipAndPuffThreshold(){
 }
 
 void printSipAndPuffData() {
-  
-  Serial.print(" myBMPpres: "); Serial.print(myBMPpres);Serial.print(", ");
-  Serial.print(" myLPSpres: "); Serial.print(myLPSpres);Serial.print(", ");
-  Serial.print(" myRawPres: "); Serial.print(myRawPres);Serial.print(", ");
+
+  Serial.print(" main: "); Serial.print(sapActionState.mainState);Serial.print(", ");
+  Serial.print(" secondary: "); Serial.print(sapActionState.secondaryState);Serial.print(", ");
+  Serial.print(" time: "); Serial.print(sapActionState.elapsedTime);Serial.print(", ");
   
   Serial.println();
  
