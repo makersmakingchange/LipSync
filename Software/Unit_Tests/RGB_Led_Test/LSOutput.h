@@ -44,7 +44,6 @@ const colorType colorProperty[] {
 class LSOutput {
   public:
     LSOutput();
-    pressureType pressureArray[PS_ARRAY_SIZE];
     void begin();  
     void clearLedAll();                                  
     void clearLed(int ledNumber);
