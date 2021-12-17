@@ -134,7 +134,7 @@ void pressureDataloop() {
 
   readPressure();                 //Read the pressure object (can be last value from array, average or other algorithms)
 
-  //printPressureData(); 
+  printPressureData(); 
 
   sapPrevState = sapQueue.end();  //Get the previous state
   
@@ -197,12 +197,6 @@ void pressureDataloop() {
       sapStateTimer[0].reset();                                                                        
       sapStateTimer[0].start();     
   }
-
-  delay(20);
-}
-
-
-void loop() {
   for (int i=0; i < ledStateArraySize; i++) {
     if(ledStateArray[i]==LED_ACTION_OFF) {
      led.clearLed(i+1);
@@ -264,6 +258,11 @@ void loop() {
     sapActionIndex++;
     
   }
+  delay(20);
+}
+
+
+void loop() {
   
   delay(20);
 }

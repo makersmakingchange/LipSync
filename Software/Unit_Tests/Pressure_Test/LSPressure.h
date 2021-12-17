@@ -11,13 +11,10 @@
 
 Adafruit_LPS35HW lps35hw = Adafruit_LPS35HW();
 
-
 Adafruit_BMP280 bmp; // use I2C interface
 
-//Adafruit_Sensor *bmp_temp = bmp.getTemperatureSensor();
-
 Adafruit_Sensor *bmp_pressure = bmp.getPressureSensor();
-StopWatch myTimer[1];
+StopWatch pressureTimer[1];
 
 typedef struct {
   float mainPressure;
@@ -33,6 +30,7 @@ class LSPressure {
     void resetTimer();
     unsigned long getTime();
     int pressureType;
+    float pressureComp;
     float pressureZero;
   public:
     LSPressure();
@@ -42,7 +40,6 @@ class LSPressure {
     void clear();  
     void zero();
     void update();    
-    //Pop last dot or dash from the stack    
     void setFilterMode(int mode); 
     float getMainPressure();
     float getRefPressure();
@@ -71,40 +68,23 @@ void LSPressure::begin(int type) {
 
   filterMode = FILTER_NONE;
 
-  lps35hw.setDataRate(LPS35HW_RATE_50_HZ);  // 1,10,25,50,75
+  lps35hw.setDataRate(LPS35HW_RATE_75_HZ);  // 1,10,25,50,75
 
-  /*
-
-    bmp.setSampling(Adafruit_BMP280::MODE_FORCED,     // Operating Mode. 
-                  Adafruit_BMP280::SAMPLING_X1,     // Temp. oversampling
-                  Adafruit_BMP280::SAMPLING_X1,    // Pressure oversampling 
-                  Adafruit_BMP280::FILTER_OFF,      // Filtering. 
-                  Adafruit_BMP280::STANDBY_MS_1); // Standby time. 
-  
-
+  if(pressureType==PRESS_TYPE_DIFF){
     bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     // Operating Mode. 
-                  Adafruit_BMP280::SAMPLING_X1,     // Temp. oversampling
+                  Adafruit_BMP280::SAMPLING_NONE,     // Temp. oversampling
                   Adafruit_BMP280::SAMPLING_X4,    // Pressure oversampling 
                   Adafruit_BMP280::FILTER_X16,      // Filtering. 
-                  Adafruit_BMP280::STANDBY_MS_1); // Standby time. 
-
-    */
-
-    if(pressureType==PRESS_TYPE_DIFF){
-      bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     // Operating Mode. 
-                    Adafruit_BMP280::SAMPLING_X2,     // Temp. oversampling
-                    Adafruit_BMP280::SAMPLING_X16,    // Pressure oversampling 
-                    Adafruit_BMP280::FILTER_X16,      // Filtering. 
-                    Adafruit_BMP280::STANDBY_MS_500); // Standby time.       
-    } else {
-      zero();
-    }
+                  Adafruit_BMP280::STANDBY_MS_1000); // Standby time.       
+  } else {
+    zero();
+  }
 
   clear();
 }
 
 void LSPressure::clear() {
-  
+      
   sensors_event_t pressure_event;
   bmp_pressure->getEvent(&pressure_event);
 
@@ -114,9 +94,10 @@ void LSPressure::clear() {
     refVal=pressure_event.pressure;
   }
   else{
-    refVal= pressureZero;
+    refVal = pressureZero;
   }
-  float rawVal = mainVal - refVal;
+  //pressureComp = mainVal - refVal;
+  float rawVal = 0.0;  //mainVal - refVal;
   
   for (int i=0; i < PRESS_ARRAY_SIZE; i++) {
     //pressureArray[i] = {mainVal, refVal, rawVal};
@@ -144,15 +125,16 @@ void LSPressure::update() {
   else{
     refVal= pressureZero;
   }
-  float rawVal = mainVal - refVal;
-  /*
-  memmove( pressureArray, &pressureArray[1], (PRESS_ARRAY_SIZE-1) * sizeof(pressureArray[0]));
-  pressureArray[PRESS_ARRAY_SIZE-1] = {mainVal, refVal, rawVal};
-  */
-  pressureQueue.push({mainVal, refVal, rawVal});
-  pressureQueue.pop();
-  
 
+  if(mainVal > 0.00 && refVal > 0.00){
+    float rawVal = mainVal - refVal; // - pressureComp;
+    /*
+    memmove( pressureArray, &pressureArray[1], (PRESS_ARRAY_SIZE-1) * sizeof(pressureArray[0]));
+    pressureArray[PRESS_ARRAY_SIZE-1] = {mainVal, refVal, rawVal};
+    */
+    pressureQueue.push({mainVal, refVal, rawVal});
+    pressureQueue.pop();    
+  }
   
   //Serial.println(getTime());  
 }
@@ -207,16 +189,16 @@ float LSPressure::calculateAverage(pressureStruct * array, int len)
 //***RESET TIMER FUNCTION***//
 
 void LSPressure::resetTimer() {
-  myTimer[0].stop();                                //Reset and start the timer         
-  myTimer[0].reset();                                                                        
-  myTimer[0].start(); 
+  pressureTimer[0].stop();                                //Reset and start the timer         
+  pressureTimer[0].reset();                                                                        
+  pressureTimer[0].start(); 
 }
 
 //***GET TIME FUNCTION***//
 
 unsigned long LSPressure::getTime() {
-  unsigned long finalTime = myTimer[0].elapsed(); 
-  myTimer[0].stop();                                //Reset and start the timer         
-  myTimer[0].reset(); 
+  unsigned long finalTime = pressureTimer[0].elapsed(); 
+  pressureTimer[0].stop();                                //Reset and start the timer         
+  pressureTimer[0].reset(); 
   return finalTime;
 }
