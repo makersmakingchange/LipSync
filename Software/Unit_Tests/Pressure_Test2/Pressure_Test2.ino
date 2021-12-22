@@ -96,7 +96,7 @@ sapStruct sapCurrState, sapPrevState, sapActionState;
 
 StopWatch sapStateTimer[1];
 
-LSQueue <sapStruct> sapQueue;   //Create a Queue of type sapStruct
+LSQueue <sapStruct> sapQueue(12);   //Create a Queue of type sapStruct with size of 12
 
 LSPressure ps;                  //Starts an instance of the LSPressure object
 
@@ -184,7 +184,6 @@ void pressureDataloop() {
       }
       //Push the new state   
       sapQueue.push(sapCurrState);
-      if(sapQueue.count()==12){sapQueue.pop(); }  //Keep last 12 objects 
       //Reset and start the timer
       sapStateTimer[0].stop();      
       sapStateTimer[0].reset();                                                                        

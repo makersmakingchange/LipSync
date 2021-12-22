@@ -22,7 +22,7 @@ typedef struct {
   float rawPressure;
 } pressureStruct;
 
-LSQueue <pressureStruct> pressureQueue;
+LSQueue <pressureStruct> pressureQueue(5);
 
 class LSPressure {
   private: 
@@ -133,7 +133,6 @@ void LSPressure::update() {
     pressureArray[PRESS_ARRAY_SIZE-1] = {mainVal, refVal, rawVal};
     */
     pressureQueue.push({mainVal, refVal, rawVal});
-    pressureQueue.pop();    
   }
   
   //Serial.println(getTime());  
@@ -180,7 +179,7 @@ float LSPressure::calculateAverage(pressureStruct * array, int len)
 {
   float sum = 0.0;
   for (int i = 0 ; i < len ; i++){
-    sum += array [i].rawPressure;
+    sum += pressureQueue.peek(i).rawPressure;
   }
   return(((float) sum) / len);
 }
