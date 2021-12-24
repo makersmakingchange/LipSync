@@ -82,17 +82,21 @@ void LSQueue<T>::clear () {
 template<typename T>
 void LSQueue<T>::enqueue (const T i) {
   // check if the queue is full.
-  if (isFull ())
-    dequeue();
-
-  // store the item to the array.
+  if (isFull ()){
+    memmove( contents, &contents[1], (_size-1) * sizeof(contents[0]));
+    contents[_size-1] = i;
+  }else {
+   // store the item to the array.
   contents[tail++] = i;
   
   // wrap-around index.
-  if (tail == _size) tail = 0;
+  //if (tail == _size) tail = 0;
 
   // increase the items.
-  items++;
+  items++;   
+  }
+
+
 }
 
 // push an item to the queue.

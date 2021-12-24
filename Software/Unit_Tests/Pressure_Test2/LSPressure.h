@@ -144,18 +144,18 @@ void LSPressure::setFilterMode(int mode) {
 
 float LSPressure::getMainPressure() {
   //return pressureArray[0].mainPressure;
-  return pressureQueue.end().mainPressure;
+  return pressureQueue.front().mainPressure;
 }
 
 float LSPressure::getRefPressure() {
   //return pressureArray[0].refPressure;
-  return pressureQueue.end().refPressure;
+  return pressureQueue.front().refPressure;
 }
 
 
 float LSPressure::getRawPressure() {
   //return pressureArray[0].rawPressure;
-  return pressureQueue.end().rawPressure;
+  return pressureQueue.front().rawPressure;
 }
 
 
