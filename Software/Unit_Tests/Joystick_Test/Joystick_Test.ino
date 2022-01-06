@@ -4,7 +4,7 @@
 #include <Wire.h>  
 #include <StopWatch.h>
 
-#include "LSQueue.h"
+#include "LSCircularBuffer.h"
 #include "LSJoystick.h"
 #include "LSOutput.h"
 
@@ -31,7 +31,7 @@ int joystickState;
 int xVal;
 int yVal;
 
-LSQueue <joystickStateStruct> joystickStateQueue(12);   //Create a Queue of type joystickStruct
+LSCircularBuffer <joystickStateStruct> joystickStateBuffer(12);   //Create a bu of type joystickStruct
 
 StopWatch joystickTimer[1];
 
@@ -69,13 +69,13 @@ void joystickDataloop() {
 
   printJoystickData(); 
 
-  //joystickPrevState = joystickStateQueue.end();  //Get the previous state
+  //joystickPrevState = joystickStateBuffer.getLastElement();  //Get the previous state
   
 /*
   if(joystickPrevState.mainState == joystickState){
     joystickCurrState = {joystickState, joystickPrevState.secondaryState, joystickTimer[0].elapsed()};
     //Serial.println("a");
-    joystickStateQueue.update(joystickCurrState);
+    joystickStateBuffer.updateLastElement(joystickCurrState);
   } else {  
       if(joystickPrevState.secondaryState==JOY_SEC_STATE_RELEASED && joystickState==JOY_MAIN_STATE_CENTER){
         joystickCurrState = {joystickState, JOY_SEC_STATE_WAITING, 0};
@@ -94,8 +94,7 @@ void joystickDataloop() {
         //Serial.println("e");
       }
       //Push the new state   
-      joystickStateQueue.push(joystickCurrState);
-      if(joystickStateQueue.count()==12){joystickStateQueue.pop(); }  //Keep last 12 objects 
+      joystickStateBuffer.pushElement(joystickCurrState);
       //Reset and start the timer
       joystickTimer[0].stop();      
       joystickTimer[0].reset();                                                                        
@@ -180,7 +179,7 @@ void initJoystickArray(){
   //Push initial state to state Queue
   
   joystickCurrState = joystickPrevState = {JOY_MAIN_STATE_CENTER, JOY_SEC_STATE_WAITING, 0};
-  joystickStateQueue.push(joystickCurrState);
+  joystickStateBuffer.pushElement(joystickCurrState);
 
   //Reset and start the timer   
   joystickTimer[0].stop();                                      

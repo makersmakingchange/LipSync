@@ -35,7 +35,7 @@ typedef struct {
   int y;
 } joystickInputStruct;
 
-LSQueue <joystickInputStruct> joystickInputQueue(5);
+LSCircularBuffer <joystickInputStruct> joystickInputBuffer(5);
 class LSJoystick {
   private: 
     joystickRawStruct joystickRawComp;    
@@ -80,7 +80,7 @@ void LSJoystick::clear() {
   joystickRawCalibration[4] = {0.00, 0.00};
 
   for (int i=0; i < RAW_ARRAY_SIZE; i++) {
-      joystickInputQueue.push({0, 0});
+      joystickInputBuffer.pushElement({0, 0});
       
     
   }
@@ -121,65 +121,22 @@ void LSJoystick::update() {
   
   Tlv493dSensor.updateData();
   joystickInputStruct outputPoint = limitCircle({Tlv493dSensor.getY(),Tlv493dSensor.getX()});
-
-  /*
-  joystickRawStruct rawPoint = {Tlv493dSensor.getY()-joystickRawComp.x,Tlv493dSensor.getX()-joystickRawComp.y};
-  joystickRawStruct maxPoint, limitPoint;
-  joystickInputStruct limitOutputPoint;
-  
-  float thetaVal = atan2(rawPoint.y, rawPoint.x);         // Get the angel of the point
-  
-  if( rawPoint.x > 0 && rawPoint.y >= 0){                 // Find the max point at the corner depending on the quadrant 
-    maxPoint = joystickRawCalibration[1];
-  }
-  else if( rawPoint.x <= 0 && rawPoint.y > 0){
-    maxPoint = joystickRawCalibration[2];
-  }
-  else if( rawPoint.x < 0 && rawPoint.y <= 0){
-    maxPoint = joystickRawCalibration[3];
-  }
-  else if( rawPoint.x >= 0 && rawPoint.y < 0){
-    maxPoint = joystickRawCalibration[4];
-  }
-  else {
-    maxPoint = {0.00,0.00};
-  }
-
-  //Find the limiting point on perimeter of ellipse
-  limitPoint.x = (maxPoint.x * maxPoint.y)/sqrt(sq(maxPoint.y)+sq(maxPoint.x)*sq(tan(thetaVal)));
-  limitPoint.y = (maxPoint.x * maxPoint.y)/sqrt(sq(maxPoint.x)+sq(maxPoint.y)/sq(tan(thetaVal)));
-
-
-  //Compare the magnitude of two points from center 
-  //Output point on perimeter of ellipse if it's outside 
-  if((sq(rawPoint.y)+sq(rawPoint.x))>=(sq(limitPoint.y)+sq(limitPoint.x))){
-    limitOutputPoint.x = mapFloatInt(limitPoint.x,-maxPoint.x,maxPoint.x,-INPUT_MAX,INPUT_MAX);
-    limitOutputPoint.y = mapFloatInt(limitPoint.y,-maxPoint.y,maxPoint.y,-INPUT_MAX,INPUT_MAX);
     
-  }else {
-    limitOutputPoint.x = mapFloatInt(rawPoint.x,-maxPoint.x,maxPoint.x,-INPUT_MAX,INPUT_MAX);
-    limitOutputPoint.y = mapFloatInt(rawPoint.y,-maxPoint.y,maxPoint.y,-INPUT_MAX,INPUT_MAX);    
-  }
-
-    limitOutputPoint.x = _direction*sgn(rawPoint.x)*limitOutputPoint.x;
-    limitOutputPoint.y = _direction*sgn(rawPoint.y)*limitOutputPoint.y;    
-    */
-    
-    joystickInputQueue.push(outputPoint);
+  joystickInputBuffer.pushElement(outputPoint);
 
 }
 
 int LSJoystick::getXVal() {
-  return joystickInputQueue.front().x;
+  return joystickInputBuffer.getLastElement().x;
 }
 
 int LSJoystick::getYVal() {
-  return joystickInputQueue.front().y;
+  return joystickInputBuffer.getLastElement().y;
 }
 
 
 joystickInputStruct LSJoystick::getAllVal() {
-  return joystickInputQueue.front();
+  return joystickInputBuffer.getLastElement();
 }
 
 joystickInputStruct LSJoystick::limitCircle(joystickRawStruct point){
@@ -239,10 +196,6 @@ int LSJoystick::mapFloatInt(float input,float inputStart,float inputEnd, int out
   return output;
 }
 
-/*template <typename T>
-int LSJoystick::sgn(T val) {
-    return (T(0) < val) - (val < T(0));
-}*/
 
 int LSJoystick::sgn(float val) {
     return (0.0 < val) - (val < 0.0);
