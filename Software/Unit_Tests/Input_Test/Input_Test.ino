@@ -123,7 +123,7 @@ void inputDataloop() {
       inputButtonActionState.elapsedTime >= inputActionProperty[i].inputActionStartTime &&
       inputButtonActionState.elapsedTime < inputActionProperty[i].inputActionEndTime){
       
-      performinputAction(i,
+      performInputAction(i,
       inputActionProperty[i].inputActionLedState,
       inputActionProperty[i].inputActionLedNumber,
       inputActionProperty[i].inputActionColorNumber);
@@ -138,7 +138,7 @@ void inputDataloop() {
       inputSwitchActionState.elapsedTime >= inputActionProperty[i].inputActionStartTime &&
       inputSwitchActionState.elapsedTime < inputActionProperty[i].inputActionEndTime){
       
-      performinputAction(i,
+      performInputAction(i,
       inputActionProperty[i].inputActionLedState,
       inputActionProperty[i].inputActionLedNumber,
       inputActionProperty[i].inputActionColorNumber);
@@ -173,7 +173,7 @@ void printInputData() {
 
 
 
-void performinputAction(int action, int ledState, int ledNumber, int ledColor) {
+void performInputAction(int action, int ledState, int ledNumber, int ledColor) {
   
     
     switch (action) {
