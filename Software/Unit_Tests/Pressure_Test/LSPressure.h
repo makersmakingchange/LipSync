@@ -22,7 +22,7 @@ typedef struct {
   float rawPressure;
 } pressureStruct;
 
-LSQueue <pressureStruct> pressureQueue(5);
+LSCircularBuffer <pressureStruct> pressureBuffer(5);
 
 class LSPressure {
   private: 
@@ -101,7 +101,7 @@ void LSPressure::clear() {
   
   for (int i=0; i < PRESS_ARRAY_SIZE; i++) {
     //pressureArray[i] = {mainVal, refVal, rawVal};
-    pressureQueue.push({mainVal, refVal, rawVal});
+    pressureBuffer.pushElement({mainVal, refVal, rawVal});
     
   }
   
@@ -132,7 +132,7 @@ void LSPressure::update() {
     memmove( pressureArray, &pressureArray[1], (PRESS_ARRAY_SIZE-1) * sizeof(pressureArray[0]));
     pressureArray[PRESS_ARRAY_SIZE-1] = {mainVal, refVal, rawVal};
     */
-    pressureQueue.push({mainVal, refVal, rawVal});
+    pressureBuffer.pushElement({mainVal, refVal, rawVal});
   }
   
   //Serial.println(getTime());  
@@ -144,18 +144,18 @@ void LSPressure::setFilterMode(int mode) {
 
 float LSPressure::getMainPressure() {
   //return pressureArray[0].mainPressure;
-  return pressureQueue.front().mainPressure;
+  return pressureBuffer.getLastElement().mainPressure;
 }
 
 float LSPressure::getRefPressure() {
   //return pressureArray[0].refPressure;
-  return pressureQueue.front().refPressure;
+  return pressureBuffer.getLastElement().refPressure;
 }
 
 
 float LSPressure::getRawPressure() {
   //return pressureArray[0].rawPressure;
-  return pressureQueue.front().rawPressure;
+  return pressureBuffer.getLastElement().rawPressure;
 }
 
 
@@ -171,7 +171,7 @@ float LSPressure::getFltPressure() {
 
 pressureStruct LSPressure::getAllPressure() {
   //return pressureArray[0];
-  return pressureQueue.front();
+  return pressureBuffer.getLastElement();
 }
 
 
@@ -179,7 +179,7 @@ float LSPressure::calculateAverage(pressureStruct * array, int len)
 {
   float sum = 0.0;
   for (int i = 0 ; i < len ; i++){
-    sum += pressureQueue.peek(i).rawPressure;
+    sum += pressureBuffer.getElement(i).rawPressure;
   }
   return(((float) sum) / len);
 }

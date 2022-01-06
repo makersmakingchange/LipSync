@@ -4,7 +4,7 @@
 #include <Wire.h>  
 #include <StopWatch.h>
 
-#include "LSQueue.h"
+#include "LSCircularBuffer.h"
 #include "LSPressure.h"
 #include "LSOutput.h"
 
@@ -96,7 +96,7 @@ sapStruct sapCurrState, sapPrevState, sapActionState;
 
 StopWatch sapStateTimer[1];
 
-LSQueue <sapStruct> sapQueue(12);   //Create a Queue of type sapStruct with size of 12
+LSCircularBuffer <sapStruct> sapBuffer(12);   //Create a buffer of type sapStruct with size of 12
 
 LSPressure ps;                  //Starts an instance of the LSPressure object
 
@@ -134,9 +134,9 @@ void pressureDataloop() {
 
   readPressure();                 //Read the pressure object (can be last value from array, average or other algorithms)
 
-  printPressureData(); 
+  //printPressureData(); 
 
-  sapPrevState = sapQueue.end();  //Get the previous state
+  sapPrevState = sapBuffer.getLastElement();  //Get the previous state
   
   //check for sip and puff conditions
   if (myRawPres > puffThreshold)  { 
@@ -152,7 +152,7 @@ void pressureDataloop() {
   if(sapPrevState.mainState == sapState){
     sapCurrState = {sapState, sapPrevState.secondaryState, sapStateTimer[0].elapsed()};
     //Serial.println("a");
-    sapQueue.update(sapCurrState);
+    sapBuffer.updateLastElement(sapCurrState);
   } else {  //None:Sip , None:Puff , Sip:None, Puff:None
       //State: None
       //Previous state: {Sip or puff, released, time}
@@ -183,7 +183,7 @@ void pressureDataloop() {
         //Serial.println("e");
       }
       //Push the new state   
-      sapQueue.push(sapCurrState);
+      sapBuffer.pushElement(sapCurrState);
       //Reset and start the timer
       sapStateTimer[0].stop();      
       sapStateTimer[0].reset();                                                                        
@@ -203,7 +203,7 @@ void pressureDataloop() {
     }
   }
   //Get the last state change 
-  sapActionState = sapQueue.end(); 
+  sapActionState = sapBuffer.getLastElement(); 
 
   //printSipAndPuffData();
 
@@ -311,7 +311,7 @@ void initSipAndPuffArray(){
   
   //sapStateArray[0] = {SAP_MAIN_STATE_NONE, SAP_SEC_STATE_WAITING, 0};
   sapCurrState = sapPrevState = {SAP_MAIN_STATE_NONE, SAP_SEC_STATE_WAITING, 0};
-  sapQueue.push(sapCurrState);
+  sapBuffer.pushElement(sapCurrState);
 
   //Reset and start the timer   
   sapStateTimer[0].stop();                                      
