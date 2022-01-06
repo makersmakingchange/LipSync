@@ -1,10 +1,4 @@
 
-#define INPUT_BUTTON1_PIN 9 // pushbutton S1
-#define INPUT_BUTTON2_PIN 6 // pushbutton S2
-#define INPUT_BUTTON3_PIN 5 // pushbutton S3
-#define INPUT_SWITCH1_PIN A1 // 3.5mm jack SW1
-#define INPUT_SWITCH2_PIN 11 // 3.5mm jack SW2
-#define INPUT_SWITCH3_PIN 10 // 3.5mm jack SW3
 
 #define INPUT_MAIN_STATE_NONE           0
 #define INPUT_MAIN_STATE_B1_PRESSED     1
@@ -18,7 +12,6 @@
 #define INPUT_SEC_STATE_WAITING 0
 #define INPUT_SEC_STATE_STARTED 1
 #define INPUT_SEC_STATE_RELEASED 2
-
 
 #define INPUT_TYPE_BUTTON 0
 #define INPUT_TYPE_SWITCH 1
@@ -34,39 +27,62 @@ typedef struct {
 
 
 
-LSQueue <inputStruct> inputButtonQueue;
-LSQueue <inputStruct> inputSwitchQueue;
+LSCircularBuffer <inputStruct> inputButtonBuffer(12);
+LSCircularBuffer <inputStruct> inputSwitchBuffer(12);
 
 class LSInput {
   private: 
     void resetTimer();
     unsigned long getTime();
+    int *_buttonPinArray;
+    int *_switchPinArray;
+    int _buttonNumber;
+    int _switchNumber;
   public:
-    LSInput();
+    LSInput(int* buttonPinArray, int* switchPinArray, int buttonNumber, int switchNumber);
+    ~LSInput();
     void begin();                                    
     void clear();  
-    void update(int type);    
-    void updateButton();   
-    void updateSwitch();  
+    void update();    
+    void readState(int type); 
     inputStruct getButtonState();
     inputStruct getSwitchState();
 };
 
-LSInput::LSInput() {
+LSInput::LSInput(int* buttonPinArray, int* switchPinArray, int buttonNumber, int switchNumber)
+{
+  _buttonPinArray = new int[buttonNumber];
+  _switchPinArray = new int[switchNumber];
+
+  _buttonNumber = buttonNumber;
+  _switchNumber = switchNumber;
+  
+  for (int i = 0; i < buttonNumber; i++){
+    pinMode(buttonPinArray[i], INPUT_PULLUP);
+    _buttonPinArray[i] = buttonPinArray[i];
+  }
+  for (int i = 0; i < switchNumber; i++){
+    pinMode(switchPinArray[i], INPUT_PULLUP);
+    _switchPinArray[i] = switchPinArray[i];
+  }
+}
+
+LSInput::~LSInput()
+{
 
 }
 
 
-
 void LSInput::begin() {
-  
+
+  /*
   pinMode(INPUT_SWITCH1_PIN, INPUT_PULLUP);// 3.5mm jack SW1
   pinMode(INPUT_SWITCH2_PIN, INPUT_PULLUP);// 3.5mm jack SW2
   pinMode(INPUT_SWITCH3_PIN, INPUT_PULLUP);// 3.5mm jack SW3
   pinMode(INPUT_BUTTON1_PIN, INPUT_PULLUP);// pushbutton S1
   pinMode(INPUT_BUTTON2_PIN, INPUT_PULLUP);// pushbutton S1
   pinMode(INPUT_BUTTON3_PIN, INPUT_PULLUP); //right 3.5mm jack
-  
+  */
   clear();
 }
 
@@ -74,44 +90,57 @@ void LSInput::clear() {
     
     inputStruct inputPrevState = {INPUT_MAIN_STATE_NONE, INPUT_SEC_STATE_WAITING, 0};
 
-    inputButtonQueue.push(inputPrevState);
-    inputSwitchQueue.push(inputPrevState);
+    inputButtonBuffer.pushElement(inputPrevState);
+    inputSwitchBuffer.pushElement(inputPrevState);
+
     
     inputTimer[0].stop();                                      
     inputTimer[0].reset();                                                                        
     inputTimer[0].start(); 
-
+    
     inputTimer[1].stop();                                      
     inputTimer[1].reset();                                                                        
     inputTimer[1].start(); 
 }
 
-void LSInput::update(int type) {
+void LSInput::update() {
+  readState(INPUT_TYPE_BUTTON);
+  readState(INPUT_TYPE_SWITCH);
+}
+
+void LSInput::readState(int type) {
   //resetTimer();
 
   int inputState[3];
   int inputAllState;
-  inputStruct inputCurrState, inputPrevState;
+  inputStruct inputCurrState = {0, 0, 0};
+  inputStruct inputPrevState = {0, 0, 0};
+
+  if(type==INPUT_TYPE_BUTTON){
+    for (int i = 0; i < _buttonNumber; i++){
+      inputState[i] = !digitalRead(_buttonPinArray[i]);
+    }  
+  }
+  else if(type==INPUT_TYPE_SWITCH){
+    for (int i = 0; i < _switchNumber; i++){
+      inputState[i] = !digitalRead(_switchPinArray[i]);
+    }  
+  }
   
-  (type==0) ? inputState[0] = !digitalRead(INPUT_BUTTON1_PIN) : inputState[0] = !digitalRead(INPUT_SWITCH1_PIN);// 3.5mm jack SW1
-  (type==0) ? inputState[1] = !digitalRead(INPUT_BUTTON2_PIN) : inputState[1] = !digitalRead(INPUT_SWITCH2_PIN);// 3.5mm jack SW1
-  (type==0) ? inputState[2] = !digitalRead(INPUT_BUTTON3_PIN) : inputState[2] = !digitalRead(INPUT_SWITCH3_PIN);// 3.5mm jack SW1
-
-
   inputAllState = inputState[0] + 2 * inputState[1] + 4 * inputState[2] ;
   
- (type==0) ? inputPrevState = inputButtonQueue.end() : inputPrevState = inputSwitchQueue.end(); 
-  
-  if(inputPrevState.mainState == inputAllState){
+ (type==0) ? inputPrevState = inputButtonBuffer.getLastElement() : inputPrevState = inputSwitchBuffer.getLastElement(); 
+
+  if(inputPrevState.mainState == inputAllState && inputPrevState.secondaryState != INPUT_SEC_STATE_RELEASED){
     inputCurrState = {inputAllState, inputPrevState.secondaryState, inputTimer[type].elapsed()};
-    //Serial.println("a");
-    (type==0) ? inputButtonQueue.update(inputCurrState) : inputSwitchQueue.update(inputCurrState);
+
+    (type==0) ? inputButtonBuffer.updateLastElement(inputCurrState) : inputSwitchBuffer.updateLastElement(inputCurrState);
   } else {
-      if(inputPrevState.secondaryState==INPUT_SEC_STATE_RELEASED && inputState==INPUT_MAIN_STATE_NONE){
+      if(inputPrevState.secondaryState==INPUT_SEC_STATE_RELEASED && inputAllState==INPUT_MAIN_STATE_NONE){
         inputCurrState = {inputAllState, INPUT_SEC_STATE_WAITING, 0};
         //Serial.println("b");
       }
-      else if(inputPrevState.secondaryState==INPUT_SEC_STATE_RELEASED && inputState!=INPUT_MAIN_STATE_NONE){
+      else if(inputPrevState.secondaryState==INPUT_SEC_STATE_RELEASED && inputAllState!=INPUT_MAIN_STATE_NONE){
         inputCurrState = {inputAllState, INPUT_SEC_STATE_STARTED, 0};
         //Serial.println("c");
       }      
@@ -123,13 +152,12 @@ void LSInput::update(int type) {
         inputCurrState = {inputPrevState.mainState, INPUT_SEC_STATE_RELEASED, inputPrevState.elapsedTime};
         //Serial.println("e");
       }
-      //Push the new state   
+      //Push the new state 
+      
       if (type==0){
-        inputButtonQueue.push(inputCurrState);
-        if(inputButtonQueue.count()==12){inputButtonQueue.pop(); }  //Keep last 12 objects         
+        inputButtonBuffer.pushElement(inputCurrState);     
       } else{
-        inputSwitchQueue.push(inputCurrState);
-        if(inputSwitchQueue.count()==12){inputSwitchQueue.pop(); }  //Keep last 12 objects                
+        inputSwitchBuffer.pushElement(inputCurrState);           
       }
 
       //Reset and start the timer
@@ -149,21 +177,14 @@ void LSInput::update(int type) {
 
 }
 
-void LSInput::updateButton(){
-   update(INPUT_TYPE_BUTTON);
-}
-
-void LSInput::updateSwitch(){
-   update(INPUT_TYPE_SWITCH);  
-}
 
 inputStruct LSInput::getButtonState() {
-  inputStruct inputCurrState = inputButtonQueue.end();  //Get the state
+  inputStruct inputCurrState = inputButtonBuffer.getLastElement();  //Get the state
   return inputCurrState;
 }
 
 inputStruct LSInput::getSwitchState() {
-  inputStruct inputCurrState = inputSwitchQueue.end();  //Get the state
+  inputStruct inputCurrState = inputSwitchBuffer.getLastElement();  //Get the state
   return inputCurrState;
 }
 

@@ -4,9 +4,20 @@
 #include <Wire.h>  
 #include <StopWatch.h>
 
-#include "LSQueue.h"
+#include "LSCircularBuffer.h"
 #include "LSOutput.h"
 #include "LSInput.h"
+
+#define INPUT_BUTTON1_PIN 9 // pushbutton S1
+#define INPUT_BUTTON2_PIN 6 // pushbutton S2
+#define INPUT_BUTTON3_PIN 5 // pushbutton S3
+#define INPUT_SWITCH1_PIN A1 // 3.5mm jack SW1
+#define INPUT_SWITCH2_PIN 11 // 3.5mm jack SW2
+#define INPUT_SWITCH3_PIN 10 // 3.5mm jack SW3
+
+#define INPUT_BUTTON_NUMBER 3
+#define INPUT_SWITCH_NUMBER 3
+
 
 #define ACTION_NOTHING 0                              // No action
 #define ACTION_LEFT_CLICK 1                           // Generates a short left click
@@ -24,6 +35,8 @@
 #define LED_ACTION_ON 1
 #define LED_ACTION_BLINK 2
 
+int inputButtonPinArray[] = {INPUT_BUTTON1_PIN,INPUT_BUTTON2_PIN,INPUT_BUTTON3_PIN};
+int inputSwitchPinArray[] = {INPUT_SWITCH1_PIN,INPUT_SWITCH2_PIN,INPUT_SWITCH3_PIN};
 
 int outputAction;
 
@@ -43,7 +56,7 @@ typedef struct {
 
 
 int inputActionSize;
-inputStruct inputActionState;
+inputStruct inputButtonActionState, inputSwitchActionState;
 
 const inputActionStruct inputActionProperty[] {
     {ACTION_NOTHING,            0, LED_ACTION_OFF,    0,LED_CLR_NONE,   0,0},
@@ -51,12 +64,12 @@ const inputActionStruct inputActionProperty[] {
     {ACTION_RIGHT_CLICK,        4, LED_ACTION_BLINK,  3,LED_CLR_BLUE,   0,1000},
     {ACTION_DRAG,               5 , LED_ACTION_BLINK,  1,LED_CLR_YELLOW, 1000,3000},
     {ACTION_SCROLL,             3, LED_ACTION_BLINK,  3,LED_CLR_GREEN,  1000,3000},
-    {ACTION_CURSOR_HOME_RESET,  2, LED_ACTION_BLINK,  2,LED_CLR_PURPLE,  3000,5000}
+    {ACTION_CURSOR_HOME_RESET,  2, LED_ACTION_BLINK,  2,LED_CLR_PURPLE,  0,1000}
 };
 
 
 
-LSInput ip;                     //Starts an instance of the LSPressure object
+LSInput ip(inputButtonPinArray,inputSwitchPinArray,INPUT_BUTTON_NUMBER,INPUT_SWITCH_NUMBER);   //Starts an instance of the object
 
 LSOutput led;                   //Starts an instance of the LSOutput led object
 
@@ -94,20 +107,36 @@ void initInput(){
 //The loop handling pressure polling, sip and puff state evaluation 
 void inputDataloop() {
   
-  ip.updateButton();              //Request new values 
+  ip.update();              //Request new values 
 
 
   //Get the last state change 
-  inputActionState = ip.getButtonState();
+  inputButtonActionState = ip.getButtonState();
+  inputSwitchActionState = ip.getSwitchState();
 
-  printInputData();
+  //printInputData();
   //Output action logic
   
   for (int i=0; i < inputActionSize; i++) {
-    if(inputActionState.mainState==inputActionProperty[i].inputActionState && 
-      inputActionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
-      inputActionState.elapsedTime >= inputActionProperty[i].inputActionStartTime &&
-      inputActionState.elapsedTime < inputActionProperty[i].inputActionEndTime){
+    if(inputButtonActionState.mainState==inputActionProperty[i].inputActionState && 
+      inputButtonActionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
+      inputButtonActionState.elapsedTime >= inputActionProperty[i].inputActionStartTime &&
+      inputButtonActionState.elapsedTime < inputActionProperty[i].inputActionEndTime){
+      
+      performinputAction(i,
+      inputActionProperty[i].inputActionLedState,
+      inputActionProperty[i].inputActionLedNumber,
+      inputActionProperty[i].inputActionColorNumber);
+      
+      break;
+    }
+  }
+
+  for (int i=0; i < inputActionSize; i++) {
+    if(inputSwitchActionState.mainState==inputActionProperty[i].inputActionState && 
+      inputSwitchActionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
+      inputSwitchActionState.elapsedTime >= inputActionProperty[i].inputActionStartTime &&
+      inputSwitchActionState.elapsedTime < inputActionProperty[i].inputActionEndTime){
       
       performinputAction(i,
       inputActionProperty[i].inputActionLedState,
@@ -134,9 +163,9 @@ void loop() {
 
 void printInputData() {
 
-  Serial.print(" main: "); Serial.print(inputActionState.mainState);Serial.print(", ");
-  Serial.print(" secondary: "); Serial.print(inputActionState.secondaryState);Serial.print(", ");
-  Serial.print(" time: "); Serial.print(inputActionState.elapsedTime);Serial.print(", ");
+  Serial.print(" main: "); Serial.print(inputButtonActionState.mainState);Serial.print(": "); Serial.print(inputSwitchActionState.mainState);Serial.print(", ");
+  Serial.print(" secondary: "); Serial.print(inputButtonActionState.secondaryState);Serial.print(": "); Serial.print(inputSwitchActionState.secondaryState);Serial.print(", ");
+  Serial.print(" time: "); Serial.print(inputButtonActionState.elapsedTime); Serial.print(": "); Serial.print(inputSwitchActionState.elapsedTime);Serial.print(", ");
   
   Serial.println();
  
