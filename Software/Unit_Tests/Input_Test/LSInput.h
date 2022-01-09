@@ -16,6 +16,8 @@
 #define INPUT_TYPE_BUTTON 0
 #define INPUT_TYPE_SWITCH 1
 
+#define INPUT_REACTION_TIME 150
+
 StopWatch inputTimer[2];
 StopWatch testTimer[1];
 
@@ -74,15 +76,6 @@ LSInput::~LSInput()
 
 
 void LSInput::begin() {
-
-  /*
-  pinMode(INPUT_SWITCH1_PIN, INPUT_PULLUP);// 3.5mm jack SW1
-  pinMode(INPUT_SWITCH2_PIN, INPUT_PULLUP);// 3.5mm jack SW2
-  pinMode(INPUT_SWITCH3_PIN, INPUT_PULLUP);// 3.5mm jack SW3
-  pinMode(INPUT_BUTTON1_PIN, INPUT_PULLUP);// pushbutton S1
-  pinMode(INPUT_BUTTON2_PIN, INPUT_PULLUP);// pushbutton S1
-  pinMode(INPUT_BUTTON3_PIN, INPUT_PULLUP); //right 3.5mm jack
-  */
   clear();
 }
 
@@ -112,46 +105,58 @@ void LSInput::readState(int type) {
   //resetTimer();
 
   int inputState[3];
-  int inputAllState;
+  int inputAllState = 0;
   inputStruct inputCurrState = {0, 0, 0};
   inputStruct inputPrevState = {0, 0, 0};
 
   if(type==INPUT_TYPE_BUTTON){
     for (int i = 0; i < _buttonNumber; i++){
       inputState[i] = !digitalRead(_buttonPinArray[i]);
+      inputAllState+= pow(2,i) * inputState[i];
     }  
   }
   else if(type==INPUT_TYPE_SWITCH){
     for (int i = 0; i < _switchNumber; i++){
       inputState[i] = !digitalRead(_switchPinArray[i]);
+      inputAllState+= pow(2,i) * inputState[i];
     }  
   }
   
-  inputAllState = inputState[0] + 2 * inputState[1] + 4 * inputState[2] ;
+  //inputAllState = inputState[0] + 2 * inputState[1] + 4 * inputState[2] ;
   
  (type==0) ? inputPrevState = inputButtonBuffer.getLastElement() : inputPrevState = inputSwitchBuffer.getLastElement(); 
-
-  if(inputPrevState.mainState == inputAllState && inputPrevState.secondaryState != INPUT_SEC_STATE_RELEASED){
+  // prev: none,waiting  current : none 
+  // prev: press x,started  current : press x 
+  if((inputAllState == inputPrevState.mainState && inputPrevState.secondaryState != INPUT_SEC_STATE_RELEASED)){
     inputCurrState = {inputAllState, inputPrevState.secondaryState, inputTimer[type].elapsed()};
 
     (type==0) ? inputButtonBuffer.updateLastElement(inputCurrState) : inputSwitchBuffer.updateLastElement(inputCurrState);
-  } else {
-      if(inputPrevState.secondaryState==INPUT_SEC_STATE_RELEASED && inputAllState==INPUT_MAIN_STATE_NONE){
-        inputCurrState = {inputAllState, INPUT_SEC_STATE_WAITING, 0};
-        //Serial.println("b");
-      }
-      else if(inputPrevState.secondaryState==INPUT_SEC_STATE_RELEASED && inputAllState!=INPUT_MAIN_STATE_NONE){
+    //Serial.println("a");
+  } // prev: press x,started  current : press y and elapsed time<reaction time ms
+  else if(inputAllState != INPUT_MAIN_STATE_NONE && inputPrevState.secondaryState == INPUT_SEC_STATE_STARTED && inputPrevState.elapsedTime<INPUT_REACTION_TIME){
+    inputCurrState = {inputAllState, inputPrevState.secondaryState, inputTimer[type].elapsed()};
+
+    (type==0) ? inputButtonBuffer.updateLastElement(inputCurrState) : inputSwitchBuffer.updateLastElement(inputCurrState);
+    //Serial.println("b");
+  } 
+  else { 
+      // prev: none,waiting  current : press x 
+      if(inputPrevState.secondaryState==INPUT_SEC_STATE_WAITING){
         inputCurrState = {inputAllState, INPUT_SEC_STATE_STARTED, 0};
         //Serial.println("c");
-      }      
-      else if(inputPrevState.secondaryState==INPUT_SEC_STATE_WAITING){
-        inputCurrState = {inputAllState, INPUT_SEC_STATE_STARTED, 0};
-        //Serial.println("d");
-      }     
+      } // prev: press x,started  current : none  OR prev: press x,started  current : press y and elapsed time>=150
       else if(inputPrevState.secondaryState==INPUT_SEC_STATE_STARTED){
         inputCurrState = {inputPrevState.mainState, INPUT_SEC_STATE_RELEASED, inputPrevState.elapsedTime};
+        //Serial.println("d");
+      } // prev: press x,released  current : none 
+      else if(inputPrevState.secondaryState==INPUT_SEC_STATE_RELEASED && inputAllState==INPUT_MAIN_STATE_NONE){
+        inputCurrState = {inputAllState, INPUT_SEC_STATE_WAITING, 0};
         //Serial.println("e");
-      }
+      } // prev: press x,released  current : press y 
+      else if(inputPrevState.secondaryState==INPUT_SEC_STATE_RELEASED && inputAllState!=INPUT_MAIN_STATE_NONE){
+        inputCurrState = {inputAllState, INPUT_SEC_STATE_STARTED, 0};
+        //Serial.println("f");
+      }     
       //Push the new state 
       
       if (type==0){
