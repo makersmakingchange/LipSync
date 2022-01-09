@@ -1,7 +1,7 @@
 #include <Adafruit_LPS35HW.h>
 #include <Adafruit_BMP280.h>   //onboard pressure sensor on Adafruit Sense Micro 
 
-#define PRESS_ARRAY_SIZE 5
+#define PRESS_BUFF_SIZE 5
 
 #define FILTER_NONE 0
 #define FILTER_AVERAGE 1
@@ -22,30 +22,33 @@ typedef struct {
   float rawPressure;
 } pressureStruct;
 
-LSCircularBuffer <pressureStruct> pressureBuffer(5);
+LSCircularBuffer <pressureStruct> pressureBuffer(PRESS_BUFF_SIZE);
 
 class LSPressure {
   private: 
-    float calculateAverage(pressureStruct * array, int len);  
     void resetTimer();
     unsigned long getTime();
+    int filterMode;
     int pressureType;
-    float pressureComp;
-    float pressureZero;
+    float mainVal;
+    float refVal;
+    float compVal;
+    float rawVal;
+    sensors_event_t pressure_event;
   public:
     LSPressure();
-    pressureStruct pressureArray[PRESS_ARRAY_SIZE];
-    int filterMode;
     void begin(int type);                                    
     void clear();  
-    void zero();
     void update();    
     void setFilterMode(int mode); 
     float getMainPressure();
     float getRefPressure();
     float getRawPressure();
-    float getFltPressure();
+    float getCompPressure();
+    void setCompPressure();
+    void setZeroPressure();
     pressureStruct getAllPressure();
+    float getAveragePressure();  
 };
 
 LSPressure::LSPressure() {
@@ -76,62 +79,39 @@ void LSPressure::begin(int type) {
                   Adafruit_BMP280::SAMPLING_X4,    // Pressure oversampling 
                   Adafruit_BMP280::FILTER_X16,      // Filtering. 
                   Adafruit_BMP280::STANDBY_MS_1000); // Standby time.       
-  } else {
-    zero();
   }
-
   clear();
+
+  setZeroPressure();
 }
 
 void LSPressure::clear() {
-      
-  sensors_event_t pressure_event;
-  bmp_pressure->getEvent(&pressure_event);
 
-  float mainVal = lps35hw.readPressure();
-  float refVal;
-  if(pressureType==PRESS_TYPE_DIFF){
-    refVal=pressure_event.pressure;
+  while(pressureBuffer.getLength()<PRESS_BUFF_SIZE){
+    pressureBuffer.pushElement({0.0, 0.0, 0.0});   
   }
-  else{
-    refVal = pressureZero;
-  }
-  //pressureComp = mainVal - refVal;
-  float rawVal = 0.0;  //mainVal - refVal;
-  
-  for (int i=0; i < PRESS_ARRAY_SIZE; i++) {
-    //pressureArray[i] = {mainVal, refVal, rawVal};
-    pressureBuffer.pushElement({mainVal, refVal, rawVal});
-    
-  }
-  
-}
 
-void LSPressure::zero() {
-  //lps35hw.zeroPressure();
-  pressureZero = lps35hw.readPressure();
 }
 
 void LSPressure::update() {
   //resetTimer();
-  sensors_event_t pressure_event;
   bmp_pressure->getEvent(&pressure_event);
   
-  float mainVal = lps35hw.readPressure();
-  float refVal;
-  if(pressureType==PRESS_TYPE_DIFF){
-    refVal=pressure_event.pressure;
-  }
-  else{
-    refVal= pressureZero;
-  }
+  mainVal = lps35hw.readPressure();
 
+  float tempRefVal = pressure_event.pressure;
+
+  //Update compensation pressure value if reference pressure is changed 
+  if(refVal!=tempRefVal && pressureType==PRESS_TYPE_DIFF){ 
+    compVal+=refVal-tempRefVal;
+    refVal=tempRefVal; 
+  }
+  
+  
+  //Make sure pressure readings are valid 
   if(mainVal > 0.00 && refVal > 0.00){
-    float rawVal = mainVal - refVal; // - pressureComp;
-    /*
-    memmove( pressureArray, &pressureArray[1], (PRESS_ARRAY_SIZE-1) * sizeof(pressureArray[0]));
-    pressureArray[PRESS_ARRAY_SIZE-1] = {mainVal, refVal, rawVal};
-    */
+    rawVal = mainVal - refVal - compVal;
+
     pressureBuffer.pushElement({mainVal, refVal, rawVal});
   }
   
@@ -143,45 +123,59 @@ void LSPressure::setFilterMode(int mode) {
 }
 
 float LSPressure::getMainPressure() {
-  //return pressureArray[0].mainPressure;
   return pressureBuffer.getLastElement().mainPressure;
 }
 
 float LSPressure::getRefPressure() {
-  //return pressureArray[0].refPressure;
   return pressureBuffer.getLastElement().refPressure;
 }
 
 
 float LSPressure::getRawPressure() {
-  //return pressureArray[0].rawPressure;
   return pressureBuffer.getLastElement().rawPressure;
 }
 
+float LSPressure::getCompPressure() {
 
-float LSPressure::getFltPressure() {
-  if(filterMode == FILTER_NONE){
-    return pressureArray[0].rawPressure;
-  } else if (filterMode == FILTER_AVERAGE) {
-    return (calculateAverage(pressureArray,PRESS_ARRAY_SIZE));
-  } else {
-    return pressureArray[0].rawPressure;
+  bmp_pressure->getEvent(&pressure_event);
+
+  mainVal = lps35hw.readPressure();
+  
+  if(pressureType==PRESS_TYPE_DIFF){
+    refVal=pressure_event.pressure;
+    compVal = mainVal - refVal;
+  }
+  else{
+    compVal = 0.0;
+  }
+  return compVal;
+}
+
+void LSPressure::setCompPressure() {
+  getCompPressure();
+}
+
+void LSPressure::setZeroPressure() {
+  if(pressureType==PRESS_TYPE_DIFF){
+    getCompPressure();
+  } else{
+    refVal = lps35hw.readPressure();
   }
 }
 
+
 pressureStruct LSPressure::getAllPressure() {
-  //return pressureArray[0];
   return pressureBuffer.getLastElement();
 }
 
 
-float LSPressure::calculateAverage(pressureStruct * array, int len)  
+float LSPressure::getAveragePressure()  
 {
   float sum = 0.0;
-  for (int i = 0 ; i < len ; i++){
+  for (int i = 0 ; i < PRESS_BUFF_SIZE ; i++){
     sum += pressureBuffer.getElement(i).rawPressure;
   }
-  return(((float) sum) / len);
+  return(((float) sum) / PRESS_BUFF_SIZE);
 }
 
 

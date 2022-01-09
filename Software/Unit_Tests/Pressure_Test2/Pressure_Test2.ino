@@ -154,34 +154,34 @@ void pressureDataloop() {
     //Serial.println("a");
     sapBuffer.updateLastElement(sapCurrState);
   } else {  //None:Sip , None:Puff , Sip:None, Puff:None
-      //State: None
-      //Previous state: {Sip or puff, released, time}
-      //New state: {none, waiting, 0}
-      if(sapPrevState.secondaryState==SAP_SEC_STATE_RELEASED && sapState==SAP_MAIN_STATE_NONE){
-        sapCurrState = {sapState, SAP_SEC_STATE_WAITING, 0};
-        //Serial.println("b");
-      }
-      //State: Sip or puff
-      //Previous state: {none, released, time}
-      //New state: {Sip or puff, started, 0}
-      else if(sapPrevState.secondaryState==SAP_SEC_STATE_RELEASED && sapState!=SAP_MAIN_STATE_NONE){
-        sapCurrState = {sapState, SAP_SEC_STATE_STARTED, 0};
-        //Serial.println("c");
-      }      
       //State: Sip or puff
       //Previous state: {none, waiting, time} Note: There can't be sip or puff and waiting 
       //New state: {Sip or puff, started, 0}
-      else if(sapPrevState.secondaryState==SAP_SEC_STATE_WAITING){
+      if(sapPrevState.secondaryState==SAP_SEC_STATE_WAITING){
         sapCurrState = {sapState, SAP_SEC_STATE_STARTED, 0};
-        //Serial.println("d");
+        //Serial.println("b");
       } 
       //State: none
       //Previous state: {Sip or puff, started, time} Note: There can't be none and started 
       //New state: {Sip or puff, released, time}      
       else if(sapPrevState.secondaryState==SAP_SEC_STATE_STARTED){
         sapCurrState = {sapPrevState.mainState, SAP_SEC_STATE_RELEASED, sapPrevState.elapsedTime};
-        //Serial.println("e");
+        //Serial.println("c");
       }
+      //State: None
+      //Previous state: {Sip or puff, released, time}
+      //New state: {none, waiting, 0}
+      else if(sapPrevState.secondaryState==SAP_SEC_STATE_RELEASED && sapState==SAP_MAIN_STATE_NONE){
+        sapCurrState = {sapState, SAP_SEC_STATE_WAITING, 0};
+        //Serial.println("d");
+      }
+      //State: Sip or puff
+      //Previous state: {none, released, time}
+      //New state: {Sip or puff, started, 0}
+      else if(sapPrevState.secondaryState==SAP_SEC_STATE_RELEASED && sapState!=SAP_MAIN_STATE_NONE){
+        sapCurrState = {sapState, SAP_SEC_STATE_STARTED, 0};
+        //Serial.println("e");
+      }      
       //Push the new state   
       sapBuffer.pushElement(sapCurrState);
       //Reset and start the timer
@@ -191,7 +191,7 @@ void pressureDataloop() {
   }
 
   //No action in 1 minute : reset timer
-  if(sapPrevState.secondaryState==SAP_SEC_STATE_WAITING && sapStateTimer[0].elapsed()>60000){
+  if(sapPrevState.secondaryState==SAP_SEC_STATE_WAITING && sapStateTimer[0].elapsed()>30000){
       sapStateTimer[0].stop();                                //Reset and start the timer         
       sapStateTimer[0].reset();                                                                        
       sapStateTimer[0].start();     
@@ -223,7 +223,9 @@ void pressureDataloop() {
       canPerformAction=false;
       
   }
-
+  if(sapActionState.elapsedTime==0){
+    canPerformAction=false;
+  }
   int sapActionIndex = 0;
 
   //Perform output action and led action on sip and puff release 
