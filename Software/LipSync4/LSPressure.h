@@ -95,6 +95,7 @@ void LSPressure::clear() {
 
 void LSPressure::update() {
   //resetTimer();
+  
   bmp_pressure->getEvent(&pressure_event);
   
   mainVal = lps35hw.readPressure();
@@ -102,7 +103,7 @@ void LSPressure::update() {
   float tempRefVal = pressure_event.pressure;
 
   //Update compensation pressure value if reference pressure is changed 
-  if(refVal!=tempRefVal && pressureType==PRESS_TYPE_DIFF){ 
+  if(refVal!=tempRefVal && tempRefVal > 0.00 && pressureType==PRESS_TYPE_DIFF){ 
     compVal+=refVal-tempRefVal;
     refVal=tempRefVal; 
   }

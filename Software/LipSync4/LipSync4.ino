@@ -14,17 +14,41 @@
 
 int conMode = 0;
 
-int xVal;
-int yVal;
+uint8_t ledStateArray[3] = {LED_ACTION_OFF,LED_ACTION_OFF,LED_ACTION_OFF};
+int ledStateArraySize;
+
+typedef struct { 
+  uint8_t inputActionNumber;
+  uint8_t inputActionState;
+  uint8_t inputActionLedState;
+  uint8_t inputActionLedNumber;
+  uint8_t inputActionColorNumber;
+  unsigned long inputActionStartTime;
+  unsigned long inputActionEndTime;
+} inputActionStruct;
+
+int inputActionSize;
+inputStruct inputButtonActionState, inputSwitchActionState;
+
+const inputActionStruct inputActionProperty[] {
+    {OUTPUT_NOTHING,            0, LED_ACTION_OFF,    0,LED_CLR_NONE,   0,0},
+    {OUTPUT_LEFT_CLICK,         1 , LED_ACTION_BLINK,  1,LED_CLR_RED,    0,1000},
+    {OUTPUT_RIGHT_CLICK,        4, LED_ACTION_BLINK,  3,LED_CLR_BLUE,   0,1000},
+    {OUTPUT_DRAG,               5 , LED_ACTION_BLINK,  1,LED_CLR_YELLOW, 1000,3000},
+    {OUTPUT_SCROLL,             3, LED_ACTION_BLINK,  3,LED_CLR_GREEN,  1000,3000},
+    {OUTPUT_CURSOR_CALIBRATION,  2, LED_ACTION_BLINK,  2,LED_CLR_PURPLE,  0,1000}
+};
+
+
+int inputButtonPinArray[] = {INPUT_BUTTON1_PIN,INPUT_BUTTON2_PIN,INPUT_BUTTON3_PIN};
+int inputSwitchPinArray[] = {INPUT_SWITCH1_PIN,INPUT_SWITCH2_PIN,INPUT_SWITCH3_PIN};
 
 int sapState;
 int outputAction;
 
-float myLPSpres; //read sensor
-float myBMPpres;
-float myRawPres;
-
-uint8_t ledStateArray[3] = {LED_ACTION_OFF,LED_ACTION_OFF,LED_ACTION_OFF};
+float mainPressure; //read sensor
+float refPressure;
+float diffPressure;
 
 float sipThreshold;
 float puffThreshold;
@@ -54,7 +78,6 @@ typedef struct {
 } sapActionStruct;
 
 int sapActionSize;
-int ledStateArraySize;
 
 const sapActionStruct sapActionProperty[] {
     {OUTPUT_NOTHING,            SAP_MAIN_STATE_NONE, {LED_ACTION_OFF,0,LED_CLR_NONE,LED_ACTION_OFF,0,LED_CLR_NONE},   0,0},
@@ -67,42 +90,13 @@ const sapActionStruct sapActionProperty[] {
 
 };
 
-typedef struct { 
-  uint8_t inputActionNumber;
-  uint8_t inputActionState;
-  uint8_t inputActionLedState;
-  uint8_t inputActionLedNumber;
-  uint8_t inputActionColorNumber;
-  unsigned long inputActionStartTime;
-  unsigned long inputActionEndTime;
-} inputActionStruct;
-
-
-
-
-int inputActionSize;
-inputStruct inputButtonActionState, inputSwitchActionState;
-
-const inputActionStruct inputActionProperty[] {
-    {OUTPUT_NOTHING,            0, LED_ACTION_OFF,    0,LED_CLR_NONE,   0,0},
-    {OUTPUT_LEFT_CLICK,         1 , LED_ACTION_BLINK,  1,LED_CLR_RED,    0,1000},
-    {OUTPUT_RIGHT_CLICK,        4, LED_ACTION_BLINK,  3,LED_CLR_BLUE,   0,1000},
-    {OUTPUT_DRAG,               5 , LED_ACTION_BLINK,  1,LED_CLR_YELLOW, 1000,3000},
-    {OUTPUT_SCROLL,             3, LED_ACTION_BLINK,  3,LED_CLR_GREEN,  1000,3000},
-    {OUTPUT_CURSOR_CALIBRATION,  2, LED_ACTION_BLINK,  2,LED_CLR_PURPLE,  0,1000}
-};
-
-
-int inputButtonPinArray[] = {INPUT_BUTTON1_PIN,INPUT_BUTTON2_PIN,INPUT_BUTTON3_PIN};
-int inputSwitchPinArray[] = {INPUT_SWITCH1_PIN,INPUT_SWITCH2_PIN,INPUT_SWITCH3_PIN};
-
 
 sapStruct sapCurrState, sapPrevState, sapActionState;
 
-StopWatch sapStateTimer[1];
-StopWatch myTimer[1];
-
 LSCircularBuffer <sapStruct> sapBuffer(12);   //Create a buffer of type sapStruct
+
+int xVal;
+int yVal;
 
 LSInput ip(inputButtonPinArray,inputSwitchPinArray,INPUT_BUTTON_NUMBER,INPUT_SWITCH_NUMBER);   //Starts an instance of the object
 
@@ -114,6 +108,10 @@ LSOutput led;                   //Starts an instance of the LSOutput led object
 
 LSUSBMouse mouse;               //Starts an instance of the usb mouse object
 LSBLEMouse btmouse; 
+
+
+StopWatch sapStateTimer[1];
+StopWatch myTimer[1];
 
 void setup() {
 
@@ -146,6 +144,24 @@ void setup() {
   Scheduler.startLoop(joystickLoop);
   
 } //end setup
+
+
+void loop() {
+
+}
+
+//*********************************//
+// Input Functions
+//*********************************//
+
+
+void initInput(){
+  
+  ip.begin();
+  inputActionSize=sizeof(inputActionProperty)/sizeof(inputActionStruct);
+
+}
+
 
 //The loop handling inputs 
 void inputLoop() {
@@ -190,7 +206,63 @@ void inputLoop() {
     }
   }
   
-  delay(20);
+  delay(30);
+}
+
+void printInputData() {
+
+  Serial.print(" main: "); Serial.print(inputButtonActionState.mainState);Serial.print(": "); Serial.print(inputSwitchActionState.mainState);Serial.print(", ");
+  Serial.print(" secondary: "); Serial.print(inputButtonActionState.secondaryState);Serial.print(": "); Serial.print(inputSwitchActionState.secondaryState);Serial.print(", ");
+  Serial.print(" time: "); Serial.print(inputButtonActionState.elapsedTime); Serial.print(": "); Serial.print(inputSwitchActionState.elapsedTime);Serial.print(", ");
+  
+  Serial.println();
+ 
+}
+
+//*********************************//
+// Sip and Puff Functions
+//*********************************//
+
+void initSipAndPuff() {
+
+  ps.begin(PRESS_TYPE_DIFF);
+  setSipAndPuffThreshold();
+  initSipAndPuffArray();
+  sapActionSize=sizeof(sapActionProperty)/sizeof(sapActionStruct);
+}
+
+void setSipAndPuffThreshold(){
+  sipThreshold = SOFT_SIP_THRESHOLD;
+  puffThreshold = SOFT_PUFF_THRESHOLD;
+}
+
+void initSipAndPuffArray(){
+
+  //Push initial state to state Queue
+  
+  //sapStateArray[0] = {SAP_MAIN_STATE_NONE, SAP_SEC_STATE_WAITING, 0};
+  sapCurrState = sapPrevState = {SAP_MAIN_STATE_NONE, SAP_SEC_STATE_WAITING, 0};
+  sapBuffer.pushElement(sapCurrState);
+
+  //Reset and start the timer   
+  sapStateTimer[0].stop();                                      
+  sapStateTimer[0].reset();                                                                        
+  sapStateTimer[0].start(); 
+}
+
+void updatePressure() {
+  ps.update();
+}
+
+
+void readPressure() {
+
+  pressureStruct pressureValues = ps.getAllPressure();
+  refPressure = pressureValues.refPressure;
+  mainPressure = pressureValues.mainPressure;
+  diffPressure = pressureValues.rawPressure;
+  
+ 
 }
 
 //The loop handling pressure polling, sip and puff state evaluation 
@@ -205,9 +277,9 @@ void pressureLoop() {
   sapPrevState = sapBuffer.getLastElement();  //Get the previous state
   
   //check for sip and puff conditions
-  if (myRawPres > puffThreshold)  { 
+  if (diffPressure > puffThreshold)  { 
     sapState = SAP_MAIN_STATE_PUFF;
-  } else if (myRawPres < sipThreshold)  { 
+  } else if (diffPressure < sipThreshold)  { 
     sapState = SAP_MAIN_STATE_SIP;
   } else {
     sapState = SAP_MAIN_STATE_NONE;
@@ -330,76 +402,6 @@ void pressureLoop() {
 
 }
 
-
-void loop() {
-
-}
-
-
-void printInputData() {
-
-  Serial.print(" main: "); Serial.print(inputButtonActionState.mainState);Serial.print(": "); Serial.print(inputSwitchActionState.mainState);Serial.print(", ");
-  Serial.print(" secondary: "); Serial.print(inputButtonActionState.secondaryState);Serial.print(": "); Serial.print(inputSwitchActionState.secondaryState);Serial.print(", ");
-  Serial.print(" time: "); Serial.print(inputButtonActionState.elapsedTime); Serial.print(": "); Serial.print(inputSwitchActionState.elapsedTime);Serial.print(", ");
-  
-  Serial.println();
- 
-}
-
-
-
-void updatePressure() {
-  ps.update();
-}
-
-
-void readPressure() {
-
-  pressureStruct pressureValues = ps.getAllPressure();
-  myBMPpres = pressureValues.refPressure;
-  myLPSpres = pressureValues.mainPressure;
-  myRawPres = pressureValues.rawPressure;
-  
- 
-}
-
-void printPressureData() {
-
-  Serial.print(" myBMPpres: "); Serial.print(myBMPpres);Serial.print(", ");
-  Serial.print(" myLPSpres: "); Serial.print(myLPSpres);Serial.print(", ");
-  Serial.print(" myRawPres: "); Serial.print(myRawPres);Serial.print(", ");
-  
-  Serial.println();
-
-}
-
-void initSipAndPuff() {
-
-  ps.begin(PRESS_TYPE_DIFF);
-  setSipAndPuffThreshold();
-  initSipAndPuffArray();
-  sapActionSize=sizeof(sapActionProperty)/sizeof(sapActionStruct);
-}
-
-void setSipAndPuffThreshold(){
-  sipThreshold = SOFT_SIP_THRESHOLD;
-  puffThreshold = SOFT_PUFF_THRESHOLD;
-}
-
-void initSipAndPuffArray(){
-
-  //Push initial state to state Queue
-  
-  //sapStateArray[0] = {SAP_MAIN_STATE_NONE, SAP_SEC_STATE_WAITING, 0};
-  sapCurrState = sapPrevState = {SAP_MAIN_STATE_NONE, SAP_SEC_STATE_WAITING, 0};
-  sapBuffer.pushElement(sapCurrState);
-
-  //Reset and start the timer   
-  sapStateTimer[0].stop();                                      
-  sapStateTimer[0].reset();                                                                        
-  sapStateTimer[0].start(); 
-}
-
 void printSipAndPuffData() {
   Serial.print(" main: "); Serial.print(sapActionState.mainState);Serial.print(", ");
   Serial.print(" secondary: "); Serial.print(sapActionState.secondaryState);Serial.print(", ");
@@ -407,6 +409,17 @@ void printSipAndPuffData() {
   
   Serial.println();
  
+}
+
+
+void printPressureData() {
+
+  Serial.print(" refPressure: "); Serial.print(refPressure);Serial.print(", ");
+  Serial.print(" mainPressure: "); Serial.print(mainPressure);Serial.print(", ");
+  Serial.print(" diffPressure: "); Serial.print(diffPressure);Serial.print(", ");
+  
+  Serial.println();
+
 }
 
 
@@ -529,16 +542,9 @@ void centerJoystick(void) {
   js.setInputComp();
 }
 
-//The loop handling joystick 
-void joystickLoop() {
-  updateJoystick();               //Request new values
-
-  readJoystick();                 //Read the filtered values 
-  
-  performJystick();
-  
-  delay(20);  
-}
+//*********************************//
+// Joystick Functions
+//*********************************//
 
 void initJoystick() {
 
@@ -579,6 +585,17 @@ void readJoystick() {
  
 }
 
+//The loop handling joystick 
+void joystickLoop() {
+  updateJoystick();               //Request new values
+
+  readJoystick();                 //Read the filtered values 
+  
+  performJystick();
+  
+  delay(20);  
+}
+
 void performJystick(){
   
   if(conMode==1){
@@ -600,6 +617,10 @@ void printJoystickData() {
  
 }
 
+//*********************************//
+// LED Functions
+//*********************************//
+
 void initLedFeedback(){
   led.setLedBlinkById(4,3,500,LED_CLR_GREEN,LED_BRIGHTNESS);
   ledStateArraySize=sizeof(ledStateArray)/sizeof(uint8_t);
@@ -620,14 +641,9 @@ void setLedState(int ledState, int ledNumber){
   }
 }
 
-void initInput(){
-  
-  ip.begin();
-  inputActionSize=sizeof(inputActionProperty)/sizeof(inputActionStruct);
-
-}
-
-
+//*********************************//
+// Timer Functions
+//*********************************//
 
 void resetTimer() {
   myTimer[0].stop();                                //Reset and start the timer         
