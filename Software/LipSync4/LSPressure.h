@@ -2,9 +2,10 @@
 #include <Adafruit_BMP280.h>   //onboard pressure sensor on Adafruit Sense Micro 
 
 #define PRESS_BUFF_SIZE 5
+#define PRESS_REF_TOLERANCE 0.1
 
-#define FILTER_NONE 0
-#define FILTER_AVERAGE 1
+#define PRESS_FILTER_NONE 0
+#define PRESS_FILTER_AVERAGE 1
 
 #define PRESS_TYPE_ABS 0
 #define PRESS_TYPE_DIFF 1
@@ -19,7 +20,7 @@ StopWatch pressureTimer[1];
 typedef struct {
   float mainPressure;
   float refPressure;
-  float rawPressure;
+  float diffPressure;
 } pressureStruct;
 
 LSCircularBuffer <pressureStruct> pressureBuffer(PRESS_BUFF_SIZE);
@@ -33,22 +34,23 @@ class LSPressure {
     float mainVal;
     float refVal;
     float compVal;
-    float rawVal;
+    float diffVal;
     sensors_event_t pressure_event;
+    float refTolVal;
   public:
     LSPressure();
     void begin(int type);                                    
     void clear();  
-    void update();    
     void setFilterMode(int mode); 
-    float getMainPressure();
-    float getRefPressure();
-    float getRawPressure();
+    void setRefTolerance(float value); 
     float getCompPressure();
     void setCompPressure();
     void setZeroPressure();
+    void update();    
+    float getMainPressure();
+    float getRefPressure();
+    float getDiffPressure();
     pressureStruct getAllPressure();
-    float getAveragePressure();  
 };
 
 LSPressure::LSPressure() {
@@ -69,7 +71,9 @@ void LSPressure::begin(int type) {
 
   pressureType = type;
 
-  filterMode = FILTER_NONE;
+  filterMode = PRESS_FILTER_NONE;
+
+  refTolVal = PRESS_REF_TOLERANCE;
 
   lps35hw.setDataRate(LPS35HW_RATE_75_HZ);  // 1,10,25,50,75
 
@@ -93,34 +97,85 @@ void LSPressure::clear() {
 
 }
 
+void LSPressure::setFilterMode(int mode) {
+  filterMode = mode;
+}
+
+void LSPressure::setRefTolerance(float value) {
+  refTolVal = value;
+}
+
+float LSPressure::getCompPressure() {
+
+  float tempMainVal = 0.00;
+  float tempRefVal = 0.00;
+  float tempCompVal = 0.00;
+
+  if(pressureType==PRESS_TYPE_DIFF){
+    //Keep reading until we have a valid pressure > 0.0
+    do{     
+      tempMainVal = lps35hw.readPressure();
+      bmp_pressure->getEvent(&pressure_event);
+      tempRefVal=pressure_event.pressure;
+    } while (tempMainVal <= 0.00 || tempRefVal <= 0.00);
+    
+    tempCompVal = tempMainVal - tempRefVal; 
+    refVal=tempRefVal;
+  } 
+  else if(pressureType==PRESS_TYPE_ABS){
+    //Keep reading until we have a valid pressure > 0.00
+    do{
+      tempMainVal = lps35hw.readPressure();
+    } while (tempMainVal <= 0.00);
+
+    tempCompVal=0.00;
+    refVal=tempMainVal;
+  }
+  return tempCompVal;
+}
+
+void LSPressure::setCompPressure() {
+  compVal = getCompPressure();
+}
+
+void LSPressure::setZeroPressure() {
+  compVal = 0.00;
+  for (int i = 0 ; i < PRESS_BUFF_SIZE ; i++){
+    compVal += getCompPressure();
+  }
+  compVal = (compVal / PRESS_BUFF_SIZE);
+}
+
+
 void LSPressure::update() {
   //resetTimer();
-  
-  bmp_pressure->getEvent(&pressure_event);
-  
+
   mainVal = lps35hw.readPressure();
-
-  float tempRefVal = pressure_event.pressure;
-
-  //Update compensation pressure value if reference pressure is changed 
-  if(refVal!=tempRefVal && tempRefVal > 0.00 && pressureType==PRESS_TYPE_DIFF){ 
-    compVal+=refVal-tempRefVal;
-    refVal=tempRefVal; 
-  }
   
+  if(pressureType==PRESS_TYPE_DIFF) {
+    
+    bmp_pressure->getEvent(&pressure_event); 
+    float tempRefVal = pressure_event.pressure;
+    //Update compensation pressure value if reference pressure is changed 
+    if(abs(refVal-tempRefVal)>=refTolVal && tempRefVal > 0.00){ 
+        Serial.print(" refVal: "); Serial.print(refVal);Serial.print(", ");
+        Serial.print(" tempRefVal: "); Serial.print(tempRefVal);Serial.print(", ");
+        Serial.print(" compVal: "); Serial.print(compVal);Serial.print(", ");
+        Serial.println();
+        compVal+=refVal-tempRefVal;
+      }    
+      if(tempRefVal > 0.00) { refVal=tempRefVal; }
+   };
+
   
   //Make sure pressure readings are valid 
   if(mainVal > 0.00 && refVal > 0.00){
-    rawVal = mainVal - refVal - compVal;
+    diffVal = mainVal - refVal - compVal;
 
-    pressureBuffer.pushElement({mainVal, refVal, rawVal});
+    pressureBuffer.pushElement({mainVal, refVal, diffVal});
   }
   
   //Serial.println(getTime());  
-}
-
-void LSPressure::setFilterMode(int mode) {
-  filterMode = mode;
 }
 
 float LSPressure::getMainPressure() {
@@ -132,51 +187,14 @@ float LSPressure::getRefPressure() {
 }
 
 
-float LSPressure::getRawPressure() {
-  return pressureBuffer.getLastElement().rawPressure;
+float LSPressure::getDiffPressure() {
+  return pressureBuffer.getLastElement().diffPressure;
 }
 
-float LSPressure::getCompPressure() {
-
-  bmp_pressure->getEvent(&pressure_event);
-
-  mainVal = lps35hw.readPressure();
-  
-  if(pressureType==PRESS_TYPE_DIFF){
-    refVal=pressure_event.pressure;
-    compVal = mainVal - refVal;
-  }
-  else{
-    compVal = 0.0;
-  }
-  return compVal;
-}
-
-void LSPressure::setCompPressure() {
-  getCompPressure();
-}
-
-void LSPressure::setZeroPressure() {
-  if(pressureType==PRESS_TYPE_DIFF){
-    getCompPressure();
-  } else{
-    refVal = lps35hw.readPressure();
-  }
-}
 
 
 pressureStruct LSPressure::getAllPressure() {
   return pressureBuffer.getLastElement();
-}
-
-
-float LSPressure::getAveragePressure()  
-{
-  float sum = 0.0;
-  for (int i = 0 ; i < PRESS_BUFF_SIZE ; i++){
-    sum += pressureBuffer.getElement(i).rawPressure;
-  }
-  return(((float) sum) / PRESS_BUFF_SIZE);
 }
 
 

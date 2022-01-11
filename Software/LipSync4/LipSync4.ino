@@ -260,7 +260,7 @@ void readPressure() {
   pressureStruct pressureValues = ps.getAllPressure();
   refPressure = pressureValues.refPressure;
   mainPressure = pressureValues.mainPressure;
-  diffPressure = pressureValues.rawPressure;
+  diffPressure = pressureValues.diffPressure;
   
  
 }
@@ -590,6 +590,8 @@ void joystickLoop() {
   updateJoystick();               //Request new values
 
   readJoystick();                 //Read the filtered values 
+
+  //printJoystickData();
   
   performJystick();
   
