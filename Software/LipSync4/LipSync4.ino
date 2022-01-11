@@ -1,18 +1,18 @@
 
 #include <Wire.h>  
 #include <StopWatch.h>
-
+#include <ArduinoJson.h>
 #include "LSConfig.h"
 #include "LSUSB.h"
 #include "LSBLE.h"
-#include "LSMemory.h"
 #include "LSCircularBuffer.h"
 #include "LSInput.h"
 #include "LSPressure.h"
 #include "LSJoystick.h"
 #include "LSOutput.h"
+#include "LSMemory.h"
 
-int conMode = 0;
+int comMethod = 0;
 
 uint8_t ledStateArray[3] = {LED_ACTION_OFF,LED_ACTION_OFF,LED_ACTION_OFF};
 int ledStateArraySize;
@@ -118,7 +118,7 @@ void setup() {
   mouse.begin();
   btmouse.begin();
 
-  conMode=CON_MODE;
+  comMethod=COM_METHOD;
   
   Serial.begin(115200);
   // Wait until serial port is opened
@@ -147,9 +147,10 @@ void setup() {
 
 
 void loop() {
-  //inputLoop();
+  inputLoop();
+  delay(25);
   pressureLoop();
-  //delay(30);
+  delay(25);
 }
 
 //*********************************//
@@ -399,7 +400,7 @@ void pressureLoop() {
     sapActionIndex++;
   }
 
-  delay(50);
+  //delay(50);
   //Serial.println(getTime());  
 
 }
@@ -493,10 +494,10 @@ void performAction(int action, int ledState, int ledNumber, int ledColor) {
 
 void cursorLeftClick(void) {
   //Serial.println("Left Click");
-  if(conMode==1){
+  if(comMethod==1){
     mouse.click(MOUSE_LEFT);
   } 
-  else if(conMode==2){
+  else if(comMethod==2){
     btmouse.click(MOUSE_LEFT);
   }
   delay(80);
@@ -504,10 +505,10 @@ void cursorLeftClick(void) {
 
 void cursorRightClick(void) {
   //Serial.println("Right Click");  
-  if(conMode==1){
+  if(comMethod==1){
     mouse.click(MOUSE_RIGHT);
   } 
-  else if(conMode==2){
+  else if(comMethod==2){
     btmouse.click(MOUSE_RIGHT);
   }
   delay(80);
@@ -515,10 +516,10 @@ void cursorRightClick(void) {
 
 void cursorMiddleClick(void) {
   //Serial.println("Middle Click");  
-  if(conMode==1){
+  if(comMethod==1){
     mouse.click(MOUSE_MIDDLE);
   } 
-  else if(conMode==2){
+  else if(comMethod==2){
     btmouse.click(MOUSE_MIDDLE);
   }
   delay(80);
@@ -526,10 +527,10 @@ void cursorMiddleClick(void) {
 
 void cursorDrag(void) {
   //Serial.println("Drag");  
-  if(conMode==1){
+  if(comMethod==1){
     mouse.press(MOUSE_LEFT);
   } 
-  else if(conMode==2){
+  else if(comMethod==2){
     btmouse.press(MOUSE_LEFT);
   }
   delay(80);
@@ -581,7 +582,7 @@ void updateJoystick() {
 
 void readJoystick() {
 
-  joystickInputStruct joystickValues = js.getAllVal();
+  joystickInputType joystickValues = js.getAllVal();
   xVal = joystickValues.x;
   yVal = joystickValues.y;
  
@@ -602,10 +603,10 @@ void joystickLoop() {
 
 void performJystick(){
   
-  if(conMode==1){
+  if(comMethod==1){
     (outputAction==OUTPUT_SCROLL)? mouse.scroll(yVal) : mouse.move(xVal, -yVal);
   }
-  else if(conMode==2){
+  else if(comMethod==2){
     (outputAction==OUTPUT_SCROLL)? btmouse.scroll(yVal) : btmouse.move(xVal, -yVal);
   } 
 
