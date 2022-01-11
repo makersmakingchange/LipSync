@@ -158,10 +158,6 @@ void LSPressure::update() {
     float tempRefVal = pressure_event.pressure;
     //Update compensation pressure value if reference pressure is changed 
     if(abs(refVal-tempRefVal)>=refTolVal && tempRefVal > 0.00){ 
-        Serial.print(" refVal: "); Serial.print(refVal);Serial.print(", ");
-        Serial.print(" tempRefVal: "); Serial.print(tempRefVal);Serial.print(", ");
-        Serial.print(" compVal: "); Serial.print(compVal);Serial.print(", ");
-        Serial.println();
         compVal+=refVal-tempRefVal;
       }    
       if(tempRefVal > 0.00) { refVal=tempRefVal; }

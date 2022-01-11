@@ -137,9 +137,9 @@ void setup() {
   
   initLedFeedback();
 
-  Scheduler.startLoop(inputLoop);
+  //Scheduler.startLoop(inputLoop);
   
-  Scheduler.startLoop(pressureLoop);
+  //Scheduler.startLoop(pressureLoop);
 
   Scheduler.startLoop(joystickLoop);
   
@@ -147,7 +147,9 @@ void setup() {
 
 
 void loop() {
-
+  //inputLoop();
+  pressureLoop();
+  //delay(30);
 }
 
 //*********************************//
@@ -206,7 +208,7 @@ void inputLoop() {
     }
   }
   
-  delay(30);
+  
 }
 
 void printInputData() {
@@ -397,7 +399,7 @@ void pressureLoop() {
     sapActionIndex++;
   }
 
-  delay(20);
+  delay(50);
   //Serial.println(getTime());  
 
 }

@@ -19,7 +19,6 @@
 #define INPUT_REACTION_TIME 150
 
 StopWatch inputTimer[2];
-StopWatch testTimer[1];
 
 typedef struct {
   int mainState;            //button1 + 2*button2 + 4*button3
@@ -34,8 +33,6 @@ LSCircularBuffer <inputStruct> inputSwitchBuffer(12);
 
 class LSInput {
   private: 
-    void resetTimer();
-    unsigned long getTime();
     int *_buttonPinArray;
     int *_switchPinArray;
     int _buttonNumber;
@@ -161,7 +158,7 @@ void LSInput::readState(int type) {
       
       if (type==0){
         inputButtonBuffer.pushElement(inputCurrState);     
-      } else{
+      } else if (type==1){
         inputSwitchBuffer.pushElement(inputCurrState);           
       }
 
@@ -172,7 +169,7 @@ void LSInput::readState(int type) {
   }
 
   //No action in 1 minute : reset timer
-  if(inputPrevState.secondaryState==INPUT_SEC_STATE_WAITING && inputTimer[type].elapsed()>60000){
+  if(inputPrevState.secondaryState==INPUT_SEC_STATE_WAITING && inputTimer[type].elapsed()>30000){
       //Reset and start the timer         
       inputTimer[type].stop();      
       inputTimer[type].reset();                                                                        
@@ -191,21 +188,4 @@ inputStruct LSInput::getButtonState() {
 inputStruct LSInput::getSwitchState() {
   inputStruct inputCurrState = inputSwitchBuffer.getLastElement();  //Get the state
   return inputCurrState;
-}
-
-//***RESET TIMER FUNCTION***//
-
-void LSInput::resetTimer() {
-  testTimer[0].stop();                                //Reset and start the timer         
-  testTimer[0].reset();                                                                        
-  testTimer[0].start(); 
-}
-
-//***GET TIME FUNCTION***//
-
-unsigned long LSInput::getTime() {
-  unsigned long finalTime = testTimer[0].elapsed(); 
-  testTimer[0].stop();                                //Reset and start the timer         
-  testTimer[0].reset(); 
-  return finalTime;
 }
