@@ -166,9 +166,9 @@ void testMemory() {
     delay(1);
     varFloat6=mem.readFloat(SETTINGS_FILE,"float6");
     delay(1);
-    varString1=mem.read(SETTINGS_FILE,"string1");
+    varString1=mem.readString(SETTINGS_FILE,"string1");
     delay(1);
-    varString2=mem.read(SETTINGS_FILE,"string2");
+    varString2=mem.readString(SETTINGS_FILE,"string2");
     delay(1);
   
   Serial.print("Configured: ");
@@ -217,7 +217,7 @@ void testMemory() {
     //delay(1);
     //mem.writeInt(SETTINGS_FILE,"mode",deviceMode);
     //delay(1);
-    mem.writeInt(SETTINGS_FILE,"configured",deviceConfigured);
+    //mem.writeInt(SETTINGS_FILE,"configured",deviceConfigured);
     //delay(1);
     //mem.writeInt(SETTINGS_FILE,"sip-thr",deviceSipThreshold);    
     //delay(1);
@@ -275,9 +275,9 @@ void testMemory() {
     //delay(1);
     //mem.writeFloat(SETTINGS_FILE,"float6",varFloat6);
     //delay(1); 
-    //mem.write(SETTINGS_FILE,"string1",varString1);
+    //mem.writeString(SETTINGS_FILE,"string1",varString1);
     //delay(1);
-    //mem.write(SETTINGS_FILE,"string2",varString2);
+    //mem.writeString(SETTINGS_FILE,"string2",varString2);
     delay(1);               
   } else {
   }  
