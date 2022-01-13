@@ -75,7 +75,7 @@ void LSPressure::begin(int type) {
 
   refTolVal = PRESS_REF_TOLERANCE;
 
-  lps35hw.setDataRate(LPS35HW_RATE_75_HZ);  // 1,10,25,50,75
+  lps35hw.setDataRate(LPS35HW_RATE_10_HZ);  // 1,10,25,50,75
 
   if(pressureType==PRESS_TYPE_DIFF){
     bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     // Operating Mode. 

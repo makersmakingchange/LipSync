@@ -4,7 +4,7 @@
 
 using namespace Adafruit_LittleFS_Namespace;
 
-
+#define BUFFER_SIZE  512
 
 DynamicJsonDocument doc(1024);
 //Initialize FileSystem
