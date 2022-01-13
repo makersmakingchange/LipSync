@@ -25,22 +25,23 @@
 
 Tlv493d Tlv493dSensor = Tlv493d();
 
+#define BUFFER_SIZE  512
 typedef struct {
   float x;
   float y;
-} magnetInputType;
+} pointFloatType;
 
 typedef struct {
   int x;
   int y;
-} joystickInputType;
+} pointIntType;
 
-LSCircularBuffer <joystickInputType> joystickInputBuffer(5);
+LSCircularBuffer <pointIntType> joystickInputBuffer(5);
 class LSJoystick {
   private:
-    magnetInputType magnetInputComp;
-    magnetInputType magnetInputCalibration[CALIBRATION_ARRAY_SIZE];
-    joystickInputType limitCircle(magnetInputType point);
+    pointFloatType magnetInputComp;
+    pointFloatType magnetInputCalibration[CALIBRATION_ARRAY_SIZE];
+    pointIntType limitCircle(pointFloatType point);
     int mapFloatInt(float input, float inputStart, float inputEnd, int outputStart, int outputEnd);
     int sgn(float val);
     int _direction;
@@ -50,11 +51,12 @@ class LSJoystick {
     void clear();                                                  //Clear the stack
     void setMagDirection(int direction);
     void setInputComp();
-    void setInputMax(int quad);
+    pointFloatType getInputMax(int quad);
+    void setInputMax(int quad, pointFloatType point);
     void update();
     int getXVal();
     int getYVal();
-    joystickInputType getAllVal();
+    pointIntType getAllVal();
 
 };
 
@@ -96,25 +98,31 @@ void LSJoystick::setMagDirection(int direction) {
 
 void LSJoystick::setInputComp() {
   Tlv493dSensor.updateData();
-  magnetInputComp.x = Tlv493dSensor.getY();
-  magnetInputComp.y = Tlv493dSensor.getX();
+  magnetInputComp.x = Tlv493dSensor.getY()*_direction;
+  magnetInputComp.y = Tlv493dSensor.getX()*_direction;
   magnetInputCalibration[0] = {magnetInputComp.x, magnetInputComp.y};
 
 }
 
 
 
-void LSJoystick::setInputMax(int quad) {
-  /*
-    if((quad >= 0) && (quad < CALIBRATION_ARRAY_SIZE)){
+pointFloatType LSJoystick::getInputMax(int quad) {
+  
+  if((quad >= 0) && (quad < CALIBRATION_ARRAY_SIZE)){
     Tlv493dSensor.updateData();
-    magnetInputCalibration[quad] = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};
-    }*/
+    magnetInputCalibration[quad] = {Tlv493dSensor.getY()*_direction, Tlv493dSensor.getX()*_direction};
+  }
+  return magnetInputCalibration[quad];
+}
+//,pointFloatType point
+void LSJoystick::setInputMax(int quad,pointFloatType point) {
+  /*
   magnetInputCalibration[1] = {RAW_X1_MAX, RAW_Y1_MAX};
   magnetInputCalibration[2] = {RAW_X2_MAX, RAW_Y2_MAX};
   magnetInputCalibration[3] = {RAW_X3_MAX, RAW_Y3_MAX};
   magnetInputCalibration[4] = {RAW_X4_MAX, RAW_Y4_MAX};
-
+  */
+  magnetInputCalibration[quad] = point;
 }
 
 
@@ -122,7 +130,7 @@ void LSJoystick::setInputMax(int quad) {
 void LSJoystick::update() {
 
   Tlv493dSensor.updateData();
-  joystickInputType outputPoint = limitCircle({Tlv493dSensor.getY(), Tlv493dSensor.getX()});
+  pointIntType outputPoint = limitCircle({Tlv493dSensor.getY()*_direction, Tlv493dSensor.getX()*_direction});
   joystickInputBuffer.pushElement(outputPoint);
 
 }
@@ -136,14 +144,14 @@ int LSJoystick::getYVal() {
 }
 
 
-joystickInputType LSJoystick::getAllVal() {
+pointIntType LSJoystick::getAllVal() {
   return joystickInputBuffer.getLastElement();
 }
 
-joystickInputType LSJoystick::limitCircle(magnetInputType point) {
-  magnetInputType rawPoint = {point.x - magnetInputComp.x, point.y - magnetInputComp.y};
-  magnetInputType maxPoint, limitPoint;
-  joystickInputType limitOutputPoint;
+pointIntType LSJoystick::limitCircle(pointFloatType point) {
+  pointFloatType rawPoint = {point.x - magnetInputComp.x, point.y - magnetInputComp.y};
+  pointFloatType maxPoint, limitPoint;
+  pointIntType limitOutputPoint;
 
   float thetaVal = atan2(rawPoint.y, rawPoint.x);         // Get the angel of the point
 
@@ -179,8 +187,8 @@ joystickInputType LSJoystick::limitCircle(magnetInputType point) {
     limitOutputPoint.y = mapFloatInt(rawPoint.y, -maxPoint.y, maxPoint.y, -INPUT_MAX, INPUT_MAX);
   }
 
-  limitOutputPoint.x = _direction * sgn(rawPoint.x) * limitOutputPoint.x;
-  limitOutputPoint.y = _direction * sgn(rawPoint.y) * limitOutputPoint.y;
+  limitOutputPoint.x = sgn(rawPoint.x) * limitOutputPoint.x;
+  limitOutputPoint.y = sgn(rawPoint.y) * limitOutputPoint.y;
 
   return limitOutputPoint;
 }

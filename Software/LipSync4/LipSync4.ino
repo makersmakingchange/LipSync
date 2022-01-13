@@ -98,7 +98,10 @@ LSCircularBuffer <sapStruct> sapBuffer(12);   //Create a buffer of type sapStruc
 int xVal;
 int yVal;
 
-LSInput ip(inputButtonPinArray,inputSwitchPinArray,INPUT_BUTTON_NUMBER,INPUT_SWITCH_NUMBER);   //Starts an instance of the object
+LSMemory mem;
+
+//LSInput ip(inputButtonPinArray,inputSwitchPinArray,INPUT_BUTTON_NUMBER,INPUT_SWITCH_NUMBER); 
+LSInput ip(inputSwitchPinArray,INPUT_SWITCH_NUMBER);   //Starts an instance of the object
 
 LSJoystick js;                  //Starts an instance of the LSJoystick object
 
@@ -127,6 +130,8 @@ void setup() {
   
   delay(2000);
 
+  initMemory();
+
   initSipAndPuff();
 
   led.begin();    
@@ -139,7 +144,7 @@ void setup() {
 
   //Scheduler.startLoop(inputLoop);
   
-  //Scheduler.startLoop(pressureLoop);
+  Scheduler.startLoop(pressureLoop);
 
   Scheduler.startLoop(joystickLoop);
   
@@ -147,10 +152,22 @@ void setup() {
 
 
 void loop() {
-  inputLoop();
-  delay(25);
-  pressureLoop();
-  delay(25);
+  //inputLoop();
+  //pressureLoop();
+  //printInputData();
+  //printJoystickData();
+  //delay(400);
+  //led.setLedBlinkById(4,1,300,LED_CLR_GREEN,20);
+}
+
+//*********************************//
+// Memory Functions
+//*********************************//
+
+void initMemory(){
+  mem.begin();
+  mem.format();
+  mem.initialize(SETTINGS_FILE,SETTINGS_JSON);  
 }
 
 //*********************************//
@@ -171,14 +188,14 @@ void inputLoop() {
   
   ip.update();              //Request new values 
 
-
+  
   //Get the last state change 
-  inputButtonActionState = ip.getButtonState();
-  inputSwitchActionState = ip.getSwitchState();
-
+  //inputButtonActionState = ip.getInputState();
+  inputSwitchActionState = ip.getInputState();
+  
   //printInputData();
   //Output action logic
-  
+  /*
   for (int i=0; i < inputActionSize; i++) {
     if(inputButtonActionState.mainState==inputActionProperty[i].inputActionState && 
       inputButtonActionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
@@ -193,7 +210,7 @@ void inputLoop() {
       break;
     }
   }
-
+  */
   for (int i=0; i < inputActionSize; i++) {
     if(inputSwitchActionState.mainState==inputActionProperty[i].inputActionState && 
       inputSwitchActionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
@@ -209,7 +226,7 @@ void inputLoop() {
     }
   }
   
-  
+  delay(50);
 }
 
 void printInputData() {
@@ -351,7 +368,7 @@ void pressureLoop() {
   //printSipAndPuffData();
   //Output action logic
 
-  int canPerformAction = true;
+  bool canPerformAction = true;
 
   //Skip Sip and puff action if it's in drag or scroll mode
 
@@ -400,7 +417,7 @@ void pressureLoop() {
     sapActionIndex++;
   }
 
-  //delay(50);
+  delay(50);
   //Serial.println(getTime());  
 
 }
@@ -474,9 +491,9 @@ void performAction(int action, int ledState, int ledNumber, int ledColor) {
         break;
       }
       case OUTPUT_CURSOR_CALIBRATION: {
-        led.setLedBlinkById(ledNumber,2,500,ledColor,LED_BRIGHTNESS);
-        led.setLedColorById(ledNumber,ledColor,LED_BRIGHTNESS);
-        calibrateJoystick();
+        //led.setLedBlinkById(ledNumber,2,500,ledColor,LED_BRIGHTNESS);
+        //led.setLedColorById(ledNumber,ledColor,LED_BRIGHTNESS);
+        setJoystickCalibration();
         setLedState(ledState,ledNumber);
         delay(5);
         break;
@@ -540,10 +557,11 @@ void cursorScroll(void) {
   //Serial.println("Scroll");  
 }
 
-void centerJoystick(void) {
+void setJoystickCenter(void) {
   //Serial.println("Center Joystick");  
   js.setInputComp();
 }
+
 
 //*********************************//
 // Joystick Functions
@@ -553,25 +571,51 @@ void initJoystick() {
 
   js.begin();
   js.setMagDirection(MAG_DIRECTION_INVERSE);
-  js.setInputComp();
-  calibrateJoystick();
+  delay(5);
+  setJoystickCenter();
+  delay(5);
+  getJoystickCalibration();
 }
 
-void calibrateJoystick() {
-  led.setLedBlinkById(4,3,500,LED_CLR_YELLOW,LED_BRIGHTNESS);
+void getJoystickCalibration() {
+  String commandKey;
+  pointFloatType maxPoint;
+  for (int i=1; i < 5; i++) {
+    commandKey="CA"+String(i);
+    maxPoint=mem.readPoint(SETTINGS_FILE,commandKey);
+    delay(5);
+    /*
+    Serial.print(maxPoint.x);  
+    Serial.print(",");  
+    Serial.println(maxPoint.y); 
+    */
+    js.setInputMax(i,maxPoint);
+  }
+}
+
+void setJoystickCalibration() {
+  led.setLedBlinkById(4,2,500,LED_CLR_ORANGE,LED_BRIGHTNESS);
+  String commandKey;
+  pointFloatType maxPoint;
   delay(1000);
-  centerJoystick();
+  
+  for (int i=1; i < 5; i++) {
+    commandKey="CA"+String(i);
+    led.setLedBlinkById(2,6,500,LED_CLR_ORANGE,LED_BRIGHTNESS);
+    led.setLedColorById(2, LED_CLR_ORANGE, LED_BRIGHTNESS); 
+    maxPoint=js.getInputMax(i);
+    mem.writePoint(SETTINGS_FILE,commandKey,maxPoint);
+    Serial.print(maxPoint.x);  
+    Serial.print(",");  
+    Serial.println(maxPoint.y); 
+    led.clearLed(2);    
+    delay(1000);
+  }
+  /*
   js.setInputMax(1);
   js.setInputMax(2);
   js.setInputMax(3);
   js.setInputMax(4);
-
-  /*
-  for (int i=1; i < 5; i++) {
-  led.setLedBlinkById(6,3,500,LED_CLR_YELLOW,LED_BRIGHTNESS);
-  js.setRawMax(1);
-  led.setLedBlinkById(1,3,1000,LED_CLR_RED,LED_BRIGHTNESS);    
-  }
   */
 }
 
@@ -582,7 +626,7 @@ void updateJoystick() {
 
 void readJoystick() {
 
-  joystickInputType joystickValues = js.getAllVal();
+  pointIntType joystickValues = js.getAllVal();
   xVal = joystickValues.x;
   yVal = joystickValues.y;
  

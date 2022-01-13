@@ -32,6 +32,11 @@
 #define LED_ACTION_ON 1
 #define LED_ACTION_BLINK 2
 
+
+#define SETTINGS_FILE    "/settings.txt"
+#define SETTINGS_JSON    "{\"CF\":5,\"MN\":0,\"VN\":0.0,\"CM\":0,\"SL\":0,\"ST\":0,\"PT\":0,\"CA0\":[0.0,0.0],\"CA1\":[25.0,25.0],\"CA2\":[-25.0,25.0],\"CA3\":[-25.0,-25.0],\"CA4\":[25.0,-25.0]}"
+
+
 //CAN BE CHANGED 
 
 #define SOFT_SIP_THRESHOLD -2.5                    //hPa
@@ -42,4 +47,4 @@
 
 #define LED_BRIGHTNESS 50 
 
-#define CON_MODE 1        //0 = None , 1 = USB , 2 = Wireless  
+#define COM_METHOD 1        //0 = None , 1 = USB , 2 = Wireless  

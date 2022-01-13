@@ -13,12 +13,10 @@
 #define INPUT_SEC_STATE_STARTED 1
 #define INPUT_SEC_STATE_RELEASED 2
 
-#define INPUT_TYPE_BUTTON 0
-#define INPUT_TYPE_SWITCH 1
-
 #define INPUT_REACTION_TIME 150
 
-StopWatch inputTimer[2];
+StopWatch inputTimer[1];
+StopWatch testTimer[1];
 
 typedef struct {
   int mainState;            //button1 + 2*button2 + 4*button3
@@ -28,42 +26,38 @@ typedef struct {
 
 
 
-LSCircularBuffer <inputStruct> inputButtonBuffer(12);
-LSCircularBuffer <inputStruct> inputSwitchBuffer(12);
+LSCircularBuffer <inputStruct> inputBuffer(5);
 
 class LSInput {
   private: 
-    int *_buttonPinArray;
-    int *_switchPinArray;
-    int _buttonNumber;
-    int _switchNumber;
+    void resetTimer();
+    unsigned long getTime();
+    int *_inputPinArray;
+    int _inputNumber;
+    int inputState[3];
+    int inputAllState;
+    inputStruct inputCurrState = {0, 0, 0};
+    inputStruct inputPrevState = {0, 0, 0};
   public:
-    LSInput(int* buttonPinArray, int* switchPinArray, int buttonNumber, int switchNumber);
+    LSInput(int* inputPinArray, int inputNumber);
     ~LSInput();
     void begin();                                    
     void clear();  
     void update();    
-    void readState(int type); 
-    inputStruct getButtonState();
-    inputStruct getSwitchState();
+    inputStruct getInputState();
 };
 
-LSInput::LSInput(int* buttonPinArray, int* switchPinArray, int buttonNumber, int switchNumber)
+LSInput::LSInput(int* inputPinArray, int inputNumber)
 {
-  _buttonPinArray = new int[buttonNumber];
-  _switchPinArray = new int[switchNumber];
+  _inputPinArray = new int[inputNumber];
 
-  _buttonNumber = buttonNumber;
-  _switchNumber = switchNumber;
+  _inputNumber = inputNumber;
   
-  for (int i = 0; i < buttonNumber; i++){
-    pinMode(buttonPinArray[i], INPUT_PULLUP);
-    _buttonPinArray[i] = buttonPinArray[i];
+  for (int i = 0; i < inputNumber; i++){
+    pinMode(inputPinArray[i], INPUT_PULLUP);
+    _inputPinArray[i] = inputPinArray[i];
   }
-  for (int i = 0; i < switchNumber; i++){
-    pinMode(switchPinArray[i], INPUT_PULLUP);
-    _switchPinArray[i] = switchPinArray[i];
-  }
+
 }
 
 LSInput::~LSInput()
@@ -80,60 +74,50 @@ void LSInput::clear() {
     
     inputStruct inputPrevState = {INPUT_MAIN_STATE_NONE, INPUT_SEC_STATE_WAITING, 0};
 
-    inputButtonBuffer.pushElement(inputPrevState);
-    inputSwitchBuffer.pushElement(inputPrevState);
+    inputBuffer.pushElement(inputPrevState);
 
     
     inputTimer[0].stop();                                      
     inputTimer[0].reset();                                                                        
     inputTimer[0].start(); 
-    
-    inputTimer[1].stop();                                      
-    inputTimer[1].reset();                                                                        
-    inputTimer[1].start(); 
+   
 }
+
 
 void LSInput::update() {
-  readState(INPUT_TYPE_BUTTON);
-  readState(INPUT_TYPE_SWITCH);
-}
-
-void LSInput::readState(int type) {
   //resetTimer();
 
-  int inputState[3];
-  int inputAllState = 0;
-  inputStruct inputCurrState = {0, 0, 0};
-  inputStruct inputPrevState = {0, 0, 0};
+  //inputAllState = 0;
+  //inputStruct inputCurrState = {0, 0, 0};
+  //inputStruct inputPrevState = {0, 0, 0};
 
-  if(type==INPUT_TYPE_BUTTON){
-    for (int i = 0; i < _buttonNumber; i++){
-      inputState[i] = !digitalRead(_buttonPinArray[i]);
-      inputAllState+= pow(2,i) * inputState[i];
-    }  
-  }
-  else if(type==INPUT_TYPE_SWITCH){
-    for (int i = 0; i < _switchNumber; i++){
-      inputState[i] = !digitalRead(_switchPinArray[i]);
-      inputAllState+= pow(2,i) * inputState[i];
-    }  
-  }
+  inputState[0] = !digitalRead(_inputPinArray[0]);
+  inputState[1] = !digitalRead(_inputPinArray[1]);
+  inputState[2] = !digitalRead(_inputPinArray[1]);
+  /*
+  for (int i = 0; i < _inputNumber; i++){
+    inputState[i] = !digitalRead(_inputPinArray[i]);
+    //inputAllState+= pow(2,i) * inputState[i];
+  }  
+  */
+  inputPrevState = inputBuffer.getLastElement();
   
-  //inputAllState = inputState[0] + 2 * inputState[1] + 4 * inputState[2] ;
+
+  inputAllState = inputState[0] + 2 * inputState[1] + 4 * inputState[2] ;
   
- (type==0) ? inputPrevState = inputButtonBuffer.getLastElement() : inputPrevState = inputSwitchBuffer.getLastElement(); 
+ 
   // prev: none,waiting  current : none 
   // prev: press x,started  current : press x 
   if((inputAllState == inputPrevState.mainState && inputPrevState.secondaryState != INPUT_SEC_STATE_RELEASED)){
-    inputCurrState = {inputAllState, inputPrevState.secondaryState, inputTimer[type].elapsed()};
-
-    (type==0) ? inputButtonBuffer.updateLastElement(inputCurrState) : inputSwitchBuffer.updateLastElement(inputCurrState);
+    inputCurrState = {inputAllState, inputPrevState.secondaryState, inputTimer[0].elapsed()};
+    
+    //inputBuffer.updateLastElement(inputCurrState);  
     //Serial.println("a");
   } // prev: press x,started  current : press y and elapsed time<reaction time ms
   else if(inputAllState != INPUT_MAIN_STATE_NONE && inputPrevState.secondaryState == INPUT_SEC_STATE_STARTED && inputPrevState.elapsedTime<INPUT_REACTION_TIME){
-    inputCurrState = {inputAllState, inputPrevState.secondaryState, inputTimer[type].elapsed()};
+    inputCurrState = {inputAllState, inputPrevState.secondaryState, inputTimer[0].elapsed()};
 
-    (type==0) ? inputButtonBuffer.updateLastElement(inputCurrState) : inputSwitchBuffer.updateLastElement(inputCurrState);
+    //inputBuffer.updateLastElement(inputCurrState);  
     //Serial.println("b");
   } 
   else { 
@@ -156,36 +140,45 @@ void LSInput::readState(int type) {
       }     
       //Push the new state 
       
-      if (type==0){
-        inputButtonBuffer.pushElement(inputCurrState);     
-      } else if (type==1){
-        inputSwitchBuffer.pushElement(inputCurrState);           
-      }
+      inputBuffer.pushElement(inputCurrState);   
 
       //Reset and start the timer
-      inputTimer[type].stop();      
-      inputTimer[type].reset();                                                                        
-      inputTimer[type].start(); 
+      inputTimer[0].stop();      
+      inputTimer[0].reset();                                                                        
+      inputTimer[0].start(); 
   }
-
+  /*
   //No action in 1 minute : reset timer
-  if(inputPrevState.secondaryState==INPUT_SEC_STATE_WAITING && inputTimer[type].elapsed()>30000){
+  if(inputPrevState.secondaryState==INPUT_SEC_STATE_WAITING && inputTimer[type].elapsed()>60000){
       //Reset and start the timer         
-      inputTimer[type].stop();      
-      inputTimer[type].reset();                                                                        
-      inputTimer[type].start();   
-  }
+      inputTimer[0].stop();      
+      inputTimer[0].reset();                                                                        
+      inputTimer[0].start();   
+  }*/
   
-
+//Serial.println(getTime());  
 }
 
 
-inputStruct LSInput::getButtonState() {
-  inputStruct inputCurrState = inputButtonBuffer.getLastElement();  //Get the state
+inputStruct LSInput::getInputState() {
+  inputStruct inputCurrState = inputBuffer.getLastElement();  //Get the state
   return inputCurrState;
 }
 
-inputStruct LSInput::getSwitchState() {
-  inputStruct inputCurrState = inputSwitchBuffer.getLastElement();  //Get the state
-  return inputCurrState;
+
+//***RESET TIMER FUNCTION***//
+
+void LSInput::resetTimer() {
+  testTimer[0].stop();                                //Reset and start the timer         
+  testTimer[0].reset();                                                                        
+  testTimer[0].start(); 
+}
+
+//***GET TIME FUNCTION***//
+
+unsigned long LSInput::getTime() {
+  unsigned long finalTime = testTimer[0].elapsed(); 
+  testTimer[0].stop();                                //Reset and start the timer         
+  testTimer[0].reset(); 
+  return finalTime;
 }
