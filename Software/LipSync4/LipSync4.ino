@@ -116,6 +116,8 @@ LSBLEMouse btmouse;
 StopWatch sapStateTimer[1];
 StopWatch myTimer[1];
 
+int joystickCounter =0;
+
 void setup() {
 
   mouse.begin();
@@ -571,7 +573,6 @@ void setJoystickCenter(void) {
 void initJoystick() {
 
   js.begin();
-  js.setMagnetDirection(JOY_MAG_DIRECTION_INVERSE);
   setJoystickCenter();
   getJoystickCalibration();
 }
@@ -631,16 +632,19 @@ void readJoystick() {
 }
 
 //The loop handling joystick 
+
 void joystickLoop() {
-  updateJoystick();               //Request new values
 
-  readJoystick();                 //Read the filtered values 
+    updateJoystick();               //Request new values
+  
+    readJoystick();                 //Read the filtered values 
+  
+    //printJoystickData();
+    
+    performJystick();
 
-  //printJoystickData();
-  
-  performJystick();
-  
-  delay(20);  
+
+    delay(20);  
 }
 
 void performJystick(){

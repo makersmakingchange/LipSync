@@ -20,6 +20,9 @@
 
 #define JOY_MAG_DIRECTION_DEFAULT 1
 #define JOY_MAG_DIRECTION_INVERSE -1
+#define JOY_MAG_DIRECTION_FAULT 0
+
+#define JOY_MAG_DIRECTION_THRESHOLD 9
 
 #define JOY_INPUT_XY_MAX 12 //1024
 
@@ -59,7 +62,7 @@ class LSJoystick {
     LSJoystick();
     void begin();
     void clear();                                                  //Clear the stack
-    void setMagnetDirection(int magnetDirection);
+    void setMagnetDirection();
     void setDeadzone(bool deadzoneEnabled,float deadzoneFactor);
     void setOutputScale(int scaleLevel);
     void setInputComp();
@@ -73,20 +76,17 @@ class LSJoystick {
 };
 
 LSJoystick::LSJoystick() {
-  //_magnetDirection = JOY_MAG_DIRECTION_DEFAULT;
 }
 
 void LSJoystick::begin() {
-  setMagnetDirection(JOY_MAG_DIRECTION_DEFAULT);
   setDeadzone(true,JOY_DEADZONE_FACTOR);
   setOutputScale(JOY_OUTPUT_SCALE);
   Tlv493dSensor.begin();
+  setMagnetDirection();
   clear();
 }
 
 void LSJoystick::clear() {
-
-  _magnetDirection = JOY_MAG_DIRECTION_DEFAULT;
 
   magnetInputComp.x = 0.00;
   magnetInputComp.y = 0.00;
@@ -107,12 +107,26 @@ void LSJoystick::clear() {
   */
 }
 
-void LSJoystick::setMagnetDirection(int magnetDirection) {
-  if (magnetDirection == JOY_MAG_DIRECTION_DEFAULT || magnetDirection == JOY_MAG_DIRECTION_INVERSE) {
-    _magnetDirection = magnetDirection;
-  } else {
+void LSJoystick::setMagnetDirection() {
+
+  float zReading = 0.0;
+  for (int i = 0 ; i < JOY_RAW_ARRAY_SIZE ; i++){
+    Tlv493dSensor.updateData();
+    zReading += Tlv493dSensor.getZ();
+  }
+  zReading = ((float) zReading) / JOY_RAW_ARRAY_SIZE;
+   
+  if (zReading < -1 * JOY_MAG_DIRECTION_THRESHOLD)
+  {
     _magnetDirection = JOY_MAG_DIRECTION_DEFAULT;
   }
+  if (zReading > JOY_MAG_DIRECTION_THRESHOLD){
+    _magnetDirection = JOY_MAG_DIRECTION_INVERSE;
+  }
+  else {
+    _magnetDirection = JOY_MAG_DIRECTION_FAULT;
+  }
+
 }
 
 void LSJoystick::setDeadzone(bool deadzoneEnabled,float deadzoneFactor){
@@ -163,7 +177,7 @@ void LSJoystick::update() {
   pointIntType outputPoint = processInputReading({Tlv493dSensor.getY()*_magnetDirection, Tlv493dSensor.getX()*_magnetDirection});
   outputPoint = processOutputResponse(outputPoint);
   joystickInputBuffer.pushElement(outputPoint);
-
+  //Serial.println(Tlv493dSensor.getMeasurementDelay()); 
 }
 
 
