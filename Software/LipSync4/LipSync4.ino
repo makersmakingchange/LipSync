@@ -571,7 +571,7 @@ void setJoystickCenter(void) {
 void initJoystick() {
 
   js.begin();
-  js.setMagDirection(MAG_DIRECTION_INVERSE);
+  js.setMagnetDirection(JOY_MAG_DIRECTION_INVERSE);
   setJoystickCenter();
   getJoystickCalibration();
 }
@@ -582,11 +582,11 @@ void getJoystickCalibration() {
   for (int i=1; i < 5; i++) {
     commandKey="CA"+String(i);
     maxPoint=mem.readPoint(SETTINGS_FILE,commandKey);
-    /*
+    
     Serial.print(maxPoint.x);  
     Serial.print(",");  
     Serial.println(maxPoint.y); 
-    */
+    
     js.setInputMax(i,maxPoint);
   }
 }

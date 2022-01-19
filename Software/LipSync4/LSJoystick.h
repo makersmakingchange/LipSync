@@ -1,27 +1,32 @@
 #include <Tlv493d.h>  //Infinion TLV493 magnetic sensor
 
-#define CALIBRATION_ARRAY_SIZE 5
-#define RAW_ARRAY_SIZE 5
+#define JOY_CALIBR_ARRAY_SIZE 5
+#define JOY_RAW_ARRAY_SIZE 5
 
-#define RAW_X_COMP 0.0
-#define RAW_Y_COMP 0.0
+#define JOY_RAW_X_COMP 0.0
+#define JOY_RAW_Y_COMP 0.0
 
-#define RAW_X1_MAX 40.0
-#define RAW_Y1_MAX 40.0
+#define JOY_RAW_X1_MAX 40.0
+#define JOY_RAW_Y1_MAX 40.0
 
-#define RAW_X2_MAX -40.0
-#define RAW_Y2_MAX 40.0
+#define JOY_RAW_X2_MAX -40.0
+#define JOY_RAW_Y2_MAX 40.0
 
-#define RAW_X3_MAX -40.0
-#define RAW_Y3_MAX -40.0
+#define JOY_RAW_X3_MAX -40.0
+#define JOY_RAW_Y3_MAX -40.0
 
-#define RAW_X4_MAX 40.0
-#define RAW_Y4_MAX -40.0
+#define JOY_RAW_X4_MAX 40.0
+#define JOY_RAW_Y4_MAX -40.0
 
-#define MAG_DIRECTION_DEFAULT 1
-#define MAG_DIRECTION_INVERSE -1
+#define JOY_MAG_DIRECTION_DEFAULT 1
+#define JOY_MAG_DIRECTION_INVERSE -1
 
-#define INPUT_MAX 8
+#define JOY_INPUT_XY_MAX 12 //1024
+
+#define JOY_DEADZONE_FACTOR 0.05
+
+
+#define JOY_OUTPUT_SCALE 5 
 
 Tlv493d Tlv493dSensor = Tlv493d();
 
@@ -39,18 +44,24 @@ typedef struct {
 LSCircularBuffer <pointIntType> joystickInputBuffer(5);
 class LSJoystick {
   private:
-    pointFloatType magnetInputComp;
-    pointFloatType magnetInputCalibration[CALIBRATION_ARRAY_SIZE];
-    pointIntType limitCircle(pointFloatType point);
+    pointIntType processInputReading(pointFloatType point);
+    pointIntType processOutputResponse(pointIntType point);
     int mapFloatInt(float input, float inputStart, float inputEnd, int outputStart, int outputEnd);
     pointFloatType absPoint(pointFloatType point);
     int sgn(float val);
-    int _direction;
+    pointFloatType magnetInputComp;
+    pointFloatType magnetInputCalibration[JOY_CALIBR_ARRAY_SIZE];
+    int _magnetDirection;
+    bool _deadzoneEnabled;
+    float _deadzoneFactor;
+    int _scaleLevel;
   public:
     LSJoystick();
     void begin();
     void clear();                                                  //Clear the stack
-    void setMagDirection(int direction);
+    void setMagnetDirection(int magnetDirection);
+    void setDeadzone(bool deadzoneEnabled,float deadzoneFactor);
+    void setOutputScale(int scaleLevel);
     void setInputComp();
     pointFloatType getInputMax(int quad);
     void setInputMax(int quad, pointFloatType point);
@@ -62,17 +73,20 @@ class LSJoystick {
 };
 
 LSJoystick::LSJoystick() {
-  _direction = MAG_DIRECTION_DEFAULT;
+  //_magnetDirection = JOY_MAG_DIRECTION_DEFAULT;
 }
 
 void LSJoystick::begin() {
+  setMagnetDirection(JOY_MAG_DIRECTION_DEFAULT);
+  setDeadzone(true,JOY_DEADZONE_FACTOR);
+  setOutputScale(JOY_OUTPUT_SCALE);
   Tlv493dSensor.begin();
   clear();
 }
 
 void LSJoystick::clear() {
 
-  _direction = MAG_DIRECTION_DEFAULT;
+  _magnetDirection = JOY_MAG_DIRECTION_DEFAULT;
 
   magnetInputComp.x = 0.00;
   magnetInputComp.y = 0.00;
@@ -82,46 +96,61 @@ void LSJoystick::clear() {
   magnetInputCalibration[3] = {0.00, 0.00};
   magnetInputCalibration[4] = {0.00, 0.00};
 
-  for (int i = 0; i < RAW_ARRAY_SIZE; i++) {
+
+  joystickInputBuffer.pushElement({0, 0});
+
+  /*
+  for (int i = 0; i < JOY_RAW_ARRAY_SIZE; i++) {
     joystickInputBuffer.pushElement({0, 0});
 
+  }
+  */
+}
 
+void LSJoystick::setMagnetDirection(int magnetDirection) {
+  if (magnetDirection == JOY_MAG_DIRECTION_DEFAULT || magnetDirection == JOY_MAG_DIRECTION_INVERSE) {
+    _magnetDirection = magnetDirection;
+  } else {
+    _magnetDirection = JOY_MAG_DIRECTION_DEFAULT;
   }
 }
 
-void LSJoystick::setMagDirection(int direction) {
-  if (direction == MAG_DIRECTION_DEFAULT || direction == MAG_DIRECTION_INVERSE) {
-    _direction = direction;
-  } else {
-    _direction = MAG_DIRECTION_DEFAULT;
-  }
+void LSJoystick::setDeadzone(bool deadzoneEnabled,float deadzoneFactor){
+  _deadzoneEnabled = deadzoneEnabled;
+  _deadzoneFactor = deadzoneFactor;
+}
+
+void LSJoystick::setOutputScale(int scaleLevel){
+  _scaleLevel=scaleLevel;
 }
 
 void LSJoystick::setInputComp() {
   Tlv493dSensor.updateData();
-  magnetInputComp.x = Tlv493dSensor.getY()*_direction;
-  magnetInputComp.y = Tlv493dSensor.getX()*_direction;
+  magnetInputComp.x = Tlv493dSensor.getY()*_magnetDirection;
+  magnetInputComp.y = Tlv493dSensor.getX()*_magnetDirection;
   magnetInputCalibration[0] = {magnetInputComp.x, magnetInputComp.y};
-
+    Serial.print(magnetInputComp.x);  
+    Serial.print(",");  
+    Serial.println(magnetInputComp.y); 
 }
 
 
 
 pointFloatType LSJoystick::getInputMax(int quad) {
   
-  if((quad >= 0) && (quad < CALIBRATION_ARRAY_SIZE)){
+  if((quad >= 0) && (quad < JOY_CALIBR_ARRAY_SIZE)){
     Tlv493dSensor.updateData();
-    magnetInputCalibration[quad] = {Tlv493dSensor.getY()*_direction, Tlv493dSensor.getX()*_direction};
+    magnetInputCalibration[quad] = {Tlv493dSensor.getY()*_magnetDirection, Tlv493dSensor.getX()*_magnetDirection};
   }
   return magnetInputCalibration[quad];
 }
 
 void LSJoystick::setInputMax(int quad,pointFloatType point) {
   /*
-  magnetInputCalibration[1] = {RAW_X1_MAX, RAW_Y1_MAX};
-  magnetInputCalibration[2] = {RAW_X2_MAX, RAW_Y2_MAX};
-  magnetInputCalibration[3] = {RAW_X3_MAX, RAW_Y3_MAX};
-  magnetInputCalibration[4] = {RAW_X4_MAX, RAW_Y4_MAX};
+  magnetInputCalibration[1] = {JOY_RAW_X1_MAX, JOY_RAW_Y1_MAX};
+  magnetInputCalibration[2] = {JOY_RAW_X2_MAX, JOY_RAW_Y2_MAX};
+  magnetInputCalibration[3] = {JOY_RAW_X3_MAX, JOY_RAW_Y3_MAX};
+  magnetInputCalibration[4] = {JOY_RAW_X4_MAX, JOY_RAW_Y4_MAX};
   */
   magnetInputCalibration[quad] = point;
 }
@@ -131,10 +160,12 @@ void LSJoystick::setInputMax(int quad,pointFloatType point) {
 void LSJoystick::update() {
 
   Tlv493dSensor.updateData();
-  pointIntType outputPoint = limitCircle({Tlv493dSensor.getY()*_direction, Tlv493dSensor.getX()*_direction});
+  pointIntType outputPoint = processInputReading({Tlv493dSensor.getY()*_magnetDirection, Tlv493dSensor.getX()*_magnetDirection});
+  outputPoint = processOutputResponse(outputPoint);
   joystickInputBuffer.pushElement(outputPoint);
 
 }
+
 
 int LSJoystick::getXVal() {
   return joystickInputBuffer.getLastElement().x;
@@ -149,11 +180,19 @@ pointIntType LSJoystick::getAllVal() {
   return joystickInputBuffer.getLastElement();
 }
 
-pointIntType LSJoystick::limitCircle(pointFloatType point) {
+//Private
+
+pointIntType LSJoystick::processInputReading(pointFloatType point) {
   pointFloatType rawPoint = {point.x - magnetInputComp.x, point.y - magnetInputComp.y};
   pointFloatType maxPoint, limitPoint = {0.00, 0.00};
   pointIntType outputPoint;
   bool canSkip=false;
+/*
+      Serial.print(point.x);  
+    Serial.print(",");  
+    Serial.println(point.y); 
+*/
+
 
   float thetaVal = atan2(rawPoint.y, rawPoint.x);         // Get the angel of the point
 
@@ -184,24 +223,27 @@ pointIntType LSJoystick::limitCircle(pointFloatType point) {
     limitPoint.x = abs(maxPoint.x * maxPoint.y) / sqrt(sq(maxPoint.y) + sq(maxPoint.x) * sq(tan(thetaVal)));
     limitPoint.y = abs(maxPoint.x * maxPoint.y) / sqrt(sq(maxPoint.x) + sq(maxPoint.y) / sq(tan(thetaVal)));
   }
-    
+
   //Compare the magnitude of two points from center
   //Output point on perimeter of ellipse if it's outside
   if ((sq(rawPoint.y) + sq(rawPoint.x)) >= (sq(limitPoint.y) + sq(limitPoint.x))) {
-    outputPoint.x = sgn(rawPoint.x) * INPUT_MAX;
-    outputPoint.y = sgn(rawPoint.y) * INPUT_MAX;
+    outputPoint.x = sgn(rawPoint.x) * limitPoint.x;
+    outputPoint.y = sgn(rawPoint.y) * limitPoint.y;
 
   } else {
-    outputPoint.x = mapFloatInt(rawPoint.x, -maxPoint.x, maxPoint.x, -INPUT_MAX, INPUT_MAX);
-    outputPoint.y = mapFloatInt(rawPoint.y, -maxPoint.y, maxPoint.y, -INPUT_MAX, INPUT_MAX);
+    outputPoint.x = mapFloatInt(rawPoint.x, -maxPoint.x, maxPoint.x, -JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX);
+    outputPoint.y = mapFloatInt(rawPoint.y, -maxPoint.y, maxPoint.y, -JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX);
   }
 
   outputPoint.x = outputPoint.x;
   outputPoint.y = outputPoint.y;
-
+ 
   return outputPoint;
 }
 
+pointIntType LSJoystick::processOutputResponse(pointIntType point){
+  return point;
+}
 
 
 int LSJoystick::mapFloatInt(float input, float inputStart, float inputEnd, int outputStart, int outputEnd) {
