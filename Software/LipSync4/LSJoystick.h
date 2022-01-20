@@ -120,7 +120,7 @@ void LSJoystick::setMagnetDirection() {
   {
     _magnetDirection = JOY_MAG_DIRECTION_DEFAULT;
   }
-  if (zReading > JOY_MAG_DIRECTION_THRESHOLD){
+  else if (zReading > JOY_MAG_DIRECTION_THRESHOLD){
     _magnetDirection = JOY_MAG_DIRECTION_INVERSE;
   }
   else {

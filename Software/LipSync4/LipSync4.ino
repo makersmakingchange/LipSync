@@ -36,7 +36,7 @@ const inputActionStruct inputActionProperty[] {
     {OUTPUT_RIGHT_CLICK,        4, LED_ACTION_BLINK,  3,LED_CLR_BLUE,   0,1000},
     {OUTPUT_DRAG,               5 , LED_ACTION_BLINK,  1,LED_CLR_YELLOW, 1000,3000},
     {OUTPUT_SCROLL,             3, LED_ACTION_BLINK,  3,LED_CLR_GREEN,  1000,3000},
-    {OUTPUT_CURSOR_CALIBRATION,  2, LED_ACTION_BLINK,  2,LED_CLR_PURPLE,  0,1000}
+    {OUTPUT_NOTHING,            2, LED_ACTION_BLINK,  2,LED_CLR_PURPLE,  0,1000}
 };
 
 
@@ -120,9 +120,9 @@ int joystickCounter =0;
 unsigned long previousJoyMillis = 0;        
 unsigned long previousPressureMillis = 0;
 unsigned long previousInputMillis = 0;
-long joyMillis = 20; 
-long pressureMillis = 20; 
-long inputMillis = 50; 
+unsigned long joyMillis = 20; 
+unsigned long pressureMillis = 20; 
+unsigned long inputMillis = 50; 
 
 void setup() {
 
@@ -188,7 +188,7 @@ void loop() {
 
 void initMemory(){
   mem.begin();
-  //mem.format();
+  mem.format();
   mem.initialize(SETTINGS_FILE,SETTINGS_JSON);  
 }
 
@@ -226,11 +226,12 @@ void inputLoop() {
       inputButtonActionState.elapsedTime >= inputActionProperty[i].inputActionStartTime &&
       inputButtonActionState.elapsedTime < inputActionProperty[i].inputActionEndTime){
       
-      performAction(i,
+      performAction(inputActionProperty[i].inputActionNumber,
       inputActionProperty[i].inputActionLedState,
       inputActionProperty[i].inputActionLedNumber,
       inputActionProperty[i].inputActionColorNumber);
-      
+        Serial.println(inputActionProperty[i].inputActionNumber);
+
       break;
     }
   }
@@ -482,6 +483,8 @@ void performAction(int action, int ledState, int ledNumber, int ledColor) {
   
     switch (action) {
       case OUTPUT_NOTHING: {
+        led.setLedColorById(ledNumber,ledColor,LED_BRIGHTNESS);
+        setLedState(ledState,ledNumber);
         //do nothing
         break;
       }

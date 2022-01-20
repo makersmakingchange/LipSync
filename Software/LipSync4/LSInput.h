@@ -13,7 +13,7 @@
 #define INPUT_SEC_STATE_STARTED 1
 #define INPUT_SEC_STATE_RELEASED 2
 
-#define INPUT_REACTION_TIME 150
+#define INPUT_REACTION_TIME 20
 
 StopWatch inputTimer[1];
 StopWatch testTimer[1];
@@ -87,24 +87,22 @@ void LSInput::clear() {
 void LSInput::update() {
   //resetTimer();
 
-  //inputAllState = 0;
-  //inputStruct inputCurrState = {0, 0, 0};
-  //inputStruct inputPrevState = {0, 0, 0};
+  inputAllState = 0;
+
 
   inputState[0] = !digitalRead(_inputPinArray[0]);
   inputState[1] = !digitalRead(_inputPinArray[1]);
-  inputState[2] = !digitalRead(_inputPinArray[1]);
-  /*
+  inputState[2] = !digitalRead(_inputPinArray[2]);
+  
   for (int i = 0; i < _inputNumber; i++){
     inputState[i] = !digitalRead(_inputPinArray[i]);
-    //inputAllState+= pow(2,i) * inputState[i];
+    inputAllState+= pow(2,i) * inputState[i];
   }  
-  */
+  
   inputPrevState = inputBuffer.getLastElement();
   
 
-  inputAllState = inputState[0] + 2 * inputState[1] + 4 * inputState[2] ;
-  
+  //inputAllState = inputState[0] + 2 * inputState[1] + 4 * inputState[2];
  
   // prev: none,waiting  current : none 
   // prev: press x,started  current : press x 

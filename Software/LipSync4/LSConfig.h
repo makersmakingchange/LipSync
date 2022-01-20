@@ -10,9 +10,9 @@
 #define OUTPUT_CURSOR_CALIBRATION 5                   // Initiates the joystick calibration.
 #define OUTPUT_MIDDLE_CLICK 6                         // Generates a short middle click
 
-#define INPUT_BUTTON1_PIN 9 // pushbutton S1
-#define INPUT_BUTTON2_PIN 6 // pushbutton S2
-#define INPUT_BUTTON3_PIN 5 // pushbutton S3
+#define INPUT_BUTTON1_PIN A1 // pushbutton S1
+#define INPUT_BUTTON2_PIN 11 // pushbutton S2
+#define INPUT_BUTTON3_PIN 10 // pushbutton S3
 #define INPUT_SWITCH1_PIN A1 // 3.5mm jack SW1
 #define INPUT_SWITCH2_PIN 11 // 3.5mm jack SW2
 #define INPUT_SWITCH3_PIN 10 // 3.5mm jack SW3
