@@ -100,8 +100,8 @@ int yVal;
 
 LSMemory mem;
 
-//LSInput ib(inputButtonPinArray,INPUT_BUTTON_NUMBER); 
-LSInput is(inputSwitchPinArray,INPUT_SWITCH_NUMBER);   //Starts an instance of the object
+LSInput ib(inputButtonPinArray,INPUT_BUTTON_NUMBER); 
+//LSInput is(inputSwitchPinArray,INPUT_SWITCH_NUMBER);   //Starts an instance of the object
 
 LSJoystick js;                  //Starts an instance of the LSJoystick object
 
@@ -158,7 +158,7 @@ void loop() {
   pressureLoop();
   //printInputData();
   //printJoystickData();
-  delay(20);
+  //delay(40);
   //led.setLedBlinkById(4,1,300,LED_CLR_GREEN,20);
 }
 
@@ -168,7 +168,7 @@ void loop() {
 
 void initMemory(){
   mem.begin();
-  //mem.format();
+  mem.format();
   mem.initialize(SETTINGS_FILE,SETTINGS_JSON);  
 }
 
@@ -179,8 +179,8 @@ void initMemory(){
 
 void initInput(){
   
-  //ib.begin();
-  is.begin();
+  ib.begin();
+  //is.begin();
   inputActionSize=sizeof(inputActionProperty)/sizeof(inputActionStruct);
 
 }
@@ -189,17 +189,17 @@ void initInput(){
 //The loop handling inputs 
 void inputLoop() {
 
-  //ib.update();
-  is.update();              //Request new values 
+  ib.update();
+  //is.update();              //Request new values 
 
   
   //Get the last state change 
-  //inputButtonActionState = ib.getInputState();
-  inputSwitchActionState = is.getInputState();
+  inputButtonActionState = ib.getInputState();
+  //inputSwitchActionState = is.getInputState();
   
   //printInputData();
   //Output action logic
-  /*
+  
   for (int i=0; i < inputActionSize; i++) {
     if(inputButtonActionState.mainState==inputActionProperty[i].inputActionState && 
       inputButtonActionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
@@ -214,7 +214,7 @@ void inputLoop() {
       break;
     }
   }
-  */
+  /*
   for (int i=0; i < inputActionSize; i++) {
     if(inputSwitchActionState.mainState==inputActionProperty[i].inputActionState && 
       inputSwitchActionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
@@ -229,7 +229,7 @@ void inputLoop() {
       break;
     }
   }
-  
+  */
 }
 
 void printInputData() {
@@ -420,7 +420,7 @@ void pressureLoop() {
     sapActionIndex++;
   }
 
-  //delay(50);
+  delay(20);
   //Serial.println(getTime());  
 
 }
@@ -601,7 +601,7 @@ void setJoystickCalibration() {
   for (int i=1; i < 5; i++) {
     commandKey="CA"+String(i);
     led.setLedBlinkById(2,6,500,LED_CLR_ORANGE,LED_BRIGHTNESS);
-    led.setLedColorById(2, LED_CLR_ORANGE, LED_BRIGHTNESS); 
+    led.setLedColorById(2, LED_CLR_ORANGE, LED_BRIGHTNESS_HIGH); 
     maxPoint=js.getInputMax(i);
     mem.writePoint(SETTINGS_FILE,commandKey,maxPoint);
     Serial.print(maxPoint.x);  

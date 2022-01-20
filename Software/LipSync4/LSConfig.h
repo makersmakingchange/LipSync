@@ -46,5 +46,6 @@
 #define HARD_PUFF_THRESHOLD 10.0
 
 #define LED_BRIGHTNESS 50 
+#define LED_BRIGHTNESS_HIGH 150 
 
 #define COM_METHOD 1        //0 = None , 1 = USB , 2 = Wireless  
