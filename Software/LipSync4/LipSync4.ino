@@ -1,4 +1,3 @@
-
 #include <Wire.h>  
 #include <StopWatch.h>
 #include <ArduinoJson.h>
@@ -101,7 +100,7 @@ int yVal;
 LSMemory mem;
 
 LSInput ib(inputButtonPinArray,INPUT_BUTTON_NUMBER); 
-//LSInput is(inputSwitchPinArray,INPUT_SWITCH_NUMBER);   //Starts an instance of the object
+LSInput is(inputSwitchPinArray,INPUT_SWITCH_NUMBER);   //Starts an instance of the object
 
 LSJoystick js;                  //Starts an instance of the LSJoystick object
 
@@ -188,7 +187,7 @@ void loop() {
 
 void initMemory(){
   mem.begin();
-  mem.format();
+  //mem.format();
   mem.initialize(SETTINGS_FILE,SETTINGS_JSON);  
 }
 
@@ -200,7 +199,7 @@ void initMemory(){
 void initInput(){
   
   ib.begin();
-  //is.begin();
+  is.begin();
   inputActionSize=sizeof(inputActionProperty)/sizeof(inputActionStruct);
 
 }
@@ -210,12 +209,12 @@ void initInput(){
 void inputLoop() {
 
   ib.update();
-  //is.update();              //Request new values 
+  is.update();              //Request new values 
 
   
   //Get the last state change 
   inputButtonActionState = ib.getInputState();
-  //inputSwitchActionState = is.getInputState();
+  inputSwitchActionState = is.getInputState();
   
   //printInputData();
   //Output action logic
@@ -230,19 +229,18 @@ void inputLoop() {
       inputActionProperty[i].inputActionLedState,
       inputActionProperty[i].inputActionLedNumber,
       inputActionProperty[i].inputActionColorNumber);
-        Serial.println(inputActionProperty[i].inputActionNumber);
-
+       
       break;
     }
   }
-  /*
+  
   for (int i=0; i < inputActionSize; i++) {
     if(inputSwitchActionState.mainState==inputActionProperty[i].inputActionState && 
       inputSwitchActionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
       inputSwitchActionState.elapsedTime >= inputActionProperty[i].inputActionStartTime &&
       inputSwitchActionState.elapsedTime < inputActionProperty[i].inputActionEndTime){
       
-      performAction(i,
+      performAction(inputActionProperty[i].inputActionNumber,
       inputActionProperty[i].inputActionLedState,
       inputActionProperty[i].inputActionLedNumber,
       inputActionProperty[i].inputActionColorNumber);
@@ -250,7 +248,7 @@ void inputLoop() {
       break;
     }
   }
-  */
+  
 }
 
 void printInputData() {
