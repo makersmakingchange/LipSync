@@ -117,6 +117,12 @@ StopWatch sapStateTimer[1];
 StopWatch myTimer[1];
 
 int joystickCounter =0;
+unsigned long previousJoyMillis = 0;        
+unsigned long previousPressureMillis = 0;
+unsigned long previousInputMillis = 0;
+long joyMillis = 20; 
+long pressureMillis = 20; 
+long inputMillis = 50; 
 
 void setup() {
 
@@ -148,18 +154,32 @@ void setup() {
   
   //Scheduler.startLoop(pressureLoop);
 
-  Scheduler.startLoop(joystickLoop);
+  //Scheduler.startLoop(joystickLoop);
   
 } //end setup
 
 
 void loop() {
-  inputLoop();
-  pressureLoop();
+  unsigned long currentMillis = millis();
+  if(currentMillis - previousJoyMillis >= joyMillis)
+  {
+    previousJoyMillis = currentMillis;  // Remember the time
+    joystickLoop();
+  }
+  if(currentMillis - previousPressureMillis >= pressureMillis)
+  {
+    previousPressureMillis = currentMillis;  // Remember the time
+    pressureLoop();
+  }
+  if(currentMillis - previousInputMillis >= inputMillis)
+  {
+    previousInputMillis = currentMillis;  // Remember the time
+    inputLoop();
+  }  
+  //inputLoop();
+  //pressureLoop();
   //printInputData();
   //printJoystickData();
-  //delay(40);
-  //led.setLedBlinkById(4,1,300,LED_CLR_GREEN,20);
 }
 
 //*********************************//
@@ -168,7 +188,7 @@ void loop() {
 
 void initMemory(){
   mem.begin();
-  mem.format();
+  //mem.format();
   mem.initialize(SETTINGS_FILE,SETTINGS_JSON);  
 }
 
@@ -420,7 +440,7 @@ void pressureLoop() {
     sapActionIndex++;
   }
 
-  delay(20);
+  //delay(20);
   //Serial.println(getTime());  
 
 }
@@ -644,7 +664,7 @@ void joystickLoop() {
     performJystick();
 
 
-    delay(20);  
+    //delay(20);  
 }
 
 void performJystick(){
