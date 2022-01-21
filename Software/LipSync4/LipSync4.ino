@@ -582,8 +582,9 @@ void cursorScroll(void) {
 }
 
 void setJoystickCenter(void) {
-  //Serial.println("Center Joystick");  
   js.setInputComp();
+  pointFloatType centerPoint = js.getInputComp();
+  printJoystickFloatData(centerPoint);
 }
 
 
@@ -604,11 +605,12 @@ void getJoystickCalibration() {
   for (int i=1; i < 5; i++) {
     commandKey="CA"+String(i);
     maxPoint=mem.readPoint(SETTINGS_FILE,commandKey);
-    
+    printJoystickFloatData(maxPoint);
+    /*
     Serial.print(maxPoint.x);  
     Serial.print(",");  
     Serial.println(maxPoint.y); 
-    
+    */
     js.setInputMax(i,maxPoint);
   }
 }
@@ -625,18 +627,16 @@ void setJoystickCalibration() {
     led.setLedColorById(2, LED_CLR_ORANGE, LED_BRIGHTNESS_HIGH); 
     maxPoint=js.getInputMax(i);
     mem.writePoint(SETTINGS_FILE,commandKey,maxPoint);
+    printJoystickFloatData(maxPoint);
+    /*
     Serial.print(maxPoint.x);  
     Serial.print(",");  
     Serial.println(maxPoint.y); 
+    */
     led.clearLed(2);    
     delay(1000);
   }
-  /*
-  js.setInputMax(1);
-  js.setInputMax(2);
-  js.setInputMax(3);
-  js.setInputMax(4);
-  */
+ 
 }
 
 void updateJoystick() {
@@ -646,10 +646,10 @@ void updateJoystick() {
 
 void readJoystick() {
 
-  pointIntType joystickValues = js.getAllVal();
-  xVal = joystickValues.x;
-  yVal = joystickValues.y;
- 
+  pointIntType joyOutPoint = js.getXYVal();
+  xVal = joyOutPoint.x;
+  yVal = joyOutPoint.y;
+  //printJoystickIntData(joyOutPoint);
 }
 
 //The loop handling joystick 
@@ -659,13 +659,9 @@ void joystickLoop() {
     updateJoystick();               //Request new values
   
     readJoystick();                 //Read the filtered values 
-  
-    //printJoystickData();
     
-    performJystick();
+    //performJystick();
 
-
-    //delay(20);  
 }
 
 void performJystick(){
@@ -680,10 +676,18 @@ void performJystick(){
 
 }
 
-void printJoystickData() {
+void printJoystickFloatData(pointFloatType point) {
 
-  Serial.print(" xRaw: "); Serial.print(xVal);Serial.print(", ");
-  Serial.print(" yRaw: "); Serial.print(yVal);Serial.print(", ");
+  Serial.print(" x: "); Serial.print(point.x);Serial.print(", ");
+  Serial.print(" y: "); Serial.print(point.y);Serial.print(", ");
+  
+  Serial.println();
+}
+
+void printJoystickIntData(pointIntType point) {
+
+  Serial.print(" x: "); Serial.print(point.x);Serial.print(", ");
+  Serial.print(" y: "); Serial.print(point.y);Serial.print(", ");
   
   Serial.println();
  
