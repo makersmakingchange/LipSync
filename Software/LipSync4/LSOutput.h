@@ -12,6 +12,11 @@
 #define LED_CLR_ORANGE 6
 #define LED_CLR_PURPLE 7
 #define LED_CLR_TEAL 8
+#define LED_CLR_MAGENTA 9
+
+#define LED_ACTION_OFF 0
+#define LED_ACTION_ON 1
+#define LED_ACTION_BLINK 2
 
 Adafruit_NeoPixel ledPixels = Adafruit_NeoPixel(OUTPUT_RGB_LED_NUM, OUTPUT_RGB_LED_PIN, NEO_GRB + NEO_KHZ800);
 
@@ -38,7 +43,8 @@ const colorStruct colorProperty[] {
     {LED_CLR_PINK,"Pink",{60,0,50}},   
     {LED_CLR_ORANGE,"Orange",{60,20,0}},
     {LED_CLR_PURPLE,"Purple",{50,0,128}},
-    {LED_CLR_TEAL,"Teal",{0,128,128}}       
+    {LED_CLR_TEAL,"Teal",{0,128,128}},
+    {LED_CLR_MAGENTA,"Magenta",{255,0,255}}       
 };
 
 class LSOutput {

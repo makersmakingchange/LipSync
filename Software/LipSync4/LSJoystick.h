@@ -26,7 +26,11 @@
 
 #define JOY_INPUT_XY_MAX 1024 //1024
 
-#define JOY_DEADZONE_FACTOR 0.05
+#define JOY_OUTPUT_XY_MAX 12 
+
+#define JOY_DEADZONE_STATUS true
+
+#define JOY_DEADZONE_FACTOR 0.12
 
 
 #define JOY_OUTPUT_SCALE 5 
@@ -47,17 +51,21 @@ typedef struct {
 LSCircularBuffer <pointIntType> joystickInputBuffer(5);
 class LSJoystick {
   private:
-    pointIntType processInputReading(pointFloatType point);
-    pointIntType processOutputResponse(pointIntType point);
+    int applyDeadzone(int input);
+    pointIntType linearizeOutput(pointIntType inputPoint);
+    pointIntType processInputReading(pointFloatType inputPoint);
+    pointIntType processOutputResponse(pointIntType inputPoint);
     int mapFloatInt(float input, float inputStart, float inputEnd, int outputStart, int outputEnd);
-    pointFloatType absPoint(pointFloatType point);
+    pointFloatType absPoint(pointFloatType inputPoint);
     int sgn(float val);
-    pointFloatType magnetInputComp;
+    //pointFloatType magnetInputComp;
     pointFloatType magnetInputCalibration[JOY_CALIBR_ARRAY_SIZE];
     int _magnetDirection;
     bool _deadzoneEnabled;
     float _deadzoneFactor;
+    int _deadzoneValue;
     int _scaleLevel;
+    float _inputRadius;
   public:
     LSJoystick();
     void begin();
@@ -66,8 +74,9 @@ class LSJoystick {
     void setMagnetDirection();
     void setDeadzone(bool deadzoneEnabled,float deadzoneFactor);
     void setOutputScale(int scaleLevel);
-    pointFloatType getInputComp();
-    void setInputComp();
+    void setMinimumRadius();
+    pointFloatType readInputComp();
+    void getInputComp();
     pointFloatType getInputMax(int quad);
     void setInputMax(int quad, pointFloatType point);
     void update();
@@ -81,18 +90,20 @@ LSJoystick::LSJoystick() {
 }
 
 void LSJoystick::begin() {
-  setDeadzone(true,JOY_DEADZONE_FACTOR);
-  setOutputScale(JOY_OUTPUT_SCALE);
+
+  _inputRadius = 0.0;
   Tlv493dSensor.begin();
   setMagnetDirection();
+  setDeadzone(JOY_DEADZONE_STATUS,JOY_DEADZONE_FACTOR);
+  setOutputScale(JOY_OUTPUT_SCALE);
   clear();
 }
 
 void LSJoystick::clear() {
 
-  magnetInputComp.x = 0.00;
-  magnetInputComp.y = 0.00;
-  magnetInputCalibration[0] = {magnetInputComp.x, magnetInputComp.y};
+  //magnetInputComp.x = 0.00;
+  //magnetInputComp.y = 0.00;
+  magnetInputCalibration[0] = {0.00, 0.00};
   magnetInputCalibration[1] = {0.00, 0.00};
   magnetInputCalibration[2] = {0.00, 0.00};
   magnetInputCalibration[3] = {0.00, 0.00};
@@ -138,25 +149,35 @@ void LSJoystick::setMagnetDirection() {
 
 void LSJoystick::setDeadzone(bool deadzoneEnabled,float deadzoneFactor){
   _deadzoneEnabled = deadzoneEnabled;
+  
   _deadzoneFactor = deadzoneFactor;
+  (_deadzoneEnabled) ? _deadzoneValue = round(JOY_INPUT_XY_MAX*_deadzoneFactor):_deadzoneValue=0;   
 }
 
 void LSJoystick::setOutputScale(int scaleLevel){
   _scaleLevel=scaleLevel;
 }
 
-pointFloatType LSJoystick::getInputComp() {
-  return magnetInputComp;
+void LSJoystick::setMinimumRadius(){
+  float tempRadius = 0.0;
+  for (int i = 1; i < JOY_CALIBR_ARRAY_SIZE; i++) {
+    tempRadius = (sqrt(sq(magnetInputCalibration[i].x) + sq(magnetInputCalibration[i].y))/sqrt(2.0));
+    if(_inputRadius==0.0 || tempRadius<_inputRadius) { _inputRadius = tempRadius; }
+  }
 }
 
-void LSJoystick::setInputComp() {
+
+
+pointFloatType LSJoystick::readInputComp() {
+  return magnetInputCalibration[0];
+}
+
+void LSJoystick::getInputComp() {
   Tlv493dSensor.updateData();
-  magnetInputComp.x = Tlv493dSensor.getY()*_magnetDirection;
-  magnetInputComp.y = Tlv493dSensor.getX()*_magnetDirection;
-  magnetInputCalibration[0] = {magnetInputComp.x, magnetInputComp.y};
-    Serial.print(magnetInputComp.x);  
-    Serial.print(",");  
-    Serial.println(magnetInputComp.y);
+  //magnetInputComp.x = Tlv493dSensor.getY()*_magnetDirection;
+  //magnetInputComp.y = Tlv493dSensor.getX()*_magnetDirection;
+  magnetInputCalibration[0] = {Tlv493dSensor.getY()*_magnetDirection, Tlv493dSensor.getX()*_magnetDirection};
+  setMinimumRadius();
 }
 
 
@@ -166,18 +187,16 @@ pointFloatType LSJoystick::getInputMax(int quad) {
   if((quad >= 0) && (quad < JOY_CALIBR_ARRAY_SIZE)){
     Tlv493dSensor.updateData();
     magnetInputCalibration[quad] = {Tlv493dSensor.getY()*_magnetDirection, Tlv493dSensor.getX()*_magnetDirection};
+    setMinimumRadius();
   }
+  
   return magnetInputCalibration[quad];
 }
 
-void LSJoystick::setInputMax(int quad,pointFloatType point) {
-  /*
-  magnetInputCalibration[1] = {JOY_RAW_X1_MAX, JOY_RAW_Y1_MAX};
-  magnetInputCalibration[2] = {JOY_RAW_X2_MAX, JOY_RAW_Y2_MAX};
-  magnetInputCalibration[3] = {JOY_RAW_X3_MAX, JOY_RAW_Y3_MAX};
-  magnetInputCalibration[4] = {JOY_RAW_X4_MAX, JOY_RAW_Y4_MAX};
-  */
-  magnetInputCalibration[quad] = point;
+void LSJoystick::setInputMax(int quad,pointFloatType inputPoint) {
+
+  magnetInputCalibration[quad] = inputPoint;
+  setMinimumRadius();
 }
 
 
@@ -191,9 +210,9 @@ void LSJoystick::update() {
   outputPoint = processOutputResponse(outputPoint);
   joystickInputBuffer.pushElement(outputPoint);
   
-  Serial.print(inputPoint.x);  
-  Serial.print(",");  
-  Serial.println(inputPoint.y); 
+//  Serial.print(outputPoint.x);  
+//  Serial.print(",");  
+//  Serial.println(outputPoint.y); 
   
 }
 
@@ -215,82 +234,84 @@ pointIntType LSJoystick::getXYVal() {
 
 //Private
 
-pointIntType LSJoystick::processInputReading(pointFloatType point) {
-  pointFloatType rawPoint = {point.x - magnetInputComp.x, point.y - magnetInputComp.y};
-  pointFloatType maxPoint, limitPoint = {0.00, 0.00};
-  pointIntType outputPoint;
-  bool canSkip=false;
-/*
-      Serial.print(point.x);  
-    Serial.print(",");  
-    Serial.println(point.y); 
-*/
+int LSJoystick::applyDeadzone(int input){
 
+  int output = 0;
+  //Deadzone
+  if(_deadzoneEnabled) { 
+    if(abs(input)<_deadzoneValue){
+      output=0;
+    }
+    else if(abs(input)>JOY_INPUT_XY_MAX-_deadzoneValue){
+      output=sgn(input) * JOY_INPUT_XY_MAX;
+    } else{
+      output=input;
+    }
+  }
+  return output;
+}
 
-  float thetaVal = atan2(rawPoint.y, rawPoint.x);         // Get the angel of the point
+pointIntType LSJoystick::linearizeOutput(pointIntType inputPoint){
+  pointIntType outputPoint = {0,0};
+  outputPoint.x = map(inputPoint.x,-1*JOY_INPUT_XY_MAX,JOY_INPUT_XY_MAX,-1*JOY_OUTPUT_XY_MAX,JOY_OUTPUT_XY_MAX);
+  outputPoint.y = map(inputPoint.y,-1*JOY_INPUT_XY_MAX,JOY_INPUT_XY_MAX,-1*JOY_OUTPUT_XY_MAX,JOY_OUTPUT_XY_MAX);
+  return outputPoint;  
+}
 
-  if ( rawPoint.x > 0 && rawPoint.y >= 0) {               // Find the max point at the corner depending on the quadrant
-    maxPoint = absPoint(magnetInputCalibration[1]);
-    //Serial.println("1"); 
-  }
-  else if ( rawPoint.x <= 0 && rawPoint.y > 0) {
-    maxPoint = absPoint(magnetInputCalibration[2]);
-    //Serial.println("2"); 
-  }
-  else if ( rawPoint.x < 0 && rawPoint.y <= 0) {
-    maxPoint = absPoint(magnetInputCalibration[3]);
-    //Serial.println("3"); 
-  }
-  else if ( rawPoint.x >= 0 && rawPoint.y < 0) {
-    maxPoint = absPoint(magnetInputCalibration[4]);
-    //Serial.println("4"); 
-  }
-  else {
-    maxPoint = {0.00, 0.00};
-    //Serial.println("0"); 
-    canSkip=true;
-  }
+pointIntType LSJoystick::processInputReading(pointFloatType inputPoint) {
+  pointFloatType centeredPoint = {inputPoint.x - magnetInputCalibration[0].x, inputPoint.y - magnetInputCalibration[0].y};
+  pointFloatType limitPoint = {0.00, 0.00};
+  pointIntType outputPoint = {0,0};
+  
+  float thetaVal = atan2(centeredPoint.y, centeredPoint.x);         // Get the angel of the point
 
-  //Find the limiting point on perimeter of ellipse
-  if(!canSkip){
-    limitPoint.x = abs(maxPoint.x * maxPoint.y) / sqrt(sq(maxPoint.y) + sq(maxPoint.x) * sq(tan(thetaVal)));
-    limitPoint.y = abs(maxPoint.x * maxPoint.y) / sqrt(sq(maxPoint.x) + sq(maxPoint.y) / sq(tan(thetaVal)));
-  }
+  //Find the limiting point on perimeter of circle
+  limitPoint.x = sgn(centeredPoint.x) * abs(cos(thetaVal)*_inputRadius);
+  limitPoint.y = sgn(centeredPoint.y) * abs(sin(thetaVal)*_inputRadius);
 
   //Compare the magnitude of two points from center
-  //Output point on perimeter of ellipse if it's outside
-  if ((sq(rawPoint.y) + sq(rawPoint.x)) >= (sq(limitPoint.y) + sq(limitPoint.x))) {
-    outputPoint.x = sgn(rawPoint.x) * limitPoint.x;
-    outputPoint.y = sgn(rawPoint.y) * limitPoint.y;
-
-  } else {
-    outputPoint.x = mapFloatInt(rawPoint.x, -maxPoint.x, maxPoint.x, -JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX);
-    outputPoint.y = mapFloatInt(rawPoint.y, -maxPoint.y, maxPoint.y, -JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX);
+  //Output point on perimeter of circle if it's outside
+  if ((sq(centeredPoint.y) + sq(centeredPoint.x)) >= sq(_inputRadius)) {
+    centeredPoint.x = limitPoint.x; 
+    centeredPoint.y = limitPoint.y; 
+//    Serial.print(centeredPoint.x);  
+//    Serial.print(",");  
+//    Serial.println(centeredPoint.y); 
   }
-
-  outputPoint.x = outputPoint.x;
-  outputPoint.y = outputPoint.y;
+  
+    outputPoint.x = mapFloatInt(centeredPoint.x, -1*_inputRadius, _inputRadius, -1*JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX);
+    outputPoint.y = mapFloatInt(centeredPoint.y, -1*_inputRadius, _inputRadius, -1*JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX);
+ 
+//    Serial.print(outputPoint.x);  
+//    Serial.print(",");  
+//    Serial.println(outputPoint.y); 
  
   return outputPoint;
 }
 
-pointIntType LSJoystick::processOutputResponse(pointIntType point){
-  return point;
-}
 
+
+pointIntType LSJoystick::processOutputResponse(pointIntType inputPoint){
+  pointIntType outputPoint,deadzonedPoint = {0,0};
+  //Deadzone
+  deadzonedPoint = {applyDeadzone(inputPoint.x),applyDeadzone(inputPoint.y)};
+  //Linearize
+  outputPoint = linearizeOutput(deadzonedPoint);
+  return outputPoint;
+}
 
 int LSJoystick::mapFloatInt(float input, float inputStart, float inputEnd, int outputStart, int outputEnd) {
 
   float inputRange = inputEnd - inputStart;
   int outputRange = outputEnd - outputStart;
 
-  int output = (input - inputStart) * outputRange / inputRange + outputStart;
-
+  int output = (int)((input - inputStart) * outputRange / inputRange + outputStart);
+  
   return output;
 }
 
-pointFloatType LSJoystick::absPoint(pointFloatType point){
-  return {abs(point.x), abs(point.y)};
+pointFloatType LSJoystick::absPoint(pointFloatType inputPoint){
+  return {abs(inputPoint.x), abs(inputPoint.y)};
 }
 
 
