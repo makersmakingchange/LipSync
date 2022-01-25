@@ -15,7 +15,6 @@ Adafruit_LPS35HW lps35hw = Adafruit_LPS35HW();
 Adafruit_BMP280 bmp; // use I2C interface
 
 Adafruit_Sensor *bmp_pressure = bmp.getPressureSensor();
-StopWatch pressureTimer[1];
 
 typedef struct {
   float mainPressure;
@@ -27,8 +26,6 @@ LSCircularBuffer <pressureStruct> pressureBuffer(PRESS_BUFF_SIZE);
 
 class LSPressure {
   private: 
-    void resetTimer();
-    unsigned long getTime();
     int filterMode;
     int pressureType;
     float mainVal;
@@ -191,22 +188,4 @@ float LSPressure::getDiffPressure() {
 
 pressureStruct LSPressure::getAllPressure() {
   return pressureBuffer.getLastElement();
-}
-
-
-//***RESET TIMER FUNCTION***//
-
-void LSPressure::resetTimer() {
-  pressureTimer[0].stop();                                //Reset and start the timer         
-  pressureTimer[0].reset();                                                                        
-  pressureTimer[0].start(); 
-}
-
-//***GET TIME FUNCTION***//
-
-unsigned long LSPressure::getTime() {
-  unsigned long finalTime = pressureTimer[0].elapsed(); 
-  pressureTimer[0].stop();                                //Reset and start the timer         
-  pressureTimer[0].reset(); 
-  return finalTime;
 }

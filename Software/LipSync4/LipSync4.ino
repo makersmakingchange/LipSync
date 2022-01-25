@@ -1,5 +1,6 @@
 #include <Wire.h>  
 #include <StopWatch.h>
+#include "LSTimer.h"
 #include <ArduinoJson.h>
 #include "LSConfig.h"
 #include "LSUSB.h"
@@ -107,14 +108,11 @@ int yVal;
 StopWatch sapStateTimer[1];
 StopWatch myTimer[1];
 
-int joystickCounter =0;
-unsigned long previousJoyMillis = 0;        
-unsigned long previousPressureMillis = 0;
-unsigned long previousInputMillis = 0;
+int pollTimerId[3];
+int stateTimerId[1];
 
-unsigned long joyMillis = CONF_JOYSTICK_POLL_RATE; 
-unsigned long pressureMillis = CONF_PRESSURE_POLL_RATE; 
-unsigned long inputMillis = CONF_INPUT_POLL_RATE; 
+LSTimer mainPollTimer;
+LSTimer mainStateTimer;
 
 //Create instances of classes
 
@@ -159,33 +157,18 @@ void setup() {
   
   initLedFeedback();
 
-  //Scheduler.startLoop(inputLoop);
-  
-  //Scheduler.startLoop(pressureLoop);
+  pollTimerId[0] = mainPollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, joystickLoop);
+  pollTimerId[1] = mainPollTimer.setInterval(CONF_PRESSURE_POLL_RATE, pressureLoop);
+  pollTimerId[2] = mainPollTimer.setInterval(CONF_INPUT_POLL_RATE, inputLoop);
 
-  //Scheduler.startLoop(joystickLoop);
   
 } //end setup
 
 
 void loop() {
-  unsigned long currentMillis = millis();
-  if(currentMillis - previousJoyMillis >= joyMillis)
-  {
-    previousJoyMillis = currentMillis;  // Remember the time
-    joystickLoop();
-  }
-  if(currentMillis - previousPressureMillis >= pressureMillis)
-  {
-    previousPressureMillis = currentMillis;  // Remember the time
-    pressureLoop();
-  }
-  if(currentMillis - previousInputMillis >= inputMillis)
-  {
-    previousInputMillis = currentMillis;  // Remember the time
-    inputLoop();
-  }  
 
+  mainPollTimer.run();
+  mainStateTimer.run();
 }
 
 //*********************************//
@@ -294,9 +277,10 @@ void initSipAndPuffArray(){
   sapBuffer.pushElement(sapCurrState);
 
   //Reset and start the timer   
-  sapStateTimer[0].stop();                                      
-  sapStateTimer[0].reset();                                                                        
-  sapStateTimer[0].start(); 
+  stateTimerId[0] =  mainStateTimer.startTimer();
+//  sapStateTimer[0].stop();                                      
+//  sapStateTimer[0].reset();                                                                        
+//  sapStateTimer[0].start(); 
 }
 
 void updatePressure() {
@@ -316,7 +300,7 @@ void readPressure() {
 
 //The loop handling pressure polling, sip and puff state evaluation 
 void pressureLoop() {
-  //resetTimer();
+
   updatePressure();               //Request new pressure difference from sensor and push it to array
 
   readPressure();                 //Read the pressure object (can be last value from array, average or other algorithms)
@@ -337,7 +321,8 @@ void pressureLoop() {
   //None:None, Sip:Sip, Puff:Puff
   //Update time
   if(sapPrevState.mainState == sapState){
-    sapCurrState = {sapState, sapPrevState.secondaryState, sapStateTimer[0].elapsed()};
+    //sapCurrState = {sapState, sapPrevState.secondaryState, sapStateTimer[0].elapsed()};
+    sapCurrState = {sapState, sapPrevState.secondaryState, mainStateTimer.elapsedTime(stateTimerId[0])};
     //Serial.println("a");
     sapBuffer.updateLastElement(sapCurrState);
   } else {  //None:Sip , None:Puff , Sip:None, Puff:None
@@ -372,17 +357,21 @@ void pressureLoop() {
       //Push the new state   
       sapBuffer.pushElement(sapCurrState);
       //Reset and start the timer
-      sapStateTimer[0].stop();      
-      sapStateTimer[0].reset();                                                                        
-      sapStateTimer[0].start(); 
+//      sapStateTimer[0].stop();      
+//      sapStateTimer[0].reset();                                                                        
+//      sapStateTimer[0].start(); 
+      mainStateTimer.restartTimer(stateTimerId[0]);  
   }
 
   //No action in 1 minute : reset timer
-  if(sapPrevState.secondaryState==CONF_SAP_SEC_STATE_WAITING && sapStateTimer[0].elapsed()>30000){
+  //if(sapPrevState.secondaryState==CONF_SAP_SEC_STATE_WAITING && sapStateTimer[0].elapsed()>30000){
+  if(sapPrevState.secondaryState==CONF_SAP_SEC_STATE_WAITING && mainStateTimer.elapsedTime(stateTimerId[0])>30000){
       ps.setZeroPressure();                                   //Update pressure compensation value 
-      sapStateTimer[0].stop();                                //Reset and start the timer         
-      sapStateTimer[0].reset();                                                                        
-      sapStateTimer[0].start();     
+      //Reset and start the timer    
+//      sapStateTimer[0].stop();                                     
+//      sapStateTimer[0].reset();                                                                        
+//      sapStateTimer[0].start();  
+      mainStateTimer.restartTimer(stateTimerId[0]);   
   }
   
   for (int i=0; i < ledStateArraySize; i++) {
@@ -446,8 +435,6 @@ void pressureLoop() {
     sapActionIndex++;
   }
 
-  //delay(20);
-  //Serial.println(getTime());  
 
 }
 

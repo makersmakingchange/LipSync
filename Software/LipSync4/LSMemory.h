@@ -13,7 +13,7 @@ class LSMemory {
   public:
     LSMemory();   
     void begin();                                                   
-    void initialize(String fileString,String jsonString);                                                                                                 //Pop last dot or dash from the stack    
+    void initialize(String fileString,String jsonString);   
     void clear(String fileString);
     void format();
     String readAll(String fileString);
