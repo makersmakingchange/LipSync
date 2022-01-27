@@ -1,6 +1,6 @@
 #include <Wire.h>  
 #include <StopWatch.h>
-#include "LSTimer2.h"
+#include "LSTimer.h"
 #include <ArduinoJson.h>
 #include "LSConfig.h"
 #include "LSUSB.h"
