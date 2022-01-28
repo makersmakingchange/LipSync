@@ -1,3 +1,7 @@
+//Header definition
+#ifndef _LSJOYSTICK_H
+#define _LSJOYSTICK_H
+
 #include <Tlv493d.h>  //Infinion TLV493 magnetic sensor
 
 #define JOY_CALIBR_ARRAY_SIZE 5
@@ -318,3 +322,6 @@ pointFloatType LSJoystick::absPoint(pointFloatType inputPoint){
 int LSJoystick::sgn(float val) {
   return (0.0 < val) - (val < 0.0);
 }
+
+
+#endif 

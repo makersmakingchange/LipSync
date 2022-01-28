@@ -1,3 +1,7 @@
+//Header definition
+#ifndef _LSMEMORY_H
+#define _LSMEMORY_H
+
 #include <ArduinoJson.h>
 #include <Adafruit_LittleFS.h>
 #include <InternalFileSystem.h>
@@ -206,3 +210,5 @@ void LSMemory::writePoint(String fileString,String key,pointFloatType value){
   point.add(value.y);
   writeObject(fileString,key,obj);
 }
+
+#endif 

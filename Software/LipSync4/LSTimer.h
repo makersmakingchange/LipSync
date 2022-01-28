@@ -2,11 +2,9 @@
  * Based on SimpleTimer.h
  *
  */
-#if defined(ARDUINO) && ARDUINO >= 100
-  #include "Arduino.h"
-#else
-  #include "WProgram.h"
-#endif
+//Header definition
+#ifndef _LSTIMER_H
+#define _LSTIMER_H
 
 typedef void (*timer_callback)(void);
 typedef void (*timer_callback_p)(void *);
@@ -303,3 +301,5 @@ void LSTimer::toggle(int numTimer) {
 int LSTimer::getNumTimers() {
     return numTimers;
 }
+
+#endif 

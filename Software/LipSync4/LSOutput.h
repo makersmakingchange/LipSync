@@ -1,3 +1,7 @@
+//Header definition
+#ifndef _LSOUTPUT_H
+#define _LSOUTPUT_H
+
 #include <Adafruit_NeoPixel.h>
 
 #define OUTPUT_RGB_LED_PIN A3 //output pin for neopixel
@@ -98,9 +102,8 @@ void LSOutput::begin() {
   pinMode(OUTPUT_RGB_LED_PIN, OUTPUT);
 
   ledPixels.begin();
-  clearLedAll();
+  //clearLedAll();
 }
-
 void LSOutput::run() {
 
   //Update the timer
@@ -108,7 +111,7 @@ void LSOutput::run() {
 
   //Set the action and state once the blinking timer has finished it's job 
   if(!ledStateTimer.isEnabled(ledStateTimerId) && ledAction == LED_ACTION_BLINK){
-    clearLedAll();
+    //clearLedAll();
   }
 }
 
@@ -174,7 +177,7 @@ void LSOutput::setLedBlinkById(int ledNumber, int numBlinks, int delayBlinks, in
   performLedColor(ledNumber, ledColorNumber, ledBrightness, LED_STATE_ON);
   if(numBlinks==1){
     //ledStateTimerId = ledStateTimer.setTimeout(delayBlinks,performLedToggle(ledNumber, ledColorNumber,ledBrightness));    
-    ledStateTimerId = ledStateTimer.setTimeout(delayBlinks,clearLedAll); 
+    //ledStateTimerId = ledStateTimer.setTimeout(delayBlinks,clearLedAll); 
   } else{
     //ledStateTimerId = ledStateTimer.setTimer(delayBlinks,performLedToggle(ledNumber, ledColorNumber,ledBrightness),numBlinks*2);    
   }
@@ -259,3 +262,6 @@ void LSOutput::performLedToggle(int ledNumber, int ledColorNumber,uint8_t ledBri
   performLedColor(ledNumber,tempColorNumber,ledBrightness, tempState);
 
 }
+
+
+#endif 

@@ -1,3 +1,6 @@
+//Header definition
+#ifndef _LSINPUT_H
+#define _LSINPUT_H
 
 
 #define INPUT_MAIN_STATE_NONE           0
@@ -15,11 +18,7 @@
 
 #define INPUT_REACTION_TIME 20
 
-StopWatch inputTimer[1];
-
-LSTimer inputStateTimer;
-
-int inputStateTimerId;
+#define INPUT_ACTION_TIMEOUT 60000
 
 typedef struct {
   int mainState;            //button1 + 2*button2 + 4*button3
@@ -39,6 +38,8 @@ class LSInput {
     int inputAllState;
     inputStruct inputCurrState = {0, 0, 0};
     inputStruct inputPrevState = {0, 0, 0};
+    LSTimer inputStateTimer;
+    int inputStateTimerId;
   public:
     LSInput(int* inputPinArray, int inputNumber);
     ~LSInput();
@@ -74,14 +75,10 @@ void LSInput::begin() {
 
 void LSInput::clear() {
     
-    inputStruct inputPrevState = {INPUT_MAIN_STATE_NONE, INPUT_SEC_STATE_WAITING, 0};
+  inputStruct inputPrevState = {INPUT_MAIN_STATE_NONE, INPUT_SEC_STATE_WAITING, 0};
 
-    inputBuffer.pushElement(inputPrevState);
+  inputBuffer.pushElement(inputPrevState);
 
-    
-//    inputTimer[0].stop();                                      
-//    inputTimer[0].reset();                                                                        
-//    inputTimer[0].start(); 
   inputStateTimerId = inputStateTimer.startTimer();
 }
 
@@ -109,13 +106,11 @@ void LSInput::update() {
   // prev: none,waiting  current : none 
   // prev: press x,started  current : press x 
   if((inputAllState == inputPrevState.mainState && inputPrevState.secondaryState != INPUT_SEC_STATE_RELEASED)){
-    //inputCurrState = {inputAllState, inputPrevState.secondaryState, inputTimer[0].elapsed()};
     inputCurrState = {inputAllState, inputPrevState.secondaryState, inputStateTimer.elapsedTime(inputStateTimerId)};
     inputBuffer.updateLastElement(inputCurrState);  
     //Serial.println("a");
   } // prev: press x,started  current : press y and elapsed time<reaction time ms
   else if(inputAllState != INPUT_MAIN_STATE_NONE && inputPrevState.secondaryState == INPUT_SEC_STATE_STARTED && inputPrevState.elapsedTime<INPUT_REACTION_TIME){
-    //inputCurrState = {inputAllState, inputPrevState.secondaryState, inputTimer[0].elapsed()};
     inputCurrState = {inputAllState, inputPrevState.secondaryState, inputStateTimer.elapsedTime(inputStateTimerId)};
 
     inputBuffer.updateLastElement(inputCurrState);  
@@ -144,19 +139,12 @@ void LSInput::update() {
       inputBuffer.pushElement(inputCurrState);   
 
       //Reset and start the timer
-//      inputTimer[0].stop();      
-//      inputTimer[0].reset();                                                                        
-//      inputTimer[0].start(); 
       inputStateTimer.restartTimer(inputStateTimerId);
   }
   
   //No action in 1 minute : reset timer
-  //if(inputPrevState.secondaryState==INPUT_SEC_STATE_WAITING && inputTimer[0].elapsed()>60000){
-  if(inputPrevState.secondaryState==INPUT_SEC_STATE_WAITING && inputStateTimer.elapsedTime(inputStateTimerId)>30000){
+  if(inputPrevState.secondaryState==INPUT_SEC_STATE_WAITING && inputStateTimer.elapsedTime(inputStateTimerId)>INPUT_ACTION_TIMEOUT){
       //Reset and start the timer         
-//      inputTimer[0].stop();      
-//      inputTimer[0].reset();                                                                        
-//      inputTimer[0].start();   
       inputStateTimer.restartTimer(inputStateTimerId);
   }
   
@@ -167,3 +155,5 @@ inputStruct LSInput::getInputState() {
   inputStruct inputCurrState = inputBuffer.getLastElement();  //Get the state
   return inputCurrState;
 }
+
+#endif 

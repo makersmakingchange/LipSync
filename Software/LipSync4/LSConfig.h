@@ -16,7 +16,7 @@
 #define CONF_ACTION_DRAG 3                                 // Initiates drag mode, holding down left click until cancelled
 #define CONF_ACTION_SCROLL 4                               // Initiates scroll mode. Vertical motion generates mouse scroll wheel movement.
 #define CONF_ACTION_CURSOR_CALIBRATION 5                   // Initiates the joystick calibration.
-#define CONF_ACTION__MIDDLE_CLICK 6                        // Generates a short middle click
+#define CONF_ACTION_MIDDLE_CLICK 6                        // Generates a short middle click
 
 #define CONF_SAP_MAIN_STATE_NONE 0
 #define CONF_SAP_MAIN_STATE_SIP 1
@@ -31,7 +31,7 @@
 #define CONF_SETTINGS_JSON    "{\"CF\":5,\"MN\":0,\"VN\":0.0,\"CM\":0,\"SL\":0,\"ST\":0,\"PT\":0,\"CA0\":[0.0,0.0],\"CA1\":[25.0,25.0],\"CA2\":[-25.0,25.0],\"CA3\":[-25.0,-25.0],\"CA4\":[25.0,-25.0]}"
 
 #define CONF_JOYSTICK_POLL_RATE 20    //20ms
-#define CONF_PRESSURE_POLL_RATE 20 
+#define CONF_PRESSURE_POLL_RATE 50 
 #define CONF_INPUT_POLL_RATE 50 
 
 //CAN BE CHANGED 
@@ -43,3 +43,5 @@
 #define CONF_LED_BRIGHTNESS_HIGH 150 
 
 #define CONF_COM_METHOD 1        //0 = None , 1 = USB , 2 = Wireless  
+
+#define CONF_ACTION_TIMEOUT 60000

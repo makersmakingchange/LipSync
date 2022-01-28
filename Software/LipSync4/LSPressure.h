@@ -1,3 +1,8 @@
+//Header definition
+#ifndef _LSPRESSURE_H
+#define _LSPRESSURE_H
+
+
 #include <Adafruit_LPS35HW.h>
 #include <Adafruit_BMP280.h>   //onboard pressure sensor on Adafruit Sense Micro 
 
@@ -189,3 +194,6 @@ float LSPressure::getDiffPressure() {
 pressureStruct LSPressure::getAllPressure() {
   return pressureBuffer.getLastElement();
 }
+
+
+#endif 
