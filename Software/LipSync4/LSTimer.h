@@ -10,28 +10,28 @@ typedef void (*timer_callback)(void);
 typedef void (*timer_callback_p)(void *);
 
 class LSTimer {
-	public:
-		const static int MAX_TIMERS = 10;	                // maximum number of timers
-		const static int RUN_FOREVER = 0;                 // setTimer() constants
-		const static int RUN_ONCE = 1;
-		LSTimer();                                        // constructor
-		void run();							                          // this function must be called inside loop()
-		int setInterval(unsigned long d, unsigned long s, timer_callback f);        // call function f every d milliseconds
+  public:
+    const static int MAX_TIMERS = 10;                 // maximum number of timers
+    const static int RUN_FOREVER = 0;                 // setTimer() constants
+    const static int RUN_ONCE = 1;
+    LSTimer();                                        // constructor
+    void run();                                       // this function must be called inside loop()
+    int setInterval(unsigned long d, unsigned long s, timer_callback f);        // call function f every d milliseconds
     int setInterval(unsigned long d, unsigned long s, timer_callback_p f, void* p);
-		int setTimeout(unsigned long s, timer_callback f);         // call function f once after d milliseconds
+    int setTimeout(unsigned long s, timer_callback f);         // call function f once after d milliseconds
     int setTimeout( unsigned long s, timer_callback_p f, void* p);
-		int setTimer(unsigned long d, unsigned long s, timer_callback f, unsigned n);    // call function f every d milliseconds for n times
+    int setTimer(unsigned long d, unsigned long s, timer_callback f, unsigned n);    // call function f every d milliseconds for n times
     int setTimer(unsigned long d, unsigned long s, timer_callback_p f, void* p, unsigned n);
     int startTimer(); 
     unsigned long elapsedTime(int timerId);
-		void deleteTimer(int numTimer);                   // destroy the specified timer
-		void restartTimer(int numTimer);                  // restart the specified timer
-		boolean isEnabled(int numTimer);                  // returns true if the specified timer is enabled
-		void enable(int numTimer);                        // enables the specified timer
-		void disable(int numTimer);                       // disables the specified timer
-		void toggle(int numTimer);
-		int getNumTimers();                               // returns the number of used timers
-		int getNumAvailableTimers() { return MAX_TIMERS - numTimers; };       // returns the number of available timers
+    void deleteTimer(int numTimer);                   // destroy the specified timer
+    void restartTimer(int numTimer);                  // restart the specified timer
+    boolean isEnabled(int numTimer);                  // returns true if the specified timer is enabled
+    void enable(int numTimer);                        // enables the specified timer
+    void disable(int numTimer);                       // disables the specified timer
+    void toggle(int numTimer);
+    int getNumTimers();                               // returns the number of used timers
+    int getNumAvailableTimers() { return MAX_TIMERS - numTimers; };       // returns the number of available timers
   
   private:
     const static int DEFCALL_DONTRUN = 0;        // don't call the callback function
