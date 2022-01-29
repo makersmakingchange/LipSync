@@ -16,12 +16,12 @@ class LSTimer {
 		const static int RUN_ONCE = 1;
 		LSTimer();                                        // constructor
 		void run();							                          // this function must be called inside loop()
-		int setInterval(unsigned long d, timer_callback f);        // call function f every d milliseconds
-    int setInterval(unsigned long d, timer_callback_p f, void* p);
-		int setTimeout(unsigned long d, timer_callback f);         // call function f once after d milliseconds
-    int setTimeout(unsigned long d, timer_callback_p f, void* p);
-		int setTimer(unsigned long d, timer_callback f, unsigned n);    // call function f every d milliseconds for n times
-    int setTimer(unsigned long d, timer_callback_p f, void* p, unsigned n);
+		int setInterval(unsigned long d, unsigned long s, timer_callback f);        // call function f every d milliseconds
+    int setInterval(unsigned long d, unsigned long s, timer_callback_p f, void* p);
+		int setTimeout(unsigned long s, timer_callback f);         // call function f once after d milliseconds
+    int setTimeout( unsigned long s, timer_callback_p f, void* p);
+		int setTimer(unsigned long d, unsigned long s, timer_callback f, unsigned n);    // call function f every d milliseconds for n times
+    int setTimer(unsigned long d, unsigned long s, timer_callback_p f, void* p, unsigned n);
     int startTimer(); 
     unsigned long elapsedTime(int timerId);
 		void deleteTimer(int numTimer);                   // destroy the specified timer
@@ -38,7 +38,7 @@ class LSTimer {
     const static int DEFCALL_RUNONLY = 1;        // call the callback function but don't delete the timer
     const static int DEFCALL_RUNANDDEL = 2;      // call the callback function and delete the timer
     int findFirstFreeSlot();                     // find the first available slot
-    int setupTimer(unsigned long d, void* f, void* p, boolean h, unsigned n);
+    int setupTimer(unsigned long d, unsigned long s, void* f, void* p, boolean h, unsigned n);
     typedef struct {
       unsigned long prev_millis;        // value returned by the millis() function in the previous run() call
       void* callback;                   // pointer to the callback function
@@ -48,6 +48,7 @@ class LSTimer {
       unsigned maxNumRuns;              // number of runs to be executed
       unsigned numRuns;                 // number of executed runs
       boolean enabled;                  // true if enabled
+      boolean startup;                  // true if there's startup initial delay
       unsigned toBeCalled;              // deferred function call (sort of) - N.B.: only used in run()
     } timer_t;
 
@@ -73,7 +74,7 @@ LSTimer::LSTimer() {
 
 void LSTimer::run() {
     int i;
-    unsigned long current_millis;
+    unsigned long current_millis,delay_millis;
 
     // get current time
     current_millis = elapsed();
@@ -86,11 +87,15 @@ void LSTimer::run() {
         if (timer[i].callback != NULL) {
 
             // is it time to process this timer ?
+
+            (timer[i].numRuns==0) ? delay_millis=timer[i].startup : delay_millis=timer[i].delay;
             
-            if ((current_millis - timer[i].prev_millis) >= timer[i].delay) {
+            if ((current_millis - timer[i].prev_millis) >= delay_millis) {
 
                 // update time
-                timer[i].prev_millis += timer[i].delay;
+                timer[i].prev_millis += delay_millis;
+
+                if(timer[i].startup>0){ timer[i].startup=0; }
 
                 // check if the timer callback has to be executed
                 if (timer[i].enabled) {
@@ -148,7 +153,7 @@ int LSTimer::findFirstFreeSlot() {
     return -1;
 }
 
-int LSTimer::setupTimer(unsigned long d, void* f, void* p, boolean h, unsigned n) {
+int LSTimer::setupTimer(unsigned long d, unsigned long s, void* f, void* p, boolean h, unsigned n) {
     int freeTimer;
 
     freeTimer = findFirstFreeSlot();
@@ -165,7 +170,9 @@ int LSTimer::setupTimer(unsigned long d, void* f, void* p, boolean h, unsigned n
     timer[freeTimer].param = p;
     timer[freeTimer].hasParam = h;
     timer[freeTimer].maxNumRuns = n;
+    timer[freeTimer].numRuns = 0;
     timer[freeTimer].enabled = true;
+    timer[freeTimer].startup = s;
     timer[freeTimer].prev_millis = elapsed();
 
     numTimers++;
@@ -173,28 +180,28 @@ int LSTimer::setupTimer(unsigned long d, void* f, void* p, boolean h, unsigned n
     return freeTimer;
 }
 
-int LSTimer::setInterval(unsigned long d, timer_callback f) {
-    return setupTimer(d, (void *)f, NULL, false, RUN_FOREVER);
+int LSTimer::setInterval(unsigned long d, unsigned long s, timer_callback f) {
+    return setupTimer(d, s, (void *)f, NULL, false, RUN_FOREVER);
 }
 
-int LSTimer::setInterval(unsigned long d, timer_callback_p f, void* p) {
-  return setupTimer(d, (void *)f, p, true, RUN_FOREVER);
+int LSTimer::setInterval(unsigned long d, unsigned long s, timer_callback_p f, void* p) {
+  return setupTimer(d, s, (void *)f, p, true, RUN_FOREVER);
 }
 
-int LSTimer::setTimeout(unsigned long d, timer_callback f) {
-    return setupTimer(d, (void *)f, NULL, false, RUN_ONCE);
+int LSTimer::setTimeout(unsigned long s, timer_callback f) {
+    return setupTimer(0, s, (void *)f, NULL, false, RUN_ONCE);
 }
 
-int LSTimer::setTimeout(unsigned long d, timer_callback_p f, void* p) {
-  return setupTimer(d, (void *)f, p, true, RUN_ONCE);
+int LSTimer::setTimeout(unsigned long s, timer_callback_p f, void* p) {
+  return setupTimer(0, s, (void *)f, p, true, RUN_ONCE);
 }
 
-int LSTimer::setTimer(unsigned long d, timer_callback f, unsigned n) {
-  return setupTimer(d, (void *)f, NULL, false, n);
+int LSTimer::setTimer(unsigned long d, unsigned long s, timer_callback f, unsigned n) {
+  return setupTimer(d, s, (void *)f, NULL, false, n);
 }
 
-int LSTimer::setTimer(unsigned long d, timer_callback_p f, void* p, unsigned n) {
-  return setupTimer(d, (void *)f, p, true, n);
+int LSTimer::setTimer(unsigned long d, unsigned long s, timer_callback_p f, void* p, unsigned n) {
+  return setupTimer(d, s, (void *)f, p, true, n);
 }
 
 int LSTimer::startTimer() {
@@ -211,6 +218,7 @@ int LSTimer::startTimer() {
     timer[freeTimer].hasParam = 0;
     timer[freeTimer].maxNumRuns = 1;
     timer[freeTimer].enabled = true;
+    timer[freeTimer].startup = 0;
     timer[freeTimer].prev_millis = elapsed();
 
     numTimers++;
@@ -223,7 +231,6 @@ unsigned long LSTimer::elapsedTime(int timerId) {
         return 0;
     }
 
-  
     unsigned long current_millis,diff_millis;
 
     // get current time
@@ -259,6 +266,7 @@ void LSTimer::restartTimer(int numTimer) {
     }
 
     timer[numTimer].prev_millis = elapsed();
+    timer[numTimer].numRuns = 0;
 }
 
 
