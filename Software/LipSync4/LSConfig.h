@@ -16,16 +16,11 @@
 #define CONF_ACTION_DRAG 3                                 // Initiates drag mode, holding down left click until cancelled
 #define CONF_ACTION_SCROLL 4                               // Initiates scroll mode. Vertical motion generates mouse scroll wheel movement.
 #define CONF_ACTION_CURSOR_CALIBRATION 5                   // Initiates the joystick calibration.
-#define CONF_ACTION_MIDDLE_CLICK 6                        // Generates a short middle click
-
-#define CONF_SAP_MAIN_STATE_NONE 0
-#define CONF_SAP_MAIN_STATE_SIP 1
-#define CONF_SAP_MAIN_STATE_PUFF 2
-
-#define CONF_SAP_SEC_STATE_WAITING 0
-#define CONF_SAP_SEC_STATE_STARTED 1
-#define CONF_SAP_SEC_STATE_RELEASED 2
-
+#define CONF_ACTION_CURSOR_CENTER 6                        // Center the joystick 
+#define CONF_ACTION_MIDDLE_CLICK 7                         // Generates a short middle click
+#define CONF_ACTION_DEC_SPEED 8                            // Decrease cursor movement speed
+#define CONF_ACTION_INC_SPEED 9                            // Increase cursor movement speed
+#define CONF_ACTION_CHANGE_MODE 10                         // Change communication mode
 
 #define CONF_SETTINGS_FILE    "/settings.txt"
 #define CONF_SETTINGS_JSON    "{\"CF\":5,\"MN\":0,\"VN\":0.0,\"CM\":0,\"SL\":0,\"ST\":0,\"PT\":0,\"CA0\":[0.0,0.0],\"CA1\":[25.0,25.0],\"CA2\":[-25.0,25.0],\"CA3\":[-25.0,-25.0],\"CA4\":[25.0,-25.0]}"
@@ -42,6 +37,6 @@
 #define CONF_LED_BRIGHTNESS 50 
 #define CONF_LED_BRIGHTNESS_HIGH 150 
 
-#define CONF_COM_METHOD 1        //0 = None , 1 = USB , 2 = Wireless  
+#define CONF_COM_MODE 1        //0 = None , 1 = USB , 2 = Wireless  
 
 #define CONF_ACTION_TIMEOUT 60000

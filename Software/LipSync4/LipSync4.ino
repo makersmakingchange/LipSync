@@ -11,8 +11,44 @@
 #include "LSOutput.h"
 #include "LSMemory.h"
 
-int comMethod = 0;
+int comMode = 0;
 
+//LED module variables and structures 
+typedef struct { 
+  uint8_t ledOutputActionNumber;
+  uint8_t ledNumber;
+  uint8_t ledStartColor;
+  uint8_t ledEndColor;
+  uint8_t ledEndAction;
+} ledActionStruct;
+
+const ledActionStruct ledActionProperty[] {
+    {CONF_ACTION_NOTHING,            0,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_OFF},
+    {CONF_ACTION_LEFT_CLICK,         1,LED_CLR_NONE,  LED_CLR_RED,    LED_ACTION_BLINK},
+    {CONF_ACTION_RIGHT_CLICK,        3,LED_CLR_NONE,  LED_CLR_BLUE,   LED_ACTION_BLINK},
+    {CONF_ACTION_DRAG,               1,LED_CLR_PURPLE,LED_CLR_RED,    LED_ACTION_ON},
+    {CONF_ACTION_SCROLL,             3,LED_CLR_PURPLE,LED_CLR_BLUE,   LED_ACTION_ON},
+    {CONF_ACTION_CURSOR_CALIBRATION, 2,LED_CLR_NONE,  LED_CLR_ORANGE, LED_ACTION_BLINK},
+    {CONF_ACTION_CURSOR_CENTER,      2,LED_CLR_NONE,  LED_CLR_ORANGE, LED_ACTION_BLINK},
+    {CONF_ACTION_MIDDLE_CLICK,       2,LED_CLR_NONE,  LED_CLR_PURPLE, LED_ACTION_BLINK},
+    {CONF_ACTION_DEC_SPEED,          1,LED_CLR_NONE,  LED_CLR_RED,    LED_ACTION_BLINK},
+    {CONF_ACTION_INC_SPEED,          3,LED_CLR_NONE,  LED_CLR_BLUE,   LED_ACTION_BLINK},
+    {CONF_ACTION_CHANGE_MODE,        2,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_OFF}
+
+};
+
+typedef struct { 
+  uint8_t ledAction;            //off = 0, on = 1, blink = 2
+  uint8_t ledColorNumber;
+  uint8_t ledNumber;
+  uint8_t ledBlinkNumber;
+  unsigned long ledBlinkTime;
+  uint8_t ledBrightness;
+} ledStateStruct; 
+
+ledStateStruct ledCurrentState; 
+
+int ledBlinkTimerId[2];
 
 //Input module variables and structures 
 
@@ -36,85 +72,38 @@ const inputActionStruct switchActionProperty[] {
     {CONF_ACTION_MIDDLE_CLICK,       4, 3000,10000}
 };
 
+const inputActionStruct buttonActionProperty[] {
+    {CONF_ACTION_NOTHING,            0, 0,0},
+    {CONF_ACTION_DEC_SPEED,          1, 0,1000},
+    {CONF_ACTION_INC_SPEED,          4, 0,1000},
+    {CONF_ACTION_CURSOR_CENTER,      2, 0,1000},
+    {CONF_ACTION_CHANGE_MODE,        2, 1000,3000},
+    {CONF_ACTION_CURSOR_CALIBRATION, 5, 0,1000}
+};
+
 
 int inputButtonPinArray[] = {CONF_BUTTON1_PIN,CONF_BUTTON2_PIN,CONF_BUTTON3_PIN};
 int inputSwitchPinArray[] = {CONF_SWITCH1_PIN,CONF_SWITCH2_PIN,CONF_SWITCH3_PIN};
 
 
 //Pressure module variables and structures 
-int sapState;
-int outputAction;
-bool canOutputAction;
-
-float mainPressure; 
-float refPressure;
-float diffPressure;
 
 pressureStruct pressureValues = {0.0,0.0,0.0};
 
-float sipThreshold;
-float puffThreshold;
-
-typedef struct {
-  int mainState;            //none = 0, sip = 1, puff = 2
-  int secondaryState;       //waiting = 0, started = 1, detected = 2
-  unsigned long elapsedTime;     //in ms
-} sapStruct;
-
-typedef struct { 
-  uint8_t ledOutputActionNumber;
-  uint8_t ledNumber;
-  uint8_t ledStartColor;
-  uint8_t ledEndColor;
-  uint8_t ledEndAction;
-} ledActionStruct;
-
-
-typedef struct { 
-  uint8_t sapOutputActionNumber;
-  uint8_t sapActionState;
-  unsigned long sapActionStartTime;
-  unsigned long sapActionEndTime;
-} sapActionStruct;
+sapStruct sapActionState;
 
 int sapActionSize;
 
-const sapActionStruct sapActionProperty[] {
-    {CONF_ACTION_NOTHING,            CONF_SAP_MAIN_STATE_NONE,  0,0},
-    {CONF_ACTION_LEFT_CLICK,         CONF_SAP_MAIN_STATE_PUFF,  0,1000},
-    {CONF_ACTION_RIGHT_CLICK,        CONF_SAP_MAIN_STATE_SIP,   0,1000},
-    {CONF_ACTION_DRAG,               CONF_SAP_MAIN_STATE_PUFF,  1000,3000},
-    {CONF_ACTION_SCROLL,             CONF_SAP_MAIN_STATE_SIP,   1000,3000},
-    {CONF_ACTION_CURSOR_CALIBRATION, CONF_SAP_MAIN_STATE_PUFF,  3000,5000},
-    {CONF_ACTION_MIDDLE_CLICK,       CONF_SAP_MAIN_STATE_SIP ,  3000,5000}
+const inputActionStruct sapActionProperty[] {
+    {CONF_ACTION_NOTHING,            PRESS_SAP_MAIN_STATE_NONE,  0,0},
+    {CONF_ACTION_LEFT_CLICK,         PRESS_SAP_MAIN_STATE_PUFF,  0,1000},
+    {CONF_ACTION_RIGHT_CLICK,        PRESS_SAP_MAIN_STATE_SIP,   0,1000},
+    {CONF_ACTION_DRAG,               PRESS_SAP_MAIN_STATE_PUFF,  1000,3000},
+    {CONF_ACTION_SCROLL,             PRESS_SAP_MAIN_STATE_SIP,   1000,3000},
+    {CONF_ACTION_CURSOR_CALIBRATION, PRESS_SAP_MAIN_STATE_PUFF,  3000,5000},
+    {CONF_ACTION_MIDDLE_CLICK,       PRESS_SAP_MAIN_STATE_SIP ,  3000,5000}
 
 };
-
-const ledActionStruct ledActionProperty[] {
-    {CONF_ACTION_NOTHING,            0,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_OFF},
-    {CONF_ACTION_LEFT_CLICK,         1,LED_CLR_NONE,  LED_CLR_RED,    LED_ACTION_BLINK},
-    {CONF_ACTION_RIGHT_CLICK,        3,LED_CLR_NONE,  LED_CLR_BLUE,   LED_ACTION_BLINK},
-    {CONF_ACTION_DRAG,               1,LED_CLR_PURPLE,LED_CLR_RED,    LED_ACTION_ON},
-    {CONF_ACTION_SCROLL,             3,LED_CLR_PURPLE,LED_CLR_BLUE,   LED_ACTION_ON},
-    {CONF_ACTION_CURSOR_CALIBRATION, 2,LED_CLR_NONE,  LED_CLR_ORANGE, LED_ACTION_BLINK},
-    {CONF_ACTION_MIDDLE_CLICK,       2,LED_CLR_NONE,  LED_CLR_PURPLE, LED_ACTION_BLINK}
-
-};
-
-typedef struct { 
-  uint8_t ledAction;            //off = 0, on = 1, blink = 2
-  uint8_t ledColorNumber;
-  uint8_t ledNumber;
-  uint8_t ledBlinkNumber;
-  unsigned long ledBlinkTime;
-  uint8_t ledBrightness;
-} ledStateStruct; 
-
-ledStateStruct ledCurrentState; 
-
-sapStruct sapCurrState, sapPrevState, sapActionState;
-
-LSCircularBuffer <sapStruct> sapBuffer(12);   //Create a buffer of type sapStruct
 
 //Joystick module variables and structures 
 
@@ -124,13 +113,15 @@ int yVal;
 //Timer related variables 
 
 int pollTimerId[3];
-int sapStateTimerId[1];
 
-int ledBlinkTimerId[2];
 LSTimer ledStateTimer;
 
-LSTimer mainPollTimer;
-LSTimer mainStateTimer;
+LSTimer pollTimer;
+
+//General
+
+int outputAction;
+bool canOutputAction;
 
 //Create instances of classes
 
@@ -154,7 +145,7 @@ void setup() {
   mouse.begin();
   btmouse.begin();
 
-  comMethod=CONF_COM_METHOD;
+  comMode=CONF_COM_MODE;
   
   Serial.begin(115200);
   // Wait until serial port is opened
@@ -176,9 +167,9 @@ void setup() {
   initLedFeedback();
 
 
-  pollTimerId[0] = mainPollTimer.setInterval(CONF_JOYSTICK_POLL_RATE,0, joystickLoop);
-  pollTimerId[1] = mainPollTimer.setInterval(CONF_PRESSURE_POLL_RATE,0, pressureLoop);
-  pollTimerId[2] = mainPollTimer.setInterval(CONF_INPUT_POLL_RATE,0, inputLoop);
+  pollTimerId[0] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE,0, joystickLoop);
+  pollTimerId[1] = pollTimer.setInterval(CONF_PRESSURE_POLL_RATE,0, pressureLoop);
+  pollTimerId[2] = pollTimer.setInterval(CONF_INPUT_POLL_RATE,0, inputLoop);
 
 
   
@@ -188,8 +179,7 @@ void setup() {
 void loop() {
 
   ledStateTimer.run();
-  mainPollTimer.run();
-  mainStateTimer.run();
+  pollTimer.run();
 }
 
 //*********************************//
@@ -237,7 +227,7 @@ void inputLoop() {
       inputButtonActionState.elapsedTime >= switchActionProperty[i].inputActionStartTime &&
       inputButtonActionState.elapsedTime < switchActionProperty[i].inputActionEndTime){
       
-      tempActionIndex=sapActionProperty[i].sapOutputActionNumber;  
+      tempActionIndex=sapActionProperty[i].inputActionNumber;  
       
       performOutputAction(tempActionIndex,
       ledActionProperty[tempActionIndex].ledNumber,
@@ -253,7 +243,7 @@ void inputLoop() {
       inputSwitchActionState.elapsedTime >= switchActionProperty[i].inputActionStartTime &&
       inputSwitchActionState.elapsedTime < switchActionProperty[i].inputActionEndTime){
 
-      tempActionIndex=sapActionProperty[i].sapOutputActionNumber;  
+      tempActionIndex=sapActionProperty[i].inputActionNumber;  
       
       performOutputAction(tempActionIndex,
       ledActionProperty[tempActionIndex].ledNumber,
@@ -274,25 +264,13 @@ void initSipAndPuff() {
 
   ps.begin(PRESS_TYPE_DIFF);
   setSipAndPuffThreshold();
-  initSipAndPuffArray();
-  sapActionSize=sizeof(sapActionProperty)/sizeof(sapActionStruct);
+  sapActionSize=sizeof(sapActionProperty)/sizeof(inputActionStruct);
 }
 
 void setSipAndPuffThreshold(){
-  sipThreshold = CONF_SIP_THRESHOLD;
-  puffThreshold = CONF_PUFF_THRESHOLD;
+  ps.setStateThreshold(CONF_SIP_THRESHOLD,CONF_PUFF_THRESHOLD);
 }
 
-void initSipAndPuffArray(){
-
-  //Push initial state to state Queue
-  
-  sapCurrState = sapPrevState = {CONF_SAP_MAIN_STATE_NONE, CONF_SAP_SEC_STATE_WAITING, 0};
-  sapBuffer.pushElement(sapCurrState);
-
-  //Reset and start the timer   
-  sapStateTimerId[0] =  mainStateTimer.startTimer();
-}
 
 void updatePressure() {
   ps.update();
@@ -312,69 +290,10 @@ void pressureLoop() {
 
   readPressure();                 //Read the pressure object (can be last value from array, average or other algorithms)
 
-  sapPrevState = sapBuffer.getLastElement();  //Get the previous state
-  
-  //check for sip and puff conditions
-  if (pressureValues.diffPressure > puffThreshold)  { 
-    sapState = CONF_SAP_MAIN_STATE_PUFF;
-  } else if (pressureValues.diffPressure < sipThreshold)  { 
-    sapState = CONF_SAP_MAIN_STATE_SIP;
-  } else {
-    sapState = CONF_SAP_MAIN_STATE_NONE;
-  }
-
-  //None:None, Sip:Sip, Puff:Puff
-  //Update time
-  if(sapPrevState.mainState == sapState){
-    sapCurrState = {sapState, sapPrevState.secondaryState, mainStateTimer.elapsedTime(sapStateTimerId[0])};
-    //Serial.println("a");
-    sapBuffer.updateLastElement(sapCurrState);
-  } else {  //None:Sip , None:Puff , Sip:None, Puff:None
-      //State: Sip or puff
-      //Previous state: {none, waiting, time} Note: There can't be sip or puff and waiting 
-      //New state: {Sip or puff, started, 0}
-      if(sapPrevState.secondaryState==CONF_SAP_SEC_STATE_WAITING){
-        sapCurrState = {sapState, CONF_SAP_SEC_STATE_STARTED, 0};
-        //Serial.println("b");
-      } 
-      //State: none
-      //Previous state: {Sip or puff, started, time} Note: There can't be none and started 
-      //New state: {Sip or puff, released, time}      
-      else if(sapPrevState.secondaryState==CONF_SAP_SEC_STATE_STARTED){
-        sapCurrState = {sapPrevState.mainState, CONF_SAP_SEC_STATE_RELEASED, sapPrevState.elapsedTime};
-        //Serial.println("c");
-      }
-      //State: None
-      //Previous state: {Sip or puff, released, time}
-      //New state: {none, waiting, 0}
-      else if(sapPrevState.secondaryState==CONF_SAP_SEC_STATE_RELEASED && sapState==CONF_SAP_MAIN_STATE_NONE){
-        sapCurrState = {sapState, CONF_SAP_SEC_STATE_WAITING, 0};
-        //Serial.println("d");
-      }
-      //State: Sip or puff
-      //Previous state: {none, released, time}
-      //New state: {Sip or puff, started, 0}
-      else if(sapPrevState.secondaryState==CONF_SAP_SEC_STATE_RELEASED && sapState!=CONF_SAP_MAIN_STATE_NONE){
-        sapCurrState = {sapState, CONF_SAP_SEC_STATE_STARTED, 0};
-        //Serial.println("e");
-      }      
-      //Push the new state   
-      sapBuffer.pushElement(sapCurrState);
-      //Reset and start the timer
-      mainStateTimer.restartTimer(sapStateTimerId[0]);  
-  }
-
-  //No action in 1 minute : reset timer
-  if(sapPrevState.secondaryState==CONF_SAP_SEC_STATE_WAITING && mainStateTimer.elapsedTime(sapStateTimerId[0])>CONF_ACTION_TIMEOUT){
-      ps.setZeroPressure();                                   //Update pressure compensation value 
-      //Reset and start the timer    
-      mainStateTimer.restartTimer(sapStateTimerId[0]);   
-  }
-  
   //Get the last state change 
-  sapActionState = sapBuffer.getLastElement(); 
+  sapActionState = ps.getState();
 
-  printSipAndPuffData(2);
+  //printSipAndPuffData(2);
   //Output action logic
 
   canOutputAction = true;
@@ -382,7 +301,7 @@ void pressureLoop() {
   //Logic to Skip Sip and puff action if it's in drag or scroll mode
 
   if((
-      sapActionState.secondaryState == CONF_SAP_SEC_STATE_RELEASED) &&
+      sapActionState.secondaryState == PRESS_SAP_SEC_STATE_RELEASED) &&
       (outputAction == CONF_ACTION_SCROLL ||
       outputAction == CONF_ACTION_DRAG)){
       releaseOutputAction();
@@ -396,12 +315,12 @@ void pressureLoop() {
   //Perform led action on sip and puff start
   while (sapActionIndex < sapActionSize && canOutputAction){
     //Perform output action and led action on sip and puff release 
-    if(sapActionState.mainState==sapActionProperty[sapActionIndex].sapActionState && 
-      sapActionState.secondaryState == CONF_SAP_SEC_STATE_RELEASED &&
-      sapActionState.elapsedTime >= sapActionProperty[sapActionIndex].sapActionStartTime &&
-      sapActionState.elapsedTime < sapActionProperty[sapActionIndex].sapActionEndTime){
+    if(sapActionState.mainState==sapActionProperty[sapActionIndex].inputActionState && 
+      sapActionState.secondaryState == PRESS_SAP_SEC_STATE_RELEASED &&
+      sapActionState.elapsedTime >= sapActionProperty[sapActionIndex].inputActionStartTime &&
+      sapActionState.elapsedTime < sapActionProperty[sapActionIndex].inputActionEndTime){
 
-      tempActionIndex=sapActionProperty[sapActionIndex].sapOutputActionNumber;      //used for releasing drag or scroll
+      tempActionIndex=sapActionProperty[sapActionIndex].inputActionNumber;      //used for releasing drag or scroll
 
       
       performOutputAction(tempActionIndex,
@@ -412,12 +331,12 @@ void pressureLoop() {
             
       break;
     } //Perform led action on sip and puff start
-    else if(sapActionState.mainState==sapActionProperty[sapActionIndex].sapActionState && 
-      sapActionState.secondaryState == CONF_SAP_SEC_STATE_STARTED &&
-      sapActionState.elapsedTime >= sapActionProperty[sapActionIndex].sapActionStartTime &&
-      sapActionState.elapsedTime < sapActionProperty[sapActionIndex].sapActionEndTime){
+    else if(sapActionState.mainState==sapActionProperty[sapActionIndex].inputActionState && 
+      sapActionState.secondaryState == PRESS_SAP_SEC_STATE_STARTED &&
+      sapActionState.elapsedTime >= sapActionProperty[sapActionIndex].inputActionStartTime &&
+      sapActionState.elapsedTime < sapActionProperty[sapActionIndex].inputActionEndTime){
 
-      tempActionIndex=sapActionProperty[sapActionIndex].sapOutputActionNumber;      //used for releasing drag or scroll
+      tempActionIndex=sapActionProperty[sapActionIndex].inputActionNumber;      //used for releasing drag or scroll
         
       led.setLedColorById(ledActionProperty[tempActionIndex].ledNumber, 
       ledActionProperty[tempActionIndex].ledStartColor, 
@@ -443,27 +362,29 @@ void releaseOutputAction(){
 
 void performOutputAction(int action, int ledNumber, int ledColor) {
     
-    led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS);                      //Set the initial pre-output action led color 
     switch (action) {
       case CONF_ACTION_NOTHING: {
-        releaseOutputAction();
         break;
       }
       case CONF_ACTION_LEFT_CLICK: {
+        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
         cursorLeftClick();
         releaseOutputAction();
         break;
       }
       case CONF_ACTION_RIGHT_CLICK: {
+        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
         cursorRightClick();
         releaseOutputAction();
         break;
       }
       case CONF_ACTION_DRAG: {
+        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
         cursorDrag();
         break;
       }
       case CONF_ACTION_SCROLL: {
+        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
         cursorScroll(); //Enter Scroll mode
         break;
       }
@@ -471,10 +392,39 @@ void performOutputAction(int action, int ledNumber, int ledColor) {
         //setJoystickCalibration();
         break;
       }
+      case CONF_ACTION_CURSOR_CENTER: {
+        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
+        //Perform cursor center
+        setJoystickCenter();
+        releaseOutputAction();
+        break;
+      }
       case CONF_ACTION_MIDDLE_CLICK: {
+        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
         //Perform cursor middle click
         cursorMiddleClick();
-        //releaseOutputAction();
+        releaseOutputAction();
+        break;
+      }
+      case CONF_ACTION_DEC_SPEED: {
+        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
+        //Decrease cursor speed
+        decreaseCursorSpeed();
+        releaseOutputAction();
+        break;
+      }
+      case CONF_ACTION_INC_SPEED: {
+        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
+        //Increase cursor speed
+        increaseCursorSpeed();
+        releaseOutputAction();
+        break;
+      }
+      case CONF_ACTION_CHANGE_MODE: {
+        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
+        //Change communication mode
+        changeComMode();
+        releaseOutputAction();
         break;
       }
    }
@@ -483,10 +433,10 @@ void performOutputAction(int action, int ledNumber, int ledColor) {
 
 void cursorLeftClick(void) {
   //Serial.println("Left Click");
-  if(comMethod==1){
+  if(comMode==1){
     mouse.click(MOUSE_LEFT);
   } 
-  else if(comMethod==2){
+  else if(comMode==2){
     btmouse.click(MOUSE_LEFT);
   }
   //delay(80);
@@ -494,10 +444,10 @@ void cursorLeftClick(void) {
 
 void cursorRightClick(void) {
   //Serial.println("Right Click");  
-  if(comMethod==1){
+  if(comMode==1){
     mouse.click(MOUSE_RIGHT);
   } 
-  else if(comMethod==2){
+  else if(comMode==2){
     btmouse.click(MOUSE_RIGHT);
   }
   //delay(80);
@@ -505,10 +455,10 @@ void cursorRightClick(void) {
 
 void cursorMiddleClick(void) {
   //Serial.println("Middle Click");  
-  if(comMethod==1){
+  if(comMode==1){
     mouse.click(MOUSE_MIDDLE);
   } 
-  else if(comMethod==2){
+  else if(comMode==2){
     btmouse.click(MOUSE_MIDDLE);
   }
   //delay(80);
@@ -516,10 +466,10 @@ void cursorMiddleClick(void) {
 
 void cursorDrag(void) {
   //Serial.println("Drag");  
-  if(comMethod==1){
+  if(comMode==1){
     mouse.press(MOUSE_LEFT);
   } 
-  else if(comMethod==2){
+  else if(comMode==2){
     btmouse.press(MOUSE_LEFT);
   }
   //delay(80);
@@ -533,6 +483,21 @@ void setJoystickCenter(void) {
   js.getInputComp();
   pointFloatType centerPoint = js.readInputComp();
   printJoystickFloatData(centerPoint);
+}
+
+void decreaseCursorSpeed(void) {
+  Serial.println("Decrease Cursor Speed");  
+}
+
+void increaseCursorSpeed(void) {
+  Serial.println("Increase Cursor Speed");  
+}
+
+void changeComMode(void) {
+  Serial.println("Change Communication Mode");  
+  if(comMode<2){ comMode++;}
+  else { comMode=0;}
+  Serial.println(comMode);  
 }
 
 
@@ -606,10 +571,10 @@ void joystickLoop() {
 
 void performJystick(){
   
-  if(comMethod==1){
+  if(comMode==1){
     (outputAction==CONF_ACTION_SCROLL)? mouse.scroll(yVal/10) : mouse.move(xVal, -yVal);
   }
-  else if(comMethod==2){
+  else if(comMode==2){
     (outputAction==CONF_ACTION_SCROLL)? btmouse.scroll(yVal/10) : btmouse.move(xVal, -yVal);
   } 
 
@@ -673,7 +638,7 @@ void initLedFeedback(){
       delay(500);
     }
     led.setLedColor(4,0,CONF_LED_BRIGHTNESS);
-    setLedState(1,3,4,2,600);
+    setLedState(1,3,4,3,2000);
     performLedBlink();
 }
 
@@ -692,20 +657,21 @@ void setLedState(int ledAction, int ledColorNumber, int ledNumber,  int ledBlink
 
 void performLed(){
   led.setLedColor(ledCurrentState.ledNumber, ledCurrentState.ledColorNumber, ledCurrentState.ledBrightness);
-    
+    Serial.println("test1");
 }
 
 void clearLed(){
-    led.clearLed(ledCurrentState.ledNumber);
-  
+    //led.clearLed(ledCurrentState.ledNumber);
+    led.setLedColor(ledCurrentState.ledNumber, 0, ledCurrentState.ledBrightness);
+Serial.println("test2");
 }
 
 //***SET RGB LED BLINK BY ID FUNCTION***//
 
 void performLedBlink() {
 
-  ledBlinkTimerId[0] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime, ledCurrentState.ledBlinkTime,performLed,ledCurrentState.ledBlinkNumber);   
-  ledBlinkTimerId[1] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime*2, ledCurrentState.ledBlinkTime*2,clearLed,ledCurrentState.ledBlinkNumber+1);   
+  ledBlinkTimerId[0] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime, 0,performLed,ledCurrentState.ledBlinkNumber);   
+  ledBlinkTimerId[1] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime, ledCurrentState.ledBlinkTime,clearLed,ledCurrentState.ledBlinkNumber);   
 
 }
 

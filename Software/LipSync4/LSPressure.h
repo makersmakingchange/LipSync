@@ -9,11 +9,21 @@
 #define PRESS_BUFF_SIZE 5
 #define PRESS_REF_TOLERANCE 0.1
 
+#define PRESS_SAP_DEFAULT_THRESHOLD 2.5 
+
 #define PRESS_FILTER_NONE 0
 #define PRESS_FILTER_AVERAGE 1
 
 #define PRESS_TYPE_ABS 0
 #define PRESS_TYPE_DIFF 1
+
+#define PRESS_SAP_MAIN_STATE_NONE 0
+#define PRESS_SAP_MAIN_STATE_SIP 1
+#define PRESS_SAP_MAIN_STATE_PUFF 2
+
+#define PRESS_SAP_SEC_STATE_WAITING 0
+#define PRESS_SAP_SEC_STATE_STARTED 1
+#define PRESS_SAP_SEC_STATE_RELEASED 2
 
 Adafruit_LPS35HW lps35hw = Adafruit_LPS35HW();
 
@@ -27,7 +37,15 @@ typedef struct {
   float diffPressure;
 } pressureStruct;
 
+typedef struct {
+  int mainState;            //none = 0, sip = 1, puff = 2
+  int secondaryState;       //waiting = 0, started = 1, detected = 2
+  unsigned long elapsedTime;     //in ms
+} sapStruct;
+
+
 LSCircularBuffer <pressureStruct> pressureBuffer(PRESS_BUFF_SIZE);
+LSCircularBuffer <sapStruct> sapBuffer(12);   //Create a buffer of type sapStruct
 
 class LSPressure {
   private: 
@@ -39,6 +57,13 @@ class LSPressure {
     float diffVal;
     sensors_event_t pressure_event;
     float refTolVal;
+    LSTimer mainStateTimer;
+    int sapStateTimerId;
+    sapStruct sapCurrState;
+    sapStruct sapPrevState;
+    float sipThreshold;
+    float puffThreshold;
+    int sapMainState;
   public:
     LSPressure();
     void begin(int type);                                    
@@ -48,11 +73,15 @@ class LSPressure {
     float getCompPressure();
     void setCompPressure();
     void setZeroPressure();
+    void setStateThreshold(float s, float p);
     void update();    
+    void updatePressure();
+    void updateState();
     float getMainPressure();
     float getRefPressure();
     float getDiffPressure();
     pressureStruct getAllPressure();
+    sapStruct getState();
 };
 
 LSPressure::LSPressure() {
@@ -77,6 +106,10 @@ void LSPressure::begin(int type) {
 
   refTolVal = PRESS_REF_TOLERANCE;
 
+  sipThreshold = -PRESS_SAP_DEFAULT_THRESHOLD;
+
+  puffThreshold = PRESS_SAP_DEFAULT_THRESHOLD;
+
   lps35hw.setDataRate(LPS35HW_RATE_25_HZ);  // 1,10,25,50,75
 
   if(pressureType==PRESS_TYPE_DIFF){
@@ -96,6 +129,14 @@ void LSPressure::clear() {
   while(pressureBuffer.getLength()<PRESS_BUFF_SIZE){
     pressureBuffer.pushElement({0.0, 0.0, 0.0});   
   }
+
+    //Push initial state to state Queue
+  
+  sapCurrState = sapPrevState = {PRESS_SAP_MAIN_STATE_NONE, PRESS_SAP_SEC_STATE_WAITING, 0};
+  sapBuffer.pushElement(sapCurrState);
+
+  //Reset and start the timer   
+  sapStateTimerId =  mainStateTimer.startTimer();
 
 }
 
@@ -148,8 +189,18 @@ void LSPressure::setZeroPressure() {
   compVal = (compVal / PRESS_BUFF_SIZE);
 }
 
+void LSPressure::setStateThreshold(float s, float p){
+  sipThreshold = s;
+  puffThreshold = p;
+}
 
 void LSPressure::update() {
+  updatePressure();
+  updateState();
+}
+
+
+void LSPressure::updatePressure() {
   //resetTimer();
 
   mainVal = lps35hw.readPressure();
@@ -176,6 +227,68 @@ void LSPressure::update() {
   //Serial.println(getTime());  
 }
 
+void LSPressure::updateState() {
+  mainStateTimer.run();
+  sapPrevState = sapBuffer.getLastElement();  //Get the previous state
+  float pressureValue = getDiffPressure();
+  //check for sip and puff conditions
+  if (pressureValue > puffThreshold)  { 
+    sapMainState = PRESS_SAP_MAIN_STATE_PUFF;
+  } else if (pressureValue < sipThreshold)  { 
+    sapMainState = PRESS_SAP_MAIN_STATE_SIP;
+  } else {
+    sapMainState = PRESS_SAP_MAIN_STATE_NONE;
+  }
+
+  //None:None, Sip:Sip, Puff:Puff
+  //Update time
+  if(sapPrevState.mainState == sapMainState){
+    sapCurrState = {sapMainState, sapPrevState.secondaryState, mainStateTimer.elapsedTime(sapStateTimerId)};
+    //Serial.println("a");
+    sapBuffer.updateLastElement(sapCurrState);
+  } else {  //None:Sip , None:Puff , Sip:None, Puff:None
+      //State: Sip or puff
+      //Previous state: {none, waiting, time} Note: There can't be sip or puff and waiting 
+      //New state: {Sip or puff, started, 0}
+      if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_WAITING){
+        sapCurrState = {sapMainState, PRESS_SAP_SEC_STATE_STARTED, 0};
+        //Serial.println("b");
+      } 
+      //State: none
+      //Previous state: {Sip or puff, started, time} Note: There can't be none and started 
+      //New state: {Sip or puff, released, time}      
+      else if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_STARTED){
+        sapCurrState = {sapPrevState.mainState, PRESS_SAP_SEC_STATE_RELEASED, sapPrevState.elapsedTime};
+        //Serial.println("c");
+      }
+      //State: None
+      //Previous state: {Sip or puff, released, time}
+      //New state: {none, waiting, 0}
+      else if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_RELEASED && sapMainState==PRESS_SAP_MAIN_STATE_NONE){
+        sapCurrState = {sapMainState, PRESS_SAP_SEC_STATE_WAITING, 0};
+        //Serial.println("d");
+      }
+      //State: Sip or puff
+      //Previous state: {none, released, time}
+      //New state: {Sip or puff, started, 0}
+      else if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_RELEASED && sapMainState!=PRESS_SAP_MAIN_STATE_NONE){
+        sapCurrState = {sapMainState, PRESS_SAP_SEC_STATE_STARTED, 0};
+        //Serial.println("e");
+      }      
+      //Push the new state   
+      sapBuffer.pushElement(sapCurrState);
+      //Reset and start the timer
+      mainStateTimer.restartTimer(sapStateTimerId);  
+  }
+
+  //No action in 1 minute : reset timer
+  if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_WAITING && mainStateTimer.elapsedTime(sapStateTimerId)>CONF_ACTION_TIMEOUT){
+      setZeroPressure();                                   //Update pressure compensation value 
+      //Reset and start the timer    
+      mainStateTimer.restartTimer(sapStateTimerId);   
+  }
+}
+
 float LSPressure::getMainPressure() {
   return pressureBuffer.getLastElement().mainPressure;
 }
@@ -193,6 +306,10 @@ float LSPressure::getDiffPressure() {
 
 pressureStruct LSPressure::getAllPressure() {
   return pressureBuffer.getLastElement();
+}
+
+sapStruct LSPressure::getState(){
+  return sapBuffer.getLastElement();
 }
 
 
