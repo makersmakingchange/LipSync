@@ -2,7 +2,6 @@
 #ifndef _LSOUTPUT_H
 #define _LSOUTPUT_H
 
-
 #include <Adafruit_NeoPixel.h>
 
 #define OUTPUT_RGB_LED_PIN A3 //output pin for neopixel

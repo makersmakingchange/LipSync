@@ -50,6 +50,8 @@ ledStateStruct ledCurrentState;
 
 int ledBlinkTimerId[2];
 
+LSTimer ledStateTimer;
+
 //Input module variables and structures 
 
 typedef struct { 
@@ -113,8 +115,6 @@ int yVal;
 //Timer related variables 
 
 int pollTimerId[3];
-
-LSTimer ledStateTimer;
 
 LSTimer pollTimer;
 
@@ -222,10 +222,10 @@ void inputLoop() {
   int tempActionIndex = 0;
   
   for (int i=0; i < inputActionSize; i++) {
-    if(inputButtonActionState.mainState==switchActionProperty[i].inputActionState && 
+    if(inputButtonActionState.mainState==buttonActionProperty[i].inputActionState && 
       inputButtonActionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
-      inputButtonActionState.elapsedTime >= switchActionProperty[i].inputActionStartTime &&
-      inputButtonActionState.elapsedTime < switchActionProperty[i].inputActionEndTime){
+      inputButtonActionState.elapsedTime >= buttonActionProperty[i].inputActionStartTime &&
+      inputButtonActionState.elapsedTime < buttonActionProperty[i].inputActionEndTime){
       
       tempActionIndex=sapActionProperty[i].inputActionNumber;  
       
