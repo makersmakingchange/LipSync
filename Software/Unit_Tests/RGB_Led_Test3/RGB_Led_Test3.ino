@@ -17,6 +17,8 @@ typedef struct {
 
 ledStateStruct ledCurrentState; 
 
+
+
 LSOutput led;
 
 int ledBlinkTimerId[8];
@@ -61,12 +63,14 @@ void initLedFeedback(){
 
 void initLedFeedback2(){
       performLedOff();
-      setLedState(1,1,4,3,2000);
-      ledBlinkTimerId[0] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime,0,ledCurrentState.ledBlinkNumber*2,performLedOn); 
-      setLedState(1,3,4,3,2000);
-      ledBlinkTimerId[1] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime*2,0,ledCurrentState.ledBlinkNumber+1,performLedOff);  
-      //setLedState(1,4,4,1,2000);
-      //ledBlinkTimerId[2] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime,0,1,performLedOn); 
+      setLedState(1,1,4,2,1000);
+      int c1 = 1;
+      ledBlinkTimerId[0] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime,0,ledCurrentState.ledBlinkNumber+2,performLedOn,(void *)c1); 
+      int c2 = 2;
+      ledBlinkTimerId[1] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime*2,0,ledCurrentState.ledBlinkNumber+1,performLedOn,(void *)c2);  
+      int c3 = 3;
+      ledBlinkTimerId[1] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime*4,0,ledCurrentState.ledBlinkNumber,performLedOn,(void *)c3);  
+
 }
 
 
@@ -83,8 +87,9 @@ void setLedState(int ledAction, int ledColorNumber, int ledNumber,  int ledBlink
 
 }
 
-void performLedOn(){
-  led.setLedColor(ledCurrentState.ledNumber, ledCurrentState.ledColorNumber, ledCurrentState.ledBrightness);
+void performLedOn(void * args){
+  int color = (int)args;
+  led.setLedColor(ledCurrentState.ledNumber, color, ledCurrentState.ledBrightness);
   Serial.println("LED ON");
 }
 
@@ -96,15 +101,16 @@ void performLedOff(){
 
 
 void performLedOnce(){
-  ledBlinkTimerId[2] = ledStateTimer.setTimeout(ledCurrentState.ledBlinkTime,performLedOn);
+  int c3 = ledCurrentState.ledColorNumber;
+  ledBlinkTimerId[2] = ledStateTimer.setTimeout(ledCurrentState.ledBlinkTime,performLedOn,(void *) c3);
   Serial.println("LED ON ONCE");
 }
 
 
 void performLedBlink() {
 
-  ledBlinkTimerId[0] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime, 0,ledCurrentState.ledBlinkNumber*2,performLedOn);  
-  ledBlinkTimerId[1] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime*2, 0,ledCurrentState.ledBlinkNumber+1,performLedOff);   
- 
+//  ledBlinkTimerId[0] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime, 0,ledCurrentState.ledBlinkNumber*2,performLedOn);  
+//  ledBlinkTimerId[1] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime*2, 0,ledCurrentState.ledBlinkNumber+1,performLedOff);   
+// 
   
 }

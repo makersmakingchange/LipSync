@@ -44,24 +44,23 @@ typedef struct {
 //Color properties 
 const colorStruct colorProperty[] {
     {LED_CLR_NONE,"None",{0,0,0}},
-    {LED_CLR_RED,"Red",{60,0,0}},
     {LED_CLR_BLUE,"Blue",{0,0,60}},
-    {LED_CLR_GREEN,"Green",{0,60,0}},
-    {LED_CLR_YELLOW,"Yellow",{50,60,0}}, 
-    {LED_CLR_PINK,"Pink",{60,0,50}},   
-    {LED_CLR_ORANGE,"Orange",{60,20,0}},
     {LED_CLR_PURPLE,"Purple",{50,0,128}},
-    {LED_CLR_TEAL,"Teal",{0,128,128}},
-    {LED_CLR_MAGENTA,"Magenta",{255,0,255}}       
+    {LED_CLR_MAGENTA,"Magenta",{255,0,255}},       
+    {LED_CLR_PINK,"Pink",{60,0,50}},   
+    {LED_CLR_RED,"Red",{60,0,0}},
+    {LED_CLR_ORANGE,"Orange",{60,20,0}},
+    {LED_CLR_YELLOW,"Yellow",{50,60,0}}, 
+    {LED_CLR_GREEN,"Green",{0,60,0}},
+    {LED_CLR_TEAL,"Teal",{0,128,128}}  
 };
 
 
 class LSOutput {
-   private:
-     //LSOutput();
+  private:
+   
   public:
     LSOutput();
-    //static LSOutput* getInstance();   
     void begin();   
     void clearLedAll();                                  
     void clearLed(int ledNumber);
@@ -73,11 +72,7 @@ class LSOutput {
 
 };
 
-//LSOutput* LSOutput::getInstance()                                              
-//{                                                                                                                                   
-//    static LSOutput instance;                                                               
-//    return &instance;                                                            
-//}      
+    
 
 LSOutput::LSOutput() {
 

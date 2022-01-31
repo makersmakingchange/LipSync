@@ -57,11 +57,10 @@ const colorStruct colorProperty[] {
 
 
 class LSOutput {
-   private:
-     //LSOutput();
+  private:
+   
   public:
     LSOutput();
-    //static LSOutput* getInstance();   
     void begin();   
     void clearLedAll();                                  
     void clearLed(int ledNumber);
@@ -73,11 +72,7 @@ class LSOutput {
 
 };
 
-//LSOutput* LSOutput::getInstance()                                              
-//{                                                                                                                                   
-//    static LSOutput instance;                                                               
-//    return &instance;                                                            
-//}      
+    
 
 LSOutput::LSOutput() {
 
