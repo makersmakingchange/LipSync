@@ -48,7 +48,7 @@ typedef struct {
 
 ledStateStruct ledCurrentState; 
 
-int ledBlinkTimerId[2];
+int ledTimerId[9];
 
 LSTimer ledStateTimer;
 
@@ -338,7 +338,7 @@ void pressureLoop() {
 
       tempActionIndex=sapActionProperty[sapActionIndex].inputActionNumber;      //used for releasing drag or scroll
         
-      led.setLedColorById(ledActionProperty[tempActionIndex].ledNumber, 
+      led.setLedColor(ledActionProperty[tempActionIndex].ledNumber, 
       ledActionProperty[tempActionIndex].ledStartColor, 
       CONF_LED_BRIGHTNESS); 
       break;
@@ -367,24 +367,24 @@ void performOutputAction(int action, int ledNumber, int ledColor) {
         break;
       }
       case CONF_ACTION_LEFT_CLICK: {
-        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
+        led.setLedColor(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
         cursorLeftClick();
         releaseOutputAction();
         break;
       }
       case CONF_ACTION_RIGHT_CLICK: {
-        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
+        led.setLedColor(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
         cursorRightClick();
         releaseOutputAction();
         break;
       }
       case CONF_ACTION_DRAG: {
-        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
+        led.setLedColor(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
         cursorDrag();
         break;
       }
       case CONF_ACTION_SCROLL: {
-        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
+        led.setLedColor(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
         cursorScroll(); //Enter Scroll mode
         break;
       }
@@ -393,35 +393,35 @@ void performOutputAction(int action, int ledNumber, int ledColor) {
         break;
       }
       case CONF_ACTION_CURSOR_CENTER: {
-        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
+        led.setLedColor(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
         //Perform cursor center
         setJoystickCenter();
         releaseOutputAction();
         break;
       }
       case CONF_ACTION_MIDDLE_CLICK: {
-        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
+        led.setLedColor(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
         //Perform cursor middle click
         cursorMiddleClick();
         releaseOutputAction();
         break;
       }
       case CONF_ACTION_DEC_SPEED: {
-        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
+        led.setLedColor(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
         //Decrease cursor speed
         decreaseCursorSpeed();
         releaseOutputAction();
         break;
       }
       case CONF_ACTION_INC_SPEED: {
-        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
+        led.setLedColor(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
         //Increase cursor speed
         increaseCursorSpeed();
         releaseOutputAction();
         break;
       }
       case CONF_ACTION_CHANGE_MODE: {
-        led.setLedColorById(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
+        led.setLedColor(ledNumber,ledColor,CONF_LED_BRIGHTNESS); 
         //Change communication mode
         changeComMode();
         releaseOutputAction();
@@ -524,18 +524,18 @@ void getJoystickCalibration() {
 }
 
 void setJoystickCalibration() {
-    for (int j = 1; j <= 7; j++) {
-      led.setLedColor(4,j,CONF_LED_BRIGHTNESS);
-      delay(500);
-    }
-    led.setLedColor(4,0,CONF_LED_BRIGHTNESS);
-   String commandKey;
+  for (int j = 1; j <= 7; j++) {
+    led.setLedColor(4,j,CONF_LED_BRIGHTNESS);
+    delay(500);
+  }
+  led.setLedColor(4,0,CONF_LED_BRIGHTNESS);
+  String commandKey;
   pointFloatType maxPoint;
   delay(1000);
   
   for (int i=1; i < 5; i++) {
     commandKey="CA"+String(i);
-    led.setLedColorById(2, LED_CLR_ORANGE, CONF_LED_BRIGHTNESS_HIGH); 
+    led.setLedColor(2, LED_CLR_ORANGE, CONF_LED_BRIGHTNESS_HIGH); 
     maxPoint=js.getInputMax(i);
     mem.writePoint(CONF_SETTINGS_FILE,commandKey,maxPoint);
     printJoystickFloatData(maxPoint);
@@ -633,15 +633,15 @@ void printJoystickIntData(pointIntType point) {
 //*********************************//
 
 void initLedFeedback(){
-    for (int j = 1; j <= 7; j++) {
-      led.setLedColor(4,j,CONF_LED_BRIGHTNESS);
-      delay(500);
-    }
-    led.setLedColor(4,0,CONF_LED_BRIGHTNESS);
-    setLedState(1,3,4,3,2000);
-    performLedBlink();
-}
+    turnLedOff();
+    setLedState(1,1,4,2,1000);
 
+   for (int i = 0; i <= 8; i++) {
+    int color = i;
+    if(color==8){color = 0; }
+    ledTimerId[i] = ledStateTimer.setTimeout(ledCurrentState.ledBlinkTime*(i+1),turnLedOnWithColor,(void *)color); 
+   }
+}
 
 void setLedState(int ledAction, int ledColorNumber, int ledNumber,  int ledBlinkNumber, unsigned long ledBlinkTime){ //Set led state after output action is performed 
   if(ledNumber<=OUTPUT_RGB_LED_NUM+1){
@@ -655,38 +655,44 @@ void setLedState(int ledAction, int ledColorNumber, int ledNumber,  int ledBlink
 
 }
 
-void performLed(){
+void turnLedOn(){
   led.setLedColor(ledCurrentState.ledNumber, ledCurrentState.ledColorNumber, ledCurrentState.ledBrightness);
-    Serial.println("test1");
+} 
+
+void turnLedOnWithColor(void * args){
+  int color = (int)args;
+  led.setLedColor(ledCurrentState.ledNumber, color, ledCurrentState.ledBrightness);
 }
 
-void clearLed(){
-    //led.clearLed(ledCurrentState.ledNumber);
-    led.setLedColor(ledCurrentState.ledNumber, 0, ledCurrentState.ledBrightness);
-Serial.println("test2");
+void turnLedOff(){
+    led.clearLed(ledCurrentState.ledNumber);
 }
 
-//***SET RGB LED BLINK BY ID FUNCTION***//
 
-void performLedBlink() {
+void turnLedOnce(){
+  ledTimerId[0] = ledStateTimer.setTimeout(ledCurrentState.ledBlinkTime,turnLedOn);
+}
 
-  ledBlinkTimerId[0] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime, 0,performLed,ledCurrentState.ledBlinkNumber);   
-  ledBlinkTimerId[1] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime, ledCurrentState.ledBlinkTime,clearLed,ledCurrentState.ledBlinkNumber);   
 
+void blinkLed() {
+
+  ledTimerId[0] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime, 0,ledCurrentState.ledBlinkNumber*2,turnLedOn);  
+  ledTimerId[1] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime*2, 0,ledCurrentState.ledBlinkNumber+1,turnLedOff);   
+ 
 }
 
 void performLedAction(){
     switch (ledCurrentState.ledAction) {
       case LED_ACTION_OFF: {
-        clearLed();
+        turnLedOff();
         break;
       }
       case LED_ACTION_ON: {
-        performLed();
+        turnLedOn();
         break;
       }
       case LED_ACTION_BLINK: {
-        performLedBlink();
+        blinkLed();
         break;
       }
     }

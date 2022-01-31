@@ -18,7 +18,6 @@
 #define LED_CLR_GREEN 8
 #define LED_CLR_TEAL 9
 
-
 #define LED_ACTION_OFF 0
 #define LED_ACTION_ON 1
 #define LED_ACTION_BLINK 2
@@ -58,23 +57,22 @@ const colorStruct colorProperty[] {
 
 
 class LSOutput {
+  private:
+   
   public:
     LSOutput();
-    void begin();  
+    void begin();   
     void clearLedAll();                                  
     void clearLed(int ledNumber);
-    void setLedState(int ledState, int ledNumber);
     uint32_t getLedColor(int ledNumber);
-    void setLedColorById(int ledNumber, int ledColorNumber, uint8_t ledBrightness); 
     uint8_t getLedBrightness();
-    void setLedBrightness(uint8_t ledBrightness); 
-    void setLedColor(int ledNumber, int ledColorNumber, uint8_t ledBrightness);
-   private:
-     int ledAction;                               //off = 0, on = 1, blink = 2
-     boolean ledStateArray[OUTPUT_RGB_LED_NUM];        //off = 0, on = 1
-     LSTimer ledStateTimer;
+    void setLedBrightness(int ledBrightness); 
+    void setLedColor(int ledNumber, int ledColorNumber, int ledBrightness); 
+
 
 };
+
+    
 
 LSOutput::LSOutput() {
 
@@ -83,11 +81,9 @@ LSOutput::LSOutput() {
 void LSOutput::begin() {
 
   pinMode(OUTPUT_RGB_LED_PIN, OUTPUT);
-
   ledPixels.begin();
-  //clearLedAll();
+  clearLedAll();
 }
-
 
 
 //***CLEAR ALL RGB LED FUNCTION***//
@@ -99,22 +95,9 @@ void LSOutput::clearLedAll() {
 //***CLEAR RGB LED FUNCTION***//
 
 void LSOutput::clearLed(int ledNumber) {
-
-  setLedColor(ledNumber,LED_CLR_NONE,0);
+  setLedColor(ledNumber,LED_CLR_NONE,255);
 }
 
-//***SET RGB LED STATE FUNCTION***//
-
-void LSOutput::setLedState(int ledState, int ledNumber){ //Set led state after output action is performed 
-  if(ledNumber<=OUTPUT_RGB_LED_NUM){
-    ledStateArray[ledNumber-1]=ledState;
-  }
-  else if(ledNumber==OUTPUT_RGB_LED_NUM+1){
-      for (int i=0; i < OUTPUT_RGB_LED_NUM; i++) {
-        ledStateArray[i]=ledState;
-      }
-  }
-}
 
 //***GET RGB LED COLOR FUNCTION***//
 
@@ -124,17 +107,6 @@ uint32_t LSOutput::getLedColor(int ledNumber) {
   
   return colorValue;
 }
-
-
-//***SET RGB LED COLOR BY ID FUNCTION***//
-
-void LSOutput::setLedColorById(int ledNumber, int ledColorNumber, uint8_t ledBrightness) {
-  if(ledAction == LED_ACTION_BLINK){
-    return;
-  }
-  setLedColor(ledNumber,ledColorNumber,ledBrightness);
-}
-
 
 
 //***GET RGB LED BRIGHTNESS FUNCTION***//
@@ -147,15 +119,16 @@ uint8_t LSOutput::getLedBrightness() {
 
 //***SET RGB LED BRIGHTNESS FUNCTION***//
 
-void LSOutput::setLedBrightness(uint8_t ledBrightness) {
+void LSOutput::setLedBrightness(int ledBrightness) {
   ledPixels.setBrightness(ledBrightness);
   ledPixels.show();
 }
 
 
-//***PERFORM RGB LED COLOR FUNCTION***//
+//***SET RGB LED COLOR FUNCTION***//
 
-void LSOutput::setLedColor(int ledNumber, int ledColorNumber, uint8_t ledBrightness) {
+void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness) {
+  
     if(ledNumber>=1 && ledNumber <=OUTPUT_RGB_LED_NUM) {
       ledPixels.setPixelColor(ledNumber-1, ledPixels.Color(colorProperty[ledColorNumber].colorCode.g,colorProperty[ledColorNumber].colorCode.r,colorProperty[ledColorNumber].colorCode.b));
     }
@@ -167,6 +140,8 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, uint8_t ledBrightn
     ledPixels.setBrightness(ledBrightness);
     ledPixels.show();
 }
+
+
 
 
 #endif 
