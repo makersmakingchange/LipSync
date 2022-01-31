@@ -98,8 +98,7 @@ void turnLedOnWithColor(void * args){
 }
 
 void turnLedOff(){
-    //led.clearLed(ledCurrentState.ledNumber);
-    led.setLedColor(ledCurrentState.ledNumber, 0, ledCurrentState.ledBrightness);
+    led.clearLed(ledCurrentState.ledNumber);
     Serial.println("LED OFF");
 }
 

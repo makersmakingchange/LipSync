@@ -95,7 +95,7 @@ void LSOutput::clearLedAll() {
 //***CLEAR RGB LED FUNCTION***//
 
 void LSOutput::clearLed(int ledNumber) {
-  setLedColor(ledNumber,LED_CLR_NONE,0);
+  setLedColor(ledNumber,LED_CLR_NONE,255);
 }
 
 
