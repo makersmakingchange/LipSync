@@ -167,11 +167,11 @@ void LSOutput::setLedBlinkById(int ledNumber, int numBlinks, int delayBlinks, in
 
       for (int i = 0; i < numBlinks; i++) {
         if(ledNumber>=1 && ledNumber <=OUTPUT_RGB_LED_NUM) {
-          ledPixels.setPixelColor(ledNumber-1, ledPixels.Color(colorProperty[ledColorNumber].colorCode.g,colorProperty[ledColorNumber].colorCode.r,colorProperty[ledColorNumber].colorCode.b));
+          ledPixels.setPixelColor(ledNumber-1, colorProperty[ledColorNumber].colorCode);
         }
         else if (ledNumber==OUTPUT_RGB_LED_NUM+1) {
           for (int i = 0; i < OUTPUT_RGB_LED_NUM; i++) {
-            ledPixels.setPixelColor(i, ledPixels.Color(colorProperty[ledColorNumber].colorCode.g,colorProperty[ledColorNumber].colorCode.r,colorProperty[ledColorNumber].colorCode.b));            
+            ledPixels.setPixelColor(i, colorProperty[ledColorNumber].colorCode);            
           }
         }
         ledPixels.setBrightness(ledBrightness);
