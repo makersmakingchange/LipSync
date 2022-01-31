@@ -8,15 +8,15 @@
 #define OUTPUT_RGB_LED_NUM 3
 
 #define LED_CLR_NONE 0
-#define LED_CLR_RED 1
-#define LED_CLR_BLUE 2
-#define LED_CLR_GREEN 3
-#define LED_CLR_YELLOW 4
-#define LED_CLR_PINK 5
+#define LED_CLR_BLUE 1
+#define LED_CLR_PURPLE 2
+#define LED_CLR_MAGENTA 3
+#define LED_CLR_PINK 4
+#define LED_CLR_RED 5
 #define LED_CLR_ORANGE 6
-#define LED_CLR_PURPLE 7
-#define LED_CLR_TEAL 8
-#define LED_CLR_MAGENTA 9
+#define LED_CLR_YELLOW 7
+#define LED_CLR_GREEN 8
+#define LED_CLR_TEAL 9
 
 #define LED_ACTION_OFF 0
 #define LED_ACTION_ON 1
@@ -52,7 +52,7 @@ const colorStruct colorProperty[] {
     {LED_CLR_ORANGE,"Orange",{60,20,0}},
     {LED_CLR_YELLOW,"Yellow",{50,60,0}}, 
     {LED_CLR_GREEN,"Green",{0,60,0}},
-    {LED_CLR_TEAL,"Teal",{0,128,128}}  
+    {LED_CLR_TEAL,"Teal",{0,128,128}}
 };
 
 

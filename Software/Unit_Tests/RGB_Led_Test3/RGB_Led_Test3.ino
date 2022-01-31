@@ -21,7 +21,7 @@ ledStateStruct ledCurrentState;
 
 LSOutput led;
 
-int ledBlinkTimerId[8];
+int ledTimerId[9];
 
 LSTimer ledStateTimer;
 
@@ -36,7 +36,7 @@ void setup() {
 
   led.begin();       
   
-  initLedFeedback2();
+  initLedFeedback();
 
 
   
@@ -44,33 +44,32 @@ void setup() {
 
 
 void loop() {
-ledStateTimer.run();
+  ledStateTimer.run();
 }
 
 
 
 
 void initLedFeedback(){
-    setLedState(1,3,4,3,500);
-    performLedOff();
-    performLedBlink();
-    setLedState(1,3,4,3,9000);
-    //performLedOnce();
+    setLedState(1,LED_CLR_GREEN,4,3,500);
+    turnLedOff();
+    blinkLed();
+    setLedState(1,LED_CLR_PINK,4,3,9000);
+    turnLedOnce();
 
 
 }
 
 
 void initLedFeedback2(){
-      performLedOff();
-      setLedState(1,1,4,2,1000);
-      int c1 = 1;
-      ledBlinkTimerId[0] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime,0,ledCurrentState.ledBlinkNumber+2,performLedOn,(void *)c1); 
-      int c2 = 2;
-      ledBlinkTimerId[1] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime*2,0,ledCurrentState.ledBlinkNumber+1,performLedOn,(void *)c2);  
-      int c3 = 3;
-      ledBlinkTimerId[1] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime*4,0,ledCurrentState.ledBlinkNumber,performLedOn,(void *)c3);  
+    turnLedOff();
+    setLedState(1,1,4,2,1000);
 
+   for (int i = 0; i <= 8; i++) {
+    int color = i;
+    if(color==8){color = 0; }
+    ledTimerId[i] = ledStateTimer.setTimeout(ledCurrentState.ledBlinkTime*(i+1),turnLedOnWithColor,(void *)color); 
+   }
 }
 
 
@@ -87,30 +86,33 @@ void setLedState(int ledAction, int ledColorNumber, int ledNumber,  int ledBlink
 
 }
 
-void performLedOn(void * args){
+void turnLedOn(){
+  led.setLedColor(ledCurrentState.ledNumber, ledCurrentState.ledColorNumber, ledCurrentState.ledBrightness);
+  Serial.println("LED ON");
+} 
+
+void turnLedOnWithColor(void * args){
   int color = (int)args;
   led.setLedColor(ledCurrentState.ledNumber, color, ledCurrentState.ledBrightness);
-  Serial.println("LED ON");
+  Serial.println("LED ON WITH COLOR");
 }
 
-void performLedOff(){
+void turnLedOff(){
     //led.clearLed(ledCurrentState.ledNumber);
     led.setLedColor(ledCurrentState.ledNumber, 0, ledCurrentState.ledBrightness);
     Serial.println("LED OFF");
 }
 
 
-void performLedOnce(){
-  int c3 = ledCurrentState.ledColorNumber;
-  ledBlinkTimerId[2] = ledStateTimer.setTimeout(ledCurrentState.ledBlinkTime,performLedOn,(void *) c3);
+void turnLedOnce(){
+  ledTimerId[0] = ledStateTimer.setTimeout(ledCurrentState.ledBlinkTime,turnLedOn);
   Serial.println("LED ON ONCE");
 }
 
 
-void performLedBlink() {
+void blinkLed() {
 
-//  ledBlinkTimerId[0] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime, 0,ledCurrentState.ledBlinkNumber*2,performLedOn);  
-//  ledBlinkTimerId[1] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime*2, 0,ledCurrentState.ledBlinkNumber+1,performLedOff);   
-// 
-  
+  ledTimerId[0] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime, 0,ledCurrentState.ledBlinkNumber*2,turnLedOn);  
+  ledTimerId[1] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime*2, 0,ledCurrentState.ledBlinkNumber+1,turnLedOff);   
+ 
 }
