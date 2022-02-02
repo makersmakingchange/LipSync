@@ -89,9 +89,9 @@ void LSInput::update() {
   inputAllState = 0;
 
 
-  inputState[0] = !digitalRead(_inputPinArray[0]);
-  inputState[1] = !digitalRead(_inputPinArray[1]);
-  inputState[2] = !digitalRead(_inputPinArray[2]);
+//  inputState[0] = !digitalRead(_inputPinArray[0]);
+//  inputState[1] = !digitalRead(_inputPinArray[1]);
+//  inputState[2] = !digitalRead(_inputPinArray[2]);
   
   for (int i = 0; i < _inputNumber; i++){
     inputState[i] = !digitalRead(_inputPinArray[i]);

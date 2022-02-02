@@ -56,13 +56,12 @@ LSCircularBuffer <pointIntType> joystickInputBuffer(5);
 class LSJoystick {
   private:
     int applyDeadzone(int input);
-    pointIntType linearizeOutput(pointIntType inputPoint);
     pointIntType processInputReading(pointFloatType inputPoint);
+    pointIntType linearizeOutput(pointIntType inputPoint);
     pointIntType processOutputResponse(pointIntType inputPoint);
     int mapFloatInt(float input, float inputStart, float inputEnd, int outputStart, int outputEnd);
     pointFloatType absPoint(pointFloatType inputPoint);
     int sgn(float val);
-    //pointFloatType magnetInputComp;
     pointFloatType magnetInputCalibration[JOY_CALIBR_ARRAY_SIZE];
     int _magnetDirection;
     bool _deadzoneEnabled;
@@ -79,8 +78,8 @@ class LSJoystick {
     void setDeadzone(bool deadzoneEnabled,float deadzoneFactor);
     void setOutputScale(int scaleLevel);
     void setMinimumRadius();
-    pointFloatType readInputComp();
-    void getInputComp();
+    pointFloatType getInputComp();
+    void updateInputComp();
     pointFloatType getInputMax(int quad);
     void setInputMax(int quad, pointFloatType point);
     void update();
@@ -172,11 +171,11 @@ void LSJoystick::setMinimumRadius(){
 
 
 
-pointFloatType LSJoystick::readInputComp() {
+pointFloatType LSJoystick::getInputComp() {
   return magnetInputCalibration[0];
 }
 
-void LSJoystick::getInputComp() {
+void LSJoystick::updateInputComp() {
   Tlv493dSensor.updateData();
   //magnetInputComp.x = Tlv493dSensor.getY()*_magnetDirection;
   //magnetInputComp.y = Tlv493dSensor.getX()*_magnetDirection;

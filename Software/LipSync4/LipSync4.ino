@@ -480,8 +480,8 @@ void cursorScroll(void) {
 }
 
 void setJoystickCenter(void) {
-  js.getInputComp();
-  pointFloatType centerPoint = js.readInputComp();
+  js.updateInputComp();
+  pointFloatType centerPoint = js.getInputComp();
   printJoystickFloatData(centerPoint);
 }
 
