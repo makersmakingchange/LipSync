@@ -18,9 +18,10 @@
 #define LED_CLR_GREEN 8
 #define LED_CLR_TEAL 9
 
-#define LED_ACTION_OFF 0
-#define LED_ACTION_ON 1
-#define LED_ACTION_BLINK 2
+#define LED_ACTION_NONE 0
+#define LED_ACTION_OFF 1
+#define LED_ACTION_ON 2
+#define LED_ACTION_BLINK 3
 
 #define LED_STATE_OFF 0
 #define LED_STATE_ON 1
