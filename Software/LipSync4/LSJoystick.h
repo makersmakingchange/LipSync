@@ -4,6 +4,8 @@
 
 #include <Tlv493d.h>  //Infinion TLV493 magnetic sensor
 
+#define JOY_BUFF_SIZE 5
+
 #define JOY_CALIBR_ARRAY_SIZE 5
 #define JOY_RAW_ARRAY_SIZE 5
 
@@ -39,8 +41,6 @@
 
 #define JOY_OUTPUT_SCALE 5 
 
-Tlv493d Tlv493dSensor = Tlv493d();
-
 
 typedef struct {
   float x;
@@ -52,9 +52,11 @@ typedef struct {
   int y;
 } pointIntType;
 
-LSCircularBuffer <pointIntType> joystickInputBuffer(5);
+
 class LSJoystick {
   private:
+    Tlv493d Tlv493dSensor = Tlv493d();
+    LSCircularBuffer <pointIntType> joystickInputBuffer;
     int applyDeadzone(int input);
     pointIntType processInputReading(pointFloatType inputPoint);
     pointIntType linearizeOutput(pointIntType inputPoint);
@@ -90,6 +92,7 @@ class LSJoystick {
 };
 
 LSJoystick::LSJoystick() {
+  joystickInputBuffer.begin(JOY_BUFF_SIZE);
 }
 
 void LSJoystick::begin() {

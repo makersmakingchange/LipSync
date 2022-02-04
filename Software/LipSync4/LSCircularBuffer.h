@@ -12,9 +12,10 @@
 template<typename T>
 class LSCircularBuffer {
   public:
-    LSCircularBuffer( uint16_t inputSize );
+    LSCircularBuffer();
     ~LSCircularBuffer();
     T getElement( uint16_t );                       //Zero is the push location of new element 
+    void begin( uint16_t inputSize );
     void pushElement(const T elementVal);
     void updateLastElement(const T elementVal);
     T getLastElement( void ); 
@@ -36,14 +37,15 @@ class LSCircularBuffer {
 // Return     : void
 //*********************************//
 template<typename T>
-LSCircularBuffer<T>::LSCircularBuffer(uint16_t inputSize)
+LSCircularBuffer<T>::LSCircularBuffer()
 {
-  cBufferData = new T[inputSize];
-  cBufferLastPtr = 0;
-  cBufferElementsUsed = 0;  
-  cBufferSize = inputSize;
+//  cBufferData = new T[inputSize];
+//  cBufferLastPtr = 0;
+//  cBufferElementsUsed = 0;  
+//  cBufferSize = inputSize;
   
 }
+
 //*********************************//
 // Function   : ~LSCircularBuffer 
 // 
@@ -58,6 +60,25 @@ LSCircularBuffer<T>::~LSCircularBuffer()
 {
   delete[] cBufferData;
 
+}
+
+//*********************************//
+// Function   : begin 
+// 
+// Description: create LSCircularBuffer type with arguments
+// 
+// Arguments :  uint16_t inputSize: number of elements
+// 
+// Return     : void
+//*********************************//
+template<typename T>
+void LSCircularBuffer<T>::begin(uint16_t inputSize)
+{
+  cBufferData = new T[inputSize];
+  cBufferLastPtr = 0;
+  cBufferElementsUsed = 0;  
+  cBufferSize = inputSize;
+  
 }
 
 //*********************************//

@@ -7,6 +7,8 @@
 #include <Adafruit_BMP280.h>   //onboard pressure sensor on Adafruit Sense Micro 
 
 #define PRESS_BUFF_SIZE 5
+#define PRESS_SAP_BUFF_SIZE 12
+
 #define PRESS_REF_TOLERANCE 0.1
 
 #define PRESS_SAP_DEFAULT_THRESHOLD 2.5 
@@ -25,12 +27,6 @@
 #define PRESS_SAP_SEC_STATE_STARTED 1
 #define PRESS_SAP_SEC_STATE_RELEASED 2
 
-Adafruit_LPS35HW lps35hw = Adafruit_LPS35HW();
-
-Adafruit_BMP280 bmp; // use I2C interface
-
-Adafruit_Sensor *bmp_pressure = bmp.getPressureSensor();
-
 typedef struct {
   float mainPressure;
   float refPressure;
@@ -44,11 +40,13 @@ typedef struct {
 } sapStruct;
 
 
-LSCircularBuffer <pressureStruct> pressureBuffer(PRESS_BUFF_SIZE);
-LSCircularBuffer <sapStruct> sapBuffer(12);   //Create a buffer of type sapStruct
-
 class LSPressure {
   private: 
+    Adafruit_LPS35HW lps35hw = Adafruit_LPS35HW();
+    Adafruit_BMP280 bmp; // use I2C interface
+    Adafruit_Sensor *bmp_pressure = bmp.getPressureSensor();
+    LSCircularBuffer <pressureStruct> pressureBuffer;
+    LSCircularBuffer <sapStruct> sapBuffer;   //Create a buffer of type sapStruct
     int filterMode;
     int pressureType;
     float mainVal;
@@ -85,7 +83,8 @@ class LSPressure {
 };
 
 LSPressure::LSPressure() {
-
+  pressureBuffer.begin(PRESS_BUFF_SIZE);
+  sapBuffer.begin(PRESS_SAP_BUFF_SIZE);  
 }
 
 void LSPressure::begin(int type) {

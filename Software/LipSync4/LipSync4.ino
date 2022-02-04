@@ -28,7 +28,7 @@ const ledActionStruct ledActionProperty[] {
     {CONF_ACTION_RIGHT_CLICK,        3,LED_CLR_NONE,  LED_CLR_BLUE,   LED_ACTION_BLINK},
     {CONF_ACTION_DRAG,               1,LED_CLR_PURPLE,LED_CLR_RED,    LED_ACTION_ON},
     {CONF_ACTION_SCROLL,             3,LED_CLR_PURPLE,LED_CLR_BLUE,   LED_ACTION_ON},
-    {CONF_ACTION_CURSOR_CALIBRATION, 2,LED_CLR_NONE,  LED_CLR_ORANGE, LED_ACTION_BLINK},
+    {CONF_ACTION_CURSOR_CALIBRATION, 4,LED_CLR_NONE,  LED_CLR_ORANGE, LED_ACTION_BLINK},
     {CONF_ACTION_CURSOR_CENTER,      2,LED_CLR_NONE,  LED_CLR_ORANGE, LED_ACTION_BLINK},
     {CONF_ACTION_MIDDLE_CLICK,       2,LED_CLR_NONE,  LED_CLR_PURPLE, LED_ACTION_BLINK},
     {CONF_ACTION_DEC_SPEED,          1,LED_CLR_NONE,  LED_CLR_RED,    LED_ACTION_BLINK},
@@ -38,7 +38,7 @@ const ledActionStruct ledActionProperty[] {
 };
 
 typedef struct { 
-  uint8_t ledAction;            //off = 0, on = 1, blink = 2
+  uint8_t ledAction;            //none = 0, off = 1, on = 2, blink = 3
   uint8_t ledColorNumber;
   uint8_t ledNumber;
   uint8_t ledBlinkNumber;
@@ -65,22 +65,25 @@ int inputActionSize;
 inputStruct inputButtonActionState, inputSwitchActionState;
 
 const inputActionStruct switchActionProperty[] {
-    {CONF_ACTION_NOTHING,            0, 0,0},
-    {CONF_ACTION_LEFT_CLICK,         1, 0,1000},
-    {CONF_ACTION_RIGHT_CLICK,        4, 0,1000},
-    {CONF_ACTION_DRAG,               1, 1000,3000},
-    {CONF_ACTION_SCROLL,             4, 1000,3000},
-    {CONF_ACTION_CURSOR_CALIBRATION, 1, 3000,10000},
-    {CONF_ACTION_MIDDLE_CLICK,       4, 3000,10000}
+    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_NONE,       0,0},
+    {CONF_ACTION_LEFT_CLICK,         INPUT_MAIN_STATE_S1_PRESSED, 0,1000},
+    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S2_PRESSED, 0,1000},
+    {CONF_ACTION_RIGHT_CLICK,        INPUT_MAIN_STATE_S3_PRESSED, 0,1000},
+    {CONF_ACTION_DRAG,               INPUT_MAIN_STATE_S1_PRESSED, 1000,3000},
+    {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED, 1000,3000},
+    {CONF_ACTION_SCROLL,             INPUT_MAIN_STATE_S3_PRESSED, 1000,3000},
+    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S1_PRESSED, 3000,10000},
+    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S2_PRESSED, 3000,10000},
+    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S3_PRESSED, 3000,10000},
 };
 
 const inputActionStruct buttonActionProperty[] {
-    {CONF_ACTION_NOTHING,            0, 0,0},
-    {CONF_ACTION_DEC_SPEED,          1, 0,1000},
-    {CONF_ACTION_INC_SPEED,          4, 0,1000},
-    {CONF_ACTION_CURSOR_CENTER,      2, 0,1000},
-    {CONF_ACTION_CHANGE_MODE,        2, 1000,3000},
-    {CONF_ACTION_CURSOR_CALIBRATION, 5, 0,1000}
+    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_NONE,        0,0},
+    {CONF_ACTION_DEC_SPEED,          INPUT_MAIN_STATE_S1_PRESSED,  0,1000},
+    {CONF_ACTION_INC_SPEED,          INPUT_MAIN_STATE_S3_PRESSED,  0,1000},
+    {CONF_ACTION_CURSOR_CENTER,      INPUT_MAIN_STATE_S2_PRESSED,  0,1000},
+    {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED,  1000,3000},
+    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S13_PRESSED, 0,1000}
 };
 
 
@@ -152,7 +155,7 @@ void setup() {
   while( !TinyUSBDevice.mounted() ) delay(1);
   //while (!Serial) { delay(1); }
   
-  delay(2000);
+  delay(1000);
 
   initMemory();
 
@@ -229,7 +232,7 @@ void inputLoop() {
       inputButtonActionState.elapsedTime >= buttonActionProperty[i].inputActionStartTime &&
       inputButtonActionState.elapsedTime < buttonActionProperty[i].inputActionEndTime){
       
-      tempActionIndex=sapActionProperty[i].inputActionNumber;  
+      tempActionIndex=buttonActionProperty[i].inputActionNumber;  
       
       performOutputAction(tempActionIndex,
       ledActionProperty[tempActionIndex].ledEndAction,
@@ -254,7 +257,7 @@ void inputLoop() {
       inputSwitchActionState.elapsedTime >= switchActionProperty[i].inputActionStartTime &&
       inputSwitchActionState.elapsedTime < switchActionProperty[i].inputActionEndTime){
 
-      tempActionIndex=sapActionProperty[i].inputActionNumber;  
+      tempActionIndex=switchActionProperty[i].inputActionNumber;  
       
       performOutputAction(tempActionIndex,
       ledActionProperty[tempActionIndex].ledEndAction,
@@ -400,8 +403,7 @@ void performOutputAction(int action, int ledAction, int ledNumber, int ledColor)
         break;
       }
       case CONF_ACTION_CURSOR_CALIBRATION: {
-        //setJoystickCalibration();
-        outputAction=CONF_ACTION_NOTHING;
+        setJoystickCalibration();
         break;
       }
       case CONF_ACTION_CURSOR_CENTER: {
@@ -449,7 +451,6 @@ void cursorLeftClick(void) {
   else if(comMode==2){
     btmouse.click(MOUSE_LEFT);
   }
-  //delay(80);
 }
 
 void cursorRightClick(void) {
@@ -460,7 +461,6 @@ void cursorRightClick(void) {
   else if(comMode==2){
     btmouse.click(MOUSE_RIGHT);
   }
-  //delay(80);
 }
 
 void cursorMiddleClick(void) {
@@ -471,7 +471,6 @@ void cursorMiddleClick(void) {
   else if(comMode==2){
     btmouse.click(MOUSE_MIDDLE);
   }
-  //delay(80);
 }
 
 void cursorDrag(void) {
@@ -482,7 +481,6 @@ void cursorDrag(void) {
   else if(comMode==2){
     btmouse.press(MOUSE_LEFT);
   }
-  //delay(80);
 }
 
 void cursorScroll(void) {
@@ -534,24 +532,25 @@ void getJoystickCalibration() {
 }
 
 void setJoystickCalibration() {
-  for (int j = 1; j <= 7; j++) {
-    led.setLedColor(4,j,CONF_LED_BRIGHTNESS);
-    delay(500);
-  }
-  led.setLedColor(4,0,CONF_LED_BRIGHTNESS);
-  String commandKey;
-  pointFloatType maxPoint;
-  delay(1000);
-  
-  for (int i=1; i < 5; i++) {
-    commandKey="CA"+String(i);
-    led.setLedColor(2, LED_CLR_ORANGE, CONF_LED_BRIGHTNESS_HIGH); 
-    maxPoint=js.getInputMax(i);
-    mem.writePoint(CONF_SETTINGS_FILE,commandKey,maxPoint);
-    printJoystickFloatData(maxPoint);
-    led.clearLed(2);    
-    delay(1000);
-  }
+  Serial.println("Calibration");  
+//  for (int j = 1; j <= 7; j++) {
+//    led.setLedColor(4,j,CONF_LED_BRIGHTNESS);
+//    delay(500);
+//  }
+//  led.setLedColor(4,0,CONF_LED_BRIGHTNESS);
+//  String commandKey;
+//  pointFloatType maxPoint;
+//  delay(1000);
+//  
+//  for (int i=1; i < 5; i++) {
+//    commandKey="CA"+String(i);
+//    led.setLedColor(2, LED_CLR_ORANGE, CONF_LED_BRIGHTNESS_HIGH); 
+//    maxPoint=js.getInputMax(i);
+//    mem.writePoint(CONF_SETTINGS_FILE,commandKey,maxPoint);
+//    printJoystickFloatData(maxPoint);
+//    led.clearLed(2);    
+//    delay(1000);
+//  }
 }
 
 void updateJoystick() {
@@ -644,7 +643,7 @@ void printJoystickIntData(pointIntType point) {
 
 void initLedFeedback(){
     turnLedOff();
-    setLedState(1,1,4,2,1000);
+    setLedState(1,1,4,2,500);
 
    for (int i = 0; i <= 8; i++) {
     int color = i;

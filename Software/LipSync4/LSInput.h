@@ -2,36 +2,35 @@
 #ifndef _LSINPUT_H
 #define _LSINPUT_H
 
+#define INPUT_BUFF_SIZE 5
 
 #define INPUT_MAIN_STATE_NONE           0
-#define INPUT_MAIN_STATE_B1_PRESSED     1
-#define INPUT_MAIN_STATE_B2_PRESSED     2
-#define INPUT_MAIN_STATE_B12_PRESSED    3
-#define INPUT_MAIN_STATE_B3_PRESSED     4
-#define INPUT_MAIN_STATE_B13_PRESSED    5
-#define INPUT_MAIN_STATE_B23_PRESSED    6
-#define INPUT_MAIN_STATE_B123_PRESSED   7
+#define INPUT_MAIN_STATE_S1_PRESSED     1
+#define INPUT_MAIN_STATE_S2_PRESSED     2
+#define INPUT_MAIN_STATE_S12_PRESSED    3
+#define INPUT_MAIN_STATE_S3_PRESSED     4
+#define INPUT_MAIN_STATE_S13_PRESSED    5
+#define INPUT_MAIN_STATE_S23_PRESSED    6
+#define INPUT_MAIN_STATE_S123_PRESSED   7
 
 #define INPUT_SEC_STATE_WAITING 0
 #define INPUT_SEC_STATE_STARTED 1
 #define INPUT_SEC_STATE_RELEASED 2
 
-#define INPUT_REACTION_TIME 20
+#define INPUT_REACTION_TIME 120
 
 #define INPUT_ACTION_TIMEOUT 60000
 
 typedef struct {
-  int mainState;            //button1 + 2*button2 + 4*button3
-  int secondaryState;       //waiting = 0, started = 1, detected = 2
+  int mainState;                 //button1 + 2*button2 + 4*button3
+  int secondaryState;            //waiting = 0, started = 1, released = 2
   unsigned long elapsedTime;     //in ms
 } inputStruct;
 
 
-
-LSCircularBuffer <inputStruct> inputBuffer(5);
-
 class LSInput {
   private: 
+    LSCircularBuffer <inputStruct> inputBuffer;
     int *_inputPinArray;
     int _inputNumber;
     int inputState[3];
@@ -51,6 +50,7 @@ class LSInput {
 
 LSInput::LSInput(int* inputPinArray, int inputNumber)
 {
+  inputBuffer.begin(INPUT_BUFF_SIZE);
   _inputPinArray = new int[inputNumber];
 
   _inputNumber = inputNumber;
@@ -88,11 +88,6 @@ void LSInput::update() {
 
   inputAllState = 0;
 
-
-//  inputState[0] = !digitalRead(_inputPinArray[0]);
-//  inputState[1] = !digitalRead(_inputPinArray[1]);
-//  inputState[2] = !digitalRead(_inputPinArray[2]);
-  
   for (int i = 0; i < _inputNumber; i++){
     inputState[i] = !digitalRead(_inputPinArray[i]);
     inputAllState+= pow(2,i) * inputState[i];
@@ -122,7 +117,7 @@ void LSInput::update() {
         inputCurrState = {inputAllState, INPUT_SEC_STATE_STARTED, 0};
         //Serial.println("c");
       } // prev: press x,started  current : none  OR prev: press x,started  current : press y and elapsed time>=150
-      else if(inputPrevState.secondaryState==INPUT_SEC_STATE_STARTED){
+      else if(inputPrevState.secondaryState==INPUT_SEC_STATE_STARTED && inputPrevState.elapsedTime>=INPUT_REACTION_TIME){
         inputCurrState = {inputPrevState.mainState, INPUT_SEC_STATE_RELEASED, inputPrevState.elapsedTime};
         //Serial.println("d");
       } // prev: press x,released  current : none 
