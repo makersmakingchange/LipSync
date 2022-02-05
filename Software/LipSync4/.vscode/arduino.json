@@ -1,0 +1,7 @@
+{
+    "configuration": "softdevice=s140v6,debug=l0,debug_output=serial",
+    "board": "adafruit:nrf52:feather52840sense",
+    "programmer": "adafruit:nrfutil_boot",
+    "port": "COM3",
+    "sketch": "LipSync4.ino"
+}
