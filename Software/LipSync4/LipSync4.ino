@@ -46,11 +46,11 @@ typedef struct {
   uint8_t ledBrightness;
 } ledStateStruct; 
 
-ledStateStruct ledCurrentState; 
+ledStateStruct* ledCurrentState; 
 
 int ledTimerId[9];
 
-LSTimer ledStateTimer;
+LSTimer <void> ledStateTimer;
 
 //Input module variables and structures 
 
@@ -119,7 +119,7 @@ int yVal;
 
 int pollTimerId[3];
 
-LSTimer pollTimer;
+LSTimer <void> pollTimer;
 
 //General
 
@@ -645,43 +645,56 @@ void initLedFeedback(){
     turnLedOff();
     setLedState(1,1,4,2,500);
 
+//Serial.println(ledCurrentState->ledBrightness);
+ ledStateStruct tempCurrentState ={2, 3, 1,  6,500,199};
+ 
    for (int i = 0; i <= 8; i++) {
     int color = i;
     if(color==8){color = 0; }
-    ledTimerId[i] = ledStateTimer.setTimeout(ledCurrentState.ledBlinkTime*(i+1),turnLedOnWithColor,(void *)color); 
+    //ledTimerId[i] = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime*(i+1),turnLedOnWithColor,(void *)color); 
    }
+//turnLedOnWithState(&tempCurrentState);
+   ledTimerId[0] = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime,turnLedOnWithState,(ledStateStruct*) ledCurrentState); 
 }
 
 void setLedState(int ledAction, int ledColorNumber, int ledNumber,  int ledBlinkNumber, unsigned long ledBlinkTime){ //Set led state after output action is performed 
   if(ledNumber<=OUTPUT_RGB_LED_NUM+1){
-    ledCurrentState.ledAction=ledAction;
-    ledCurrentState.ledColorNumber=ledColorNumber;
-    ledCurrentState.ledNumber=ledNumber;
-    ledCurrentState.ledBlinkNumber=ledBlinkNumber;
-    ledCurrentState.ledBlinkTime=ledBlinkTime;
-    ledCurrentState.ledBrightness=CONF_LED_BRIGHTNESS;
+//    ledStateStruct tempCurrentState ={ledAction, ledColorNumber, ledNumber,  ledBlinkNumber,ledBlinkTime,CONF_LED_BRIGHTNESS};
+//    ledCurrentState = &tempCurrentState;
+    ledCurrentState->ledAction=ledAction;
+    ledCurrentState->ledColorNumber=ledColorNumber;
+    ledCurrentState->ledNumber=ledNumber;
+    ledCurrentState->ledBlinkNumber=ledBlinkNumber;
+    ledCurrentState->ledBlinkTime=ledBlinkTime;
+    ledCurrentState->ledBrightness=CONF_LED_BRIGHTNESS;
   }
 
 }
 
 void turnLedOn(){
-  led.setLedColor(ledCurrentState.ledNumber, ledCurrentState.ledColorNumber, ledCurrentState.ledBrightness);
+  led.setLedColor(ledCurrentState->ledNumber, ledCurrentState->ledColorNumber, ledCurrentState->ledBrightness);
 } 
 
 void turnLedOnWithColor(void * args){
   int color = (int)args;
-  led.setLedColor(ledCurrentState.ledNumber, color, ledCurrentState.ledBrightness);
+  led.setLedColor(ledCurrentState->ledNumber, color, ledCurrentState->ledBrightness);
 }
 
-void turnLedOnWithState(ledStateStruct * args){
-  int number = args->ledNumber;
-  int color = args->ledColorNumber;
-  int brightness = args->ledBrightness;
-  led.setLedColor(number, color, brightness);
+void turnLedOnWithState(ledStateStruct* args){
+
+  //ledStateStruct* tempCurrentState = (ledStateStruct) args;
+  Serial.println(args->ledNumber);
+
+//    Serial.println(args->ledColorNumber);
+//    Serial.println(args->ledBrightness);
+//  int number = args->ledNumber;
+//  int color = args->ledColorNumber;
+//  int brightness = args->ledBrightness;
+//  led.setLedColor(number, color, brightness);
 }
 
 void turnLedOff(){
-    led.clearLed(ledCurrentState.ledNumber);
+    led.clearLed(ledCurrentState->ledNumber);
 }
 
 void turnLedAllOff(){
@@ -691,19 +704,19 @@ void turnLedAllOff(){
 
 
 void turnLedOnce(){
-  ledTimerId[0] = ledStateTimer.setTimeout(ledCurrentState.ledBlinkTime,turnLedOn);
+  ledTimerId[0] = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime,turnLedOn);
 }
 
 
 void blinkLed() {
 
-  ledTimerId[0] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime, 0,ledCurrentState.ledBlinkNumber*2,turnLedOn);  
-  ledTimerId[1] = ledStateTimer.setTimer(ledCurrentState.ledBlinkTime*2, 0,ledCurrentState.ledBlinkNumber+1,turnLedOff);   
+  ledTimerId[0] = ledStateTimer.setTimer(ledCurrentState->ledBlinkTime, 0,ledCurrentState->ledBlinkNumber*2,turnLedOn);  
+  ledTimerId[1] = ledStateTimer.setTimer(ledCurrentState->ledBlinkTime*2, 0,ledCurrentState->ledBlinkNumber+1,turnLedOff);   
  
 }
 
 void performLedAction(){
-    switch (ledCurrentState.ledAction) {
+    switch (ledCurrentState->ledAction) {
       case LED_ACTION_OFF: {
         turnLedOff();
         break;

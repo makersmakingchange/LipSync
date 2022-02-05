@@ -55,7 +55,7 @@ class LSPressure {
     float diffVal;
     sensors_event_t pressure_event;
     float refTolVal;
-    LSTimer mainStateTimer;
+    LSTimer <void> mainStateTimer;
     int sapStateTimerId;
     sapStruct sapCurrState;
     sapStruct sapPrevState;

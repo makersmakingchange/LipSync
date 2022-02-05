@@ -37,7 +37,7 @@ class LSInput {
     int inputAllState;
     inputStruct inputCurrState = {0, 0, 0};
     inputStruct inputPrevState = {0, 0, 0};
-    LSTimer inputStateTimer;
+    LSTimer <void> inputStateTimer;
     int inputStateTimerId;
   public:
     LSInput(int* inputPinArray, int inputNumber);

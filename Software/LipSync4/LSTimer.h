@@ -6,42 +6,22 @@
 #ifndef _LSTIMER_H
 #define _LSTIMER_H
 
-typedef void (*timer_callback)(void);
-typedef void (*timer_callback_p)(void *);
 
+template<typename T>
 class LSTimer {
-  public:
+  private:
     const static int MAX_TIMERS = 10;                                             //Maximum number of timers
     const static int RUN_FOREVER = 0;                 
     const static int RUN_ONCE = 1;
-    LSTimer();                                                                    //Constructor
-    void run();                                                                   //Must be called inside loop()
-    int setInterval(unsigned long d, unsigned long o, timer_callback f);          //Call function f every d milliseconds, start in o milliseconds
-    int setInterval(unsigned long d, unsigned long o, timer_callback_p f, void* p);
-    int setTimeout(unsigned long o, timer_callback f);                            //Call function f once after d milliseconds
-    int setTimeout( unsigned long o, timer_callback_p f, void* p);
-    int setTimer(unsigned long d, unsigned long o, unsigned n, timer_callback f); //Call function f every d milliseconds for n times, start in o milliseconds
-    int setTimer(unsigned long d, unsigned long o, unsigned n, timer_callback_p f, void* p);
-    int startTimer(); 
-    unsigned long elapsedTime(int timerId);
-    void deleteTimer(int numTimer);                                               //Destroy the specified timer
-    void restartTimer(int numTimer);                                              //Restart the specified timer
-    boolean isEnabled(int numTimer);                                              //Returns true if the specified timer is enabled
-    void enable(int numTimer);                                                    //Enables the specified timer
-    void disable(int numTimer);                                                   //Disables the specified timer
-    void toggle(int numTimer);                                                    //Toggle(Enables/Disables) the specified timer
-    int getNumTimers();                                                           //Returns the number of used timers
-    int getNumAvailableTimers() { return MAX_TIMERS - numTimers; };               //Returns the number of available timers
-  private:
     const static int DEFCALL_DONTRUN = 0;                                         //Don't call the callback function
     const static int DEFCALL_RUNONLY = 1;                                         //Call the callback function but don't delete the timer
     const static int DEFCALL_RUNANDDEL = 2;                                       //Call the callback function and delete the timer
-    int findFirstFreeSlot();                                                      //Find the first available slot
-    int setupTimer(unsigned long d, unsigned long o, boolean on, boolean h, unsigned n, void* f, void* p);
+    typedef void (*timer_callback)(void);
+    typedef void (*timer_callback_p)(T *);
     typedef struct {
       unsigned long prev_millis;                                                  //Value returned in the previous run() call
       void* callback;                                                             //Pointer to the callback function
-      void* param;                                                                //Function parameter
+      T* param;                                                                   //Function parameter
       boolean hasParam;                                                           //Check if callback takes a parameter
       unsigned long delay;                                                        //Delay value
       unsigned maxNumRuns;                                                        //Number of runs to be executed
@@ -52,12 +32,33 @@ class LSTimer {
       unsigned toBeCalled;                                                        //Deferred function call
     } timer_t;
     timer_t timer[MAX_TIMERS];
-    unsigned numTimers;                                                           //Number of timers in use
+    int numTimers; 
+    int findFirstFreeSlot();                                                      //Find the first available slot
+    int setupTimer(unsigned long d, unsigned long o, boolean on, boolean h, unsigned n, void* f, T* p);                                                               
+  public:
+    LSTimer();                                                                    //Constructor
+    void run();                                                                   //Must be called inside loop()
+    int setInterval(unsigned long d, unsigned long o, timer_callback f);          //Call function f every d milliseconds, start in o milliseconds
+    int setInterval(unsigned long d, unsigned long o, timer_callback_p f, T* p);
+    int setTimeout(unsigned long o, timer_callback f);                            //Call function f once after d milliseconds
+    int setTimeout( unsigned long o, timer_callback_p f, T* p);
+    int setTimer(unsigned long d, unsigned long o, unsigned n, timer_callback f); //Call function f every d milliseconds for n times, start in o milliseconds
+    int setTimer(unsigned long d, unsigned long o, unsigned n, timer_callback_p f, T* p);
+    int startTimer(); 
+    unsigned long elapsedTime(int timerId);
+    void deleteTimer(int numTimer);                                               //Destroy the specified timer
+    void restartTimer(int numTimer);                                              //Restart the specified timer
+    boolean isEnabled(int numTimer);                                              //Returns true if the specified timer is enabled
+    void enable(int numTimer);                                                    //Enables the specified timer
+    void disable(int numTimer);                                                   //Disables the specified timer
+    void toggle(int numTimer);                                                    //Toggle(Enables/Disables) the specified timer
+    int getNumTimers();                                                           //Returns the number of used timers
+    int getNumAvailableTimers() { return MAX_TIMERS - numTimers; };               //Returns the number of available timers
 };
 
 static inline unsigned long elapsed() { return millis(); }
-
-LSTimer::LSTimer() {
+template<typename T>
+LSTimer<T>::LSTimer() {
     unsigned long current_millis = elapsed();
 
    for (int i = 0; i < MAX_TIMERS; i++) {
@@ -68,8 +69,8 @@ LSTimer::LSTimer() {
     numTimers = 0;
 }
 
-
-void LSTimer::run() {
+template<typename T>
+void LSTimer<T>::run() {
     int i;
     unsigned long current_millis,delay_millis;
 
@@ -129,7 +130,8 @@ void LSTimer::run() {
 
 
 //Find the first available slot
-int LSTimer::findFirstFreeSlot() {
+template<typename T>
+int LSTimer<T>::findFirstFreeSlot() {
     //All slots are used
     if (numTimers >= MAX_TIMERS) {
         return -1;
@@ -146,7 +148,8 @@ int LSTimer::findFirstFreeSlot() {
     return -1;
 }
 
-int LSTimer::setupTimer(unsigned long d, unsigned long o, boolean on, boolean h, unsigned n, void* f, void* p) {
+template<typename T>
+int LSTimer<T>::setupTimer(unsigned long d, unsigned long o, boolean on, boolean h, unsigned n, void* f, T* p) {
     int freeTimer;
 
     freeTimer = findFirstFreeSlot();
@@ -174,31 +177,38 @@ int LSTimer::setupTimer(unsigned long d, unsigned long o, boolean on, boolean h,
     return freeTimer;
 }
 
-int LSTimer::setInterval(unsigned long d, unsigned long o, timer_callback f) {
+template<typename T>
+int LSTimer<T>::setInterval(unsigned long d, unsigned long o, timer_callback f) {
     return setupTimer(d, o, true, false, RUN_FOREVER, (void *)f, NULL);
 }
 
-int LSTimer::setInterval(unsigned long d, unsigned long o, timer_callback_p f, void* p) {
+template<typename T>
+int LSTimer<T>::setInterval(unsigned long d, unsigned long o, timer_callback_p f, T* p) {
   return setupTimer(d, o, true, true, RUN_FOREVER, (void *)f, p);
 }
 
-int LSTimer::setTimeout(unsigned long o, timer_callback f) {
+template<typename T>
+int LSTimer<T>::setTimeout(unsigned long o, timer_callback f) {
     return setupTimer(o, 0, false, false, RUN_ONCE, (void *)f, NULL);
 }
 
-int LSTimer::setTimeout(unsigned long o, timer_callback_p f, void* p) {
+template<typename T>
+int LSTimer<T>::setTimeout(unsigned long o, timer_callback_p f, T* p) {
   return setupTimer(o, 0, false, true, RUN_ONCE, (void *)f, p);
 }
 
-int LSTimer::setTimer(unsigned long d, unsigned long o, unsigned n, timer_callback f) {
+template<typename T>
+int LSTimer<T>::setTimer(unsigned long d, unsigned long o, unsigned n, timer_callback f) {
   return setupTimer(d, o, true, false, n, (void *)f, NULL);
 }
 
-int LSTimer::setTimer(unsigned long d, unsigned long o, unsigned n, timer_callback_p f, void* p) {
+template<typename T>
+int LSTimer<T>::setTimer(unsigned long d, unsigned long o, unsigned n, timer_callback_p f, T* p) {
   return setupTimer(d, o, true, true, n, (void *)f, p);
 }
 
-int LSTimer::startTimer() {
+template<typename T>
+int LSTimer<T>::startTimer() {
     int freeTimer;
 
     freeTimer = findFirstFreeSlot();
@@ -220,8 +230,8 @@ int LSTimer::startTimer() {
 
     return freeTimer;
 }
-
-unsigned long LSTimer::elapsedTime(int timerId) {
+template<typename T>
+unsigned long LSTimer<T>::elapsedTime(int timerId) {
     if (timerId >= MAX_TIMERS) {
         return 0;
     }
@@ -233,8 +243,8 @@ unsigned long LSTimer::elapsedTime(int timerId) {
     diff_millis = current_millis - timer[timerId].prev_millis;
     return diff_millis;
 }
-
-void LSTimer::deleteTimer(int timerId) {
+template<typename T>
+void LSTimer<T>::deleteTimer(int timerId) {
     if (timerId >= MAX_TIMERS) {
         return;
     }
@@ -253,8 +263,8 @@ void LSTimer::deleteTimer(int timerId) {
         numTimers--;
     }
 }
-
-void LSTimer::restartTimer(int numTimer) {
+template<typename T>
+void LSTimer<T>::restartTimer(int numTimer) {
     if (numTimer >= MAX_TIMERS) {
         return;
     }
@@ -263,8 +273,8 @@ void LSTimer::restartTimer(int numTimer) {
     timer[numTimer].numRuns = 0;
 }
 
-
-boolean LSTimer::isEnabled(int numTimer) {
+template<typename T>
+boolean LSTimer<T>::isEnabled(int numTimer) {
     if (numTimer >= MAX_TIMERS) {
         return false;
     }
@@ -272,8 +282,8 @@ boolean LSTimer::isEnabled(int numTimer) {
     return timer[numTimer].enabled;
 }
 
-
-void LSTimer::enable(int numTimer) {
+template<typename T>
+void LSTimer<T>::enable(int numTimer) {
     if (numTimer >= MAX_TIMERS) {
         return;
     }
@@ -281,8 +291,8 @@ void LSTimer::enable(int numTimer) {
     timer[numTimer].enabled = true;
 }
 
-
-void LSTimer::disable(int numTimer) {
+template<typename T>
+void LSTimer<T>::disable(int numTimer) {
     if (numTimer >= MAX_TIMERS) {
         return;
     }
@@ -290,8 +300,8 @@ void LSTimer::disable(int numTimer) {
     timer[numTimer].enabled = false;
 }
 
-
-void LSTimer::toggle(int numTimer) {
+template<typename T>
+void LSTimer<T>::toggle(int numTimer) {
     if (numTimer >= MAX_TIMERS) {
         return;
     }
@@ -299,8 +309,8 @@ void LSTimer::toggle(int numTimer) {
     timer[numTimer].enabled = !timer[numTimer].enabled;
 }
 
-
-int LSTimer::getNumTimers() {
+template<typename T>
+int LSTimer<T>::getNumTimers() {
     return numTimers;
 }
 

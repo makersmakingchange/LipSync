@@ -5,6 +5,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #define OUTPUT_RGB_LED_PIN A3 //output pin for neopixel
+//#define OUTPUT_RGB_LED_PIN A1
 #define OUTPUT_RGB_LED_NUM 3
 
 #define LED_CLR_NONE 0
