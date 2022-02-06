@@ -43,3 +43,6 @@
 #define CONF_COM_MODE 1        //0 = None , 1 = USB , 2 = Wireless  
 
 #define CONF_ACTION_TIMEOUT 60000
+
+
+#define CONF_LED_REACTION_TIME 200

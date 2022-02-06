@@ -54,6 +54,7 @@ class LSTimer {
     void toggle(int numTimer);                                                    //Toggle(Enables/Disables) the specified timer
     int getNumTimers();                                                           //Returns the number of used timers
     int getNumAvailableTimers() { return MAX_TIMERS - numTimers; };               //Returns the number of available timers
+    int getNumRuns(int numTimer);                                                 //Returns the number of executed runs
 };
 
 static inline unsigned long elapsed() { return millis(); }
@@ -314,4 +315,8 @@ int LSTimer<T>::getNumTimers() {
     return numTimers;
 }
 
+template<typename T>
+int LSTimer<T>::getNumRuns(int numTimer) {
+    return timer[numTimer].numRuns;
+}
 #endif 

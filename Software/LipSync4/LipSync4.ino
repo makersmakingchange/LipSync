@@ -24,18 +24,17 @@ typedef struct
 } ledActionStruct;
 
 const ledActionStruct ledActionProperty[]{
-    {CONF_ACTION_NOTHING, 0, LED_CLR_NONE, LED_CLR_NONE, LED_ACTION_NONE},
-    {CONF_ACTION_LEFT_CLICK, 1, LED_CLR_NONE, LED_CLR_RED, LED_ACTION_BLINK},
-    {CONF_ACTION_RIGHT_CLICK, 3, LED_CLR_NONE, LED_CLR_BLUE, LED_ACTION_BLINK},
-    {CONF_ACTION_DRAG, 1, LED_CLR_PURPLE, LED_CLR_RED, LED_ACTION_ON},
-    {CONF_ACTION_SCROLL, 3, LED_CLR_PURPLE, LED_CLR_BLUE, LED_ACTION_ON},
-    {CONF_ACTION_CURSOR_CALIBRATION, 4, LED_CLR_NONE, LED_CLR_ORANGE, LED_ACTION_BLINK},
-    {CONF_ACTION_CURSOR_CENTER, 2, LED_CLR_NONE, LED_CLR_ORANGE, LED_ACTION_BLINK},
-    {CONF_ACTION_MIDDLE_CLICK, 2, LED_CLR_NONE, LED_CLR_PURPLE, LED_ACTION_BLINK},
-    {CONF_ACTION_DEC_SPEED, 1, LED_CLR_NONE, LED_CLR_RED, LED_ACTION_BLINK},
-    {CONF_ACTION_INC_SPEED, 3, LED_CLR_NONE, LED_CLR_BLUE, LED_ACTION_BLINK},
-    {CONF_ACTION_CHANGE_MODE, 2, LED_CLR_NONE, LED_CLR_NONE, LED_ACTION_NONE}
-
+    {CONF_ACTION_NOTHING,            0,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_LEFT_CLICK,         1,LED_CLR_NONE,  LED_CLR_RED,    LED_ACTION_BLINK},
+    {CONF_ACTION_RIGHT_CLICK,        3,LED_CLR_NONE,  LED_CLR_BLUE,   LED_ACTION_BLINK},
+    {CONF_ACTION_DRAG,               1,LED_CLR_PURPLE,LED_CLR_RED,    LED_ACTION_ON},
+    {CONF_ACTION_SCROLL,             3,LED_CLR_PURPLE,LED_CLR_BLUE,   LED_ACTION_ON},
+    {CONF_ACTION_CURSOR_CALIBRATION, 4,LED_CLR_NONE,  LED_CLR_ORANGE, LED_ACTION_BLINK},
+    {CONF_ACTION_CURSOR_CENTER,      2,LED_CLR_NONE,  LED_CLR_ORANGE, LED_ACTION_BLINK},
+    {CONF_ACTION_MIDDLE_CLICK,       2,LED_CLR_NONE,  LED_CLR_PURPLE, LED_ACTION_BLINK},
+    {CONF_ACTION_DEC_SPEED,          1,LED_CLR_NONE,  LED_CLR_RED,    LED_ACTION_BLINK},
+    {CONF_ACTION_INC_SPEED,          3,LED_CLR_NONE,  LED_CLR_BLUE,   LED_ACTION_BLINK},
+    {CONF_ACTION_CHANGE_MODE,        2,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE}
 };
 
 typedef struct
@@ -50,7 +49,7 @@ typedef struct
 
 ledStateStruct* ledCurrentState = new ledStateStruct;
 
-int ledTimerId[9];
+int ledTimerId;
 
 LSTimer<ledStateStruct> ledStateTimer;
 
@@ -68,25 +67,26 @@ int inputActionSize;
 inputStruct inputButtonActionState, inputSwitchActionState;
 
 const inputActionStruct switchActionProperty[]{
-    {CONF_ACTION_NOTHING, INPUT_MAIN_STATE_NONE, 0, 0},
-    {CONF_ACTION_LEFT_CLICK, INPUT_MAIN_STATE_S1_PRESSED, 0, 1000},
-    {CONF_ACTION_MIDDLE_CLICK, INPUT_MAIN_STATE_S2_PRESSED, 0, 1000},
-    {CONF_ACTION_RIGHT_CLICK, INPUT_MAIN_STATE_S3_PRESSED, 0, 1000},
-    {CONF_ACTION_DRAG, INPUT_MAIN_STATE_S1_PRESSED, 1000, 3000},
-    {CONF_ACTION_CHANGE_MODE, INPUT_MAIN_STATE_S2_PRESSED, 1000, 3000},
-    {CONF_ACTION_SCROLL, INPUT_MAIN_STATE_S3_PRESSED, 1000, 3000},
-    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S1_PRESSED, 3000, 10000},
-    {CONF_ACTION_NOTHING, INPUT_MAIN_STATE_S2_PRESSED, 3000, 10000},
-    {CONF_ACTION_MIDDLE_CLICK, INPUT_MAIN_STATE_S3_PRESSED, 3000, 10000},
+    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_NONE,       0,0},
+    {CONF_ACTION_LEFT_CLICK,         INPUT_MAIN_STATE_S1_PRESSED, 0,1000},
+    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S2_PRESSED, 0,1000},
+    {CONF_ACTION_RIGHT_CLICK,        INPUT_MAIN_STATE_S3_PRESSED, 0,1000},
+    {CONF_ACTION_DRAG,               INPUT_MAIN_STATE_S1_PRESSED, 1000,3000},
+    {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED, 1000,3000},
+    {CONF_ACTION_SCROLL,             INPUT_MAIN_STATE_S3_PRESSED, 1000,3000},
+    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S1_PRESSED, 3000,10000},
+    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S2_PRESSED, 3000,10000},
+    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S3_PRESSED, 3000,10000},
 };
 
 const inputActionStruct buttonActionProperty[]{
-    {CONF_ACTION_NOTHING, INPUT_MAIN_STATE_NONE, 0, 0},
-    {CONF_ACTION_DEC_SPEED, INPUT_MAIN_STATE_S1_PRESSED, 0, 1000},
-    {CONF_ACTION_INC_SPEED, INPUT_MAIN_STATE_S3_PRESSED, 0, 1000},
-    {CONF_ACTION_CURSOR_CENTER, INPUT_MAIN_STATE_S2_PRESSED, 0, 1000},
-    {CONF_ACTION_CHANGE_MODE, INPUT_MAIN_STATE_S2_PRESSED, 1000, 3000},
-    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S13_PRESSED, 0, 1000} };
+    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_NONE,        0,0},
+    {CONF_ACTION_DEC_SPEED,          INPUT_MAIN_STATE_S1_PRESSED,  0,1000},
+    {CONF_ACTION_INC_SPEED,          INPUT_MAIN_STATE_S3_PRESSED,  0,1000},
+    {CONF_ACTION_CURSOR_CENTER,      INPUT_MAIN_STATE_S2_PRESSED,  0,1000},
+    {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED,  1000,3000},
+    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S13_PRESSED, 0,1000}
+};
 
 int inputButtonPinArray[] = { CONF_BUTTON1_PIN, CONF_BUTTON2_PIN, CONF_BUTTON3_PIN };
 int inputSwitchPinArray[] = { CONF_SWITCH1_PIN, CONF_SWITCH2_PIN, CONF_SWITCH3_PIN };
@@ -100,14 +100,13 @@ sapStruct sapActionState;
 int sapActionSize;
 
 const inputActionStruct sapActionProperty[]{
-    {CONF_ACTION_NOTHING, PRESS_SAP_MAIN_STATE_NONE, 0, 0},
-    {CONF_ACTION_LEFT_CLICK, PRESS_SAP_MAIN_STATE_PUFF, 0, 1000},
-    {CONF_ACTION_RIGHT_CLICK, PRESS_SAP_MAIN_STATE_SIP, 0, 1000},
-    {CONF_ACTION_DRAG, PRESS_SAP_MAIN_STATE_PUFF, 1000, 3000},
-    {CONF_ACTION_SCROLL, PRESS_SAP_MAIN_STATE_SIP, 1000, 3000},
-    {CONF_ACTION_CURSOR_CALIBRATION, PRESS_SAP_MAIN_STATE_PUFF, 3000, 5000},
-    {CONF_ACTION_MIDDLE_CLICK, PRESS_SAP_MAIN_STATE_SIP, 3000, 5000}
-
+    {CONF_ACTION_NOTHING,            PRESS_SAP_MAIN_STATE_NONE,  0,0},
+    {CONF_ACTION_LEFT_CLICK,         PRESS_SAP_MAIN_STATE_PUFF,  0,1000},
+    {CONF_ACTION_RIGHT_CLICK,        PRESS_SAP_MAIN_STATE_SIP,   0,1000},
+    {CONF_ACTION_DRAG,               PRESS_SAP_MAIN_STATE_PUFF,  1000,3000},
+    {CONF_ACTION_SCROLL,             PRESS_SAP_MAIN_STATE_SIP,   1000,3000},
+    {CONF_ACTION_CURSOR_CALIBRATION, PRESS_SAP_MAIN_STATE_PUFF,  3000,5000},
+    {CONF_ACTION_MIDDLE_CLICK,       PRESS_SAP_MAIN_STATE_SIP ,  3000,5000}
 };
 
 //Joystick module variables and structures
@@ -157,18 +156,18 @@ void setup()
   //while (!Serial) { delay(1); }
 
   delay(1000);
-  *ledCurrentState = { 0, 0, 0, 0, 0, 0 };
+  
   initMemory();
 
   initSipAndPuff();
 
-  led.begin();
+  initLed();
 
   initInput();
 
   initJoystick();
 
-  initLedFeedback();
+  initFeedback();
 
   pollTimerId[0] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, 0, joystickLoop);
   pollTimerId[1] = pollTimer.setInterval(CONF_PRESSURE_POLL_RATE, 0, pressureLoop);
@@ -223,25 +222,31 @@ void inputLoop()
   //Output action logic
   int tempActionIndex = 0;
 
-  for (int i = 0; i < inputActionSize; i++)
+  for (int buttonActionIndex = 0; buttonActionIndex < inputActionSize; buttonActionIndex++)
   {
-    if (inputButtonActionState.mainState == buttonActionProperty[i].inputActionState &&
+    if (inputButtonActionState.mainState == buttonActionProperty[buttonActionIndex].inputActionState &&
       inputButtonActionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
-      inputButtonActionState.elapsedTime >= buttonActionProperty[i].inputActionStartTime &&
-      inputButtonActionState.elapsedTime < buttonActionProperty[i].inputActionEndTime)
+      inputButtonActionState.elapsedTime >= buttonActionProperty[buttonActionIndex].inputActionStartTime &&
+      inputButtonActionState.elapsedTime < buttonActionProperty[buttonActionIndex].inputActionEndTime)
     {
 
-      tempActionIndex = buttonActionProperty[i].inputActionNumber;
+      tempActionIndex = buttonActionProperty[buttonActionIndex].inputActionNumber;
 
-      performOutputAction(tempActionIndex,
-        ledActionProperty[tempActionIndex].ledEndAction,
-        ledActionProperty[tempActionIndex].ledNumber,
-        ledActionProperty[tempActionIndex].ledEndColor);
+      setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
+      ledActionProperty[tempActionIndex].ledEndColor, 
+      ledActionProperty[tempActionIndex].ledNumber, 
+      1, 
+      CONF_LED_REACTION_TIME, 
+      CONF_LED_BRIGHTNESS);
+
+      outputAction = tempActionIndex;
+
+      performOutputAction(tempActionIndex);
 
       break;
     }
   }
-
+  tempActionIndex = 0;
   if ((
     inputSwitchActionState.secondaryState == INPUT_SEC_STATE_RELEASED) &&
     (outputAction == CONF_ACTION_SCROLL ||
@@ -251,20 +256,26 @@ void inputLoop()
     canOutputAction = false;
   }
 
-  for (int i = 0; i < inputActionSize && canOutputAction; i++)
+  for (int switchActionIndex = 0; switchActionIndex < inputActionSize && canOutputAction; switchActionIndex++)
   {
-    if (inputSwitchActionState.mainState == switchActionProperty[i].inputActionState &&
+    if (inputSwitchActionState.mainState == switchActionProperty[switchActionIndex].inputActionState &&
       inputSwitchActionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
-      inputSwitchActionState.elapsedTime >= switchActionProperty[i].inputActionStartTime &&
-      inputSwitchActionState.elapsedTime < switchActionProperty[i].inputActionEndTime)
+      inputSwitchActionState.elapsedTime >= switchActionProperty[switchActionIndex].inputActionStartTime &&
+      inputSwitchActionState.elapsedTime < switchActionProperty[switchActionIndex].inputActionEndTime)
     {
 
-      tempActionIndex = switchActionProperty[i].inputActionNumber;
+      tempActionIndex = switchActionProperty[switchActionIndex].inputActionNumber;
+      
+      setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
+      ledActionProperty[tempActionIndex].ledEndColor, 
+      ledActionProperty[tempActionIndex].ledNumber, 
+      1, 
+      CONF_LED_REACTION_TIME, 
+      CONF_LED_BRIGHTNESS);
+      
+      outputAction = tempActionIndex;
 
-      performOutputAction(tempActionIndex,
-        ledActionProperty[tempActionIndex].ledEndAction,
-        ledActionProperty[tempActionIndex].ledNumber,
-        ledActionProperty[tempActionIndex].ledEndColor);
+      performOutputAction(tempActionIndex);
 
       break;
     }
@@ -339,14 +350,16 @@ void pressureLoop()
 
       tempActionIndex = sapActionProperty[sapActionIndex].inputActionNumber; //used for releasing drag or scroll
 
-      setLedState(ledActionProperty[tempActionIndex].ledEndAction, ledActionProperty[tempActionIndex].ledEndColor, ledActionProperty[tempActionIndex].ledNumber, 1, 200, CONF_LED_BRIGHTNESS);
+      setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
+      ledActionProperty[tempActionIndex].ledEndColor, 
+      ledActionProperty[tempActionIndex].ledNumber, 
+      1, 
+      CONF_LED_REACTION_TIME, 
+      CONF_LED_BRIGHTNESS);
 
       outputAction = tempActionIndex;
 
-      performOutputAction(tempActionIndex,
-        ledActionProperty[tempActionIndex].ledEndAction,
-        ledActionProperty[tempActionIndex].ledNumber,
-        ledActionProperty[tempActionIndex].ledEndColor);
+      performOutputAction(tempActionIndex);
 
       break;
     } //Perform led action on sip and puff start
@@ -357,10 +370,17 @@ void pressureLoop()
     {
 
       tempActionIndex = sapActionProperty[sapActionIndex].inputActionNumber; //used for releasing drag or scroll
+      
+      setLedState(LED_ACTION_ON, ledActionProperty[tempActionIndex].ledStartColor, 
+      ledActionProperty[tempActionIndex].ledNumber, 
+      0, 
+      0, 
+      CONF_LED_BRIGHTNESS);
 
-      led.setLedColor(ledActionProperty[tempActionIndex].ledNumber,
-        ledActionProperty[tempActionIndex].ledStartColor,
-        CONF_LED_BRIGHTNESS);
+      outputAction = tempActionIndex;
+
+      performLedAction(ledCurrentState);
+
       break;
     }
     sapActionIndex++;
@@ -378,84 +398,74 @@ void releaseOutputAction()
   outputAction = CONF_ACTION_NOTHING;
 }
 
-void performOutputAction(int action, int ledAction, int ledNumber, int ledColor)
+void performOutputAction(int action)
 {
-  if (ledAction == LED_ACTION_OFF)
-  {
-    led.clearLedAll();
-  }
-  else if (ledAction == LED_ACTION_ON || ledAction == LED_ACTION_BLINK)
-  {
-    led.setLedColor(ledNumber, ledColor, CONF_LED_BRIGHTNESS);
-  }
+
+  performLedAction(ledCurrentState);
   switch (action)
   {
-  case CONF_ACTION_NOTHING:
-  {
-    break;
+    case CONF_ACTION_NOTHING:
+    {
+      break;
+    }
+    case CONF_ACTION_LEFT_CLICK:
+    {
+      cursorLeftClick();
+      break;
+    }
+    case CONF_ACTION_RIGHT_CLICK:
+    {
+      cursorRightClick();
+      break;
+    }
+    case CONF_ACTION_DRAG:
+    {
+      cursorDrag();
+      break;
+    }
+    case CONF_ACTION_SCROLL:
+    {
+      cursorScroll(); //Enter Scroll mode
+      break;
+    }
+    case CONF_ACTION_CURSOR_CALIBRATION:
+    {
+      setJoystickCalibration();
+      break;
+    }
+    case CONF_ACTION_CURSOR_CENTER:
+    {
+      //Perform cursor center
+      setJoystickCenter();
+      break;
+    }
+    case CONF_ACTION_MIDDLE_CLICK:
+    {
+      //Perform cursor middle click
+      cursorMiddleClick();
+      break;
+    }
+    case CONF_ACTION_DEC_SPEED:
+    {
+      //Decrease cursor speed
+      decreaseCursorSpeed();
+      break;
+    }
+    case CONF_ACTION_INC_SPEED:
+    {
+      //Increase cursor speed
+      increaseCursorSpeed();
+      break;
+    }
+    case CONF_ACTION_CHANGE_MODE:
+    {
+      //Change communication mode
+      changeComMode();
+      break;
+    }
   }
-  case CONF_ACTION_LEFT_CLICK:
-  {
-    cursorLeftClick();
-    break;
-  }
-  case CONF_ACTION_RIGHT_CLICK:
-  {
-    cursorRightClick();
-    break;
-  }
-  case CONF_ACTION_DRAG:
-  {
-    cursorDrag();
-    break;
-  }
-  case CONF_ACTION_SCROLL:
-  {
-    cursorScroll(); //Enter Scroll mode
-    break;
-  }
-  case CONF_ACTION_CURSOR_CALIBRATION:
-  {
-    setJoystickCalibration();
-    break;
-  }
-  case CONF_ACTION_CURSOR_CENTER:
-  {
-    //Perform cursor center
-    setJoystickCenter();
-    break;
-  }
-  case CONF_ACTION_MIDDLE_CLICK:
-  {
-    //Perform cursor middle click
-    cursorMiddleClick();
-    break;
-  }
-  case CONF_ACTION_DEC_SPEED:
-  {
-    //Decrease cursor speed
-    decreaseCursorSpeed();
-    break;
-  }
-  case CONF_ACTION_INC_SPEED:
-  {
-    //Increase cursor speed
-    increaseCursorSpeed();
-    break;
-  }
-  case CONF_ACTION_CHANGE_MODE:
-  {
-    //Change communication mode
-    changeComMode();
-    break;
-  }
-  }
-
-  if (action != CONF_ACTION_DRAG && action != CONF_ACTION_SCROLL && action != CONF_ACTION_NOTHING)
-  {
-
-    ledTimerId[0] = ledStateTimer.setTimeout(200, releaseOutputAction);
-    //ledTimerId[0] = ledStateTimer.setTimeout(200,turnLedOnWithState,ledCurrentState);
+  if(action!=CONF_ACTION_DRAG && action!=CONF_ACTION_SCROLL && action!=CONF_ACTION_NOTHING){
+    outputAction=CONF_ACTION_NOTHING;
   }
 }
 
@@ -574,25 +584,24 @@ void getJoystickCalibration()
 
 void setJoystickCalibration()
 {
-  Serial.println("Calibration");
-  //  for (int j = 1; j <= 7; j++) {
-  //    led.setLedColor(4,j,CONF_LED_BRIGHTNESS);
-  //    delay(500);
-  //  }
-  //  led.setLedColor(4,0,CONF_LED_BRIGHTNESS);
-  //  String commandKey;
-  //  pointFloatType maxPoint;
-  //  delay(1000);
-  //
-  //  for (int i=1; i < 5; i++) {
-  //    commandKey="CA"+String(i);
-  //    led.setLedColor(2, LED_CLR_ORANGE, CONF_LED_BRIGHTNESS_HIGH);
-  //    maxPoint=js.getInputMax(i);
-  //    mem.writePoint(CONF_SETTINGS_FILE,commandKey,maxPoint);
-  //    printJoystickFloatData(maxPoint);
-  //    led.clearLed(2);
-  //    delay(1000);
-  //  }
+//  Serial.println("Calibration");
+//    for (int j = 1; j <= 7; j++) {
+//      led.setLedColor(4,j,CONF_LED_BRIGHTNESS);
+//      delay(500);
+//    }
+//    led.setLedColor(4,0,CONF_LED_BRIGHTNESS);
+//    String commandKey;
+//    pointFloatType maxPoint;
+//  
+//    for (int i=1; i < 5; i++) {
+//      commandKey="CA"+String(i);
+//      led.setLedColor(2, LED_CLR_ORANGE, CONF_LED_BRIGHTNESS_HIGH);
+//      maxPoint=js.getInputMax(i);
+//      mem.writePoint(CONF_SETTINGS_FILE,commandKey,maxPoint);
+//      printJoystickFloatData(maxPoint);
+//      led.clearLed(2);
+//      delay(1000);
+//    }
 }
 
 void updateJoystick()
@@ -626,11 +635,11 @@ void performJystick()
 
   if (comMode == 1)
   {
-    (outputAction == CONF_ACTION_SCROLL) ? mouse.scroll(yVal / 10) : mouse.move(xVal, -yVal);
+    (outputAction == CONF_ACTION_SCROLL) ? mouse.scroll(round(yVal / 5)) : mouse.move(xVal, -yVal);
   }
   else if (comMode == 2)
   {
-    (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(yVal / 10) : btmouse.move(xVal, -yVal);
+    (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(round(yVal / 5)) : btmouse.move(xVal, -yVal);
   }
 }
 
@@ -718,33 +727,26 @@ void printJoystickIntData(pointIntType point)
 // LED Functions
 //*********************************//
 
-void initLedFeedback()
+void initLed()
 {
-  turnLedOff();
-  ledStateStruct* tempState[9] = {};
+
+  led.begin();
+  ledTimerId=0;
+  *ledCurrentState = { 0, 0, 0, 0, 0, 0 };
+}
 
 
-  for (int i = 0; i <= 8; i++)
-  {
-    int color = i;
-    unsigned long blinkTime=500*(i+1);
-    if (color == 8)
-    {
-      color = 0;
-    }
-    //setLedState(LED_ACTION_BLINK, color, 4, 1, 500 * (i + 1), CONF_LED_BRIGHTNESS);
-    * tempState[i] = {LED_ACTION_BLINK,color,4,1,blinkTime,50};
-    ledTimerId[i] = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, turnLedOnWithState, tempState[i]);
-
-    //ledTimerId[i] = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime*(i+1),turnLedOnWithColor,(void *)color);
-  }
-  //ledTimerId[0] = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, turnLedOnWithState, ledCurrentState);
+void initFeedback()
+{
+  setLedState(LED_ACTION_BLINK, 1, 4, 4, 300, CONF_LED_BRIGHTNESS);
+  ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
 }
 
 void setLedState(int ledAction, int ledColorNumber, int ledNumber, int ledBlinkNumber, unsigned long ledBlinkTime, int ledBrightness)
 { //Set led state after output action is performed
   if (ledNumber <= OUTPUT_RGB_LED_NUM + 1)
   {
+    
     ledCurrentState->ledAction = ledAction;
     ledCurrentState->ledColorNumber = ledColorNumber;
     ledCurrentState->ledNumber = ledNumber;
@@ -754,51 +756,65 @@ void setLedState(int ledAction, int ledColorNumber, int ledNumber, int ledBlinkN
   }
 }
 
-void turnLedOn()
+
+
+void ledIBMEffect(ledStateStruct* args)
 {
-  led.setLedColor(ledCurrentState->ledNumber, ledCurrentState->ledColorNumber, ledCurrentState->ledBrightness);
+  led.setLedColor(args->ledNumber, args->ledColorNumber, args->ledBrightness);
+  if (args->ledColorNumber == 0)
+  {
+    setLedState(LED_ACTION_NONE, LED_CLR_NONE, 0, 0, 0,0);
+    ledStateTimer.deleteTimer(0);
+  }
+  else if (args->ledColorNumber < 7)
+  {
+    setLedState(args->ledAction, (args->ledColorNumber)+1, args->ledNumber, args->ledBlinkNumber, (args->ledBlinkTime)+500,args->ledBrightness);
+    ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
+  } 
+  else if (args->ledColorNumber == 7)
+  {
+    setLedState(args->ledAction, 0, args->ledNumber, args->ledBlinkNumber, (args->ledBlinkTime)+500,args->ledBrightness);
+    ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
+  }
+
 }
 
-void turnLedOnWithColor(void* args)
-{
-  int color = (int)args;
-  led.setLedColor(ledCurrentState->ledNumber, color, ledCurrentState->ledBrightness);
-}
+void ledBlinkEffect(ledStateStruct* args){
+  if(ledStateTimer.getNumRuns(0) % 2){
+     led.setLedColor(args->ledNumber, 0, args->ledBrightness);
+  } 
+  else{
+    led.setLedColor(args->ledNumber, args->ledColorNumber, args->ledBrightness);
+  }
 
-void turnLedOnWithState(ledStateStruct* args)
-{
-
-  Serial.println(args->ledNumber);
-  Serial.println(args->ledBlinkTime);
-  Serial.println(args->ledColorNumber);
-  Serial.println(args->ledBrightness);
-  int number = args->ledNumber;
-  int color = args->ledColorNumber;
-  int brightness = args->ledBrightness;
-  led.setLedColor(number, color, brightness);
-}
-
-void turnLedOff()
-{
-  led.clearLed(ledCurrentState->ledNumber);
+  if(ledStateTimer.getNumRuns(0)==((args->ledBlinkNumber)*2)+1){
+    
+     setLedState(LED_ACTION_NONE, LED_CLR_NONE, 0, 0, 0,0);
+     
+  }   
 }
 
 void turnLedAllOff()
 {
   led.clearLedAll();
-  outputAction = CONF_ACTION_NOTHING;
 }
 
-void turnLedOnce()
+
+void turnLedOff(ledStateStruct* args)
 {
-  ledTimerId[0] = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, turnLedOn);
+  led.clearLed(args->ledNumber);
 }
 
-void blinkLed()
+
+void turnLedOn(ledStateStruct* args)
+{
+  led.setLedColor(args->ledNumber, args->ledColorNumber, args->ledBrightness);
+}
+
+void blinkLed(ledStateStruct* args)
 {
 
-  ledTimerId[0] = ledStateTimer.setTimer(ledCurrentState->ledBlinkTime, 0, ledCurrentState->ledBlinkNumber * 2, turnLedOn);
-  ledTimerId[1] = ledStateTimer.setTimer(ledCurrentState->ledBlinkTime * 2, 0, ledCurrentState->ledBlinkNumber + 1, turnLedOff);
+  ledTimerId = ledStateTimer.setTimer(args->ledBlinkTime, 0, ((args->ledBlinkNumber)*2)+1, ledBlinkEffect, ledCurrentState);
 }
 
 void performLedAction(ledStateStruct* args)
@@ -807,17 +823,17 @@ void performLedAction(ledStateStruct* args)
   {
   case LED_ACTION_OFF:
   {
-    turnLedOff();
+    turnLedOff(args);
     break;
   }
   case LED_ACTION_ON:
   {
-    turnLedOn();
+    turnLedOn(args);
     break;
   }
   case LED_ACTION_BLINK:
   {
-    blinkLed();
+    blinkLed(args);
     break;
   }
   }
