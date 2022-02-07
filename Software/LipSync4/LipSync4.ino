@@ -114,6 +114,10 @@ const inputActionStruct sapActionProperty[]{
 int xVal;
 int yVal;
 
+int calibTimerId;
+
+LSTimer<int> calibTimer;
+
 //Timer related variables
 
 int pollTimerId[3];
@@ -179,6 +183,7 @@ void loop()
 {
 
   ledStateTimer.run();
+  calibTimer.run();
   pollTimer.run();
 }
 
@@ -586,10 +591,11 @@ void getJoystickCalibration()
 void setJoystickCalibration()
 {
   Serial.println("Calibration");
+  int commandStep = 0;
+
   
 
-  setLedState(LED_ACTION_ON, LED_CLR_ORANGE, 4, 0, 300, CONF_LED_BRIGHTNESS);
-  ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledCalibrationEffect, ledCurrentState);
+  calibTimerId = calibTimer.setTimeout(ledCurrentState->ledBlinkTime, ledCalibrationEffect, (int *)commandStep);
   
 //  for (int i=1; i < 5; i++) {
 //    commandKey="CA"+String(i);
@@ -602,34 +608,39 @@ void setJoystickCalibration()
 //  }
 }
 
-void ledCalibrationEffect(ledStateStruct* args)
+void ledCalibrationEffect(int* args)
 {
-  int commandStep = args->ledBlinkNumber;
+  
+  int commandStep = (int)args;
   String commandKey = "CA"+String(commandStep);
   pointFloatType maxPoint;
-  unsigned long commandNextStart = (ledCurrentState->ledBlinkTime)*(((commandStep+1)*2)+1);
+  unsigned long commandNextStart = 300*(((commandStep+1)*2)+1)+2000;
+  
+  setLedState(LED_ACTION_ON, LED_CLR_ORANGE, 1, commandStep, 300,CONF_LED_BRIGHTNESS);
+  performLedAction(ledCurrentState);
   if (commandStep == 0)
   {
     setJoystickCenter();
-    setLedState(LED_ACTION_BLINK, args->ledColorNumber, args->ledNumber, commandStep+1, args->ledBlinkTime,args->ledBrightness);
+    ++commandStep;
+    setLedState(LED_ACTION_BLINK, LED_CLR_ORANGE, 4, commandStep, 300,CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);
-    ledTimerId = ledStateTimer.setTimeout(commandNextStart, ledCalibrationEffect, ledCurrentState);
+    calibTimerId = calibTimer.setTimeout(commandNextStart, ledCalibrationEffect, (int *)commandStep);
   }
   else if (commandStep < 5)
   {
-    Serial.println(commandStep);
     //maxPoint=js.getInputMax(commandStep);
     //mem.writePoint(CONF_SETTINGS_FILE,commandKey,maxPoint);
     //printJoystickFloatData(maxPoint);
-    setLedState(LED_ACTION_BLINK, args->ledColorNumber, args->ledNumber, commandStep+1, args->ledBlinkTime,args->ledBrightness);
+    ++commandStep;
+    setLedState(LED_ACTION_BLINK, LED_CLR_ORANGE, 4, commandStep, 300,CONF_LED_BRIGHTNESS);    
     performLedAction(ledCurrentState);
-    ledTimerId = ledStateTimer.setTimeout(commandNextStart, ledCalibrationEffect, ledCurrentState);
+    calibTimerId = calibTimer.setTimeout(commandNextStart, ledCalibrationEffect, (int *)commandStep);
   } 
   else if (commandStep == 5)
   {
-    setLedState(LED_ACTION_NONE, LED_CLR_NONE, 0, 0, 0,0);
+    setLedState(LED_ACTION_OFF, LED_CLR_NONE, 4, 0, 0,CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);
-    ledStateTimer.deleteTimer(0);
+    calibTimer.deleteTimer(0);
   }
 
 }
