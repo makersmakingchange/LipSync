@@ -34,6 +34,8 @@
 
 //CAN BE CHANGED 
 
+#define CONF_JOY_OUTPUT_SCALE 5
+
 #define CONF_SIP_THRESHOLD -2.5                    //hPa
 #define CONF_PUFF_THRESHOLD 2.5
 
