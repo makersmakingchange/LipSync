@@ -874,7 +874,7 @@ void blinkLed(ledStateStruct* args)
 }
 
 void turnLedDefault(){
-  Serial.println("kkl");
+  Serial.println("test");
 
   if (comMode == CONF_COMM_MODE_BLE && btmouse.isConnected())
   {
