@@ -63,6 +63,7 @@ class LSJoystick {
     pointIntType processOutputResponse(pointIntType inputPoint);
     int mapFloatInt(float input, float inputStart, float inputEnd, int outputStart, int outputEnd);
     pointFloatType absPoint(pointFloatType inputPoint);
+    float magnitudePoint(pointFloatType inputPoint);
     int sgn(float val);
     pointFloatType magnetInputCalibration[JOY_CALIBR_ARRAY_SIZE];
     int _magnetDirection;
@@ -107,8 +108,6 @@ void LSJoystick::begin() {
 
 void LSJoystick::clear() {
 
-  //magnetInputComp.x = 0.00;
-  //magnetInputComp.y = 0.00;
   magnetInputCalibration[0] = {0.00, 0.00};
   magnetInputCalibration[1] = {0.00, 0.00};
   magnetInputCalibration[2] = {0.00, 0.00};
@@ -118,12 +117,6 @@ void LSJoystick::clear() {
 
   joystickInputBuffer.pushElement({0, 0});
 
-  /*
-  for (int i = 0; i < JOY_RAW_ARRAY_SIZE; i++) {
-    joystickInputBuffer.pushElement({0, 0});
-
-  }
-  */
 }
 
 
@@ -180,8 +173,6 @@ pointFloatType LSJoystick::getInputComp() {
 
 void LSJoystick::updateInputComp() {
   Tlv493dSensor.updateData();
-  //magnetInputComp.x = Tlv493dSensor.getY()*_magnetDirection;
-  //magnetInputComp.y = Tlv493dSensor.getX()*_magnetDirection;
   magnetInputCalibration[0] = {Tlv493dSensor.getY()*_magnetDirection, Tlv493dSensor.getX()*_magnetDirection};
   setMinimumRadius();
 }
@@ -189,10 +180,20 @@ void LSJoystick::updateInputComp() {
 
 
 pointFloatType LSJoystick::getInputMax(int quad) {
-  
-  if((quad >= 0) && (quad < JOY_CALIBR_ARRAY_SIZE)){
-    Tlv493dSensor.updateData();
-    magnetInputCalibration[quad] = {Tlv493dSensor.getY()*_magnetDirection, Tlv493dSensor.getX()*_magnetDirection};
+  Tlv493dSensor.updateData();
+  //Apply compensation point
+  pointFloatType tempCalibrationPoint = {Tlv493dSensor.getY()*_magnetDirection - magnetInputCalibration[0].x, 
+                                        Tlv493dSensor.getX()*_magnetDirection - magnetInputCalibration[0].y};
+//  Serial.print("x:");
+//  Serial.print(tempCalibrationPoint.x);
+//  Serial.print("y:");
+//  Serial.print(tempCalibrationPoint.y);
+//  Serial.print(",magnitude:");
+//  Serial.println(magnitudePoint(tempCalibrationPoint));
+  if((quad >= 0) && 
+  (quad < JOY_CALIBR_ARRAY_SIZE) && 
+  magnitudePoint(tempCalibrationPoint)>magnitudePoint(magnetInputCalibration[quad])){           //The point with larger magnitude is sent as output 
+    magnetInputCalibration[quad] = tempCalibrationPoint;
     setMinimumRadius();
   }
   
@@ -319,6 +320,11 @@ int LSJoystick::mapFloatInt(float input, float inputStart, float inputEnd, int o
 pointFloatType LSJoystick::absPoint(pointFloatType inputPoint){
   return {abs(inputPoint.x), abs(inputPoint.y)};
 }
+
+float LSJoystick::magnitudePoint(pointFloatType inputPoint){
+  return (sqrt(sq(inputPoint.x) + sq(inputPoint.y)));
+}
+
 
 
 int LSJoystick::sgn(float val) {
