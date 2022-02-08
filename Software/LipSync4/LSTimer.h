@@ -27,7 +27,7 @@ class LSTimer {
       unsigned maxNumRuns;                                                        //Number of runs to be executed
       unsigned numRuns;                                                           //Number of executed runs
       boolean enabled;                                                            //Check if timer is enabled
-      unsigned long offset;                                                             //Initial offset delay
+      unsigned long offset;                                                       //Initial offset delay
       boolean offsetEnabled;                                                      //Check if offset is enabled
       unsigned toBeCalled;                                                        //Deferred function call
     } timer_t;
