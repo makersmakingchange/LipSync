@@ -95,7 +95,7 @@ int inputSwitchPinArray[] = { CONF_SWITCH1_PIN, CONF_SWITCH2_PIN, CONF_SWITCH3_P
 
 pressureStruct pressureValues = { 0.0, 0.0, 0.0 };
 
-sapStruct sapActionState;
+inputStruct sapActionState;
 
 int sapActionSize;
 
@@ -342,70 +342,71 @@ void pressureLoop()
 
   //printSipAndPuffData(2);
   //Output action logic
-
-   bool canEvaluateAction = true;
-  //Logic to Skip Sip and puff action if it's in drag or scroll mode
-  if ((sapActionState.secondaryState == PRESS_SAP_SEC_STATE_RELEASED) &&
-    (outputAction == CONF_ACTION_SCROLL ||
-      outputAction == CONF_ACTION_DRAG))
-  {
-    releaseOutputAction();
-    canEvaluateAction = false;
-  }
-
-  int sapActionIndex = 0;
-  int tempActionIndex = 0;
-  //Perform output action and led action on sip and puff release
-  //Perform led action on sip and puff start
-  while (sapActionIndex < sapActionSize && canEvaluateAction && canOutputAction)
-  {
-    //Perform output action and led action on sip and puff release
-    if (sapActionState.mainState == sapActionProperty[sapActionIndex].inputActionState &&
-      sapActionState.secondaryState == PRESS_SAP_SEC_STATE_RELEASED &&
-      sapActionState.elapsedTime >= sapActionProperty[sapActionIndex].inputActionStartTime &&
-      sapActionState.elapsedTime < sapActionProperty[sapActionIndex].inputActionEndTime)
-    {
-
-      tempActionIndex = sapActionProperty[sapActionIndex].inputActionNumber; //used for releasing drag or scroll
-
-      setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
-      ledActionProperty[tempActionIndex].ledEndColor, 
-      ledActionProperty[tempActionIndex].ledNumber, 
-      1, 
-      CONF_LED_REACTION_TIME, 
-      CONF_LED_BRIGHTNESS);
-
-      outputAction = tempActionIndex;
-
-      performOutputAction(tempActionIndex);
-
-      break;
-    } //Perform led action on sip and puff start
-    else if (sapActionState.mainState == sapActionProperty[sapActionIndex].inputActionState &&
-      sapActionState.secondaryState == PRESS_SAP_SEC_STATE_STARTED &&
-      sapActionState.elapsedTime >= sapActionProperty[sapActionIndex].inputActionStartTime &&
-      sapActionState.elapsedTime < sapActionProperty[sapActionIndex].inputActionEndTime)
-    {
-
-      tempActionIndex = sapActionProperty[sapActionIndex].inputActionNumber; //used for releasing drag or scroll
-      
-      setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
-      ledActionProperty[tempActionIndex].ledStartColor, 
-      ledActionProperty[tempActionIndex].ledNumber, 
-      0, 
-      0, 
-      CONF_LED_BRIGHTNESS);
-
-      performLedAction(ledCurrentState);
-
-      break;
-    }
-    sapActionIndex++;
-  }
+  evaluateOutputAction(sapActionState, sapActionSize,sapActionProperty);
+//   bool canEvaluateAction = true;
+//  //Logic to Skip Sip and puff action if it's in drag or scroll mode
+//  if ((sapActionState.secondaryState == PRESS_SAP_SEC_STATE_RELEASED) &&
+//    (outputAction == CONF_ACTION_SCROLL ||
+//      outputAction == CONF_ACTION_DRAG))
+//  {
+//    releaseOutputAction();
+//    canEvaluateAction = false;
+//  }
+//
+//  int sapActionIndex = 0;
+//  int tempActionIndex = 0;
+//  //Perform output action and led action on sip and puff release
+//  //Perform led action on sip and puff start
+//  while (sapActionIndex < sapActionSize && canEvaluateAction && canOutputAction)
+//  {
+//    //Perform output action and led action on sip and puff release
+//    if (sapActionState.mainState == sapActionProperty[sapActionIndex].inputActionState &&
+//      sapActionState.secondaryState == PRESS_SAP_SEC_STATE_RELEASED &&
+//      sapActionState.elapsedTime >= sapActionProperty[sapActionIndex].inputActionStartTime &&
+//      sapActionState.elapsedTime < sapActionProperty[sapActionIndex].inputActionEndTime)
+//    {
+//
+//      tempActionIndex = sapActionProperty[sapActionIndex].inputActionNumber; //used for releasing drag or scroll
+//
+//      setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
+//      ledActionProperty[tempActionIndex].ledEndColor, 
+//      ledActionProperty[tempActionIndex].ledNumber, 
+//      1, 
+//      CONF_LED_REACTION_TIME, 
+//      CONF_LED_BRIGHTNESS);
+//
+//      outputAction = tempActionIndex;
+//
+//      performOutputAction(tempActionIndex);
+//
+//      break;
+//    } //Perform led action on sip and puff start
+//    else if (sapActionState.mainState == sapActionProperty[sapActionIndex].inputActionState &&
+//      sapActionState.secondaryState == PRESS_SAP_SEC_STATE_STARTED &&
+//      sapActionState.elapsedTime >= sapActionProperty[sapActionIndex].inputActionStartTime &&
+//      sapActionState.elapsedTime < sapActionProperty[sapActionIndex].inputActionEndTime)
+//    {
+//
+//      tempActionIndex = sapActionProperty[sapActionIndex].inputActionNumber; //used for releasing drag or scroll
+//      
+//      setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
+//      ledActionProperty[tempActionIndex].ledStartColor, 
+//      ledActionProperty[tempActionIndex].ledNumber, 
+//      0, 
+//      0, 
+//      CONF_LED_BRIGHTNESS);
+//
+//      performLedAction(ledCurrentState);
+//
+//      break;
+//    }
+//    sapActionIndex++;
+//  }
 }
 
 void releaseOutputAction()
 {
+  setLedDefault();
   if (outputAction == CONF_ACTION_DRAG && (mouse.isPressed(MOUSE_LEFT) || btmouse.isPressed(MOUSE_LEFT)))
   {
     mouse.release(MOUSE_LEFT);
@@ -413,6 +414,46 @@ void releaseOutputAction()
   }
   outputAction = CONF_ACTION_NOTHING;
   canOutputAction = true;
+}
+
+void evaluateOutputAction(inputStruct actionState, int actionSize,const inputActionStruct actionProperty[])
+{
+  bool canEvaluateAction = true;
+  //Output action logic
+  int tempActionIndex = 0;
+  if ((
+    actionState.secondaryState == INPUT_SEC_STATE_RELEASED) &&
+    (outputAction == CONF_ACTION_SCROLL ||
+      outputAction == CONF_ACTION_DRAG))
+  {
+    releaseOutputAction();
+    canEvaluateAction = false;
+  }
+
+  for (int actionIndex = 0; actionIndex < actionSize && canEvaluateAction && canOutputAction; actionIndex++)
+  {
+    if (actionState.mainState == actionProperty[actionIndex].inputActionState &&
+      actionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
+      actionState.elapsedTime >= actionProperty[actionIndex].inputActionStartTime &&
+      actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
+    {
+
+      tempActionIndex = actionProperty[actionIndex].inputActionNumber;
+      
+      setLedState(ledActionProperty[actionIndex].ledEndAction, 
+      ledActionProperty[actionIndex].ledEndColor, 
+      ledActionProperty[actionIndex].ledNumber, 
+      1, 
+      CONF_LED_REACTION_TIME, 
+      CONF_LED_BRIGHTNESS);
+      
+      outputAction = tempActionIndex;
+
+      performOutputAction(tempActionIndex);
+
+      break;
+    }
+  }  
 }
 
 void performOutputAction(int action)
@@ -483,7 +524,6 @@ void performOutputAction(int action)
   if(action!=CONF_ACTION_DRAG && action!=CONF_ACTION_SCROLL){
     outputAction=CONF_ACTION_NOTHING;
     canOutputAction = true;
-    setLedDefault();
   }
 }
 
@@ -837,6 +877,7 @@ void ledIBMEffect(ledStateStruct* args)
     setLedState(args->ledAction, 0, args->ledNumber, args->ledBlinkNumber, (args->ledBlinkTime)+500,args->ledBrightness);
     ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
     enablePoll(true);  
+    setLedDefault();
   }
 
 }

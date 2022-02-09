@@ -46,7 +46,7 @@ class LSPressure {
     Adafruit_BMP280 bmp; // use I2C interface
     Adafruit_Sensor *bmp_pressure = bmp.getPressureSensor();
     LSCircularBuffer <pressureStruct> pressureBuffer;
-    LSCircularBuffer <sapStruct> sapBuffer;   //Create a buffer of type sapStruct
+    LSCircularBuffer <inputStruct> sapBuffer;   //Create a buffer of type inputStruct
     int filterMode;
     int pressureType;
     float mainVal;
@@ -57,8 +57,8 @@ class LSPressure {
     float refTolVal;
     LSTimer <void> mainStateTimer;
     int sapStateTimerId;
-    sapStruct sapCurrState;
-    sapStruct sapPrevState;
+    inputStruct sapCurrState;
+    inputStruct sapPrevState;
     float sipThreshold;
     float puffThreshold;
     int sapMainState;
@@ -79,7 +79,7 @@ class LSPressure {
     float getRefPressure();
     float getDiffPressure();
     pressureStruct getAllPressure();
-    sapStruct getState();
+    inputStruct getState();
 };
 
 LSPressure::LSPressure() {
@@ -307,7 +307,7 @@ pressureStruct LSPressure::getAllPressure() {
   return pressureBuffer.getLastElement();
 }
 
-sapStruct LSPressure::getState(){
+inputStruct LSPressure::getState(){
   return sapBuffer.getLastElement();
 }
 

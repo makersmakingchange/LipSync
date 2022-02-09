@@ -51,7 +51,7 @@
 #define CONF_LED_BRIGHTNESS_LOW 1 
 #define CONF_LED_BRIGHTNESS_HIGH 150 
 
-#define CONF_COM_MODE 1        //0 = None , 1 = USB , 2 = Wireless  
+#define CONF_COM_MODE 2        //0 = None , 1 = USB , 2 = Wireless  
 
 #define CONF_ACTION_TIMEOUT 60000
 
