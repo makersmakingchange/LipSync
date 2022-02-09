@@ -32,6 +32,10 @@
 #define CONF_PRESSURE_POLL_RATE 50 
 #define CONF_INPUT_POLL_RATE 50 
 
+#define CONF_COMM_MODE_NONE 0 
+#define CONF_COMM_MODE_USB  1
+#define CONF_COMM_MODE_BLE  2
+
 //CAN BE CHANGED 
 
 #define CONF_JOY_OUTPUT_SCALE 5
@@ -44,6 +48,7 @@
 #define CONF_PUFF_THRESHOLD 2.5
 
 #define CONF_LED_BRIGHTNESS 50 
+#define CONF_LED_BRIGHTNESS_LOW 1 
 #define CONF_LED_BRIGHTNESS_HIGH 150 
 
 #define CONF_COM_MODE 1        //0 = None , 1 = USB , 2 = Wireless  
