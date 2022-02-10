@@ -30,37 +30,37 @@
 Adafruit_NeoPixel ledPixels = Adafruit_NeoPixel(OUTPUT_RGB_LED_NUM, OUTPUT_RGB_LED_PIN, NEO_GRB + NEO_KHZ800);
 
 
-struct rgb_t {
-    int r;    // red value 0 to 255
-    int g;   // green value
-    int b;   // blue value
- };
+    struct rgbStruct {
+        int r;    // red value 0 to 255
+        int g;   // green value
+        int b;   // blue value
+    };
 
-//Color structure 
-typedef struct { 
-  uint8_t colorNumber;
-  String colorName;
-  rgb_t colorCode;
-} colorStruct;
+    //Color structure 
+    typedef struct { 
+      uint8_t colorNumber;
+      String colorName;
+      rgbStruct colorCode;
+    } colorStruct;
 
-//Color properties 
-const colorStruct colorProperty[] {
-    {LED_CLR_NONE,"None",{0,0,0}},
-    {LED_CLR_BLUE,"Blue",{0,0,60}},
-    {LED_CLR_PURPLE,"Purple",{50,0,128}},
-    {LED_CLR_MAGENTA,"Magenta",{255,0,255}},       
-    {LED_CLR_PINK,"Pink",{60,0,50}},   
-    {LED_CLR_RED,"Red",{60,0,0}},
-    {LED_CLR_ORANGE,"Orange",{60,20,0}},
-    {LED_CLR_YELLOW,"Yellow",{50,60,0}}, 
-    {LED_CLR_GREEN,"Green",{0,60,0}},
-    {LED_CLR_TEAL,"Teal",{0,128,128}}
-};
+    //Color properties 
+    const colorStruct colorProperty[] {
+        {LED_CLR_NONE,"None",{0,0,0}},
+        {LED_CLR_BLUE,"Blue",{0,0,60}},
+        {LED_CLR_PURPLE,"Purple",{50,0,128}},
+        {LED_CLR_MAGENTA,"Magenta",{255,0,255}},       
+        {LED_CLR_PINK,"Pink",{60,0,50}},   
+        {LED_CLR_RED,"Red",{60,0,0}},
+        {LED_CLR_ORANGE,"Orange",{60,20,0}},
+        {LED_CLR_YELLOW,"Yellow",{50,60,0}}, 
+        {LED_CLR_GREEN,"Green",{0,60,0}},
+        {LED_CLR_TEAL,"Teal",{0,128,128}}
+    };   
 
 
 class LSOutput {
   private:
-   
+
   public:
     LSOutput();
     void begin();   

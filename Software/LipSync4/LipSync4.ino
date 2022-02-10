@@ -1,5 +1,6 @@
 #include <Wire.h>
 #include "LSTimer.h"
+#include "LSUtils.h"
 #include <ArduinoJson.h>
 #include "LSConfig.h"
 #include "LSUSB.h"
@@ -13,16 +14,7 @@
 
 int comMode = 0;
 
-//LED module variables and structures
-typedef struct
-{
-  uint8_t ledOutputActionNumber;
-  uint8_t ledNumber;
-  uint8_t ledStartColor;
-  uint8_t ledEndColor;
-  uint8_t ledEndAction;
-} ledActionStruct;
-
+//LED module variables
 const ledActionStruct ledActionProperty[]{
     {CONF_ACTION_NOTHING,            1,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
     {CONF_ACTION_LEFT_CLICK,         1,LED_CLR_NONE,  LED_CLR_RED,    LED_ACTION_BLINK},
@@ -37,34 +29,16 @@ const ledActionStruct ledActionProperty[]{
     {CONF_ACTION_CHANGE_MODE,        2,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE}
 };
 
-typedef struct
-{
-  int ledAction; //none = 0, off = 1, on = 2, blink = 3
-  int ledColorNumber;
-  int ledNumber;
-  int ledBlinkNumber;
-  unsigned long ledBlinkTime;
-  int ledBrightness;
-} ledStateStruct;
-
 ledStateStruct* ledCurrentState = new ledStateStruct;
 
 int ledTimerId;
 
 LSTimer<ledStateStruct> ledStateTimer;
 
-//Input module variables and structures
-
-typedef struct
-{
-  uint8_t inputActionNumber;
-  uint8_t inputActionState;
-  unsigned long inputActionStartTime;
-  unsigned long inputActionEndTime;
-} inputActionStruct;
+//Input module variables
 
 int buttonActionSize, switchActionSize;
-inputStruct buttonActionState, switchActionState;
+inputStateStruct buttonState, switchState;
 
 const inputActionStruct switchActionProperty[]{
     {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_NONE,       0,0},
@@ -91,11 +65,11 @@ const inputActionStruct buttonActionProperty[]{
 int inputButtonPinArray[] = { CONF_BUTTON1_PIN, CONF_BUTTON2_PIN, CONF_BUTTON3_PIN };
 int inputSwitchPinArray[] = { CONF_SWITCH1_PIN, CONF_SWITCH2_PIN, CONF_SWITCH3_PIN };
 
-//Pressure module variables and structures
+//Pressure module variables
 
 pressureStruct pressureValues = { 0.0, 0.0, 0.0 };
 
-inputStruct sapActionState;
+inputStateStruct sapActionState;
 
 int sapActionSize;
 
@@ -233,74 +207,12 @@ void inputLoop()
   is.update(); //Request new values
 
   //Get the last state change
-  buttonActionState = ib.getInputState();
-  switchActionState = is.getInputState();
+  buttonState = ib.getInputState();
+  switchState = is.getInputState();
 
   //printInputData();
-  evaluateOutputAction(buttonActionState, buttonActionSize,buttonActionProperty);
-  evaluateOutputAction(switchActionState, switchActionSize,switchActionProperty);
-//  bool canEvaluateAction = true;
-//  //Output action logic
-//  int tempActionIndex = 0;
-//
-//  for (int buttonActionIndex = 0; buttonActionIndex < buttonActionSize && canEvaluateAction; buttonActionIndex++)
-//  {
-//    if (buttonActionState.mainState == buttonActionProperty[buttonActionIndex].inputActionState &&
-//      buttonActionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
-//      buttonActionState.elapsedTime >= buttonActionProperty[buttonActionIndex].inputActionStartTime &&
-//      buttonActionState.elapsedTime < buttonActionProperty[buttonActionIndex].inputActionEndTime)
-//    {
-//
-//      tempActionIndex = buttonActionProperty[buttonActionIndex].inputActionNumber;
-//
-//      setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
-//      ledActionProperty[tempActionIndex].ledEndColor, 
-//      ledActionProperty[tempActionIndex].ledNumber, 
-//      1, 
-//      CONF_LED_REACTION_TIME, 
-//      CONF_LED_BRIGHTNESS);
-//
-//      outputAction = tempActionIndex;
-//
-//      performOutputAction(tempActionIndex);
-//
-//      break;
-//    }
-//  }
-//  tempActionIndex = 0;
-//  if ((
-//    switchActionState.secondaryState == INPUT_SEC_STATE_RELEASED) &&
-//    (outputAction == CONF_ACTION_SCROLL ||
-//      outputAction == CONF_ACTION_DRAG))
-//  {
-//    releaseOutputAction();
-//    canEvaluateAction = false;
-//  }
-//
-//  for (int switchActionIndex = 0; switchActionIndex < switchActionSize && canEvaluateAction && canOutputAction; switchActionIndex++)
-//  {
-//    if (switchActionState.mainState == switchActionProperty[switchActionIndex].inputActionState &&
-//      switchActionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
-//      switchActionState.elapsedTime >= switchActionProperty[switchActionIndex].inputActionStartTime &&
-//      switchActionState.elapsedTime < switchActionProperty[switchActionIndex].inputActionEndTime)
-//    {
-//
-//      tempActionIndex = switchActionProperty[switchActionIndex].inputActionNumber;
-//      
-//      setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
-//      ledActionProperty[tempActionIndex].ledEndColor, 
-//      ledActionProperty[tempActionIndex].ledNumber, 
-//      1, 
-//      CONF_LED_REACTION_TIME, 
-//      CONF_LED_BRIGHTNESS);
-//      
-//      outputAction = tempActionIndex;
-//
-//      performOutputAction(tempActionIndex);
-//
-//      break;
-//    }
-//  }
+  evaluateOutputAction(buttonState, buttonActionSize,buttonActionProperty);
+  evaluateOutputAction(switchState, switchActionSize,switchActionProperty);
 }
 
 //*********************************//
@@ -345,65 +257,6 @@ void pressureLoop()
   //printSipAndPuffData(2);
   //Output action logic
   evaluateOutputAction(sapActionState, sapActionSize,sapActionProperty);
-//   bool canEvaluateAction = true;
-//  //Logic to Skip Sip and puff action if it's in drag or scroll mode
-//  if ((sapActionState.secondaryState == PRESS_SAP_SEC_STATE_RELEASED) &&
-//    (outputAction == CONF_ACTION_SCROLL ||
-//      outputAction == CONF_ACTION_DRAG))
-//  {
-//    releaseOutputAction();
-//    canEvaluateAction = false;
-//  }
-//
-//  int sapActionIndex = 0;
-//  int tempActionIndex = 0;
-//  //Perform output action and led action on sip and puff release
-//  //Perform led action on sip and puff start
-//  while (sapActionIndex < sapActionSize && canEvaluateAction && canOutputAction)
-//  {
-//    //Perform output action and led action on sip and puff release
-//    if (sapActionState.mainState == sapActionProperty[sapActionIndex].inputActionState &&
-//      sapActionState.secondaryState == PRESS_SAP_SEC_STATE_RELEASED &&
-//      sapActionState.elapsedTime >= sapActionProperty[sapActionIndex].inputActionStartTime &&
-//      sapActionState.elapsedTime < sapActionProperty[sapActionIndex].inputActionEndTime)
-//    {
-//
-//      tempActionIndex = sapActionProperty[sapActionIndex].inputActionNumber; //used for releasing drag or scroll
-//
-//      setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
-//      ledActionProperty[tempActionIndex].ledEndColor, 
-//      ledActionProperty[tempActionIndex].ledNumber, 
-//      1, 
-//      CONF_LED_REACTION_TIME, 
-//      CONF_LED_BRIGHTNESS);
-//
-//      outputAction = tempActionIndex;
-//
-//      performOutputAction(tempActionIndex);
-//
-//      break;
-//    } //Perform led action on sip and puff start
-//    else if (sapActionState.mainState == sapActionProperty[sapActionIndex].inputActionState &&
-//      sapActionState.secondaryState == PRESS_SAP_SEC_STATE_STARTED &&
-//      sapActionState.elapsedTime >= sapActionProperty[sapActionIndex].inputActionStartTime &&
-//      sapActionState.elapsedTime < sapActionProperty[sapActionIndex].inputActionEndTime)
-//    {
-//
-//      tempActionIndex = sapActionProperty[sapActionIndex].inputActionNumber; //used for releasing drag or scroll
-//      
-//      setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
-//      ledActionProperty[tempActionIndex].ledStartColor, 
-//      ledActionProperty[tempActionIndex].ledNumber, 
-//      0, 
-//      0, 
-//      CONF_LED_BRIGHTNESS);
-//
-//      performLedAction(ledCurrentState);
-//
-//      break;
-//    }
-//    sapActionIndex++;
-//  }
 }
 
 void releaseOutputAction()
@@ -418,7 +271,7 @@ void releaseOutputAction()
   canOutputAction = true;
 }
 
-void evaluateOutputAction(inputStruct actionState, int actionSize,const inputActionStruct actionProperty[])
+void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inputActionStruct actionProperty[])
 {
   bool canEvaluateAction = true;
   //Output action logic
@@ -775,19 +628,19 @@ void printInputData()
 {
 
   Serial.print(" main: ");
-  Serial.print(buttonActionState.mainState);
+  Serial.print(buttonState.mainState);
   Serial.print(": ");
-  Serial.print(switchActionState.mainState);
+  Serial.print(switchState.mainState);
   Serial.print(", ");
   Serial.print(" secondary: ");
-  Serial.print(buttonActionState.secondaryState);
+  Serial.print(buttonState.secondaryState);
   Serial.print(": ");
-  Serial.print(switchActionState.secondaryState);
+  Serial.print(switchState.secondaryState);
   Serial.print(", ");
   Serial.print(" time: ");
-  Serial.print(buttonActionState.elapsedTime);
+  Serial.print(buttonState.elapsedTime);
   Serial.print(": ");
-  Serial.print(switchActionState.elapsedTime);
+  Serial.print(switchState.elapsedTime);
   Serial.print(", ");
 
   Serial.println();
