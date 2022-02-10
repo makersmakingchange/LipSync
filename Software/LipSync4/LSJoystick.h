@@ -67,6 +67,8 @@ class LSJoystick {
     int sgn(float val);
     pointFloatType magnetInputCalibration[JOY_CALIBR_ARRAY_SIZE];
     int _magnetDirection;
+    int _magnetZDirection;
+    int _magnetXYDirection;
     bool _deadzoneEnabled;
     float _deadzoneFactor;
     int _deadzoneValue;
@@ -76,6 +78,7 @@ class LSJoystick {
     LSJoystick();
     void begin();
     void clear();   
+    void setMagnetXYDirection(int magnetDirection);
     int getMagnetDirection();
     void setMagnetDirection();
     void setDeadzone(bool deadzoneEnabled,float deadzoneFactor);
@@ -99,6 +102,9 @@ LSJoystick::LSJoystick() {
 void LSJoystick::begin() {
 
   _inputRadius = 0.0;
+  _magnetXYDirection = JOY_MAG_DIRECTION_DEFAULT;
+  _magnetZDirection = JOY_MAG_DIRECTION_DEFAULT;
+
   Tlv493dSensor.begin();
   setMagnetDirection();
   setDeadzone(JOY_DEADZONE_STATUS,JOY_DEADZONE_FACTOR);
@@ -119,6 +125,11 @@ void LSJoystick::clear() {
 
 }
 
+void LSJoystick::setMagnetXYDirection(int magnetDirection){
+  _magnetXYDirection = magnetDirection;
+  _magnetDirection = _magnetZDirection * _magnetXYDirection;
+}
+
 
 int LSJoystick::getMagnetDirection() {
   return _magnetDirection;
@@ -135,14 +146,15 @@ void LSJoystick::setMagnetDirection() {
    
   if (zReading < -1 * JOY_MAG_DIRECTION_THRESHOLD)
   {
-    _magnetDirection = JOY_MAG_DIRECTION_DEFAULT;
+    _magnetZDirection = JOY_MAG_DIRECTION_INVERSE;
   }
   else if (zReading > JOY_MAG_DIRECTION_THRESHOLD){
-    _magnetDirection = JOY_MAG_DIRECTION_INVERSE;
+    _magnetZDirection = JOY_MAG_DIRECTION_DEFAULT;
   }
   else {
-    _magnetDirection = JOY_MAG_DIRECTION_FAULT;
+    _magnetZDirection = JOY_MAG_DIRECTION_FAULT;
   }
+  _magnetDirection = _magnetZDirection * _magnetXYDirection;
 
 }
 

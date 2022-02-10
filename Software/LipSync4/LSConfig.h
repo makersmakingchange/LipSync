@@ -31,6 +31,7 @@
 #define CONF_JOYSTICK_POLL_RATE 20    //20ms
 #define CONF_PRESSURE_POLL_RATE 50 
 #define CONF_INPUT_POLL_RATE 50 
+#define CONF_BLE_FEEDBACK_POLL_RATE 1000
 
 #define CONF_COMM_MODE_NONE 0 
 #define CONF_COMM_MODE_USB  1
@@ -48,12 +49,13 @@
 #define CONF_PUFF_THRESHOLD 2.5
 
 #define CONF_LED_BRIGHTNESS 50 
-#define CONF_LED_BRIGHTNESS_LOW 1 
+#define CONF_LED_BRIGHTNESS_LOW 10 
 #define CONF_LED_BRIGHTNESS_HIGH 150 
 
-#define CONF_COM_MODE 2        //0 = None , 1 = USB , 2 = Wireless  
+#define CONF_COM_MODE 1        //0 = None , 1 = USB , 2 = Wireless  
 
-#define CONF_ACTION_TIMEOUT 60000
+#define CONF_ACTION_TIMEOUT 60000         //Rest timer?
 
+#define CONF_LED_REACTION_TIME 200        //Led ON time for input actions 
 
-#define CONF_LED_REACTION_TIME 200
+#define CONF_LED_STARTUP_COLOR_TIME 500 

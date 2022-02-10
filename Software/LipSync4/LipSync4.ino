@@ -94,7 +94,7 @@ LSTimer<int> calibTimer;
 
 //Timer related variables
 
-int pollTimerId[3];
+int pollTimerId[4];
 
 LSTimer<void> pollTimer;
 
@@ -145,15 +145,22 @@ void setup()
 
   initJoystick();
 
-  initFeedback();
+  srartupFeedback();
 
   pollTimerId[0] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, 0, joystickLoop);
   pollTimerId[1] = pollTimer.setInterval(CONF_PRESSURE_POLL_RATE, 0, pressureLoop);
   pollTimerId[2] = pollTimer.setInterval(CONF_INPUT_POLL_RATE, 0, inputLoop);
+  pollTimerId[3] = pollTimer.setInterval(CONF_BLE_FEEDBACK_POLL_RATE, 0, bleFeedbackLoop);
+
   
   enablePoll(false);                              //Enable when the led IBM effect is complete 
 
 } //end setup
+
+void connect_callback(uint16_t conn_handle)
+{
+  
+}
 
 void loop()
 {
@@ -168,10 +175,12 @@ void enablePoll(bool isEnabled){
     pollTimer.enable(0);
     pollTimer.enable(1);
     pollTimer.enable(2);    
+    pollTimer.enable(3);  
   } else {
     pollTimer.disable(0);
     pollTimer.disable(1);
     pollTimer.disable(2);
+    pollTimer.disable(3);
   }
 }
 
@@ -308,7 +317,7 @@ void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inp
       break;
     }
     else if (actionState.mainState == actionProperty[actionIndex].inputActionState &&
-      actionState.secondaryState == PRESS_SAP_SEC_STATE_STARTED &&
+      actionState.secondaryState == INPUT_SEC_STATE_STARTED &&
       actionState.elapsedTime >= actionProperty[actionIndex].inputActionStartTime &&
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
@@ -500,6 +509,7 @@ void initJoystick()
 {
 
   js.begin();
+  js.setMagnetXYDirection(JOY_MAG_DIRECTION_INVERSE);       //JOY_MAG_DIRECTION_DEFAULT
   js.setOutputScale(CONF_JOY_OUTPUT_SCALE);
   setJoystickCenter();
   getJoystickCalibration();
@@ -552,7 +562,7 @@ void performCalibration(int* args)
   } 
   else if (stepNumber == 5)
   {
-    setLedState(LED_ACTION_OFF, LED_CLR_NONE, 4, 0, 0,CONF_LED_BRIGHTNESS);                            //Turn off Led's
+    setLedState(LED_ACTION_NONE, LED_CLR_NONE, 4, 0, 0,CONF_LED_BRIGHTNESS_LOW);                            //Turn off Led's
     performLedAction(ledCurrentState);
     calibTimer.deleteTimer(0);                                                                          //Delete timer
     canOutputAction = true;
@@ -713,9 +723,9 @@ void initLed()
 }
 
 
-void initFeedback()
+void srartupFeedback()
 {
-  setLedState(LED_ACTION_BLINK, 1, 4, 4, 300, CONF_LED_BRIGHTNESS);
+  setLedState(LED_ACTION_BLINK, 1, 4, 4, CONF_LED_STARTUP_COLOR_TIME, CONF_LED_BRIGHTNESS);
   ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
 
 }
@@ -738,23 +748,25 @@ void setLedState(int ledAction, int ledColorNumber, int ledNumber, int ledBlinkN
 
 void ledIBMEffect(ledStateStruct* args)
 {
-  led.setLedColor(args->ledNumber, args->ledColorNumber, args->ledBrightness);
+  
   if (args->ledColorNumber == 0)
   {
-    setLedState(LED_ACTION_NONE, LED_CLR_NONE, 0, 0, 0,0);
-    ledStateTimer.deleteTimer(0); 
+    //ledStateTimer.deleteTimer(0); 
+    enablePoll(true);
   }
   else if (args->ledColorNumber < 7)
   {
-    setLedState(args->ledAction, (args->ledColorNumber)+1, args->ledNumber, args->ledBlinkNumber, (args->ledBlinkTime)+500,args->ledBrightness);
+    led.setLedColor(args->ledNumber, args->ledColorNumber, args->ledBrightness);
+    setLedState(args->ledAction, (args->ledColorNumber)+1, args->ledNumber, args->ledBlinkNumber, (args->ledBlinkTime),args->ledBrightness);
     ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
   } 
   else if (args->ledColorNumber == 7)
   {
-    setLedState(args->ledAction, 0, args->ledNumber, args->ledBlinkNumber, (args->ledBlinkTime)+500,args->ledBrightness);
+    setLedState(LED_ACTION_OFF, 0, args->ledNumber, args->ledBlinkNumber, (args->ledBlinkTime),args->ledBrightness);
+    performLedAction(ledCurrentState);
     ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
-    enablePoll(true);  
-    setLedDefault();
+     
+     
   }
 
 }
@@ -769,7 +781,7 @@ void ledBlinkEffect(ledStateStruct* args){
 
   if(ledStateTimer.getNumRuns(0)==((args->ledBlinkNumber)*2)+1){
     
-     setLedState(LED_ACTION_NONE, LED_CLR_NONE, 0, 0, 0,0);
+     setLedState(LED_ACTION_NONE, LED_CLR_NONE, 0, 0, 0,CONF_LED_BRIGHTNESS_LOW);
      
   }   
 }
@@ -797,14 +809,26 @@ void blinkLed(ledStateStruct* args)
 }
 
 void setLedDefault(){
-
   if (comMode == CONF_COMM_MODE_USB)
   {
-    //led.clearLedAll();
+    led.clearLedAll();
   }
   else if (comMode == CONF_COMM_MODE_BLE && btmouse.isConnected())
   {
+    led.clearLedAll();
     led.setLedColor(2, LED_CLR_BLUE, CONF_LED_BRIGHTNESS_LOW);
+  }
+}
+
+void bleFeedbackLoop()
+{
+  if (comMode == CONF_COMM_MODE_BLE && btmouse.isConnected())
+  {
+    led.setLedColor(2, LED_CLR_BLUE, CONF_LED_BRIGHTNESS_LOW);
+  }
+  else if (comMode == CONF_COMM_MODE_BLE && btmouse.isConnected()==false)
+  {
+    led.clearLed(2);
   }
 }
 
