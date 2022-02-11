@@ -12,7 +12,7 @@
 #include "LSOutput.h"
 #include "LSMemory.h"
 
-int comMode = 0;
+int comMode; //0 = None , 1 = USB , 2 = Wireless  
 
 //LED module variables
 const ledActionStruct ledActionProperty[]{
@@ -103,6 +103,8 @@ LSTimer<void> pollTimer;
 int outputAction;
 bool canOutputAction = true;
 
+bool settingsEnabled = false;                        //Serial input settings command mode enabled or disabled
+
 //Create instances of classes
 
 LSMemory mem;
@@ -145,6 +147,8 @@ void setup()
 
   initJoystick();
 
+  comMode = getComMode();
+
   srartupFeedback();
 
   pollTimerId[0] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, 0, joystickLoop);
@@ -157,17 +161,13 @@ void setup()
 
 } //end setup
 
-void connect_callback(uint16_t conn_handle)
-{
-  
-}
-
 void loop()
 {
 
   ledStateTimer.run();
   calibTimer.run();
   pollTimer.run();
+  settingsEnabled=serialSettings(settingsEnabled); //Check to see if setting option is enabled in Lipsync
 }
 
 void enablePoll(bool isEnabled){
@@ -400,7 +400,7 @@ void performOutputAction(int action)
     case CONF_ACTION_CHANGE_MODE:
     {
       //Change communication mode
-      changeComMode();
+      setComMode();
       break;
     }
   }
@@ -487,17 +487,34 @@ void increaseCursorSpeed(void)
   Serial.println("Increase Cursor Speed");
 }
 
-void changeComMode(void)
+int getComMode(void)
 {
-  Serial.println("Change Communication Mode");
+  String comModeCommand = "CM";   
+  int tempComMode;
+  tempComMode = mem.readInt(CONF_SETTINGS_FILE, comModeCommand);
+
+  if(tempComMode<1 || tempComMode>2){
+    tempComMode = CONF_COM_MODE;
+    mem.writeInt(CONF_SETTINGS_FILE,comModeCommand,tempComMode);   
+  }
+  Serial.print("Current Communication Mode:");
+  Serial.println(tempComMode);  
+  return tempComMode;
+}
+
+void setComMode(void)
+{
+  String comModeCommand = "CM";   
   if (comMode < 2)
   {
     comMode++;
   }
   else
   {
-    comMode = 0;
+    comMode = 1;
   }
+  mem.writeInt(CONF_SETTINGS_FILE,comModeCommand,comMode);    
+  Serial.print("New Communication Mode:");
   Serial.println(comMode);
 }
 
