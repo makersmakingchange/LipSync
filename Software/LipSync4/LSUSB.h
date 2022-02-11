@@ -87,7 +87,7 @@ LSUSBMouse::LSUSBMouse(void)
 void LSUSBMouse::begin(void)
 {
   this->usb_hid.begin();
-  while( !USBDevice.mounted() ) delay(1);
+  //while( !USBDevice.mounted() ) delay(1);
 }
 
 

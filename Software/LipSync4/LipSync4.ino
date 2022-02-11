@@ -131,9 +131,9 @@ void setup()
 
   Serial.begin(115200);
   // Wait until serial port is opened
-  while (!TinyUSBDevice.mounted())
-    delay(1);
-  //while (!Serial) { delay(1); }
+//  while (!TinyUSBDevice.mounted())
+//    delay(1);
+  //while (!Serial) { delay(10); }
 
   delay(1000);
   
@@ -499,6 +499,7 @@ int getComMode(void)
   }
   Serial.print("Current Communication Mode:");
   Serial.println(tempComMode);  
+  tempComMode = 2;
   return tempComMode;
 }
 
