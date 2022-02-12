@@ -499,7 +499,6 @@ int getComMode(void)
   }
   Serial.print("Current Communication Mode:");
   Serial.println(tempComMode);  
-  tempComMode = 2;
   return tempComMode;
 }
 
