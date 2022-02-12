@@ -1,12 +1,21 @@
 //DO NOT CHANGE 
+#define CONF_LIPSYNC_MODEL 1
+#define CONF_LIPSYNC_VERSION 1
 
-#define CONF_BUTTON1_PIN 9                                 // Pushbutton S1
-//#define CONF_BUTTON1_PIN 5                                 // Pushbutton S1
+
+//Alpha 1
+//#define CONF_BUTTON1_PIN 9                                 // Pushbutton S1
+//#define CONF_BUTTON2_PIN 6                                 // Pushbutton S2
+//#define CONF_BUTTON3_PIN 5                                 // Pushbutton S3
+//#define CONF_SWITCH1_PIN A1                                // 3.5mm jack SW1
+//#define CONF_SWITCH2_PIN 11                                // 3.5mm jack SW2
+//#define CONF_SWITCH3_PIN 10                                // 3.5mm jack SW3
+
+//Alpha 2
+#define CONF_BUTTON1_PIN 5                                 // Pushbutton S1
 #define CONF_BUTTON2_PIN 6                                 // Pushbutton S2
-#define CONF_BUTTON3_PIN 5                                 // Pushbutton S3
-//#define CONF_BUTTON3_PIN 9                                 // Pushbutton S3
-#define CONF_SWITCH1_PIN A1                                // 3.5mm jack SW1
-//#define CONF_SWITCH1_PIN A2                                // 3.5mm jack SW1
+#define CONF_BUTTON3_PIN 9                                 // Pushbutton S3
+#define CONF_SWITCH1_PIN A2                                // 3.5mm jack SW1
 #define CONF_SWITCH2_PIN 11                                // 3.5mm jack SW2
 #define CONF_SWITCH3_PIN 10                                // 3.5mm jack SW3
 
@@ -28,9 +37,14 @@
 #define CONF_SETTINGS_FILE    "/settings.txt"
 #define CONF_SETTINGS_JSON    "{\"CF\":5,\"MN\":0,\"VN\":0.0,\"CM\":0,\"SL\":0,\"ST\":0,\"PT\":0,\"CA0\":[0.0,0.0],\"CA1\":[25.0,25.0],\"CA2\":[-25.0,25.0],\"CA3\":[-25.0,-25.0],\"CA4\":[25.0,-25.0]}"
 
-#define CONF_JOYSTICK_POLL_RATE 20    //20ms
+#define CONF_JOYSTICK_POLL_RATE 50    //50ms
 #define CONF_PRESSURE_POLL_RATE 50 
 #define CONF_INPUT_POLL_RATE 50 
+#define CONF_BLE_FEEDBACK_POLL_RATE 1000
+
+#define CONF_COMM_MODE_NONE 0 
+#define CONF_COMM_MODE_USB  1
+#define CONF_COMM_MODE_BLE  2
 
 #define CONF_COMM_MODE_NONE 0 
 #define CONF_COMM_MODE_USB  1
@@ -48,11 +62,13 @@
 #define CONF_PUFF_THRESHOLD 2.5
 
 #define CONF_LED_BRIGHTNESS 50 
+#define CONF_LED_BRIGHTNESS_LOW 10 
 #define CONF_LED_BRIGHTNESS_HIGH 150 
 
 #define CONF_COM_MODE 2        //0 = None , 1 = USB , 2 = Wireless  
 
-#define CONF_ACTION_TIMEOUT 60000
+#define CONF_ACTION_TIMEOUT 60000         //Rest timer?
 
+#define CONF_LED_REACTION_TIME 200        //Led ON time for input actions 
 
-#define CONF_LED_REACTION_TIME 200
+#define CONF_LED_STARTUP_COLOR_TIME 500 

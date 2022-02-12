@@ -33,12 +33,6 @@ typedef struct {
   float diffPressure;
 } pressureStruct;
 
-typedef struct {
-  int mainState;            //none = 0, sip = 1, puff = 2
-  int secondaryState;       //waiting = 0, started = 1, detected = 2
-  unsigned long elapsedTime;     //in ms
-} sapStruct;
-
 
 class LSPressure {
   private: 
@@ -46,7 +40,7 @@ class LSPressure {
     Adafruit_BMP280 bmp; // use I2C interface
     Adafruit_Sensor *bmp_pressure = bmp.getPressureSensor();
     LSCircularBuffer <pressureStruct> pressureBuffer;
-    LSCircularBuffer <sapStruct> sapBuffer;   //Create a buffer of type sapStruct
+    LSCircularBuffer <inputStateStruct> sapBuffer;   //Create a buffer of type inputStateStruct
     int filterMode;
     int pressureType;
     float mainVal;
@@ -57,8 +51,8 @@ class LSPressure {
     float refTolVal;
     LSTimer <void> mainStateTimer;
     int sapStateTimerId;
-    sapStruct sapCurrState;
-    sapStruct sapPrevState;
+    inputStateStruct sapCurrState;
+    inputStateStruct sapPrevState;
     float sipThreshold;
     float puffThreshold;
     int sapMainState;
@@ -79,7 +73,7 @@ class LSPressure {
     float getRefPressure();
     float getDiffPressure();
     pressureStruct getAllPressure();
-    sapStruct getState();
+    inputStateStruct getState();
 };
 
 LSPressure::LSPressure() {
@@ -307,7 +301,7 @@ pressureStruct LSPressure::getAllPressure() {
   return pressureBuffer.getLastElement();
 }
 
-sapStruct LSPressure::getState(){
+inputStateStruct LSPressure::getState(){
   return sapBuffer.getLastElement();
 }
 

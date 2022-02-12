@@ -21,22 +21,15 @@
 
 #define INPUT_ACTION_TIMEOUT 60000
 
-typedef struct {
-  int mainState;                 //button1 + 2*button2 + 4*button3
-  int secondaryState;            //waiting = 0, started = 1, released = 2
-  unsigned long elapsedTime;     //in ms
-} inputStruct;
-
-
 class LSInput {
   private: 
-    LSCircularBuffer <inputStruct> inputBuffer;
+    LSCircularBuffer <inputStateStruct> inputBuffer;
     int *_inputPinArray;
     int _inputNumber;
     int inputState[3];
     int inputAllState;
-    inputStruct inputCurrState = {0, 0, 0};
-    inputStruct inputPrevState = {0, 0, 0};
+    inputStateStruct inputCurrState = {0, 0, 0};
+    inputStateStruct inputPrevState = {0, 0, 0};
     LSTimer <void> inputStateTimer;
     int inputStateTimerId;
   public:
@@ -45,7 +38,7 @@ class LSInput {
     void begin();                                    
     void clear();  
     void update();    
-    inputStruct getInputState();
+    inputStateStruct getInputState();
 };
 
 LSInput::LSInput(int* inputPinArray, int inputNumber)
@@ -75,7 +68,7 @@ void LSInput::begin() {
 
 void LSInput::clear() {
     
-  inputStruct inputPrevState = {INPUT_MAIN_STATE_NONE, INPUT_SEC_STATE_WAITING, 0};
+  inputStateStruct inputPrevState = {INPUT_MAIN_STATE_NONE, INPUT_SEC_STATE_WAITING, 0};
 
   inputBuffer.pushElement(inputPrevState);
 
@@ -146,8 +139,8 @@ void LSInput::update() {
 }
 
 
-inputStruct LSInput::getInputState() {
-  inputStruct inputCurrState = inputBuffer.getLastElement();  //Get the state
+inputStateStruct LSInput::getInputState() {
+  inputStateStruct inputCurrState = inputBuffer.getLastElement();  //Get the state
   return inputCurrState;
 }
 
