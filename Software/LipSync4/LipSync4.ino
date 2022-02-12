@@ -131,8 +131,7 @@ void setup()
 
   Serial.begin(115200);
   // Wait until serial port is opened
-//  while (!TinyUSBDevice.mounted())
-//    delay(1);
+  //while (!TinyUSBDevice.mounted())
   //while (!Serial) { delay(10); }
 
   delay(1000);
@@ -147,7 +146,7 @@ void setup()
 
   initJoystick();
 
-  comMode = getComMode();
+  comMode = getCommunicationMethod(false,false);
 
   srartupFeedback();
 
@@ -220,74 +219,8 @@ void inputLoop()
   switchState = is.getInputState();
 
   //printInputData();
-<<<<<<< HEAD
-
-  bool canEvaluateAction = true;
-  //Output action logic
-  int tempActionIndex = 0;
-
-  for (int buttonActionIndex = 0; buttonActionIndex < inputActionSize; buttonActionIndex++)
-  {
-    if (inputButtonActionState.mainState == buttonActionProperty[buttonActionIndex].inputActionState &&
-      inputButtonActionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
-      inputButtonActionState.elapsedTime >= buttonActionProperty[buttonActionIndex].inputActionStartTime &&
-      inputButtonActionState.elapsedTime < buttonActionProperty[buttonActionIndex].inputActionEndTime)
-    {
-
-      tempActionIndex = buttonActionProperty[buttonActionIndex].inputActionNumber;
-
-      setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
-      ledActionProperty[tempActionIndex].ledEndColor, 
-      ledActionProperty[tempActionIndex].ledNumber, 
-      1, 
-      CONF_LED_REACTION_TIME, 
-      CONF_LED_BRIGHTNESS);
-
-      outputAction = tempActionIndex;
-
-      performOutputAction(tempActionIndex);
-
-      break;
-    }
-  }
-  tempActionIndex = 0;
-  if ( !canOutputAction ||((
-    inputSwitchActionState.secondaryState == INPUT_SEC_STATE_RELEASED) &&
-    (outputAction == CONF_ACTION_SCROLL ||
-      outputAction == CONF_ACTION_DRAG)))
-  {
-    releaseOutputAction();
-    canEvaluateAction = false;
-  }
-
-  for (int switchActionIndex = 0; switchActionIndex < inputActionSize && canEvaluateAction; switchActionIndex++)
-  {
-    if (inputSwitchActionState.mainState == switchActionProperty[switchActionIndex].inputActionState &&
-      inputSwitchActionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
-      inputSwitchActionState.elapsedTime >= switchActionProperty[switchActionIndex].inputActionStartTime &&
-      inputSwitchActionState.elapsedTime < switchActionProperty[switchActionIndex].inputActionEndTime)
-    {
-
-      tempActionIndex = switchActionProperty[switchActionIndex].inputActionNumber;
-      
-      setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
-      ledActionProperty[tempActionIndex].ledEndColor, 
-      ledActionProperty[tempActionIndex].ledNumber, 
-      1, 
-      CONF_LED_REACTION_TIME, 
-      CONF_LED_BRIGHTNESS);
-      
-      outputAction = tempActionIndex;
-
-      performOutputAction(tempActionIndex);
-
-      break;
-    }
-  }
-=======
   evaluateOutputAction(buttonState, buttonActionSize,buttonActionProperty);
   evaluateOutputAction(switchState, switchActionSize,switchActionProperty);
->>>>>>> merge-code
 }
 
 //*********************************//
@@ -298,14 +231,16 @@ void initSipAndPuff()
 {
 
   ps.begin(PRESS_TYPE_DIFF);
-  setSipAndPuffThreshold();
+//  setSipAndPuffThreshold();
+  getSipPressureThreshold(false);
+  getPuffPressureThreshold(false);
   sapActionSize = sizeof(sapActionProperty) / sizeof(inputActionStruct);
 }
 
-void setSipAndPuffThreshold()
-{
-  ps.setStateThreshold(CONF_SIP_THRESHOLD, CONF_PUFF_THRESHOLD);
-}
+//void setSipAndPuffThreshold()
+//{
+//  ps.setThreshold(CONF_SIP_THRESHOLD, CONF_PUFF_THRESHOLD);
+//}
 
 void updatePressure()
 {
@@ -334,12 +269,6 @@ void pressureLoop()
   evaluateOutputAction(sapActionState, sapActionSize,sapActionProperty);
 }
 
-<<<<<<< HEAD
-  bool canEvaluateAction = true;
-  //Logic to Skip Sip and puff action if it's in drag or scroll mode
-  if (!canOutputAction || ((
-    sapActionState.secondaryState == PRESS_SAP_SEC_STATE_RELEASED) &&
-=======
 void releaseOutputAction()
 {
   setLedDefault();
@@ -359,34 +288,19 @@ void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inp
   int tempActionIndex = 0;
   if ((
     actionState.secondaryState == INPUT_SEC_STATE_RELEASED) &&
->>>>>>> merge-code
     (outputAction == CONF_ACTION_SCROLL ||
-      outputAction == CONF_ACTION_DRAG)))
+      outputAction == CONF_ACTION_DRAG))
   {
     releaseOutputAction();
     canEvaluateAction = false;
   }
 
-<<<<<<< HEAD
-  int sapActionIndex = 0;
-  int tempActionIndex = 0;
-  //Perform output action and led action on sip and puff release
-  //Perform led action on sip and puff start
-  while (sapActionIndex < sapActionSize && canEvaluateAction)
-  {
-    //Perform output action and led action on sip and puff release
-    if (sapActionState.mainState == sapActionProperty[sapActionIndex].inputActionState &&
-      sapActionState.secondaryState == PRESS_SAP_SEC_STATE_RELEASED &&
-      sapActionState.elapsedTime >= sapActionProperty[sapActionIndex].inputActionStartTime &&
-      sapActionState.elapsedTime < sapActionProperty[sapActionIndex].inputActionEndTime)
-=======
   for (int actionIndex = 0; actionIndex < actionSize && canEvaluateAction && canOutputAction; actionIndex++)
   {
     if (actionState.mainState == actionProperty[actionIndex].inputActionState &&
       actionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
       actionState.elapsedTime >= actionProperty[actionIndex].inputActionStartTime &&
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
->>>>>>> merge-code
     {
 
       tempActionIndex = actionProperty[actionIndex].inputActionNumber;
@@ -422,39 +336,12 @@ void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inp
 
       break;
     }
-<<<<<<< HEAD
-    sapActionIndex++;
-  }
-}
-
-void releaseOutputAction()
-{
-  if (comMode == CONF_COMM_MODE_USB)
-  {
-    led.clearLedAll();
-  }
-  else if (comMode == CONF_COMM_MODE_BLE && btmouse.isConnected())
-  {
-    led.setLedColor(2, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
-  }
-  if (outputAction == CONF_ACTION_DRAG && (mouse.isPressed(MOUSE_LEFT) || btmouse.isPressed(MOUSE_LEFT)))
-  {
-    mouse.release(MOUSE_LEFT);
-    btmouse.release(MOUSE_LEFT);
-  }
-  outputAction = CONF_ACTION_NOTHING;
-  canOutputAction = true;
-=======
   }  
->>>>>>> merge-code
 }
 
 void performOutputAction(int action)
 {
-<<<<<<< HEAD
-=======
   
->>>>>>> merge-code
   performLedAction(ledCurrentState);
   switch (action)
   {
@@ -484,13 +371,13 @@ void performOutputAction(int action)
     }
     case CONF_ACTION_CURSOR_CALIBRATION:
     {
-      setJoystickCalibration();
+      setJoystickCalibration(false,false);
       break;
     }
     case CONF_ACTION_CURSOR_CENTER:
     {
       //Perform cursor center
-      setJoystickCenter();
+      setJoystickInitialization(false,false);
       break;
     }
     case CONF_ACTION_MIDDLE_CLICK:
@@ -584,12 +471,12 @@ void cursorScroll(void)
   //Serial.println("Scroll");
 }
 
-void setJoystickCenter(void)
-{
-  js.updateInputComp();
-  pointFloatType centerPoint = js.getInputComp();
-  printJoystickFloatData(centerPoint);
-}
+//void setJoystickCenter(void)
+//{
+//  js.updateInputComp();
+//  pointFloatType centerPoint = js.getInputComp();
+//  printJoystickFloatData(centerPoint);
+//}
 
 void decreaseCursorSpeed(void)
 {
@@ -601,37 +488,36 @@ void increaseCursorSpeed(void)
   Serial.println("Increase Cursor Speed");
 }
 
-int getComMode(void)
-{
-  String comModeCommand = "CM";   
-  int tempComMode;
-  tempComMode = mem.readInt(CONF_SETTINGS_FILE, comModeCommand);
+//int getComMode(void)
+//{
+//  String comModeCommand = "CM";   
+//  int tempComMode;
+//  tempComMode = mem.readInt(CONF_SETTINGS_FILE, comModeCommand);
+//
+//  if(tempComMode<1 || tempComMode>2){
+//    tempComMode = CONF_COM_MODE;
+//    mem.writeInt(CONF_SETTINGS_FILE,comModeCommand,tempComMode);   
+//  }
+//  Serial.print("Current Communication Mode:");
+//  Serial.println(tempComMode);  
+//  return tempComMode;
+//}
 
-  if(tempComMode<1 || tempComMode>2){
-    tempComMode = CONF_COM_MODE;
-    mem.writeInt(CONF_SETTINGS_FILE,comModeCommand,tempComMode);   
-  }
-  Serial.print("Current Communication Mode:");
-  Serial.println(tempComMode);  
-  tempComMode = 2;
-  return tempComMode;
-}
-
-void setComMode(void)
-{
-  String comModeCommand = "CM";   
-  if (comMode < 2)
-  {
-    comMode++;
-  }
-  else
-  {
-    comMode = 1;
-  }
-  mem.writeInt(CONF_SETTINGS_FILE,comModeCommand,comMode);    
-  Serial.print("New Communication Mode:");
-  Serial.println(comMode);
-}
+//void setComMode(void)
+//{
+//  String comModeCommand = "CM";   
+//  if (comMode < 2)
+//  {
+//    comMode++;
+//  }
+//  else
+//  {
+//    comMode = 1;
+//  }
+//  mem.writeInt(CONF_SETTINGS_FILE,comModeCommand,comMode);    
+//  Serial.print("New Communication Mode:");
+//  Serial.println(comMode);
+//}
 
 //*********************************//
 // Joystick Functions
@@ -643,31 +529,30 @@ void initJoystick()
   js.begin();
   js.setMagnetXYDirection(JOY_MAG_DIRECTION_INVERSE);       //JOY_MAG_DIRECTION_DEFAULT
   js.setOutputScale(CONF_JOY_OUTPUT_SCALE);
-  setJoystickCenter();
-  getJoystickCalibration();
+  setJoystickInitialization(false,false);
+  getJoystickCalibration(false,false);
 }
 
-void getJoystickCalibration()
-{
-  String commandKey;
-  pointFloatType maxPoint;
-  for (int i = 1; i < 5; i++)
-  {
-    commandKey = "CA" + String(i);
-    maxPoint = mem.readPoint(CONF_SETTINGS_FILE, commandKey);
-    printJoystickFloatData(maxPoint);
-    js.setInputMax(i, maxPoint);
-  }
-}
+//void getJoystickCalibration()
+//{
+//  String commandKey;
+//  pointFloatType maxPoint;
+//  for (int i = 1; i < 5; i++)
+//  {
+//    commandKey = "CA" + String(i);
+//    maxPoint = mem.readPoint(CONF_SETTINGS_FILE, commandKey);
+//    printJoystickFloatData(maxPoint);
+//    js.setInputMax(i, maxPoint);
+//  }
+//}
 
-void setJoystickCalibration()
-{
-  js.clear();                                                                                           //Clear previous calibration values 
-  int stepNumber = 0;
-  canOutputAction = false;
-  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_CALIB_BLINK_TIME, performCalibration, (int *)stepNumber);  //Start the process  
-  
-}
+//void setJoystickCalibration()
+//{
+//  js.clear();                                                                                           //Clear previous calibration values 
+//  int stepNumber = 0;
+//  canOutputAction = false;
+//  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_CALIB_BLINK_TIME, performCalibration, (int *)stepNumber);  //Start the process  
+//}
 
 void performCalibration(int* args)
 {
@@ -680,7 +565,7 @@ void performCalibration(int* args)
   {
     setLedState(LED_ACTION_BLINK, LED_CLR_ORANGE, 2, 1, CONF_JOY_CALIB_BLINK_TIME,CONF_LED_BRIGHTNESS);  // LED Feedback to show start of setJoystickCenter
     performLedAction(ledCurrentState);
-    setJoystickCenter();
+    setJoystickInitialization(false,false);
     ++stepNumber;
     calibTimerId[0] = calibTimer.setTimeout(nextStepStart, performCalibration, (int *)stepNumber);      // Start next step
   }
@@ -857,12 +742,7 @@ void initLed()
 
 void srartupFeedback()
 {
-<<<<<<< HEAD
-  canOutputAction = false;
-  setLedState(LED_ACTION_BLINK, 1, 4, 4, 300, CONF_LED_BRIGHTNESS);
-=======
   setLedState(LED_ACTION_BLINK, 1, 4, 4, CONF_LED_STARTUP_COLOR_TIME, CONF_LED_BRIGHTNESS);
->>>>>>> merge-code
   ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
 
 }
@@ -902,12 +782,8 @@ void ledIBMEffect(ledStateStruct* args)
     setLedState(LED_ACTION_OFF, 0, args->ledNumber, args->ledBlinkNumber, (args->ledBlinkTime),args->ledBrightness);
     performLedAction(ledCurrentState);
     ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
-<<<<<<< HEAD
-    canOutputAction = true;
-=======
      
      
->>>>>>> merge-code
   }
 
 }
@@ -949,17 +825,6 @@ void blinkLed(ledStateStruct* args)
   ledTimerId = ledStateTimer.setTimer(args->ledBlinkTime, 0, ((args->ledBlinkNumber)*2)+1, ledBlinkEffect, ledCurrentState);
 }
 
-<<<<<<< HEAD
-void turnLedDefault(){
-  Serial.println("test");
-
-  if (comMode == CONF_COMM_MODE_BLE && btmouse.isConnected())
-  {
-    led.setLedColor(2, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
-  }
-}
-
-=======
 void setLedDefault(){
   if (comMode == CONF_COMM_MODE_USB)
   {
@@ -985,18 +850,13 @@ void bleFeedbackLoop()
 }
 
 
->>>>>>> merge-code
 void performLedAction(ledStateStruct* args)
 {
   switch (args->ledAction)
   {
   case LED_ACTION_NONE:
   {
-<<<<<<< HEAD
-    turnLedDefault();
-=======
     setLedDefault();
->>>>>>> merge-code
     break;
   }
   case LED_ACTION_OFF:
