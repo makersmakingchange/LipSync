@@ -1,7 +1,7 @@
 
 
 //***API FUNCTIONS***// - DO NOT CHANGE
-typedef void (*FunctionPointer)(bool,bool,int*);        //Type definition for API function pointer
+typedef void (*FunctionPointer)(bool,bool,String);        //Type definition for API function pointer
 
 typedef struct {                                  //Type definition for API function list
   String endpoint;                               //Unique two character end point  
@@ -13,6 +13,8 @@ typedef struct {                                  //Type definition for API func
 // Declare individual API functions with command, parameter, and corresponding function
 _functionList getModelNumberFunction =            {"MN","0","0",&getModelNumber};
 _functionList getVersionNumberFunction =          {"VN","0","0",&getVersionNumber};
+_functionList getJoystickSpeedFunction =          {"SS","0","0",&getJoystickSpeed};
+_functionList setJoystickSpeedFunction =          {"SS","1","",&setJoystickrSpeed};
 _functionList getJoystickInitializationFunction = {"IN","0","0",&getJoystickInitialization};
 _functionList setJoystickInitializationFunction = {"IN","1","1",&setJoystickInitialization};
 _functionList getJoystickCalibrationFunction =    {"CA","0","0",&getJoystickCalibration};
@@ -32,10 +34,15 @@ _functionList setCommunicationMethodFunction =    {"CM","1","",&setCommunication
 _functionList getDebugModeFunction =              {"DM","0","0",&getDebugMode};
 _functionList setDebugModeFunction =              {"DM","1","",&setDebugMode};
 
+_functionList resetSettingsFunction =             {"RS","1","1",&resetSettings};
+_functionList factoryResetFunction =              {"FR","1","1",&factoryReset};
+
 // Declare array of API functions
-_functionList apiFunction[18] = {
+_functionList apiFunction[22] = {
   getModelNumberFunction,
   getVersionNumberFunction,
+  getJoystickSpeedFunction,
+  setJoystickSpeedFunction,
   getJoystickInitializationFunction,
   setJoystickInitializationFunction,
   getJoystickCalibrationFunction,
@@ -50,7 +57,9 @@ _functionList apiFunction[18] = {
   getCommunicationMethodFunction,
   setCommunicationMethodFunction,
   getDebugModeFunction,
-  setDebugModeFunction
+  setDebugModeFunction,
+  resetSettingsFunction,
+  factoryResetFunction
 };
 
 //***SERIAL SETTINGS FUNCTION TO CHANGE SPEED AND COMMUNICATION MODE USING SOFTWARE***//
@@ -120,8 +129,7 @@ void performCommand(String inputString) {
   
   //Extract parameter string from input string
   String inputParameterString = inputString.substring(inputIndex+1);
-  Serial.println(inputEndpointString);  
-  Serial.println(inputCodeString); 
+
   // Determine total number of API commands
   int apiTotalNumber=sizeof(apiFunction)/sizeof(apiFunction[0]);
 
@@ -138,9 +146,9 @@ void performCommand(String inputString) {
       // Matching Command String found
       if( isValidCommandParameter( inputParameterString )) {   //Check if parameter is valid
         //Valid Parameter
-        
+        apiFunction[apiIndex].function(true, true, inputParameterString);
         //Handle parameters that are an array as a special case.
-        if(apiFunction[apiIndex].parameter=="r"){   //"r" denotes an array parameter 
+/*         if(apiFunction[apiIndex].parameter=="r"){   //"r" denotes an array parameter 
           
           int inputParameterArray[inputParameterString.length() + 1];
           for(unsigned int arrayIndex=0; arrayIndex<inputParameterString.length(); arrayIndex++)
@@ -156,13 +164,11 @@ void performCommand(String inputString) {
           // Call matching API function with input parameter string
           apiFunction[apiIndex].function(true, true, tempParameterArray);
           delay(5);
-        }
+        } */
       } else { // Invalid input parameter
       
       // Outut error message
       printResponseSingle(true,true,false,2,inputString,false,0);
-
-      delay(5);
       }
       break;
     } else if(apiIndex== (apiTotalNumber-1)) { // api doesn’t exist
@@ -296,6 +302,8 @@ void printResponseSingle(bool responseEnabled,bool apiEnabled, bool responseStat
   }
 }
 
+
+
 //***GET MODEL NUMBER FUNCTION***//
 // Function   : getModelNumber 
 // 
@@ -322,11 +330,11 @@ void getModelNumber(bool responseEnabled, bool apiEnabled) {
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               optionalArray : int* : The array of int which should contain one element with value of zero.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void getModelNumber(bool responseEnabled, bool apiEnabled, int* optionalArray) {
-  if(optionalArray[0]==0){
+void getModelNumber(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
     getModelNumber(responseEnabled, apiEnabled);
   }
 }
@@ -356,12 +364,83 @@ void getVersionNumber(bool responseEnabled, bool apiEnabled) {
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               optionalArray : int* : The array of int which should contain one element with value of zero.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void getVersionNumber(bool responseEnabled, bool apiEnabled, int* optionalArray) {
-  if(optionalArray[0]==0){
+void getVersionNumber(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
     getVersionNumber(responseEnabled, apiEnabled);
+  }
+}
+
+//***GET JOYSTICK SPEED FUNCTION***//
+// Function   : getJoystickSpeed 
+// 
+// Description: This function retrieves the current joystick speed level.
+// 
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+// 
+// Return     : void
+//*********************************//
+int getJoystickSpeed(bool responseEnabled, bool apiEnabled) {
+
+  printResponseSingle(responseEnabled,apiEnabled,true,0,"SS,0",true,CONF_JOY_SPEED_LEVEL);
+
+  return CONF_JOY_SPEED_LEVEL;
+}
+//***GET JOYSTICK SPEED API FUNCTION***//
+// Function   : getJoystickSpeed 
+// 
+// Description: This function is redefinition of main getJoystickSpeed function to match the types of API function arguments.
+// 
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+// 
+// Return     : void
+void getJoystickSpeed(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
+    getJoystickSpeed(responseEnabled, apiEnabled);
+  }
+}
+
+//***SET JOYSTICK SPEED FUNCTION***//
+// Function   : setJoystickSpeed 
+// 
+// Description: This function sets the current joystick speed level.
+// 
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               inputSpeedCounter : bool : The new joystick speed level.
+// 
+// Return     : void
+//*********************************//
+void setJoystickSpeed(bool responseEnabled, bool apiEnabled, int inputSpeedCounter) {
+
+  printResponseSingle(responseEnabled,apiEnabled,true,0,"SS,1",true,inputSpeedCounter);
+}
+//***SET JOYSTICK SPEED API FUNCTION***//
+// Function   : setJoystickSpeed 
+// 
+// Description: This function is redefinition of main setJoystickSpeed function to match the types of API function arguments.
+// 
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+// 
+// Return     : void
+void setJoystickSpeed(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if(optionalParameter.length()==1 && optionalParameter.toInt()==1){
+    setJoystickSpeed(responseEnabled, apiEnabled);
   }
 }
 
@@ -390,11 +469,11 @@ void getJoystickInitialization(bool responseEnabled, bool apiEnabled) {
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               optionalArray : int* : The array of int which should contain one element with value of zero.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void getJoystickInitialization(bool responseEnabled, bool apiEnabled, int* optionalArray) {
-  if(optionalArray[0]==0){
+void getJoystickInitialization(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
     getJoystickInitialization(responseEnabled, apiEnabled);
   }
 }
@@ -425,11 +504,11 @@ void setJoystickInitialization(bool responseEnabled, bool apiEnabled) {
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               optionalArray : int* : The array of int which should contain one element with value of zero.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void setJoystickInitialization(bool responseEnabled, bool apiEnabled, int* optionalArray) {
-  if(optionalArray[0]==0){
+void setJoystickInitialization(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if(optionalParameter.length()==1 && optionalParameter.toInt()==1){
     setJoystickInitialization(responseEnabled, apiEnabled);
   }
 }
@@ -466,11 +545,11 @@ void getJoystickCalibration(bool responseEnable, bool apiEnabled) {
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               optionalArray : int* : The array of int which should contain one element with value of zero.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void getJoystickCalibration(bool responseEnabled, bool apiEnabled, int* optionalArray) {
-  if(optionalArray[0]==0){
+void getJoystickCalibration(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
     getJoystickCalibration(responseEnabled, apiEnabled);
   }
 }
@@ -502,11 +581,11 @@ void setJoystickCalibration(bool responseEnabled, bool apiEnabled) {
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               optionalArray : int* : The array of int which should contain one element with value of zero.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void setJoystickCalibration(bool responseEnabled, bool apiEnabled, int* optionalArray) {
-  if(optionalArray[0]==1){
+void setJoystickCalibration(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if(optionalParameter.length()==1 && optionalParameter.toInt()==1){
     setJoystickCalibration(responseEnabled, apiEnabled);
   }
 }
@@ -545,12 +624,12 @@ float getJoystickDeadZone(bool responseEnable, bool apiEnabled) {
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               optionalArray : int* : The array of int which should contain one element with value of zero.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void getJoystickDeadZone(bool responseEnabled, bool apiEnabled, int* optionalArray) {
-  if(optionalArray[0]==0){
-    getCursorDeadZone(responseEnabled, apiEnabled);
+void getJoystickDeadZone(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
+    getJoystickDeadZone(responseEnabled, apiEnabled);
   }
 }
 
@@ -583,19 +662,17 @@ void setJoystickDeadZone(bool responseEnabled, bool apiEnabled, float inputDeadZ
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               optionalArray : int* : The array of int which should contain one element with value of zero.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void setJoystickDeadZone(bool responseEnabled, bool apiEnabled, int* optionalArray) {
-  if(optionalArray[0]==1){
-    setCursorCalibration(responseEnabled, apiEnabled);
-  }
+void setJoystickDeadZone(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+    setJoystickDeadZone(responseEnabled, apiEnabled, optionalParameter.toFloat());
 }
 
 //***GET PRESSURE VALUE FUNCTION***//
 // Function   : getPressureValue 
 // 
-// Description: This function returns pressure value in volts [0.0V - 5.0V]. The pressure multiplied by 100.
+// Description: This function returns pressure difference.
 // 
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
@@ -620,11 +697,11 @@ void getPressureValue(bool responseEnabled, bool apiEnabled) {
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               optionalArray : int* : The array of int which should contain one element with value of zero.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void getPressureValue(bool responseEnabled, bool apiEnabled, int* optionalArray) {
-  if(optionalArray[0]==0){
+void getPressureValue(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
     getPressureValue(responseEnabled, apiEnabled);
   }
 }
@@ -632,7 +709,7 @@ void getPressureValue(bool responseEnabled, bool apiEnabled, int* optionalArray)
 //***GET PRESSURE THRESHOLD FUNCTION***//
 // Function   : getSipPressureThreshold 
 // 
-// Description: This function returns the current pressure threshold in percentage and the nominal pressure [0.0V - 5.0V] multiplied by 100.
+// Description: This function returns the current sip pressure threshold.
 // 
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
@@ -646,7 +723,7 @@ float getSipPressureThreshold(bool responseEnabled, bool apiEnabled) {
   float tempSipThreshold;
   tempSipThreshold = mem.readFloat(CONF_SETTINGS_FILE, sipThresholdCommand);
 
-  if(tempSipThreshold=<0 || tempSipThreshold>=100.0){
+  if(tempSipThreshold=<0 || tempSipThreshold>=CONF_PRESS_MAX_THRESHOLD){
     tempSipThreshold = CONF_SIP_THRESHOLD;
     mem.writeFloat(CONF_SETTINGS_FILE,sipThresholdCommand,tempSipThreshold);   
   }
@@ -662,30 +739,11 @@ float getSipPressureThreshold(bool responseEnabled, bool apiEnabled) {
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               optionalArray : int* : The array of int which should contain one element with value of zero.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void getSipPressureThreshold(bool responseEnabled, bool apiEnabled, int* optionalArray) {
-  if(optionalArray[0]==0){
-    getPressureThreshold(responseEnabled, apiEnabled);
-  }
-}
-
-float getPuffPressureThreshold(bool responseEnabled, bool apiEnabled) {
-  String puffThresholdCommand = "PT";  
-  float tempPuffThreshold;
-  tempPuffThreshold = mem.readFloat(CONF_SETTINGS_FILE, puffThresholdCommand);
-
-  if(tempSipThreshold=<0 || tempSipThreshold>=100.0){
-    tempPuffThreshold = CONF_PUFF_THRESHOLD;
-    mem.writeFloat(CONF_SETTINGS_FILE,puffThresholdCommand,tempPuffThreshold);   
-  }
-  ps.setPuffThreshold(tempPuffThreshold);
-  return tempPuffThreshold;
-}
-
-void getSipPressureThreshold(bool responseEnabled, bool apiEnabled, int* optionalArray) {
-  if(optionalArray[0]==0){
+void getSipPressureThreshold(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
     getPressureThreshold(responseEnabled, apiEnabled);
   }
 }
@@ -693,20 +751,20 @@ void getSipPressureThreshold(bool responseEnabled, bool apiEnabled, int* optiona
 //***SET SIP PRESSURE THRESHOLD FUNCTION***//
 // Function   : setSipPressureThreshold 
 // 
-// Description: This function sets the current Sip pressure threshold in percentage.
+// Description: This function sets the current Sip pressure threshold.
 // 
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               inputSipThreshold : float : The new sip pressure threshold in percentage.
+//               inputSipThreshold : float : The new sip pressure threshold.
 // 
 // Return     : void
 //*********************************//
 void setSipPressureThreshold(bool responseEnabled, bool apiEnabled, float inputSipThreshold) {
   String sipThresholdCommand = "ST";  
 
-  if(inputSipThreshold>1 && inputSipThreshold<100.0){
+  if(inputSipThreshold>CONF_PRESS_MIN_THRESHOLD && inputSipThreshold<CONF_PRESS_MAX_THRESHOLD){
     mem.writeFloat(CONF_SETTINGS_FILE,sipThresholdCommand,inputSipThreshold);   
     ps.setSipThreshold(inputSipThreshold);
   }
@@ -720,12 +778,56 @@ void setSipPressureThreshold(bool responseEnabled, bool apiEnabled, float inputS
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               inputSipPressureThreshold : int* : The array of one element which contains the new sip pressure threshold.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void setSipPressureThreshold(bool responseEnabled, bool apiEnabled, int* inputSipPressureThreshold) {
-  setSipPressureThreshold(responseEnabled,apiEnabled, inputSipPressureThreshold[0]);
+void setSipPressureThreshold(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  setSipPressureThreshold(responseEnabled,apiEnabled, optionalParameter.toFloat());
 }
+
+//***GET PUFF THRESHOLD FUNCTION***//
+// Function   : getPuffPressureThreshold 
+// 
+// Description: This function returns the puff pressure threshold.
+// 
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+// 
+// Return     : void
+//*********************************//
+float getPuffPressureThreshold(bool responseEnabled, bool apiEnabled) {
+  String puffThresholdCommand = "PT";  
+  float tempPuffThreshold;
+  tempPuffThreshold = mem.readFloat(CONF_SETTINGS_FILE, puffThresholdCommand);
+
+  if(tempSipThreshold=<0 || tempSipThreshold>=CONF_PRESS_MAX_THRESHOLD){
+    tempPuffThreshold = CONF_PUFF_THRESHOLD;
+    mem.writeFloat(CONF_SETTINGS_FILE,puffThresholdCommand,tempPuffThreshold);   
+  }
+  ps.setPuffThreshold(tempPuffThreshold);
+  return tempPuffThreshold;
+}
+
+//***GET PUFF THRESHOLD API FUNCTION***//
+// Function   : getPuffPressureThreshold 
+// 
+// Description: This function is redefinition of main getPuffPressureThreshold function to match the types of API function arguments.
+// 
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+// 
+// Return     : void
+void getSipPressureThreshold(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
+    getPressureThreshold(responseEnabled, apiEnabled);
+  }
+}
+
 
 //***SET PUFF PRESSURE THRESHOLD FUNCTION***//
 // Function   : setPuffPressureThreshold 
@@ -743,7 +845,7 @@ void setSipPressureThreshold(bool responseEnabled, bool apiEnabled, int* inputSi
 void setPuffPressureThreshold(bool responseEnabled, bool apiEnabled, float inputPuffThreshold) {
   String puffThresholdCommand = "PT";  
 
-  if(inputPuffThreshold>1 && inputPuffThreshold<100.0){
+  if(inputPuffThreshold>CONF_PRESS_MIN_THRESHOLD && inputPuffThreshold<CONF_PRESS_MAX_THRESHOLD){
     mem.writeFloat(CONF_SETTINGS_FILE,puffThresholdCommand,inputPuffThreshold);   
     ps.setPuffThreshold(inputPuffThreshold);
   }
@@ -757,11 +859,11 @@ void setPuffPressureThreshold(bool responseEnabled, bool apiEnabled, float input
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               inputPuffPressureThreshold : int* : The array of one element which contains the new puff pressure threshold.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void setPuffPressureThreshold(bool responseEnabled, bool apiEnabled, int* inputPuffPressureThreshold) {
-  setPuffPressureThreshold(responseEnabled,apiEnabled, inputPuffPressureThreshold[0]);
+void setPuffPressureThreshold(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  setPuffPressureThreshold(responseEnabled,apiEnabled, optionalParameter.toFloat());
 }
 
 //***GET COMMUNICATION METHOD FUNCTION***//
@@ -799,11 +901,11 @@ int getCommunicationMethod(bool responseEnabled, bool apiEnabled) {
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               optionalArray : int* : The array of int which should contain one element with value of zero.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void getCommunicationMethod(bool responseEnabled, bool apiEnabled, int* optionalArray) {
-  if(optionalArray[0]==0){
+void getCommunicationMethod(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
     getCommunicationMethod(responseEnabled, apiEnabled);
   }
 }
@@ -844,11 +946,11 @@ void setCommunicationMethod(bool responseEnabled, bool apiEnabled, int inputComm
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               inputCommunicationMethod : int* : The array of one element which contains the new communication method state.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void setCommunicationMethod(bool responseEnabled, bool apiEnabled, int* inputCommunicationMethod){
-  setCommunicationMethod(responseEnabled, apiEnabled, inputCommunicationMethod[0]);
+void setCommunicationMethod(bool responseEnabled, bool apiEnabled, String optionalParameter){
+  setCommunicationMethod(responseEnabled, apiEnabled, optionalParameter.toFloat());
 }
 
 //***GET DEBUG MODE STATE FUNCTION***//
@@ -886,11 +988,11 @@ bool getDebugMode(bool responseEnabled, bool apiEnabled) {
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               optionalArray : int* : The array of int which should contain one element with value of zero.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void getDebugMode(bool responseEnabled, bool apiEnabled, int* optionalArray) {
-  if(optionalArray[0]==0){
+void getDebugMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
     getDebugMode(responseEnabled, apiEnabled);
   }
 }
@@ -928,9 +1030,80 @@ void setDebugMode(bool responseEnabled, bool apiEnabled, int inputDebugState) {
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               inputDebugState : int* : The array of one element which contains the new debug mode state.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void setDebugMode(bool responseEnabled, bool apiEnabled, int* inputDebugState){
-  setDebugMode(responseEnabled, apiEnabled, inputDebugState[0]);
+void setDebugMode(bool responseEnabled, bool apiEnabled, String optionalParameter){
+  setDebugMode(responseEnabled, apiEnabled, optionalParameter.toInt());
+}
+
+ //***RESET SETTINGS FUNCTION***//
+// Function   : resetSettings 
+// 
+// Description: This function performs reset. 
+// 
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+// 
+// Return     : void
+//***************************//
+void resetSettings(bool responseEnabled, bool apiEnabled) { 
+
+      
+  printResponseSingle(responseEnabled,apiEnabled,true,0,"RS,1",true,0);
+
+}
+//***RESET SETTINGS API FUNCTION***//
+// Function   : resetSettings 
+// 
+// Description: This function is redefinition of main resetSettings function to match the types of API function arguments.
+// 
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+// 
+// Return     : void
+void resetSettings(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
+    hardReset(responseEnabled, apiEnabled);
+  }
+ }
+
+ //***FACTORY RESET FUNCTION***//
+// Function   : factoryReset 
+// 
+// Description: This function performs factory reset. It can perform a soft or hard reset.
+// 
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+// 
+// Return     : void
+//***************************//
+void factoryReset(bool responseEnabled, bool apiEnabled) { 
+  resetMemory();
+  printResponseSingle(responseEnabled,apiEnabled,true,0,"FR,1",true,0);
+
+}
+//***FACTORY RESET API FUNCTION***//
+// Function   : factoryReset 
+// 
+// Description: This function is redefinition of main factoryReset function to match the types of API function arguments.
+// 
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+// 
+// Return     : void
+void factoryReset(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
+    factoryReset(responseEnabled, apiEnabled);
+  }
 }

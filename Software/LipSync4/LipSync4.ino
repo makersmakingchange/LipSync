@@ -194,6 +194,12 @@ void initMemory()
   mem.initialize(CONF_SETTINGS_FILE, CONF_SETTINGS_JSON);
 }
 
+void resetMemory()
+{
+  mem.format();
+  mem.initialize(CONF_SETTINGS_FILE, CONF_SETTINGS_JSON);
+}
+
 //*********************************//
 // Input Functions
 //*********************************//

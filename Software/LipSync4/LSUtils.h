@@ -35,3 +35,114 @@ typedef struct {
   int secondaryState;            //waiting = 0, started = 1, released = 2
   unsigned long elapsedTime;     //in ms
 } inputStateStruct;
+
+
+void printResponseInt(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, int responseParameter) {
+  printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, String(responseParameter));
+
+}
+
+void printResponseIntArray(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, String responsePrefix, int responseParameterSize, char responseParameterDelimiter, int responseParameter[]) {
+  char tempParameterDelimiter[1];
+
+  (isValidDelimiter(responseParameterDelimiter)) ? tempParameterDelimiter[0]={responseParameterDelimiter} : tempParameterDelimiter[0]={'\0'};
+  
+  String responseParameterString = String(responsePrefix) + ":";
+  for(int parameterIndex = 0; parameterIndex< responseParameterSize; parameterIndex++){
+    responseParameterString.concat(responseParameter[parameterIndex]);  
+       if(parameterIndex < (responseParameterSize-1)){ responseParameterString.concat(tempParameterDelimiter[0]);  };
+  }   
+
+  printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, responseParameterString);
+
+}
+
+
+void printResponseIntPoint(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, pointIntType responseParameter) {
+  String responseParameterString = responseParameter.x + "|" + responseParameter.y;
+  
+  printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, responseParameterString);
+
+}
+
+void printResponseIntPointArray(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, String responsePrefix, int responseParameterSize, char responseParameterDelimiter, pointIntType responseParameter[]) {
+  char tempParameterDelimiter[1];
+
+  (isValidDelimiter(responseParameterDelimiter)) ? tempParameterDelimiter[0]={responseParameterDelimiter} : tempParameterDelimiter[0]={'\0'};
+  
+  String responseParameterString = String(responsePrefix) + ":";
+  for(int parameterIndex = 0; parameterIndex< responseParameterSize; parameterIndex++){
+    responseParameterString.concat(responseParameter[parameterIndex].x);  
+    responseParameterString.concat("|"); 
+    responseParameterString.concat(responseParameter[parameterIndex].y); 
+       if(parameterIndex < (responseParameterSize-1)){ responseParameterString.concat(tempParameterDelimiter[0]);  };
+  }   
+
+  printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, responseParameterString);
+
+}
+
+void printResponseFloat(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, float responseParameter) {
+  printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, String(responseParameter));
+
+}
+
+void printResponseFloatArray(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, String responsePrefix, int responseParameterSize, char responseParameterDelimiter, float responseParameter[]) {
+  char tempParameterDelimiter[1];
+
+  (isValidDelimiter(responseParameterDelimiter)) ? tempParameterDelimiter[0]={responseParameterDelimiter} : tempParameterDelimiter[0]={'\0'};
+  
+  String responseParameterString = String(responsePrefix) + ":";
+  for(int parameterIndex = 0; parameterIndex< responseParameterSize; parameterIndex++){
+    responseParameterString.concat(responseParameter[parameterIndex]);  
+       if(parameterIndex < (responseParameterSize-1)){ responseParameterString.concat(tempParameterDelimiter[0]);  };
+  }   
+
+  printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, responseParameterString);
+
+}
+
+void printResponseFloatPoint(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, pointFloatType responseParameter) {
+  String responseParameterString = responseParameter.x + "|" + responseParameter.y;
+  
+  printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, responseParameterString);
+
+}
+
+void printResponseIntPointArray(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, String responsePrefix, int responseParameterSize, char responseParameterDelimiter, pointFloatType responseParameter[]) {
+  char tempParameterDelimiter[1];
+
+  (isValidDelimiter(responseParameterDelimiter)) ? tempParameterDelimiter[0]={responseParameterDelimiter} : tempParameterDelimiter[0]={'\0'};
+  
+  String responseParameterString = String(responsePrefix) + ":";
+  for(int parameterIndex = 0; parameterIndex< responseParameterSize; parameterIndex++){
+    responseParameterString.concat(responseParameter[parameterIndex].x);  
+    responseParameterString.concat("|"); 
+    responseParameterString.concat(responseParameter[parameterIndex].y); 
+       if(parameterIndex < (responseParameterSize-1)){ responseParameterString.concat(tempParameterDelimiter[0]);  };
+  }   
+
+  printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, responseParameterString);
+
+}
+
+void printResponseString(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, String responseParameter) {
+    if(responseEnabled) {
+   
+    if(responseStatus){
+      (apiEnabled) ? Serial.print("SUCCESS") : Serial.print("MANUAL");
+    }else{
+      Serial.print("FAIL");
+    } 
+    Serial.print(",");
+    Serial.print(responseNumber);
+    Serial.print(":");
+    Serial.print(responseCommand);
+    if(responseParameterEnabled){
+      Serial.print(":");
+      Serial.println(responseParameter);    
+    } else {
+      Serial.println("");  
+    }  
+  }
+}

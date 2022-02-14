@@ -3,21 +3,12 @@
 #define CONF_LIPSYNC_VERSION 1
 
 
-//Alpha 1
-#define CONF_BUTTON1_PIN 9                                 // Pushbutton S1
+#define CONF_BUTTON1_PIN 5                                 // Pushbutton S1
 #define CONF_BUTTON2_PIN 6                                 // Pushbutton S2
-#define CONF_BUTTON3_PIN 5                                 // Pushbutton S3
-#define CONF_SWITCH1_PIN A1                                // 3.5mm jack SW1
+#define CONF_BUTTON3_PIN 9                                 // Pushbutton S3
+#define CONF_SWITCH1_PIN A2                                // 3.5mm jack SW1
 #define CONF_SWITCH2_PIN 11                                // 3.5mm jack SW2
 #define CONF_SWITCH3_PIN 10                                // 3.5mm jack SW3
-
-//Alpha 2
-//#define CONF_BUTTON1_PIN 5                                 // Pushbutton S1
-//#define CONF_BUTTON2_PIN 6                                 // Pushbutton S2
-//#define CONF_BUTTON3_PIN 9                                 // Pushbutton S3
-//#define CONF_SWITCH1_PIN A2                                // 3.5mm jack SW1
-//#define CONF_SWITCH2_PIN 11                                // 3.5mm jack SW2
-//#define CONF_SWITCH3_PIN 10                                // 3.5mm jack SW3
 
 #define CONF_BUTTON_NUMBER 3
 #define CONF_SWITCH_NUMBER 3
@@ -56,9 +47,12 @@
 #define CONF_JOY_CALIB_READING_DELAY 200
 #define CONF_JOY_CALIB_READING_NUMBER 10
 #define CONF_JOY_CALIB_STEP_DELAY 2000
+#define CONF_JOY_SPEED_LEVEL 5
 
 #define CONF_SIP_THRESHOLD 2.5                    //hPa
 #define CONF_PUFF_THRESHOLD 2.5
+#define CONF_PRESS_MIN_THRESHOLD 1.0
+#define CONF_PRESS_MAX_THRESHOLD 100.0
 
 #define CONF_LED_BRIGHTNESS 50 
 #define CONF_LED_BRIGHTNESS_LOW 10 
