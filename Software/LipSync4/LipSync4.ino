@@ -238,8 +238,8 @@ void initSipAndPuff()
 
   ps.begin(PRESS_TYPE_DIFF);
 //  setSipAndPuffThreshold();
-  getSipPressureThreshold(false);
-  getPuffPressureThreshold(false);
+  getSipPressureThreshold(false,false);
+  getPuffPressureThreshold(false,false);
   sapActionSize = sizeof(sapActionProperty) / sizeof(inputActionStruct);
 }
 
@@ -407,7 +407,7 @@ void performOutputAction(int action)
     case CONF_ACTION_CHANGE_MODE:
     {
       //Change communication mode
-      setComMode();
+      toggleCommunicationMethod(false,false);
       break;
     }
   }

@@ -14,7 +14,7 @@ typedef struct {                                  //Type definition for API func
 _functionList getModelNumberFunction =            {"MN","0","0",&getModelNumber};
 _functionList getVersionNumberFunction =          {"VN","0","0",&getVersionNumber};
 _functionList getJoystickSpeedFunction =          {"SS","0","0",&getJoystickSpeed};
-_functionList setJoystickSpeedFunction =          {"SS","1","",&setJoystickrSpeed};
+_functionList setJoystickSpeedFunction =          {"SS","1","",&setJoystickSpeed};
 _functionList getJoystickInitializationFunction = {"IN","0","0",&getJoystickInitialization};
 _functionList setJoystickInitializationFunction = {"IN","1","1",&setJoystickInitialization};
 _functionList getJoystickCalibrationFunction =    {"CA","0","0",&getJoystickCalibration};
@@ -439,9 +439,7 @@ void setJoystickSpeed(bool responseEnabled, bool apiEnabled, int inputSpeedCount
 // 
 // Return     : void
 void setJoystickSpeed(bool responseEnabled, bool apiEnabled, String optionalParameter) {
-  if(optionalParameter.length()==1 && optionalParameter.toInt()==1){
-    setJoystickSpeed(responseEnabled, apiEnabled);
-  }
+  setJoystickSpeed(responseEnabled, apiEnabled, optionalParameter.toInt());
 }
 
 //***GET JOYSTICK INITIALIZATION FUNCTION***//
@@ -608,11 +606,11 @@ float getJoystickDeadZone(bool responseEnable, bool apiEnabled) {
   float tempDeadzone;
   tempDeadzone = mem.readFloat(CONF_SETTINGS_FILE, deadZoneCommand);
 
-  if(tempDeadzone=<0 || tempDeadzone>=1){
+  if(tempDeadzone<=0 || tempDeadzone>=1){
     tempDeadzone = CONF_JOY_DEADZONE;
     mem.writeFloat(CONF_SETTINGS_FILE,deadZoneCommand,tempDeadzone);   
   }
-  ps.setDeadzone(true,tempDeadzone);
+  js.setDeadzone(true,tempDeadzone);
   return tempDeadzone;
 }
 //***GET JOYSTICK DEADZONE API FUNCTION***//
@@ -649,7 +647,7 @@ void setJoystickDeadZone(bool responseEnabled, bool apiEnabled, float inputDeadZ
   String deadZoneCommand = "DZ";  
   if(inputDeadZone>0 && inputDeadZone<1){
     mem.writeFloat(CONF_SETTINGS_FILE,deadZoneCommand,inputDeadZone); 
-    ps.setDeadzone(true,inputDeadZone);  
+    js.setDeadzone(true,inputDeadZone);  
   }
 
 }
@@ -723,7 +721,7 @@ float getSipPressureThreshold(bool responseEnabled, bool apiEnabled) {
   float tempSipThreshold;
   tempSipThreshold = mem.readFloat(CONF_SETTINGS_FILE, sipThresholdCommand);
 
-  if(tempSipThreshold=<0 || tempSipThreshold>=CONF_PRESS_MAX_THRESHOLD){
+  if((tempSipThreshold <= 0.0) || (tempSipThreshold >= CONF_PRESS_MAX_THRESHOLD)){
     tempSipThreshold = CONF_SIP_THRESHOLD;
     mem.writeFloat(CONF_SETTINGS_FILE,sipThresholdCommand,tempSipThreshold);   
   }
@@ -744,7 +742,7 @@ float getSipPressureThreshold(bool responseEnabled, bool apiEnabled) {
 // Return     : void
 void getSipPressureThreshold(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
-    getPressureThreshold(responseEnabled, apiEnabled);
+    getSipPressureThreshold(responseEnabled, apiEnabled);
   }
 }
 
@@ -802,7 +800,7 @@ float getPuffPressureThreshold(bool responseEnabled, bool apiEnabled) {
   float tempPuffThreshold;
   tempPuffThreshold = mem.readFloat(CONF_SETTINGS_FILE, puffThresholdCommand);
 
-  if(tempSipThreshold=<0 || tempSipThreshold>=CONF_PRESS_MAX_THRESHOLD){
+  if((tempPuffThreshold <= 0.0) || (tempPuffThreshold >= CONF_PRESS_MAX_THRESHOLD)){
     tempPuffThreshold = CONF_PUFF_THRESHOLD;
     mem.writeFloat(CONF_SETTINGS_FILE,puffThresholdCommand,tempPuffThreshold);   
   }
@@ -822,9 +820,9 @@ float getPuffPressureThreshold(bool responseEnabled, bool apiEnabled) {
 //               optionalParameter : String : The input parameter string should contain one element with value of zero.
 // 
 // Return     : void
-void getSipPressureThreshold(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+void getPuffPressureThreshold(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
-    getPressureThreshold(responseEnabled, apiEnabled);
+    getPuffPressureThreshold(responseEnabled, apiEnabled);
   }
 }
 
@@ -925,16 +923,12 @@ void getCommunicationMethod(bool responseEnabled, bool apiEnabled, String option
 //*********************************//
 void setCommunicationMethod(bool responseEnabled, bool apiEnabled, int inputCommunicationMethod) {
   String comModeCommand = "CM";   
-  if (comMode < 2)
+  if (inputCommunicationMethod >= 0 && inputCommunicationMethod <=2)
   {
-    comMode++;
+    mem.writeInt(CONF_SETTINGS_FILE,comModeCommand,comMode);    
+    printResponseSingle(responseEnabled, apiEnabled, true, 0, "CM,1", true, comMode);
   }
-  else
-  {
-    comMode = 1;
-  }
-  mem.writeInt(CONF_SETTINGS_FILE,comModeCommand,comMode);    
-  printResponseSingle(responseEnabled, apiEnabled, true, 0, "CM,1", true, comMode);
+
  
 }
 //***SET COMMUNICATION METHOD API FUNCTION***//
@@ -953,6 +947,18 @@ void setCommunicationMethod(bool responseEnabled, bool apiEnabled, String option
   setCommunicationMethod(responseEnabled, apiEnabled, optionalParameter.toFloat());
 }
 
+void toggleCommunicationMethod(bool responseEnabled, bool apiEnabled){
+  if (comMode < 2)
+  {
+    comMode++;
+  }
+  else
+  {
+    comMode = 1;
+  }  
+  setCommunicationMethod(responseEnabled,apiEnabled,comMode);
+}
+
 //***GET DEBUG MODE STATE FUNCTION***//
 // Function   : getDebugMode 
 // 
@@ -967,15 +973,15 @@ void setCommunicationMethod(bool responseEnabled, bool apiEnabled, String option
 //*********************************//
 bool getDebugMode(bool responseEnabled, bool apiEnabled) {
   String debugModeCommand = "DM";   
-  int tempDebugState;
-  tempDebugState = mem.readInt(CONF_SETTINGS_FILE, debugModeCommand);
+  int tempDebugMode;
+  tempDebugMode = mem.readInt(CONF_SETTINGS_FILE, debugModeCommand);
 
-  if(tempDebugState<0 || tempDebugState>1){
-    tempDebugState = CONF_DEBUG_MODE;
-    mem.writeInt(CONF_SETTINGS_FILE,debugModeCommand,tempDebugState);   
+  if(tempDebugMode<0 || tempDebugMode>1){
+    tempDebugMode = CONF_DEBUG_MODE;
+    mem.writeInt(CONF_SETTINGS_FILE,debugModeCommand,tempDebugMode);   
   }
 
-  printResponseSingle(responseEnabled,apiEnabled,true,0,"CM,0",true,tempDebugState);
+  printResponseSingle(responseEnabled,apiEnabled,true,0,"CM,0",true,tempDebugMode);
 
   return tempDebugMode;
 }
@@ -1019,7 +1025,6 @@ void setDebugMode(bool responseEnabled, bool apiEnabled, int inputDebugState) {
   
   printResponseSingle(responseEnabled, apiEnabled, true, 0, "DM,1", true, inputDebugState);
   
-  delay(5); 
 }
 //***SET DEBUG MODE STATE API FUNCTION***//
 // Function   : setDebugMode 
@@ -1069,7 +1074,7 @@ void resetSettings(bool responseEnabled, bool apiEnabled) {
 // Return     : void
 void resetSettings(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
-    hardReset(responseEnabled, apiEnabled);
+    resetSettings(responseEnabled, apiEnabled);
   }
  }
 
@@ -1105,5 +1110,120 @@ void factoryReset(bool responseEnabled, bool apiEnabled) {
 void factoryReset(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if(optionalParameter.length()==1 && optionalParameter.toInt()==0){
     factoryReset(responseEnabled, apiEnabled);
+  }
+}
+
+void printResponseInt(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, int responseParameter) {
+  printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, String(responseParameter));
+
+}
+
+void printResponseIntArray(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, String responsePrefix, int responseParameterSize, char responseParameterDelimiter, int responseParameter[]) {
+  char tempParameterDelimiter[1];
+
+  (isValidDelimiter(responseParameterDelimiter)) ? tempParameterDelimiter[0]={responseParameterDelimiter} : tempParameterDelimiter[0]={'\0'};
+  
+  String responseParameterString = String(responsePrefix) + ":";
+  for(int parameterIndex = 0; parameterIndex< responseParameterSize; parameterIndex++){
+    responseParameterString.concat(responseParameter[parameterIndex]);  
+       if(parameterIndex < (responseParameterSize-1)){ responseParameterString.concat(tempParameterDelimiter[0]);  };
+  }   
+
+  printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, responseParameterString);
+
+}
+
+
+void printResponseIntPoint(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, pointIntType responseParameter) {
+  String responseParameterString = "";
+  responseParameterString.concat(responseParameter.x);
+  responseParameterString.concat("|");
+  responseParameterString.concat(responseParameter.y);
+  printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, responseParameterString);
+
+}
+
+void printResponseIntPointArray(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, String responsePrefix, int responseParameterSize, char responseParameterDelimiter, pointIntType responseParameter[]) {
+  char tempParameterDelimiter[1];
+
+  (isValidDelimiter(responseParameterDelimiter)) ? tempParameterDelimiter[0]={responseParameterDelimiter} : tempParameterDelimiter[0]={'\0'};
+  
+  String responseParameterString = String(responsePrefix) + ":";
+  for(int parameterIndex = 0; parameterIndex< responseParameterSize; parameterIndex++){
+    responseParameterString.concat(responseParameter[parameterIndex].x);
+    responseParameterString.concat("|");
+    responseParameterString.concat(responseParameter[parameterIndex].y);
+    if(parameterIndex < (responseParameterSize-1)){ responseParameterString.concat(tempParameterDelimiter[0]);  };
+  }   
+
+  printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, responseParameterString);
+
+}
+
+void printResponseFloat(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, float responseParameter) {
+  printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, String(responseParameter));
+
+}
+
+void printResponseFloatArray(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, String responsePrefix, int responseParameterSize, char responseParameterDelimiter, float responseParameter[]) {
+  char tempParameterDelimiter[1];
+
+  (isValidDelimiter(responseParameterDelimiter)) ? tempParameterDelimiter[0]={responseParameterDelimiter} : tempParameterDelimiter[0]={'\0'};
+  
+  String responseParameterString = String(responsePrefix) + ":";
+  for(int parameterIndex = 0; parameterIndex< responseParameterSize; parameterIndex++){
+    responseParameterString.concat(responseParameter[parameterIndex]);  
+       if(parameterIndex < (responseParameterSize-1)){ responseParameterString.concat(tempParameterDelimiter[0]);  };
+  }   
+
+  printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, responseParameterString);
+
+}
+
+void printResponseFloatPoint(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, pointFloatType responseParameter) {
+  String responseParameterString = "";
+  responseParameterString.concat(responseParameter.x);
+  responseParameterString.concat("|");
+  responseParameterString.concat(responseParameter.y);
+  
+  printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, responseParameterString);
+
+}
+
+void printResponseIntPointArray(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, String responsePrefix, int responseParameterSize, char responseParameterDelimiter, pointFloatType responseParameter[]) {
+  char tempParameterDelimiter[1];
+
+  (isValidDelimiter(responseParameterDelimiter)) ? tempParameterDelimiter[0]={responseParameterDelimiter} : tempParameterDelimiter[0]={'\0'};
+  
+  String responseParameterString = String(responsePrefix) + ":";
+  for(int parameterIndex = 0; parameterIndex< responseParameterSize; parameterIndex++){
+    responseParameterString.concat(responseParameter[parameterIndex].x);
+    responseParameterString.concat("|");
+    responseParameterString.concat(responseParameter[parameterIndex].y);
+    if(parameterIndex < (responseParameterSize-1)){ responseParameterString.concat(tempParameterDelimiter[0]);  };
+  }   
+
+  printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, responseParameterString);
+
+}
+
+void printResponseString(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, String responseParameter) {
+    if(responseEnabled) {
+   
+    if(responseStatus){
+      (apiEnabled) ? Serial.print("SUCCESS") : Serial.print("MANUAL");
+    }else{
+      Serial.print("FAIL");
+    } 
+    Serial.print(",");
+    Serial.print(responseNumber);
+    Serial.print(":");
+    Serial.print(responseCommand);
+    if(responseParameterEnabled){
+      Serial.print(":");
+      Serial.println(responseParameter);    
+    } else {
+      Serial.println("");  
+    }  
   }
 }
