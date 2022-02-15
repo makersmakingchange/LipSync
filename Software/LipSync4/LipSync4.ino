@@ -485,56 +485,6 @@ void cursorScroll(void)
   //Serial.println("Scroll");
 }
 
-<<<<<<< HEAD
-void setJoystickCenter(void)
-{
-  js.updateInputComp();
-  pointFloatType centerPoint = js.getInputComp();
-  printJoystickFloatData(centerPoint);
-}
-
-void decreaseCursorSpeed(void)
-{
-  Serial.println("Decrease Cursor Speed");
-}
-
-void increaseCursorSpeed(void)
-{
-  Serial.println("Increase Cursor Speed");
-}
-
-int getComMode(void)
-{
-  String comModeCommand = "CM";   
-  int tempComMode;
-  tempComMode = mem.readInt(CONF_SETTINGS_FILE, comModeCommand);
-
-  if(tempComMode<1 || tempComMode>2){
-    tempComMode = CONF_COM_MODE;
-    mem.writeInt(CONF_SETTINGS_FILE,comModeCommand,tempComMode);   
-  }
-  Serial.print("Current Communication Mode:");
-  Serial.println(tempComMode);  
-  return tempComMode;
-}
-
-void setComMode(void)
-{
-  String comModeCommand = "CM";   
-  if (comMode < 2)
-  {
-    comMode++;
-  }
-  else
-  {
-    comMode = 1;
-  }
-  mem.writeInt(CONF_SETTINGS_FILE,comModeCommand,comMode);    
-  Serial.print("New Communication Mode:");
-  Serial.println(comMode);
-}
-=======
->>>>>>> test-code
 
 //*********************************//
 // Joystick Functions
