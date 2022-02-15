@@ -94,7 +94,7 @@ LSTimer<int> calibTimer;
 
 //Timer related variables
 
-int pollTimerId[4];
+int pollTimerId[5];
 
 LSTimer<void> pollTimer;
 
@@ -146,7 +146,7 @@ void setup()
 
   initJoystick();
 
-  comMode = getCommunicationMethod(false,false);
+  initCommunicationMode();
 
   srartupFeedback();
 
@@ -154,6 +154,7 @@ void setup()
   pollTimerId[1] = pollTimer.setInterval(CONF_PRESSURE_POLL_RATE, 0, pressureLoop);
   pollTimerId[2] = pollTimer.setInterval(CONF_INPUT_POLL_RATE, 0, inputLoop);
   pollTimerId[3] = pollTimer.setInterval(CONF_BLE_FEEDBACK_POLL_RATE, 0, bleFeedbackLoop);
+  pollTimerId[4] = pollTimer.setInterval(CONF_DEBUG_POLL_RATE, 0, debugLoop);
 
   
   enablePoll(false);                              //Enable when the led IBM effect is complete 
@@ -176,7 +177,7 @@ void enablePoll(bool isEnabled){
     pollTimer.enable(2);    
     pollTimer.enable(3);  
   } else {
-    pollTimer.disable(0);
+    getDebugMode(false,false);
     pollTimer.disable(1);
     pollTimer.disable(2);
     pollTimer.disable(3);
@@ -199,6 +200,17 @@ void resetMemory()
   mem.format();
   mem.initialize(CONF_SETTINGS_FILE, CONF_SETTINGS_JSON);
 }
+
+
+//*********************************//
+// Communication Mode Functions
+//*********************************//
+
+void initCommunicationMode()
+{
+  comMode = getCommunicationMode(false,false);
+}
+
 
 //*********************************//
 // Input Functions
@@ -237,16 +249,12 @@ void initSipAndPuff()
 {
 
   ps.begin(PRESS_TYPE_DIFF);
-//  setSipAndPuffThreshold();
-  getSipPressureThreshold(false,false);
-  getPuffPressureThreshold(false,false);
+//  getSipPressureThreshold(true,false);
+//  getPuffPressureThreshold(true,false);
+  getPressureThreshold(true,false);
   sapActionSize = sizeof(sapActionProperty) / sizeof(inputActionStruct);
 }
 
-//void setSipAndPuffThreshold()
-//{
-//  ps.setThreshold(CONF_SIP_THRESHOLD, CONF_PUFF_THRESHOLD);
-//}
 
 void updatePressure()
 {
@@ -395,19 +403,19 @@ void performOutputAction(int action)
     case CONF_ACTION_DEC_SPEED:
     {
       //Decrease cursor speed
-      decreaseCursorSpeed();
+      decreaseJoystickSpeed(false,false);
       break;
     }
     case CONF_ACTION_INC_SPEED:
     {
       //Increase cursor speed
-      increaseCursorSpeed();
+      increaseJoystickSpeed(false,false);
       break;
     }
     case CONF_ACTION_CHANGE_MODE:
     {
       //Change communication mode
-      toggleCommunicationMethod(false,false);
+      toggleCommunicationMode(false,false);
       break;
     }
   }
@@ -477,53 +485,6 @@ void cursorScroll(void)
   //Serial.println("Scroll");
 }
 
-//void setJoystickCenter(void)
-//{
-//  js.updateInputComp();
-//  pointFloatType centerPoint = js.getInputComp();
-//  printJoystickFloatData(centerPoint);
-//}
-
-void decreaseCursorSpeed(void)
-{
-  Serial.println("Decrease Cursor Speed");
-}
-
-void increaseCursorSpeed(void)
-{
-  Serial.println("Increase Cursor Speed");
-}
-
-//int getComMode(void)
-//{
-//  String comModeCommand = "CM";   
-//  int tempComMode;
-//  tempComMode = mem.readInt(CONF_SETTINGS_FILE, comModeCommand);
-//
-//  if(tempComMode<1 || tempComMode>2){
-//    tempComMode = CONF_COM_MODE;
-//    mem.writeInt(CONF_SETTINGS_FILE,comModeCommand,tempComMode);   
-//  }
-//  Serial.print("Current Communication Mode:");
-//  Serial.println(tempComMode);  
-//  return tempComMode;
-//}
-
-//void setComMode(void)
-//{
-//  String comModeCommand = "CM";   
-//  if (comMode < 2)
-//  {
-//    comMode++;
-//  }
-//  else
-//  {
-//    comMode = 1;
-//  }
-//  mem.writeInt(CONF_SETTINGS_FILE,comModeCommand,comMode);    
-//  Serial.print("New Communication Mode:");
-//  Serial.println(comMode);
-//}
 
 //*********************************//
 // Joystick Functions
@@ -533,10 +494,10 @@ void initJoystick()
 {
 
   js.begin();
-  js.setMagnetXYDirection(JOY_MAG_DIRECTION_INVERSE);       //JOY_MAG_DIRECTION_DEFAULT
+  js.setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_INVERSE);       //x,y 
   js.setOutputScale(CONF_JOY_OUTPUT_SCALE);
-  setJoystickInitialization(false,false);
-  getJoystickCalibration(false,false);
+  setJoystickInitialization(true,false);
+  getJoystickCalibration(true,false);
 }
 
 //void getJoystickCalibration()
@@ -557,10 +518,10 @@ void initJoystick()
 //  js.clear();                                                                                           //Clear previous calibration values 
 //  int stepNumber = 0;
 //  canOutputAction = false;
-//  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_CALIB_BLINK_TIME, performCalibration, (int *)stepNumber);  //Start the process  
+//  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_CALIB_BLINK_TIME, performJoystickCalibration, (int *)stepNumber);  //Start the process  
 //}
 
-void performCalibration(int* args)
+void performJoystickCalibration(int* args)
 {
   int stepNumber = (int)args;
   unsigned long readingDuration = CONF_JOY_CALIB_READING_DELAY*CONF_JOY_CALIB_READING_NUMBER;
@@ -573,15 +534,15 @@ void performCalibration(int* args)
     performLedAction(ledCurrentState);
     setJoystickInitialization(false,false);
     ++stepNumber;
-    calibTimerId[0] = calibTimer.setTimeout(nextStepStart, performCalibration, (int *)stepNumber);      // Start next step
+    calibTimerId[0] = calibTimer.setTimeout(nextStepStart, performJoystickCalibration, (int *)stepNumber);      // Start next step
   }
   else if (stepNumber < 5) //STEP 1-4: Joystick Calibration Corner Points 
   {
     setLedState(LED_ACTION_BLINK, LED_CLR_PURPLE, 4, stepNumber, CONF_JOY_CALIB_BLINK_TIME,CONF_LED_BRIGHTNESS);    
-    performLedAction(ledCurrentState);                                                                  // LED Feedback to show start of performCalibrationStep
-    calibTimerId[1] = calibTimer.setTimer(CONF_JOY_CALIB_READING_DELAY, currentReadingStart, CONF_JOY_CALIB_READING_NUMBER, performCalibrationStep, (int *)stepNumber);
+    performLedAction(ledCurrentState);                                                                  // LED Feedback to show start of performJoystickCalibrationStep
+    calibTimerId[1] = calibTimer.setTimer(CONF_JOY_CALIB_READING_DELAY, currentReadingStart, CONF_JOY_CALIB_READING_NUMBER, performJoystickCalibrationStep, (int *)stepNumber);
     ++stepNumber;                                                                                       //Set LED's feedback to show step is already started and get the max reading for the quadrant/step
-    calibTimerId[0] = calibTimer.setTimeout(nextStepStart, performCalibration, (int *)stepNumber);      //Start next step
+    calibTimerId[0] = calibTimer.setTimeout(nextStepStart, performJoystickCalibration, (int *)stepNumber);      //Start next step
   } 
   else if (stepNumber == 5)
   {
@@ -593,7 +554,7 @@ void performCalibration(int* args)
 
 }
 
-void performCalibrationStep(int* args)
+void performJoystickCalibrationStep(int* args)
 {
   int stepNumber = (int)args;
   String stepCommand = "CA"+String(stepNumber);                                                       //Command to write new calibration point to Flash memory 
@@ -610,46 +571,33 @@ void performCalibrationStep(int* args)
     printJoystickFloatData(maxPoint);  
     setLedState(LED_ACTION_OFF, LED_CLR_NONE, 4, 0, 0,CONF_LED_BRIGHTNESS);                           
     performLedAction(ledCurrentState);      
+    printResponseFloatPoint(true,true,true,0,"CA,1",true,maxPoint);
   }
 }
 
-
-void updateJoystick()
-{
-  js.update();
-}
-
-void readJoystick()
-{
-
-  pointIntType joyOutPoint = js.getXYVal();
-  xVal = joyOutPoint.x;
-  yVal = joyOutPoint.y;
-  //printJoystickIntData(joyOutPoint);
-}
 
 //The loop handling joystick
 
 void joystickLoop()
 {
 
-  updateJoystick(); //Request new values
+  js.update(); //Request new values
 
-  readJoystick(); //Read the filtered values
+  pointIntType joyOutPoint = js.getXYOut(); //Read the filtered values
 
-  performJystick();
+  performJystick(joyOutPoint);
 }
 
-void performJystick()
+void performJystick(pointIntType inputPoint)
 {
 
   if (comMode == CONF_COMM_MODE_USB)
   {
-    (outputAction == CONF_ACTION_SCROLL) ? mouse.scroll(round(yVal / 5)) : mouse.move(xVal, -yVal);
+    (outputAction == CONF_ACTION_SCROLL) ? mouse.scroll(round(inputPoint.y / 5)) : mouse.move(inputPoint.x, -inputPoint.y);
   }
   else if (comMode == CONF_COMM_MODE_BLE)
   {
-    (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(round(yVal / 5)) : btmouse.move(xVal, -yVal);
+    (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(round(inputPoint.y / 5)) : btmouse.move(inputPoint.x, -inputPoint.y);
   }
 }
 
@@ -731,6 +679,15 @@ void printJoystickIntData(pointIntType point)
   Serial.print(", ");
 
   Serial.println();
+}
+
+void debugLoop(){
+  js.update(); //Request new values
+  pointFloatType debugPointArray[2];
+  debugPointArray[0] = js.getXYIn();  //Read the raw values
+  debugPointArray[1] = {(float)js.getXYOut().x,(float)js.getXYOut().y}; //Read the filtered values
+  printResponseFloatPointArray(true,true,true,0,"DEBUG",true,"", 2, ',', debugPointArray);
+
 }
 
 //*********************************//
