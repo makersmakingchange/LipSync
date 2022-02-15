@@ -65,7 +65,9 @@ class LSPressure {
     float getCompPressure();
     void setCompPressure();
     void setZeroPressure();
-    void setStateThreshold(float s, float p);
+    void setThreshold(float s, float p);
+    void setSipThreshold(float s);
+    void setPuffThreshold(float p);
     void update();    
     void updatePressure();
     void updateState();
@@ -182,8 +184,16 @@ void LSPressure::setZeroPressure() {
   compVal = (compVal / PRESS_BUFF_SIZE);
 }
 
-void LSPressure::setStateThreshold(float s, float p){
+void LSPressure::setThreshold(float s, float p){
   sipThreshold = s;
+  puffThreshold = p;
+}
+
+void LSPressure::setSipThreshold(float s){
+  sipThreshold = s;
+}
+
+void LSPressure::setPuffThreshold(float p){
   puffThreshold = p;
 }
 
@@ -194,8 +204,7 @@ void LSPressure::update() {
 
 
 void LSPressure::updatePressure() {
-  //resetTimer();
-
+  
   mainVal = lps35hw.readPressure();
   
   if(pressureType==PRESS_TYPE_DIFF) {
@@ -216,8 +225,7 @@ void LSPressure::updatePressure() {
 
     pressureBuffer.pushElement({mainVal, refVal, diffVal});
   }
-  
-  //Serial.println(getTime());  
+ 
 }
 
 void LSPressure::updateState() {
@@ -227,7 +235,7 @@ void LSPressure::updateState() {
   //check for sip and puff conditions
   if (pressureValue > puffThreshold)  { 
     sapMainState = PRESS_SAP_MAIN_STATE_PUFF;
-  } else if (pressureValue < sipThreshold)  { 
+  } else if (pressureValue < -1*sipThreshold)  { 
     sapMainState = PRESS_SAP_MAIN_STATE_SIP;
   } else {
     sapMainState = PRESS_SAP_MAIN_STATE_NONE;

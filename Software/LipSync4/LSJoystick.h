@@ -24,11 +24,11 @@
 #define JOY_RAW_X4_MAX 40.0
 #define JOY_RAW_Y4_MAX -40.0
 
-#define JOY_MAG_DIRECTION_DEFAULT 1
-#define JOY_MAG_DIRECTION_INVERSE -1
-#define JOY_MAG_DIRECTION_FAULT 0
+#define JOY_DIRECTION_DEFAULT 1
+#define JOY_DIRECTION_INVERSE -1
+#define JOY_DIRECTION_FAULT 0
 
-#define JOY_MAG_DIRECTION_THRESHOLD 9
+#define JOY_Z_DIRECTION_THRESHOLD 9
 
 #define JOY_INPUT_XY_MAX 1024 //1024
 
@@ -66,9 +66,12 @@ class LSJoystick {
     float magnitudePoint(pointFloatType inputPoint);
     int sgn(float val);
     pointFloatType magnetInputCalibration[JOY_CALIBR_ARRAY_SIZE];
-    int _magnetDirection;
+    pointFloatType inputPoint;
+    int _joystickXDirection;
+    int _joystickYDirection;
     int _magnetZDirection;
-    int _magnetXYDirection;
+    int _magnetXDirection;
+    int _magnetYDirection;
     bool _deadzoneEnabled;
     float _deadzoneFactor;
     int _deadzoneValue;
@@ -78,10 +81,15 @@ class LSJoystick {
     LSJoystick();
     void begin();
     void clear();   
-    void setMagnetXYDirection(int magnetDirection);
-    int getMagnetDirection();
-    void setMagnetDirection();
+    int getMagnetXDirection();
+    void setMagnetXDirection(int magnetXDirection);
+    int getMagnetYDirection();
+    void setMagnetYDirection(int magnetYDirection);
+    int getMagnetZDirection();
+    void setMagnetZDirection();
+    void setMagnetDirection(int magnetXDirection, int magnetYDirection);
     void setDeadzone(bool deadzoneEnabled,float deadzoneFactor);
+    int getOutputScale();
     void setOutputScale(int scaleLevel);
     void setMinimumRadius();
     pointFloatType getInputComp();
@@ -89,9 +97,10 @@ class LSJoystick {
     pointFloatType getInputMax(int quad);
     void setInputMax(int quad, pointFloatType point);
     void update();
-    int getXVal();
-    int getYVal();
-    pointIntType getXYVal();
+    int getXOut();
+    int getYOut();
+    pointFloatType getXYIn();
+    pointIntType getXYOut();
 
 };
 
@@ -102,11 +111,9 @@ LSJoystick::LSJoystick() {
 void LSJoystick::begin() {
 
   _inputRadius = 0.0;
-  _magnetXYDirection = JOY_MAG_DIRECTION_DEFAULT;
-  _magnetZDirection = JOY_MAG_DIRECTION_DEFAULT;
 
   Tlv493dSensor.begin();
-  setMagnetDirection();
+  setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_DEFAULT);
   setDeadzone(JOY_DEADZONE_STATUS,JOY_DEADZONE_FACTOR);
   setOutputScale(JOY_OUTPUT_SCALE);
   clear();
@@ -125,17 +132,28 @@ void LSJoystick::clear() {
 
 }
 
-void LSJoystick::setMagnetXYDirection(int magnetDirection){
-  _magnetXYDirection = magnetDirection;
-  _magnetDirection = _magnetZDirection * _magnetXYDirection;
+int LSJoystick::getMagnetXDirection() {
+  return _magnetXDirection;
+}
+
+void LSJoystick::setMagnetXDirection(int magnetXDirection){
+   _magnetXDirection = magnetXDirection;
+}
+
+int LSJoystick::getMagnetYDirection() {
+  return _magnetYDirection;
+}
+
+void LSJoystick::setMagnetYDirection(int magnetYDirection){
+   _magnetYDirection = magnetYDirection;
 }
 
 
-int LSJoystick::getMagnetDirection() {
-  return _magnetDirection;
+int LSJoystick::getMagnetZDirection() {
+  return _magnetZDirection;
 }
 
-void LSJoystick::setMagnetDirection() {
+void LSJoystick::setMagnetZDirection() {
 
   float zReading = 0.0;
   for (int i = 0 ; i < JOY_RAW_ARRAY_SIZE ; i++){
@@ -144,18 +162,27 @@ void LSJoystick::setMagnetDirection() {
   }
   zReading = ((float) zReading) / JOY_RAW_ARRAY_SIZE;
    
-  if (zReading < -1 * JOY_MAG_DIRECTION_THRESHOLD)
+  if (zReading < -1 * JOY_Z_DIRECTION_THRESHOLD)
   {
-    _magnetZDirection = JOY_MAG_DIRECTION_INVERSE;
+    _magnetZDirection = JOY_DIRECTION_INVERSE;
   }
-  else if (zReading > JOY_MAG_DIRECTION_THRESHOLD){
-    _magnetZDirection = JOY_MAG_DIRECTION_DEFAULT;
+  else if (zReading > JOY_Z_DIRECTION_THRESHOLD){
+    _magnetZDirection = JOY_DIRECTION_DEFAULT;
   }
   else {
-    _magnetZDirection = JOY_MAG_DIRECTION_FAULT;
+    _magnetZDirection = JOY_DIRECTION_FAULT;
   }
-  _magnetDirection = _magnetZDirection * _magnetXYDirection;
 
+}
+
+void LSJoystick::setMagnetDirection(int magnetXDirection,int magnetYDirection) {
+
+  setMagnetXDirection(magnetXDirection);
+  setMagnetYDirection(magnetYDirection);
+  setMagnetZDirection();
+  
+  _joystickXDirection = _magnetZDirection * _magnetYDirection;
+  _joystickYDirection = _magnetZDirection * _magnetXDirection;
 }
 
 void LSJoystick::setDeadzone(bool deadzoneEnabled,float deadzoneFactor){
@@ -164,6 +191,11 @@ void LSJoystick::setDeadzone(bool deadzoneEnabled,float deadzoneFactor){
   _deadzoneFactor = deadzoneFactor;
   (_deadzoneEnabled) ? _deadzoneValue = round(JOY_INPUT_XY_MAX*_deadzoneFactor):_deadzoneValue=0;   
 }
+
+int LSJoystick::getOutputScale(){
+  return _scaleLevel;
+}
+
 
 void LSJoystick::setOutputScale(int scaleLevel){
   _scaleLevel=scaleLevel;
@@ -185,7 +217,7 @@ pointFloatType LSJoystick::getInputComp() {
 
 void LSJoystick::updateInputComp() {
   Tlv493dSensor.updateData();
-  magnetInputCalibration[0] = {Tlv493dSensor.getY()*_magnetDirection, Tlv493dSensor.getX()*_magnetDirection};
+  magnetInputCalibration[0] = {Tlv493dSensor.getY()*_joystickXDirection, Tlv493dSensor.getX()*_joystickYDirection};
   setMinimumRadius();
 }
 
@@ -194,8 +226,8 @@ void LSJoystick::updateInputComp() {
 pointFloatType LSJoystick::getInputMax(int quad) {
   Tlv493dSensor.updateData();
   //Apply compensation point
-  pointFloatType tempCalibrationPoint = {Tlv493dSensor.getY()*_magnetDirection - magnetInputCalibration[0].x, 
-                                        Tlv493dSensor.getX()*_magnetDirection - magnetInputCalibration[0].y};
+  pointFloatType tempCalibrationPoint = {Tlv493dSensor.getY()*_joystickXDirection - magnetInputCalibration[0].x, 
+                                        Tlv493dSensor.getX()*_joystickYDirection - magnetInputCalibration[0].y};
 //  Serial.print("x:");
 //  Serial.print(tempCalibrationPoint.x);
 //  Serial.print("y:");
@@ -223,30 +255,35 @@ void LSJoystick::setInputMax(int quad,pointFloatType inputPoint) {
 void LSJoystick::update() {
 
   Tlv493dSensor.updateData();
-  pointFloatType inputPoint = {Tlv493dSensor.getY()*_magnetDirection, Tlv493dSensor.getX()*_magnetDirection};
-  pointIntType outputPoint = processInputReading(inputPoint);
+  inputPoint = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};
+  pointFloatType centeredPoint = {(inputPoint.x)*_joystickXDirection, (inputPoint.y)*_joystickYDirection};
+  pointIntType outputPoint = processInputReading(centeredPoint);
   //pointIntType outputPoint = processInputReading({Tlv493dSensor.getY()*_magnetDirection, Tlv493dSensor.getX()*_magnetDirection});
   outputPoint = processOutputResponse(outputPoint);
   joystickInputBuffer.pushElement(outputPoint);
-  
-//  Serial.print(outputPoint.x);  
+//  
+//  Serial.print(Tlv493dSensor.getY());  
 //  Serial.print(",");  
-//  Serial.println(outputPoint.y); 
+//  Serial.println(Tlv493dSensor.getX()); 
   
 }
 
 
-int LSJoystick::getXVal() {
+int LSJoystick::getXOut() {
   return joystickInputBuffer.getLastElement().x;
 }
 
-int LSJoystick::getYVal() {
+int LSJoystick::getYOut() {
   return joystickInputBuffer.getLastElement().y;
 }
 
 
-pointIntType LSJoystick::getXYVal() {
+pointIntType LSJoystick::getXYOut() {
   return joystickInputBuffer.getLastElement();
+}
+
+pointFloatType LSJoystick::getXYIn() {
+  return inputPoint;
 }
 
 

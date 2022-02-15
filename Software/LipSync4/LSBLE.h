@@ -163,6 +163,9 @@ bool LSBLEMouse::isPressed(uint8_t b)
 bool LSBLEMouse::isConnected(void) {
   return Bluefruit.connected();
 }
+
+
+
 /*****************************
  *   KEYBOARD SECTION
  *****************************/ 
