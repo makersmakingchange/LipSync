@@ -4,7 +4,7 @@
 
 
 #include <Adafruit_LPS35HW.h>
-#include <Adafruit_BMP280.h>   //onboard pressure sensor on Adafruit Sense Micro 
+#include <Adafruit_BMP280.h>   
 
 #define PRESS_BUFF_SIZE 5
 #define PRESS_SAP_BUFF_SIZE 12

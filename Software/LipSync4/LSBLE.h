@@ -59,8 +59,8 @@ class LSBLEKeyboard : public Print
 
 void initializeBluefruit(const char* s) {
   Bluefruit.begin();
-  Bluefruit.Periph.setConnInterval(9, 16); // min = 9*1.25=11.25 ms, max = 16*1.25=20ms
-  Bluefruit.setTxPower(4);    // Check bluefruit.h for supported values
+  Bluefruit.Periph.setConnInterval(9, 16);  // min = 9*1.25=11.25 ms, max = 16*1.25=20ms
+  Bluefruit.setTxPower(4);                  // Check bluefruit.h for supported values
   Bluefruit.setName(s);
   bledis.setManufacturer("MakersMakingChange");
   bledis.setModel("LipSync Mouse");
@@ -73,8 +73,8 @@ void initializeBluefruit(const char* s) {
   Bluefruit.Advertising.addService(blehid);
   Bluefruit.Advertising.addName();
   Bluefruit.Advertising.restartOnDisconnect(true);
-  Bluefruit.Advertising.setInterval(32, 244);    // in unit of 0.625 ms
-  Bluefruit.Advertising.setFastTimeout(30);      // number of seconds in fast mode
+  Bluefruit.Advertising.setInterval(32, 244);    // 20 ms - in unit of 0.625 ms (Interval:  fast mode = 20 ms, slow mode = 152.5 ms)
+  Bluefruit.Advertising.setFastTimeout(30);      // number of seconds in fast mode 
   Bluefruit.Advertising.start(0);                // 0 = Don't stop advertising after n seconds
 }
 

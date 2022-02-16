@@ -9,21 +9,6 @@
 #define JOY_CALIBR_ARRAY_SIZE 5
 #define JOY_RAW_ARRAY_SIZE 5
 
-#define JOY_RAW_X_COMP 0.0
-#define JOY_RAW_Y_COMP 0.0
-
-#define JOY_RAW_X1_MAX 40.0
-#define JOY_RAW_Y1_MAX 40.0
-
-#define JOY_RAW_X2_MAX -40.0
-#define JOY_RAW_Y2_MAX 40.0
-
-#define JOY_RAW_X3_MAX -40.0
-#define JOY_RAW_Y3_MAX -40.0
-
-#define JOY_RAW_X4_MAX 40.0
-#define JOY_RAW_Y4_MAX -40.0
-
 #define JOY_DIRECTION_DEFAULT 1
 #define JOY_DIRECTION_INVERSE -1
 #define JOY_DIRECTION_FAULT 0
@@ -32,7 +17,7 @@
 
 #define JOY_INPUT_XY_MAX 1024 //1024
 
-#define JOY_OUTPUT_XY_MAX 12 
+#define JOY_OUTPUT_XY_MAX 10 
 
 #define JOY_DEADZONE_STATUS true
 

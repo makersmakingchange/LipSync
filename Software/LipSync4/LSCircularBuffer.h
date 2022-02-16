@@ -8,7 +8,7 @@
 #define _LSCIRCULARBUFFER_H
 
 
-// the definition of the CircularBuffer class.
+//The definition of the CircularBuffer class.
 template<typename T>
 class LSCircularBuffer {
   public:

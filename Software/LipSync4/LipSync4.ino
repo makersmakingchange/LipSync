@@ -13,6 +13,7 @@
 #include "LSMemory.h"
 
 int comMode; //0 = None , 1 = USB , 2 = Wireless  
+int debugMode;
 
 //LED module variables
 const ledActionStruct ledActionProperty[]{
@@ -127,8 +128,6 @@ void setup()
   mouse.begin();
   btmouse.begin();
 
-  comMode = CONF_COM_MODE;
-
   Serial.begin(115200);
   // Wait until serial port is opened
   //while (!TinyUSBDevice.mounted())
@@ -147,6 +146,8 @@ void setup()
   initJoystick();
 
   initCommunicationMode();
+
+  initDebug();
 
   srartupFeedback();
 
@@ -172,15 +173,17 @@ void loop()
 
 void enablePoll(bool isEnabled){
   if(isEnabled){
-    pollTimer.enable(0);
-    pollTimer.enable(1);
+    getDebugMode(false,false);
+    pollTimer.enable(1); 
     pollTimer.enable(2);    
     pollTimer.enable(3);  
+    //setLedDefault();
   } else {
-    getDebugMode(false,false);
+    pollTimer.disable(0);    
     pollTimer.disable(1);
     pollTimer.disable(2);
-    pollTimer.disable(3);
+    pollTimer.disable(3);  
+    pollTimer.disable(4); 
   }
 }
 
@@ -249,31 +252,18 @@ void initSipAndPuff()
 {
 
   ps.begin(PRESS_TYPE_DIFF);
-//  getSipPressureThreshold(true,false);
-//  getPuffPressureThreshold(true,false);
   getPressureThreshold(true,false);
   sapActionSize = sizeof(sapActionProperty) / sizeof(inputActionStruct);
 }
 
 
-void updatePressure()
-{
-  ps.update();
-}
-
-void readPressure()
-{
-
-  pressureValues = ps.getAllPressure();
-}
-
 //The loop handling pressure polling, sip and puff state evaluation
 void pressureLoop()
 {
 
-  updatePressure(); //Request new pressure difference from sensor and push it to array
+  ps.update(); //Request new pressure difference from sensor and push it to array
 
-  readPressure(); //Read the pressure object (can be last value from array, average or other algorithms)
+  pressureValues = ps.getAllPressure(); //Read the pressure object (can be last value from array, average or other algorithms)
 
   //Get the last state change
   sapActionState = ps.getState();
@@ -431,11 +421,11 @@ void performOutputAction(int action)
 void cursorLeftClick(void)
 {
   //Serial.println("Left Click");
-  if (comMode == CONF_COMM_MODE_USB)
+  if (comMode == CONF_COM_MODE_USB)
   {
     mouse.click(MOUSE_LEFT);
   }
-  else if (comMode == CONF_COMM_MODE_BLE)
+  else if (comMode == CONF_COM_MODE_BLE)
   {
     btmouse.click(MOUSE_LEFT);
   }
@@ -444,11 +434,11 @@ void cursorLeftClick(void)
 void cursorRightClick(void)
 {
   //Serial.println("Right Click");
-  if (comMode == CONF_COMM_MODE_USB)
+  if (comMode == CONF_COM_MODE_USB)
   {
     mouse.click(MOUSE_RIGHT);
   }
-  else if (comMode == CONF_COMM_MODE_BLE)
+  else if (comMode == CONF_COM_MODE_BLE)
   {
     btmouse.click(MOUSE_RIGHT);
   }
@@ -457,11 +447,11 @@ void cursorRightClick(void)
 void cursorMiddleClick(void)
 {
   //Serial.println("Middle Click");
-  if (comMode == CONF_COMM_MODE_USB)
+  if (comMode == CONF_COM_MODE_USB)
   {
     mouse.click(MOUSE_MIDDLE);
   }
-  else if (comMode == CONF_COMM_MODE_BLE)
+  else if (comMode == CONF_COM_MODE_BLE)
   {
     btmouse.click(MOUSE_MIDDLE);
   }
@@ -470,11 +460,11 @@ void cursorMiddleClick(void)
 void cursorDrag(void)
 {
   //Serial.println("Drag");
-  if (comMode == CONF_COMM_MODE_USB)
+  if (comMode == CONF_COM_MODE_USB)
   {
     mouse.press(MOUSE_LEFT);
   }
-  else if (comMode == CONF_COMM_MODE_BLE)
+  else if (comMode == CONF_COM_MODE_BLE)
   {
     btmouse.press(MOUSE_LEFT);
   }
@@ -591,11 +581,11 @@ void joystickLoop()
 void performJystick(pointIntType inputPoint)
 {
 
-  if (comMode == CONF_COMM_MODE_USB)
+  if (comMode == CONF_COM_MODE_USB)
   {
     (outputAction == CONF_ACTION_SCROLL) ? mouse.scroll(round(inputPoint.y / 5)) : mouse.move(inputPoint.x, -inputPoint.y);
   }
-  else if (comMode == CONF_COMM_MODE_BLE)
+  else if (comMode == CONF_COM_MODE_BLE)
   {
     (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(round(inputPoint.y / 5)) : btmouse.move(inputPoint.x, -inputPoint.y);
   }
@@ -681,14 +671,46 @@ void printJoystickIntData(pointIntType point)
   Serial.println();
 }
 
+//*********************************//
+// Debug Functions
+//*********************************//
+
+void initDebug()
+{
+  debugMode = getDebugMode(false, false);
+  setDebugState(debugMode);
+}
+
 void debugLoop(){
-  js.update(); //Request new values
-  pointFloatType debugPointArray[2];
-  debugPointArray[0] = js.getXYIn();  //Read the raw values
-  debugPointArray[1] = {(float)js.getXYOut().x,(float)js.getXYOut().y}; //Read the filtered values
-  printResponseFloatPointArray(true,true,true,0,"DEBUG",true,"", 2, ',', debugPointArray);
+  if(debugMode==1){
+    js.update(); //Request new values from joystick class
+    pointFloatType debugJoystickArray[2];
+    debugJoystickArray[0] = js.getXYIn();  //Read the raw values
+    debugJoystickArray[1] = {(float)js.getXYOut().x,(float)js.getXYOut().y}; //Read the filtered values
+    printResponseFloatPointArray(true,true,true,0,"DEBUG,1",true,"", 2, ',', debugJoystickArray);    
+  }
+  else if(debugMode==2){  //Use update values from pressureLoop()
+    //ps.update(); //Request new pressure difference from sensor and push it to array
+    float debugPressureArray[3];
+    debugPressureArray[0] = ps.getMainPressure();  //Read the main pressure 
+    debugPressureArray[1] = ps.getRefPressure();  //Read the ref pressure
+    debugPressureArray[2] = ps.getDiffPressure();  //Read the diff pressure
+    printResponseFloatArray(true,true,true,0,"DEBUG,2",true,"", 3, ',', debugPressureArray);    
+  }
 
 }
+
+void setDebugState(int inputDebugState) {
+  if (inputDebugState==0) {
+    pollTimer.enable(0);
+    pollTimer.disable(4);
+  } 
+  else {
+    pollTimer.disable(0);
+    pollTimer.enable(4);
+  }
+}
+
 
 //*********************************//
 // LED Functions
@@ -746,7 +768,6 @@ void ledIBMEffect(ledStateStruct* args)
     performLedAction(ledCurrentState);
     ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
      
-     
   }
 
 }
@@ -789,24 +810,24 @@ void blinkLed(ledStateStruct* args)
 }
 
 void setLedDefault(){
-  if (comMode == CONF_COMM_MODE_USB)
+  if (comMode == CONF_COM_MODE_USB)
   {
     led.clearLedAll();
   }
-  else if (comMode == CONF_COMM_MODE_BLE && btmouse.isConnected())
+  else if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected())
   {
     led.clearLedAll();
-    led.setLedColor(2, LED_CLR_BLUE, CONF_LED_BRIGHTNESS_LOW);
+    led.setLedColor(2, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
   }
 }
 
 void bleFeedbackLoop()
 {
-  if (comMode == CONF_COMM_MODE_BLE && btmouse.isConnected())
+  if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected())
   {
-    led.setLedColor(2, LED_CLR_BLUE, CONF_LED_BRIGHTNESS_LOW);
+    led.setLedColor(2, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
   }
-  else if (comMode == CONF_COMM_MODE_BLE && btmouse.isConnected()==false)
+  else if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected()==false)
   {
     led.clearLed(2);
   }
