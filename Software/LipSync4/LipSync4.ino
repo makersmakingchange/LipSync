@@ -239,7 +239,6 @@ void inputLoop()
   buttonState = ib.getInputState();
   switchState = is.getInputState();
 
-  //printInputData();
   evaluateOutputAction(buttonState, buttonActionSize,buttonActionProperty);
   evaluateOutputAction(switchState, switchActionSize,switchActionProperty);
 }
@@ -268,7 +267,6 @@ void pressureLoop()
   //Get the last state change
   sapActionState = ps.getState();
 
-  //printSipAndPuffData(2);
   //Output action logic
   evaluateOutputAction(sapActionState, sapActionSize,sapActionProperty);
 }
@@ -517,12 +515,15 @@ void performJoystickCalibration(int* args)
   unsigned long readingDuration = CONF_JOY_CALIB_READING_DELAY*CONF_JOY_CALIB_READING_NUMBER;
   unsigned long currentReadingStart = CONF_JOY_CALIB_BLINK_TIME*((stepNumber*2)+1);
   unsigned long nextStepStart = currentReadingStart+readingDuration+CONF_JOY_CALIB_STEP_DELAY;
+  pointFloatType centerPoint;
 
   if (stepNumber == 0)  //STEP 0: Joystick Compensation Center Point
   {
     setLedState(LED_ACTION_BLINK, LED_CLR_ORANGE, 2, 1, CONF_JOY_CALIB_BLINK_TIME,CONF_LED_BRIGHTNESS);  // LED Feedback to show start of setJoystickCenter
     performLedAction(ledCurrentState);
     setJoystickInitialization(false,false);
+    centerPoint=js.getInputComp();
+    printResponseFloatPoint(true,true,true,0,"CA,0",true,centerPoint);
     ++stepNumber;
     calibTimerId[0] = calibTimer.setTimeout(nextStepStart, performJoystickCalibration, (int *)stepNumber);      // Start next step
   }
@@ -558,7 +559,6 @@ void performJoystickCalibrationStep(int* args)
   maxPoint=js.getInputMax(stepNumber);
   if(calibTimer.getNumRuns(0)==CONF_JOY_CALIB_READING_NUMBER){                                        //Turn Led's OFF when timer is running for last time
     mem.writePoint(CONF_SETTINGS_FILE,stepCommand,maxPoint);                                          //Store the point in Flash Memory 
-    printJoystickFloatData(maxPoint);  
     setLedState(LED_ACTION_OFF, LED_CLR_NONE, 4, 0, 0,CONF_LED_BRIGHTNESS);                           
     performLedAction(ledCurrentState);      
     printResponseFloatPoint(true,true,true,0,"CA,1",true,maxPoint);
@@ -591,85 +591,6 @@ void performJystick(pointIntType inputPoint)
   }
 }
 
-//*********************************//
-// Print Functions
-//*********************************//
-
-void printInputData()
-{
-
-  Serial.print(" main: ");
-  Serial.print(buttonState.mainState);
-  Serial.print(": ");
-  Serial.print(switchState.mainState);
-  Serial.print(", ");
-  Serial.print(" secondary: ");
-  Serial.print(buttonState.secondaryState);
-  Serial.print(": ");
-  Serial.print(switchState.secondaryState);
-  Serial.print(", ");
-  Serial.print(" time: ");
-  Serial.print(buttonState.elapsedTime);
-  Serial.print(": ");
-  Serial.print(switchState.elapsedTime);
-  Serial.print(", ");
-
-  Serial.println();
-}
-
-void printSipAndPuffData(int type)
-{
-
-  if (type == 1)
-  {
-    Serial.print(" refPressure: ");
-    Serial.print(pressureValues.refPressure);
-    Serial.print(", ");
-    Serial.print(" mainPressure: ");
-    Serial.print(pressureValues.mainPressure);
-    Serial.print(", ");
-    Serial.print(" diffPressure: ");
-    Serial.print(pressureValues.diffPressure);
-  }
-  else if (type == 2)
-  {
-    Serial.print(" main: ");
-    Serial.print(sapActionState.mainState);
-    Serial.print(", ");
-    Serial.print(" secondary: ");
-    Serial.print(sapActionState.secondaryState);
-    Serial.print(", ");
-    Serial.print(" time: ");
-    Serial.print(sapActionState.elapsedTime);
-    Serial.println();
-  }
-}
-
-void printJoystickFloatData(pointFloatType point)
-{
-
-  Serial.print(" x: ");
-  Serial.print(point.x);
-  Serial.print(", ");
-  Serial.print(" y: ");
-  Serial.print(point.y);
-  Serial.print(", ");
-
-  Serial.println();
-}
-
-void printJoystickIntData(pointIntType point)
-{
-
-  Serial.print(" x: ");
-  Serial.print(point.x);
-  Serial.print(", ");
-  Serial.print(" y: ");
-  Serial.print(point.y);
-  Serial.print(", ");
-
-  Serial.println();
-}
 
 //*********************************//
 // Debug Functions
@@ -682,32 +603,55 @@ void initDebug()
 }
 
 void debugLoop(){
-  if(debugMode==1){
+  if(debugMode==CONF_DEBUG_MODE_JOYSTICK){
     js.update(); //Request new values from joystick class
     pointFloatType debugJoystickArray[2];
     debugJoystickArray[0] = js.getXYIn();  //Read the raw values
     debugJoystickArray[1] = {(float)js.getXYOut().x,(float)js.getXYOut().y}; //Read the filtered values
     printResponseFloatPointArray(true,true,true,0,"DEBUG,1",true,"", 2, ',', debugJoystickArray);    
   }
-  else if(debugMode==2){  //Use update values from pressureLoop()
+  else if(debugMode==CONF_DEBUG_MODE_PRESSURE){  //Use update values from pressureLoop()
     //ps.update(); //Request new pressure difference from sensor and push it to array
     float debugPressureArray[3];
     debugPressureArray[0] = ps.getMainPressure();  //Read the main pressure 
-    debugPressureArray[1] = ps.getRefPressure();  //Read the ref pressure
+    debugPressureArray[1] = ps.getRefPressure();   //Read the ref pressure
     debugPressureArray[2] = ps.getDiffPressure();  //Read the diff pressure
     printResponseFloatArray(true,true,true,0,"DEBUG,2",true,"", 3, ',', debugPressureArray);    
   }
-
+  else if(debugMode==CONF_DEBUG_MODE_BUTTON){  
+    int debugButtonArray[3];
+    debugButtonArray[0] = buttonState.mainState;             //Read the main state 
+    debugButtonArray[1] = buttonState.secondaryState;        //Read the secondary state
+    debugButtonArray[2] = (int) buttonState.elapsedTime;     //Read the Elapsed Time     
+    printResponseIntArray(true,true,true,0,"DEBUG,3",true,"", 3, ',', debugButtonArray);    
+  }
+  else if(debugMode==CONF_DEBUG_MODE_SWITCH){  
+    int debugSwitchArray[3];
+    debugSwitchArray[0] = switchState.mainState;             //Read the main state 
+    debugSwitchArray[1] = switchState.secondaryState;        //Read the secondary state 
+    debugSwitchArray[2] = (int) switchState.elapsedTime;     //Read the Elapsed Time    
+    printResponseIntArray(true,true,true,0,"DEBUG,4",true,"", 3, ',', debugSwitchArray);    
+  }
+  else if(debugMode==CONF_DEBUG_MODE_SAP){  
+    int debugSapArray[3];
+    debugSapArray[0] = sapActionState.mainState;             //Read the main state 
+    debugSapArray[1] = sapActionState.secondaryState;        //Read the secondary state 
+    debugSapArray[2] = (int) sapActionState.elapsedTime;     //Read the Elapsed Time    
+    printResponseIntArray(true,true,true,0,"DEBUG,5",true,"", 3, ',', debugSapArray);    
+  }
 }
 
 void setDebugState(int inputDebugState) {
-  if (inputDebugState==0) {
-    pollTimer.enable(0);
-    pollTimer.disable(4);
+  if (inputDebugState==CONF_DEBUG_MODE_NONE) {
+    pollTimer.enable(0);                      //Enable joystick data polling 
+    pollTimer.disable(4);                     //Disable debug data polling 
   } 
+  else if (inputDebugState==CONF_DEBUG_MODE_JOYSTICK) {
+    pollTimer.disable(0);                     //Disable joystick data polling 
+    pollTimer.enable(4);                      //Enable debug data polling 
+  }
   else {
-    pollTimer.disable(0);
-    pollTimer.enable(4);
+    pollTimer.enable(4);                      //Enable debug data polling 
   }
 }
 

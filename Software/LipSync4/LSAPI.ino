@@ -15,15 +15,15 @@ _functionList getModelNumberFunction =            {"MN", "0", "0", &getModelNumb
 _functionList getVersionNumberFunction =          {"VN", "0", "0", &getVersionNumber};
 _functionList getJoystickSpeedFunction =          {"SS", "0", "0", &getJoystickSpeed};
 _functionList setJoystickSpeedFunction =          {"SS", "1", "", &setJoystickSpeed};
-_functionList getJoystickInitializationFunction = {"JI", "0", "0", &getJoystickInitialization};
-_functionList setJoystickInitializationFunction = {"JI", "1", "1", &setJoystickInitialization};
+_functionList getJoystickInitializationFunction = {"IN", "0", "0", &getJoystickInitialization};
+_functionList setJoystickInitializationFunction = {"IN", "1", "1", &setJoystickInitialization};
 _functionList getJoystickCalibrationFunction =    {"CA", "0", "0", &getJoystickCalibration};
 _functionList setJoystickCalibrationFunction =    {"CA", "1", "1", &setJoystickCalibration};
 _functionList getJoystickDeadZoneFunction =       {"DZ", "0", "0", &getJoystickDeadZone};
 _functionList setJoystickDeadZoneFunction =       {"DZ", "1", "", &setJoystickDeadZone};
 
 _functionList getPressureValueFunction =          {"PV", "0", "0", &getPressureValue};
-//_functionList getPressureThresholdFunction =       {"DT","0","0",&getPressureThreshold};
+_functionList getPressureThresholdFunction =      {"DT","0","0",&getPressureThreshold};
 _functionList getSipPressureThresholdFunction =   {"ST", "0", "0", &getSipPressureThreshold};
 _functionList setSipPressureThresholdFunction =   {"ST", "1", "", &setSipPressureThreshold};
 _functionList getPuffPressureThresholdFunction =  {"PT", "0", "0", &getPuffPressureThreshold};
@@ -39,7 +39,7 @@ _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSetting
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[22] = {
+_functionList apiFunction[23] = {
   getModelNumberFunction,
   getVersionNumberFunction,
   getJoystickSpeedFunction,
@@ -51,7 +51,7 @@ _functionList apiFunction[22] = {
   getJoystickDeadZoneFunction,
   setJoystickDeadZoneFunction,
   getPressureValueFunction,
-  //getPressureThresholdFunction,
+  getPressureThresholdFunction,
   getSipPressureThresholdFunction,
   setSipPressureThresholdFunction,
   getPuffPressureThresholdFunction,
@@ -723,7 +723,7 @@ float getJoystickDeadZone(bool responseEnabled, bool apiEnabled) {
   tempDeadzone = mem.readFloat(CONF_SETTINGS_FILE, deadZoneCommand);
 
   if ((tempDeadzone <= CONF_JOY_MIN_DEADZONE) || (tempDeadzone >= CONF_JOY_MAX_DEADZONE)) {
-    tempDeadzone = CONF_JOY_DEADZONE;
+    tempDeadzone = CONF_JOY_DEADZONE_DEFAULT;
     mem.writeFloat(CONF_SETTINGS_FILE, deadZoneCommand, tempDeadzone);
   }
   js.setDeadzone(true, tempDeadzone);
@@ -1324,6 +1324,12 @@ void resetSettings(bool responseEnabled, bool apiEnabled, String optionalParamet
 //***************************//
 void factoryReset(bool responseEnabled, bool apiEnabled) {
   resetMemory();
+  setCommunicationMode(false, false, CONF_COM_MODE_DEFAULT);
+  setDebugMode(false, false, CONF_DEBUG_MODE_DEFAULT);
+  setJoystickDeadZone(false, false, CONF_JOY_DEADZONE_DEFAULT);
+  setSipPressureThreshold(false, false, CONF_SIP_THRESHOLD);
+  setPuffPressureThreshold(false, false, CONF_PUFF_THRESHOLD);
+  setJoystickSpeed(false, false, CONF_JOY_SPEED_LEVEL);  
   printResponseInt(responseEnabled, apiEnabled, true, 0, "FR,1", true, 0);
 
 }
@@ -1380,7 +1386,7 @@ void printResponseIntArray(bool responseEnabled, bool apiEnabled, bool responseS
 
   (isValidDelimiter(responseParameterDelimiter)) ? tempParameterDelimiter[0] = {responseParameterDelimiter} : tempParameterDelimiter[0] = {'\0'};
 
-  String responseParameterString = String(responsePrefix) + ":";
+  String responseParameterString = String(responsePrefix);
   for (int parameterIndex = 0; parameterIndex < responseParameterSize; parameterIndex++) {
     responseParameterString.concat(responseParameter[parameterIndex]);
     if (parameterIndex < (responseParameterSize - 1)) {
