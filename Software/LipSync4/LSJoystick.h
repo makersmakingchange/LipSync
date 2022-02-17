@@ -17,14 +17,14 @@
 
 #define JOY_INPUT_XY_MAX 1024 //1024
 
-#define JOY_OUTPUT_XY_MAX 10 
+//#define JOY_OUTPUT_XY_MAX 10 
 
 #define JOY_DEADZONE_STATUS true
 
 #define JOY_DEADZONE_FACTOR 0.12
 
 
-#define JOY_OUTPUT_SCALE 5 
+#define JOY_OUTPUT_RANGE_LEVEL 5 
 
 
 typedef struct {
@@ -60,7 +60,8 @@ class LSJoystick {
     bool _deadzoneEnabled;
     float _deadzoneFactor;
     int _deadzoneValue;
-    int _scaleLevel;
+    int _rangeLevel;
+    int _rangeValue;
     float _inputRadius;
   public:
     LSJoystick();
@@ -74,8 +75,8 @@ class LSJoystick {
     void setMagnetZDirection();
     void setMagnetDirection(int magnetXDirection, int magnetYDirection);
     void setDeadzone(bool deadzoneEnabled,float deadzoneFactor);
-    int getOutputScale();
-    void setOutputScale(int scaleLevel);
+    int getOutputRange();
+    void setOutputRange(int rangeLevel);
     void setMinimumRadius();
     pointFloatType getInputComp();
     void updateInputComp();
@@ -100,7 +101,7 @@ void LSJoystick::begin() {
   Tlv493dSensor.begin();
   setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_DEFAULT);
   setDeadzone(JOY_DEADZONE_STATUS,JOY_DEADZONE_FACTOR);
-  setOutputScale(JOY_OUTPUT_SCALE);
+  setOutputRange(JOY_OUTPUT_RANGE_LEVEL);
   clear();
 }
 
@@ -177,13 +178,17 @@ void LSJoystick::setDeadzone(bool deadzoneEnabled,float deadzoneFactor){
   (_deadzoneEnabled) ? _deadzoneValue = round(JOY_INPUT_XY_MAX*_deadzoneFactor):_deadzoneValue=0;   
 }
 
-int LSJoystick::getOutputScale(){
-  return _scaleLevel;
+int LSJoystick::getOutputRange(){
+  return _rangeLevel;
 }
 
 
-void LSJoystick::setOutputScale(int scaleLevel){
-  _scaleLevel=scaleLevel;
+void LSJoystick::setOutputRange(int rangeLevel){
+  _rangeValue = (int)((0.125 * sq(rangeLevel)) + ( 0.3 * rangeLevel ) + 2);       //Polynomial 
+  //_rangeValue = (int)((1.05 * exp(( 0.175 * rangeLevel) + 1.1)) - 1);                   //Exponential   
+   Serial.print("_rangeValue:");
+   Serial.println(_rangeValue);
+  _rangeLevel = rangeLevel;
 }
 
 void LSJoystick::setMinimumRadius(){
@@ -294,8 +299,8 @@ int LSJoystick::applyDeadzone(int input){
 
 pointIntType LSJoystick::linearizeOutput(pointIntType inputPoint){
   pointIntType outputPoint = {0,0};
-  outputPoint.x = map(inputPoint.x,-1*JOY_INPUT_XY_MAX,JOY_INPUT_XY_MAX,-1*JOY_OUTPUT_XY_MAX,JOY_OUTPUT_XY_MAX);
-  outputPoint.y = map(inputPoint.y,-1*JOY_INPUT_XY_MAX,JOY_INPUT_XY_MAX,-1*JOY_OUTPUT_XY_MAX,JOY_OUTPUT_XY_MAX);
+  outputPoint.x = map(inputPoint.x,-1*JOY_INPUT_XY_MAX,JOY_INPUT_XY_MAX,-1*_rangeValue,_rangeValue);
+  outputPoint.y = map(inputPoint.y,-1*JOY_INPUT_XY_MAX,JOY_INPUT_XY_MAX,-1*_rangeValue,_rangeValue);
   return outputPoint;  
 }
 

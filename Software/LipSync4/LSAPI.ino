@@ -411,17 +411,19 @@ void getVersionNumber(bool responseEnabled, bool apiEnabled, String optionalPara
 //*********************************//
 int getJoystickSpeed(bool responseEnabled, bool apiEnabled) {
   String commandKey = "SS";
-  int tempJoystickSpeedLevel = CONF_JOY_SPEED_LEVEL;
+  int tempJoystickSpeedLevel = CONF_JOY_SPEED_LEVEL_DEFAULT;
   if (CONF_API_ENABLED) {
     tempJoystickSpeedLevel = mem.readInt(CONF_SETTINGS_FILE, commandKey);
-    if (tempJoystickSpeedLevel < 0 || tempJoystickSpeedLevel > 10) {
-      tempJoystickSpeedLevel = CONF_JOY_SPEED_LEVEL;
+    if ((tempJoystickSpeedLevel < CONF_JOY_SPEED_LEVEL_MIN) || (tempJoystickSpeedLevel > CONF_JOY_SPEED_LEVEL_MAX)) {
+      tempJoystickSpeedLevel = CONF_JOY_SPEED_LEVEL_DEFAULT;
       mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempJoystickSpeedLevel);
     }
+    
   }
+  js.setOutputRange(tempJoystickSpeedLevel);
   printResponseInt(responseEnabled, apiEnabled, true, 0, "SS,0", true, tempJoystickSpeedLevel);
 
-  return CONF_JOY_SPEED_LEVEL;
+  return tempJoystickSpeedLevel;
 }
 //***GET JOYSTICK SPEED API FUNCTION***//
 // Function   : getJoystickSpeed
@@ -462,12 +464,12 @@ void setJoystickSpeed(bool responseEnabled, bool apiEnabled, int inputSpeedLevel
   String commandKey = "SS";
   bool isValidSpeed = true;
   int tempJoystickSpeedLevel = inputSpeedLevel;
-  if (tempJoystickSpeedLevel >= 0 && tempJoystickSpeedLevel <= 10) { //Check if inputSpeedCounter is valid
+  if ((tempJoystickSpeedLevel >= CONF_JOY_SPEED_LEVEL_MIN) && (tempJoystickSpeedLevel <= CONF_JOY_SPEED_LEVEL_MAX)) { //Check if inputSpeedCounter is valid
     // Valid inputSpeedLevel
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempJoystickSpeedLevel);
 
     if (!CONF_API_ENABLED) {
-      tempJoystickSpeedLevel = CONF_JOY_SPEED_LEVEL;
+      tempJoystickSpeedLevel = CONF_JOY_SPEED_LEVEL_DEFAULT;
     }
     isValidSpeed = true;
   }
@@ -479,11 +481,11 @@ void setJoystickSpeed(bool responseEnabled, bool apiEnabled, int inputSpeedLevel
     isValidSpeed = false;
   }
 
-  js.setOutputScale(inputSpeedLevel);
+  js.setOutputRange(tempJoystickSpeedLevel);
 
   int responseCode = 0;
   (isValidSpeed) ? responseCode = 0 : responseCode = 3;
-  printResponseInt(responseEnabled, apiEnabled, true, 0, "SS,1", true, tempJoystickSpeedLevel);
+  printResponseInt(responseEnabled, apiEnabled, isValidSpeed, responseCode, "SS,1", true, tempJoystickSpeedLevel);
 }
 //***SET JOYSTICK SPEED API FUNCTION***//
 // Function   : setJoystickSpeed
@@ -514,7 +516,7 @@ void setJoystickSpeed(bool responseEnabled, bool apiEnabled, String optionalPara
 // Return     : void
 //*********************************//
 void increaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
-  int tempJoystickSpeedLevel = js.getOutputScale();
+  int tempJoystickSpeedLevel = js.getOutputRange();
   tempJoystickSpeedLevel++;
 
   setJoystickSpeed(responseEnabled, apiEnabled, tempJoystickSpeedLevel);
@@ -533,7 +535,7 @@ void increaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
 // Return     : void
 //*********************************//
 void decreaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
-  int tempJoystickSpeedLevel = js.getOutputScale();
+  int tempJoystickSpeedLevel = js.getOutputRange();
   tempJoystickSpeedLevel--;
 
   setJoystickSpeed(responseEnabled, apiEnabled, tempJoystickSpeedLevel);
@@ -1329,7 +1331,7 @@ void factoryReset(bool responseEnabled, bool apiEnabled) {
   setJoystickDeadZone(false, false, CONF_JOY_DEADZONE_DEFAULT);
   setSipPressureThreshold(false, false, CONF_SIP_THRESHOLD);
   setPuffPressureThreshold(false, false, CONF_PUFF_THRESHOLD);
-  setJoystickSpeed(false, false, CONF_JOY_SPEED_LEVEL);  
+  setJoystickSpeed(false, false, CONF_JOY_SPEED_LEVEL_DEFAULT);  
   printResponseInt(responseEnabled, apiEnabled, true, 0, "FR,1", true, 0);
 
 }

@@ -10,7 +10,7 @@
 #define CONF_SWITCH2_PIN 11                                // 3.5mm jack SW2
 #define CONF_SWITCH3_PIN 10                                // 3.5mm jack SW3
 
-//Input buttons and switch numbers 
+//Input buttons and switch values 
 #define CONF_BUTTON_NUMBER 3
 #define CONF_SWITCH_NUMBER 3
 
@@ -38,8 +38,11 @@
 #define CONF_BLE_FEEDBACK_POLL_RATE 1000    //1s
 #define CONF_DEBUG_POLL_RATE 100            //100ms
 
+//Joystick values 
+#define CONF_JOY_SPEED_LEVEL_MIN 0
+#define CONF_JOY_SPEED_LEVEL_MAX 10
 
-//Communication mode numbers 
+//Communication mode values 
 #define CONF_COM_MODE_NONE 0 
 #define CONF_COM_MODE_USB  1
 #define CONF_COM_MODE_BLE  2
@@ -47,7 +50,7 @@
 #define CONF_COM_MODE_MIN 1
 #define CONF_COM_MODE_MAX 2
 
-//Debug mode numbers 
+//Debug mode values 
 #define CONF_DEBUG_MODE_NONE      0 
 #define CONF_DEBUG_MODE_JOYSTICK  1
 #define CONF_DEBUG_MODE_PRESSURE  2
@@ -62,7 +65,6 @@
 #define CONF_API_ENABLED true               //Enable or Disable API
 
 //Joystick Default settings
-#define CONF_JOY_OUTPUT_SCALE 5
 #define CONF_JOY_DEADZONE_DEFAULT 0.12
 #define CONF_JOY_MIN_DEADZONE 0.0
 #define CONF_JOY_MAX_DEADZONE 1.0
@@ -70,7 +72,7 @@
 #define CONF_JOY_CALIB_READING_DELAY 200
 #define CONF_JOY_CALIB_READING_NUMBER 10
 #define CONF_JOY_CALIB_STEP_DELAY 2000
-#define CONF_JOY_SPEED_LEVEL 5
+#define CONF_JOY_SPEED_LEVEL_DEFAULT 5
 
 //Sip and Puff Default settings
 #define CONF_SIP_THRESHOLD 2.5                    //hPa
