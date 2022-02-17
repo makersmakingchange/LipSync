@@ -23,7 +23,6 @@
 
 #define JOY_DEADZONE_FACTOR 0.12
 
-
 #define JOY_OUTPUT_RANGE_LEVEL 5 
 
 
@@ -186,8 +185,8 @@ int LSJoystick::getOutputRange(){
 void LSJoystick::setOutputRange(int rangeLevel){
   _rangeValue = (int)((0.125 * sq(rangeLevel)) + ( 0.3 * rangeLevel ) + 2);       //Polynomial 
   //_rangeValue = (int)((1.05 * exp(( 0.175 * rangeLevel) + 1.1)) - 1);                   //Exponential   
-   Serial.print("_rangeValue:");
-   Serial.println(_rangeValue);
+  //Serial.print("_rangeValue:");
+  //Serial.println(_rangeValue);
   _rangeLevel = rangeLevel;
 }
 

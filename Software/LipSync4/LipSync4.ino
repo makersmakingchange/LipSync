@@ -483,6 +483,7 @@ void initJoystick()
 
   js.begin();
   js.setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_INVERSE);       //x,y 
+  getJoystickDeadZone(true,false);
   getJoystickSpeed(true,false);
   setJoystickInitialization(true,false);
   getJoystickCalibration(true,false);
