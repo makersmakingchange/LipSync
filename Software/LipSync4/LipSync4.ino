@@ -25,8 +25,8 @@ const ledActionStruct ledActionProperty[]{
     {CONF_ACTION_CURSOR_CALIBRATION, 4,LED_CLR_NONE,  LED_CLR_ORANGE, LED_ACTION_BLINK},
     {CONF_ACTION_CURSOR_CENTER,      2,LED_CLR_NONE,  LED_CLR_ORANGE, LED_ACTION_BLINK},
     {CONF_ACTION_MIDDLE_CLICK,       2,LED_CLR_NONE,  LED_CLR_PURPLE, LED_ACTION_BLINK},
-    {CONF_ACTION_DEC_SPEED,          1,LED_CLR_NONE,  LED_CLR_RED,    LED_ACTION_BLINK},
-    {CONF_ACTION_INC_SPEED,          3,LED_CLR_NONE,  LED_CLR_BLUE,   LED_ACTION_BLINK},
+    {CONF_ACTION_DEC_SPEED,          1,LED_CLR_NONE,  LED_CLR_RED,    LED_ACTION_NONE},
+    {CONF_ACTION_INC_SPEED,          3,LED_CLR_NONE,  LED_CLR_BLUE,   LED_ACTION_NONE},
     {CONF_ACTION_CHANGE_MODE,        2,LED_CLR_NONE,  LED_CLR_BLUE,   LED_ACTION_BLINK}
 };
 
@@ -373,13 +373,13 @@ void performOutputAction(int action)
     }
     case CONF_ACTION_CURSOR_CALIBRATION:
     {
-      setJoystickCalibration(false,false);
+      setJoystickCalibration(true,false);
       break;
     }
     case CONF_ACTION_CURSOR_CENTER:
     {
       //Perform cursor center
-      setJoystickInitialization(false,false);
+      setJoystickInitialization(true,false);
       break;
     }
     case CONF_ACTION_MIDDLE_CLICK:
@@ -391,19 +391,19 @@ void performOutputAction(int action)
     case CONF_ACTION_DEC_SPEED:
     {
       //Decrease cursor speed
-      decreaseJoystickSpeed(false,false);
+      decreaseJoystickSpeed(true,false);
       break;
     }
     case CONF_ACTION_INC_SPEED:
     {
       //Increase cursor speed
-      increaseJoystickSpeed(false,false);
+      increaseJoystickSpeed(true,false);
       break;
     }
     case CONF_ACTION_CHANGE_MODE:
     {
       //Change communication mode
-      toggleCommunicationMode(false,false);
+      toggleCommunicationMode(true,false);
       break;
     }
   }
@@ -755,6 +755,7 @@ void blinkLed(ledStateStruct* args)
 }
 
 void setLedDefault(){
+  
   if (comMode == CONF_COM_MODE_USB)
   {
     led.clearLedAll();

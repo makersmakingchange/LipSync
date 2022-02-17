@@ -88,18 +88,18 @@ bool serialSettings(bool enabled) {
     if (settingsFlag == false && commandString == "SETTINGS") {
       //SETTING received
       //Set the return flag to true so settings actions can be performed in the next call to the function
-      printResponseSingle(true, true, true, 0, commandString, false, 0);
+      printResponseInt(true, true, true, 0, commandString, false, 0);
       settingsFlag = true;
     } else if (settingsFlag == true && commandString == "EXIT") {
       //EXIT Recieved
       //Set the return flag to false so settings actions can be exited
-      printResponseSingle(true, true, true, 0, commandString, false, 0);
+      printResponseInt(true, true, true, 0, commandString, false, 0);
       settingsFlag = false;
     } else if (settingsFlag == true && isValidCommandFormat(commandString)) { //Check if command's format is correct and it's in settings mode
       performCommand(commandString);                  //Sub function to process valid strings
       settingsFlag = false;
     } else {
-      printResponseSingle(true, true, false, 0, commandString, false, 0);
+      printResponseInt(true, true, false, 0, commandString, false, 0);
       settingsFlag = false;
     }
     Serial.flush();
@@ -149,36 +149,19 @@ void performCommand(String inputString) {
       if ( isValidCommandParameter( inputParameterString )) {  //Check if parameter is valid
         //Valid Parameter
         apiFunction[apiIndex].function(true, true, inputParameterString);
-        //Handle parameters that are an array as a special case.
-        /*         if(apiFunction[apiIndex].parameter=="r"){   //"r" denotes an array parameter
 
-                  int inputParameterArray[inputParameterString.length() + 1];
-                  for(unsigned int arrayIndex=0; arrayIndex<inputParameterString.length(); arrayIndex++)
-                  {
-                    inputParameterArray[arrayIndex]=inputParameterString.charAt(arrayIndex)-'0';
-                  }
-
-                  // Call matching API function with input parameter array
-                  apiFunction[apiIndex].function(true, true, inputParameterArray);
-                  delay(5);
-                } else {
-                  int tempParameterArray[1] = {(int)inputParameterString.toInt()};
-                  // Call matching API function with input parameter string
-                  apiFunction[apiIndex].function(true, true, tempParameterArray);
-                  delay(5);
-                } */
       } else { // Invalid input parameter
 
         // Outut error message
-        printResponseSingle(true, true, false, 2, inputString, false, 0);
+        printResponseInt(true, true, false, 2, inputString, false, 0);
       }
       break;
     } else if (apiIndex == (apiTotalNumber - 1)) { // api doesn’t exist
 
       //Output error message
-      printResponseSingle(true, true, false, 1, inputString, false, 0);
+      printResponseInt(true, true, false, 1, inputString, false, 0);
 
-      delay(5);
+      //delay(5);
       break;
     }
   } //end iterate through API functions
@@ -265,45 +248,6 @@ bool isValidDelimiter(char inputDelimiter) {
 
   return validOutput;
 }
-
-//***SERIAL PRINT OUT COMMAND RESPONSE WITH SINGLE PARAMETER FUNCTION***//
-// Function   : printResponseSingle
-//
-// Description: Serial Print output of the responses from APIs with single parameter as the output
-//
-// Parameters :  responseEnabled : bool : Print the response if it's set to true, and skip the response if it's set to false.
-//               apiEnabled : bool : Print the response and indicate if the the function was called via the API if it's set to true.
-//                                   Print Manual response if the function wasn't called via API.
-//               responseStatus : bool : The response status (SUCCESS,FAIL)
-//               responseNumber : int : 0,1,2 (Different meanings depending on the responseStatus)
-//               responseCommand : String : The End-Point command which is returned as output.
-//               responseParameterEnabled : bool : Print the parameter if it's set to true, and skip the parameter if it's set to false.
-//               responseParameter : int : The response parameters printed as output.
-//
-// Return     : void
-//***********************************************************************//
-void printResponseSingle(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, int responseParameter) {
-  if (responseEnabled) {
-
-    if (responseStatus) {
-      (apiEnabled) ? Serial.print("SUCCESS") : Serial.print("MANUAL");
-    } else {
-      Serial.print("FAIL");
-    }
-    Serial.print(",");
-    Serial.print(responseNumber);
-    Serial.print(":");
-    Serial.print(responseCommand);
-
-    if (responseParameterEnabled) {
-      Serial.print(":");
-      Serial.println(responseParameter);
-    } else {
-      Serial.println("");
-    }
-  }
-}
-
 
 
 //***GET MODEL NUMBER FUNCTION***//
@@ -464,20 +408,20 @@ void setJoystickSpeed(bool responseEnabled, bool apiEnabled, int inputSpeedLevel
   String commandKey = "SS";
   bool isValidSpeed = true;
   int tempJoystickSpeedLevel = inputSpeedLevel;
+  
   if ((tempJoystickSpeedLevel >= CONF_JOY_SPEED_LEVEL_MIN) && (tempJoystickSpeedLevel <= CONF_JOY_SPEED_LEVEL_MAX)) { //Check if inputSpeedCounter is valid
     // Valid inputSpeedLevel
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempJoystickSpeedLevel);
-
     if (!CONF_API_ENABLED) {
       tempJoystickSpeedLevel = CONF_JOY_SPEED_LEVEL_DEFAULT;
     }
+    performLedAction(ledCurrentState);
     isValidSpeed = true;
   }
   else {
     //Invalid inputSpeedLevel
-    setLedState(LED_ACTION_BLINK, LED_CLR_PURPLE, 4, 6, 50, CONF_LED_BRIGHTNESS);   //Blink 6 times
-    performLedAction(ledCurrentState);
     tempJoystickSpeedLevel = mem.readInt(CONF_SETTINGS_FILE, commandKey);
+    performLedAction(ledCurrentState);
     isValidSpeed = false;
   }
 
@@ -517,7 +461,14 @@ void setJoystickSpeed(bool responseEnabled, bool apiEnabled, String optionalPara
 //*********************************//
 void increaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
   int tempJoystickSpeedLevel = js.getOutputRange();
+
   tempJoystickSpeedLevel++;
+  if(tempJoystickSpeedLevel <= CONF_JOY_SPEED_LEVEL_MAX){
+    setLedState(LED_ACTION_BLINK, LED_CLR_BLUE, 3, tempJoystickSpeedLevel+1, 50, CONF_LED_BRIGHTNESS);   //Blink tempJoystickSpeedLevel times
+  } 
+  else{
+    setLedState(LED_ACTION_BLINK, LED_CLR_PURPLE, 4, 6, 50, CONF_LED_BRIGHTNESS);   //Blink 6 times
+  }
 
   setJoystickSpeed(responseEnabled, apiEnabled, tempJoystickSpeedLevel);
 }
@@ -536,8 +487,16 @@ void increaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
 //*********************************//
 void decreaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
   int tempJoystickSpeedLevel = js.getOutputRange();
-  tempJoystickSpeedLevel--;
 
+  tempJoystickSpeedLevel--;
+  if(tempJoystickSpeedLevel >= CONF_JOY_SPEED_LEVEL_MIN){
+    setLedState(LED_ACTION_BLINK, LED_CLR_RED, 1, tempJoystickSpeedLevel+1, 50, CONF_LED_BRIGHTNESS);   //Blink tempJoystickSpeedLevel times
+  } 
+  else{
+    setLedState(LED_ACTION_BLINK, LED_CLR_PURPLE, 4, 6, 50, CONF_LED_BRIGHTNESS);   //Blink 6 times
+  }
+  
+    
   setJoystickSpeed(responseEnabled, apiEnabled, tempJoystickSpeedLevel);
 }
 
@@ -1357,6 +1316,22 @@ void factoryReset(bool responseEnabled, bool apiEnabled, String optionalParamete
   }
 }
 
+//***SERIAL PRINT OUT COMMAND RESPONSE WITH STRING PARAMETER FUNCTION***//
+// Function   : printResponseString
+//
+// Description: Serial Print output of the responses from APIs with string parameter as the output
+//
+// Parameters :  responseEnabled : bool : Print the response if it's set to true, and skip the response if it's set to false.
+//               apiEnabled : bool : Print the response and indicate if the the function was called via the API if it's set to true.
+//                                   Print Manual response if the function wasn't called via API.
+//               responseStatus : bool : The response status (SUCCESS,FAIL)
+//               responseNumber : int : 0,1,2 (Different meanings depending on the responseStatus)
+//               responseCommand : String : The End-Point command which is returned as output.
+//               responseParameterEnabled : bool : Print the parameter if it's set to true, and skip the parameter if it's set to false.
+//               responseParameter : String : The response parameters printed as output.
+//
+// Return     : void
+//***********************************************************************//
 void printResponseString(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, String responseParameter) {
   if (responseEnabled) {
 
@@ -1378,6 +1353,22 @@ void printResponseString(bool responseEnabled, bool apiEnabled, bool responseSta
   }
 }
 
+//***SERIAL PRINT OUT COMMAND RESPONSE WITH INT PARAMETER FUNCTION***//
+// Function   : printResponseInt
+//
+// Description: Serial Print output of the responses from APIs with int parameter as the output
+//
+// Parameters :  responseEnabled : bool : Print the response if it's set to true, and skip the response if it's set to false.
+//               apiEnabled : bool : Print the response and indicate if the the function was called via the API if it's set to true.
+//                                   Print Manual response if the function wasn't called via API.
+//               responseStatus : bool : The response status (SUCCESS,FAIL)
+//               responseNumber : int : 0,1,2 (Different meanings depending on the responseStatus)
+//               responseCommand : String : The End-Point command which is returned as output.
+//               responseParameterEnabled : bool : Print the parameter if it's set to true, and skip the parameter if it's set to false.
+//               responseParameter : int : The response parameter printed as output.
+//
+// Return     : void
+//***********************************************************************//
 void printResponseInt(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, int responseParameter) {
   printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, String(responseParameter));
 
@@ -1429,6 +1420,22 @@ void printResponseIntPointArray(bool responseEnabled, bool apiEnabled, bool resp
 
 }
 
+//***SERIAL PRINT OUT COMMAND RESPONSE WITH FLOAT PARAMETER FUNCTION***//
+// Function   : printResponseFloat
+//
+// Description: Serial Print output of the responses from APIs with float parameter as the output
+//
+// Parameters :  responseEnabled : bool : Print the response if it's set to true, and skip the response if it's set to false.
+//               apiEnabled : bool : Print the response and indicate if the the function was called via the API if it's set to true.
+//                                   Print Manual response if the function wasn't called via API.
+//               responseStatus : bool : The response status (SUCCESS,FAIL)
+//               responseNumber : int : 0,1,2 (Different meanings depending on the responseStatus)
+//               responseCommand : String : The End-Point command which is returned as output.
+//               responseParameterEnabled : bool : Print the parameter if it's set to true, and skip the parameter if it's set to false.
+//               responseParameter : float : The response parameter printed as output.
+//
+// Return     : void
+//***********************************************************************//
 void printResponseFloat(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, float responseParameter) {
   printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, String(responseParameter));
 
