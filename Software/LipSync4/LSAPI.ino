@@ -140,20 +140,19 @@ void performCommand(String inputString) {
 
     // Test if input command string matches API command and input parameter string matches API parameter string
     if (inputEndpointString == apiFunction[apiIndex].endpoint &&
-        inputCodeString == apiFunction[apiIndex].code &&
-        (inputParameterString == apiFunction[apiIndex].parameter ||
-         apiFunction[apiIndex].parameter == "" ||
-         apiFunction[apiIndex].parameter == "r" )) {
+        inputCodeString == apiFunction[apiIndex].code) {
 
       // Matching Command String found
-      if ( isValidCommandParameter( inputParameterString )) {  //Check if parameter is valid
-        //Valid Parameter
+      if (!isValidCommandParameter( inputParameterString )) {
+        printResponseInt(true, true, false, 2, inputString, false, 0);
+      }
+      else if (inputParameterString == apiFunction[apiIndex].parameter || apiFunction[apiIndex].parameter == "") {
         apiFunction[apiIndex].function(true, true, inputParameterString);
-
-      } else { // Invalid input parameter
+      }
+      else { // Invalid input parameter
 
         // Outut error message
-        printResponseInt(true, true, false, 2, inputString, false, 0);
+        printResponseInt(true, true, false, 3, inputString, false, 0);
       }
       break;
     } else if (apiIndex == (apiTotalNumber - 1)) { // api doesn’t exist
@@ -266,7 +265,7 @@ void getModelNumber(bool responseEnabled, bool apiEnabled) {
   String commandKey = "MN";
   int tempModelNumber = mem.readInt(CONF_SETTINGS_FILE, commandKey);
   if (tempModelNumber != CONF_LIPSYNC_MODEL) {                          //If the previous firmware was different model then reset the settings
-    resetSettings(responseEnabled, apiEnabled);
+    resetSettings(false, false);
 
     tempModelNumber = CONF_LIPSYNC_MODEL;                               //And store the model number
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempModelNumber);
@@ -289,10 +288,6 @@ void getModelNumber(bool responseEnabled, bool apiEnabled) {
 void getModelNumber(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
     getModelNumber(responseEnabled, apiEnabled);
-  }
-  else {
-    printResponseString(responseEnabled, apiEnabled, false, 3, "MN,0", true, optionalParameter);
-
   }
 }
 
@@ -334,10 +329,6 @@ void getVersionNumber(bool responseEnabled, bool apiEnabled) {
 void getVersionNumber(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
     getVersionNumber(responseEnabled, apiEnabled);
-  }
-  else {
-    printResponseString(responseEnabled, apiEnabled, false, 3, "VN,0", true, optionalParameter);
-
   }
 }
 
@@ -384,10 +375,6 @@ int getJoystickSpeed(bool responseEnabled, bool apiEnabled) {
 void getJoystickSpeed(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
     getJoystickSpeed(responseEnabled, apiEnabled);
-  }
-  else {
-    printResponseString(responseEnabled, apiEnabled, false, 3, "SS,0", true, optionalParameter);
-
   }
 }
 
@@ -533,10 +520,6 @@ void getJoystickInitialization(bool responseEnabled, bool apiEnabled, String opt
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
     getJoystickInitialization(responseEnabled, apiEnabled);
   }
-  else {
-    printResponseString(responseEnabled, apiEnabled, false, 3, "IN,0", true, optionalParameter);
-
-  }
 }
 
 //***SET JOYSTICK INITIALIZATION FUNCTION***//
@@ -571,10 +554,6 @@ void setJoystickInitialization(bool responseEnabled, bool apiEnabled) {
 void setJoystickInitialization(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 1) {
     setJoystickInitialization(responseEnabled, apiEnabled);
-  }
-  else {
-    printResponseString(responseEnabled, apiEnabled, false, 3, "IN,1", true, optionalParameter);
-
   }
 }
 
@@ -619,10 +598,6 @@ void getJoystickCalibration(bool responseEnabled, bool apiEnabled, String option
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
     getJoystickCalibration(responseEnabled, apiEnabled);
   }
-  else {
-    printResponseString(responseEnabled, apiEnabled, false, 3, "CA,0", true, optionalParameter);
-
-  }
 }
 
 //*** SET JOYSTICK CALIBRATION FUNCTION***//
@@ -658,10 +633,6 @@ void setJoystickCalibration(bool responseEnabled, bool apiEnabled) {
 void setJoystickCalibration(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 1) {
     setJoystickCalibration(responseEnabled, apiEnabled);
-  }
-  else {
-    printResponseString(responseEnabled, apiEnabled, false, 3, "CA,1", true, optionalParameter);
-
   }
 }
 
@@ -706,10 +677,6 @@ float getJoystickDeadZone(bool responseEnabled, bool apiEnabled) {
 void getJoystickDeadZone(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
     getJoystickDeadZone(responseEnabled, apiEnabled);
-  }
-  else {
-    printResponseString(responseEnabled, apiEnabled, false, 3, "DZ,0", true, optionalParameter);
-
   }
 }
 
@@ -789,10 +756,6 @@ void getPressureValue(bool responseEnabled, bool apiEnabled, String optionalPara
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
     getPressureValue(responseEnabled, apiEnabled);
   }
-  else {
-    printResponseString(responseEnabled, apiEnabled, false, 3, "PV,0", true, optionalParameter);
-
-  }
 }
 
 //***GET PRESSURE THRESHOLD FUNCTION***//
@@ -831,10 +794,6 @@ void getPressureThreshold(bool responseEnabled, bool apiEnabled) {
 void getPressureThreshold(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
     getPressureThreshold(responseEnabled, apiEnabled);
-  }
-  else {
-    printResponseString(responseEnabled, apiEnabled, false, 3, "DT,0", true, optionalParameter);
-
   }
 }
 
@@ -878,10 +837,6 @@ float getSipPressureThreshold(bool responseEnabled, bool apiEnabled) {
 void getSipPressureThreshold(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
     getSipPressureThreshold(responseEnabled, apiEnabled);
-  }
-  else {
-    printResponseString(responseEnabled, apiEnabled, false, 3, "ST,0", true, optionalParameter);
-
   }
 }
 
@@ -970,10 +925,6 @@ void getPuffPressureThreshold(bool responseEnabled, bool apiEnabled, String opti
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
     getPuffPressureThreshold(responseEnabled, apiEnabled);
   }
-  else {
-    printResponseFloat(responseEnabled, apiEnabled, false, 3, "PT,1", true, optionalParameter.toFloat());
-
-  }
 }
 
 
@@ -1060,10 +1011,6 @@ int getCommunicationMode(bool responseEnabled, bool apiEnabled) {
 void getCommunicationMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
     getCommunicationMode(responseEnabled, apiEnabled);
-  }
-  else {
-    printResponseString(responseEnabled, apiEnabled, false, 3, "CM,0", true, optionalParameter);
-
   }
 }
 
@@ -1181,10 +1128,6 @@ void getDebugMode(bool responseEnabled, bool apiEnabled, String optionalParamete
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
     getDebugMode(responseEnabled, apiEnabled);
   }
-  else {
-    printResponseString(responseEnabled, apiEnabled, false, 3, "DM,0", true, optionalParameter);
-
-  }
 }
 
 //***SET DEBUG MODE STATE FUNCTION***//
@@ -1265,10 +1208,6 @@ void resetSettings(bool responseEnabled, bool apiEnabled, String optionalParamet
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 1) {
     resetSettings(responseEnabled, apiEnabled);
   }
-  else {
-    printResponseString(responseEnabled, apiEnabled, false, 3, "RS,1", true, optionalParameter);
-
-  }
 }
 
 //***FACTORY RESET FUNCTION***//
@@ -1309,10 +1248,6 @@ void factoryReset(bool responseEnabled, bool apiEnabled) {
 void factoryReset(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 1) {
     factoryReset(responseEnabled, apiEnabled);
-  }
-  else {
-    printResponseString(responseEnabled, apiEnabled, false, 3, "FR,1", true, optionalParameter);
-
   }
 }
 
