@@ -23,6 +23,8 @@ _functionList getJoystickDeadZoneFunction =       {"DZ", "0", "0", &getJoystickD
 _functionList setJoystickDeadZoneFunction =       {"DZ", "1", "", &setJoystickDeadZone};
 
 _functionList getPressureValueFunction =          {"PV", "0", "0", &getPressureValue};
+_functionList getPressureModeFunction =           {"PM", "0", "0", &getPressureMode};
+_functionList setPressureModeFunction =           {"PM", "1", "", &setPressureMode};
 _functionList getPressureThresholdFunction =      {"DT","0","0",&getPressureThreshold};
 _functionList getSipPressureThresholdFunction =   {"ST", "0", "0", &getSipPressureThreshold};
 _functionList setSipPressureThresholdFunction =   {"ST", "1", "", &setSipPressureThreshold};
@@ -39,7 +41,7 @@ _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSetting
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[23] = {
+_functionList apiFunction[25] = {
   getModelNumberFunction,
   getVersionNumberFunction,
   getJoystickSpeedFunction,
@@ -50,6 +52,8 @@ _functionList apiFunction[23] = {
   setJoystickCalibrationFunction,
   getJoystickDeadZoneFunction,
   setJoystickDeadZoneFunction,
+  getPressureModeFunction,
+  setPressureModeFunction,
   getPressureValueFunction,
   getPressureThresholdFunction,
   getSipPressureThresholdFunction,
@@ -758,6 +762,95 @@ void getPressureValue(bool responseEnabled, bool apiEnabled, String optionalPara
   }
 }
 
+//***GET PRESSURE MODE FUNCTION***//
+// Function   : getPressureMode
+//
+// Description: This function retrieves the state of pressure mode.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : PressureMode : int : The current state of pressure mode.
+//*********************************//
+int getPressureMode(bool responseEnabled, bool apiEnabled) {
+  String commandKey = "PM";
+  int tempPressureMode;
+  tempPressureMode = mem.readInt(CONF_SETTINGS_FILE, commandKey);
+
+  if ((tempPressureMode < PRESS_MODE_MIN) || (tempPressureMode > PRESS_MODE_MAX)) {
+    tempPressureMode = CONF_PRESS_MODE_DEFAULT;
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempPressureMode);
+  }
+  ps.setPressureMode(tempPressureMode);
+
+  printResponseInt(responseEnabled, apiEnabled, true, 0, "PM,0", true, tempPressureMode);
+
+  return tempPressureMode;
+}
+//***GET PRESSURE MODE API FUNCTION***//
+// Function   : getPressureMode
+//
+// Description: This function is redefinition of main getPressureMode function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void getPressureMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
+    getPressureMode(responseEnabled, apiEnabled);
+  }
+}
+
+//***SET PRESSURE MODE FUNCTION***//
+// Function   : setPressureMode
+//
+// Description: This function sets the state of Pressure mode.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               inputPressureMode : int : The new pressure mode state ( 0 = None, 1 = Abs , 2 = Diff )
+//
+// Return     : void
+//*********************************//
+void setPressureMode(bool responseEnabled, bool apiEnabled, int inputPressureMode) {
+  String commandKey = "PM";
+  if ((inputPressureMode >= PRESS_MODE_MIN) && (inputPressureMode <= PRESS_MODE_MAX))
+  {
+    comMode = inputPressureMode;
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputPressureMode);
+    printResponseInt(responseEnabled, apiEnabled, true, 0, "PM,1", true, inputPressureMode);
+  ps.setPressureMode(inputPressureMode);
+  }
+  else {
+    printResponseInt(responseEnabled, apiEnabled, false, 3, "PM,1", true, inputPressureMode);
+
+  }
+
+}
+//***SET PRESSURE MODE API FUNCTION***//
+// Function   : setPressureMode
+//
+// Description: This function is redefinition of main setPressureMode function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void setPressureMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  setPressureMode(responseEnabled, apiEnabled, optionalParameter.toInt());
+}
+
 //***GET PRESSURE THRESHOLD FUNCTION***//
 // Function   : getPressureThreshold
 //
@@ -983,13 +1076,13 @@ void setPuffPressureThreshold(bool responseEnabled, bool apiEnabled, String opti
 // Return     : communicationMode : int : The current state of communication method.
 //*********************************//
 int getCommunicationMode(bool responseEnabled, bool apiEnabled) {
-  String comModeCommand = "CM";
+  String commandKey = "CM";
   int tempComMode;
-  tempComMode = mem.readInt(CONF_SETTINGS_FILE, comModeCommand);
+  tempComMode = mem.readInt(CONF_SETTINGS_FILE, commandKey);
 
   if ((tempComMode < CONF_COM_MODE_MIN) || (tempComMode > CONF_COM_MODE_MAX)) {
     tempComMode = CONF_COM_MODE_DEFAULT;
-    mem.writeInt(CONF_SETTINGS_FILE, comModeCommand, tempComMode);
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempComMode);
   }
 
   printResponseInt(responseEnabled, apiEnabled, true, 0, "CM,0", true, tempComMode);
@@ -1028,12 +1121,12 @@ void getCommunicationMode(bool responseEnabled, bool apiEnabled, String optional
 // Return     : void
 //*********************************//
 void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommunicationMode) {
-  String comModeCommand = "CM";
+  String commandKey = "CM";
   if ((inputCommunicationMode >= CONF_COM_MODE_MIN) && (inputCommunicationMode <= CONF_COM_MODE_MAX))
   {
     comMode = inputCommunicationMode;
     setLedDefault();
-    mem.writeInt(CONF_SETTINGS_FILE, comModeCommand, inputCommunicationMode);
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputCommunicationMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "CM,1", true, inputCommunicationMode);
 
   }
@@ -1056,7 +1149,7 @@ void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommun
 //
 // Return     : void
 void setCommunicationMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
-  setCommunicationMode(responseEnabled, apiEnabled, optionalParameter.toFloat());
+  setCommunicationMode(responseEnabled, apiEnabled, optionalParameter.toInt());
 }
 
 

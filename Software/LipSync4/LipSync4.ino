@@ -137,9 +137,9 @@ void setup()
   
   initMemory();
 
-  initSipAndPuff();
-
   initLed();
+
+  initSipAndPuff();
 
   initInput();
 
@@ -250,7 +250,8 @@ void inputLoop()
 void initSipAndPuff()
 {
 
-  ps.begin(PRESS_TYPE_DIFF);
+  ps.begin();
+  getPressureMode(true,false);
   getPressureThreshold(true,false);
   sapActionSize = sizeof(sapActionProperty) / sizeof(inputActionStruct);
 }

@@ -16,8 +16,13 @@
 #define PRESS_FILTER_NONE 0
 #define PRESS_FILTER_AVERAGE 1
 
-#define PRESS_TYPE_ABS 0
-#define PRESS_TYPE_DIFF 1
+#define PRESS_MODE_NONE 0
+#define PRESS_MODE_ABS 1
+#define PRESS_MODE_DIFF 2
+
+#define PRESS_MODE_MIN 1
+#define PRESS_MODE_MAX 2
+
 
 #define PRESS_SAP_MAIN_STATE_NONE 0
 #define PRESS_SAP_MAIN_STATE_SIP 1
@@ -42,7 +47,7 @@ class LSPressure {
     LSCircularBuffer <pressureStruct> pressureBuffer;
     LSCircularBuffer <inputStateStruct> sapBuffer;   //Create a buffer of type inputStateStruct
     int filterMode;
-    int pressureType;
+    int pressureMode;
     float mainVal;
     float refVal;
     float compVal;
@@ -58,9 +63,11 @@ class LSPressure {
     int sapMainState;
   public:
     LSPressure();
-    void begin(int type);                                    
+    void begin();                                    
     void clear();  
     void setFilterMode(int mode); 
+    int getPressureMode();
+    void setPressureMode(int mode);
     void setRefTolerance(float value); 
     float getCompPressure();
     void setCompPressure();
@@ -83,7 +90,7 @@ LSPressure::LSPressure() {
   sapBuffer.begin(PRESS_SAP_BUFF_SIZE);  
 }
 
-void LSPressure::begin(int type) {
+void LSPressure::begin() {
 
   //BMP280 Pressure sensor setups
   if (!lps35hw.begin_I2C()) {
@@ -95,25 +102,27 @@ void LSPressure::begin(int type) {
     while (1) delay(10);
   } 
 
-  pressureType = type;
+  setFilterMode(PRESS_FILTER_NONE);
 
-  filterMode = PRESS_FILTER_NONE;
+  setPressureMode(PRESS_MODE_DIFF);
 
-  refTolVal = PRESS_REF_TOLERANCE;
+  //refTolVal = PRESS_REF_TOLERANCE;
+  setRefTolerance(PRESS_REF_TOLERANCE);
 
-  sipThreshold = -PRESS_SAP_DEFAULT_THRESHOLD;
+  //sipThreshold = -PRESS_SAP_DEFAULT_THRESHOLD;
+  setSipThreshold(-PRESS_SAP_DEFAULT_THRESHOLD);
 
-  puffThreshold = PRESS_SAP_DEFAULT_THRESHOLD;
+  //puffThreshold = PRESS_SAP_DEFAULT_THRESHOLD;
+  setPuffThreshold(PRESS_SAP_DEFAULT_THRESHOLD);
 
   lps35hw.setDataRate(LPS35HW_RATE_25_HZ);  // 1,10,25,50,75
 
-  if(pressureType==PRESS_TYPE_DIFF){
-    bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     // Operating Mode. 
-                  Adafruit_BMP280::SAMPLING_NONE,     // Temp. oversampling
-                  Adafruit_BMP280::SAMPLING_X4,    // Pressure oversampling 
-                  Adafruit_BMP280::FILTER_X16,      // Filtering. 
-                  Adafruit_BMP280::STANDBY_MS_1000); // Standby time.       
-  }
+  bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     // Operating Mode. 
+                Adafruit_BMP280::SAMPLING_NONE,     // Temp. oversampling
+                Adafruit_BMP280::SAMPLING_X4,    // Pressure oversampling 
+                Adafruit_BMP280::FILTER_X16,      // Filtering. 
+                Adafruit_BMP280::STANDBY_MS_1000); // Standby time.       
+
   clear();
 
   setZeroPressure();
@@ -139,6 +148,14 @@ void LSPressure::setFilterMode(int mode) {
   filterMode = mode;
 }
 
+int LSPressure::getPressureMode() {
+  return pressureMode;
+}
+
+void LSPressure::setPressureMode(int mode) {
+  pressureMode = mode;
+}
+
 void LSPressure::setRefTolerance(float value) {
   refTolVal = value;
 }
@@ -149,7 +166,7 @@ float LSPressure::getCompPressure() {
   float tempRefVal = 0.00;
   float tempCompVal = 0.00;
 
-  if(pressureType==PRESS_TYPE_DIFF){
+  if(pressureMode==PRESS_MODE_DIFF){
     //Keep reading until we have a valid pressure > 0.0
     do{     
       tempMainVal = lps35hw.readPressure();
@@ -160,7 +177,7 @@ float LSPressure::getCompPressure() {
     tempCompVal = tempMainVal - tempRefVal; 
     refVal=tempRefVal;
   } 
-  else if(pressureType==PRESS_TYPE_ABS){
+  else if(pressureMode==PRESS_MODE_ABS){
     //Keep reading until we have a valid pressure > 0.00
     do{
       tempMainVal = lps35hw.readPressure();
@@ -207,8 +224,8 @@ void LSPressure::updatePressure() {
   
   mainVal = lps35hw.readPressure();
   
-  if(pressureType==PRESS_TYPE_DIFF) {
-    
+  if(pressureMode==PRESS_MODE_DIFF) {
+    Serial.println("test");
     bmp_pressure->getEvent(&pressure_event); 
     float tempRefVal = pressure_event.pressure;
     //Update compensation pressure value if reference pressure is changed 
