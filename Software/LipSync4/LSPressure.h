@@ -225,7 +225,6 @@ void LSPressure::updatePressure() {
   mainVal = lps35hw.readPressure();
   
   if(pressureMode==PRESS_MODE_DIFF) {
-    Serial.println("test");
     bmp_pressure->getEvent(&pressure_event); 
     float tempRefVal = pressure_event.pressure;
     //Update compensation pressure value if reference pressure is changed 
