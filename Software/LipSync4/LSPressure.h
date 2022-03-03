@@ -92,7 +92,7 @@ class LSPressure {
 //*********************************//
 // Function   : LSPressure 
 // 
-// Description: Construct LSPressure type with arguments
+// Description: Construct LSPressure
 // 
 // Arguments :  void
 // 
