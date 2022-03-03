@@ -12,7 +12,7 @@
 #define PRESS_REF_TOLERANCE 0.1 //The change in reference pressure (hPa) that would initiate reference pressure update 
                                 //It's only used in differential mode
 
-#define PRESS_SAP_DEFAULT_THRESHOLD 2.5 // hPa hecto Pascals
+#define PRESS_SAP_DEFAULT_THRESHOLD 3.0 // hPa hecto Pascals
 
 #define PRESS_FILTER_NONE 0
 #define PRESS_FILTER_AVERAGE 1
@@ -414,7 +414,9 @@ void LSPressure::updateState() {
       //New state: {Sip or puff, released, time}      
       else if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_STARTED){
         sapCurrState = {sapPrevState.mainState, PRESS_SAP_SEC_STATE_RELEASED, sapPrevState.elapsedTime};
+        setZeroPressure();
         //Serial.println("c");
+        //Serial.println(refVal);
       }
       //State: None
       //Previous state: {Sip or puff, released, time}

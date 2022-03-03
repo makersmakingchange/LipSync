@@ -75,8 +75,8 @@
 #define CONF_JOY_SPEED_LEVEL_DEFAULT 5
 
 //Sip and Puff Default settings
-#define CONF_SIP_THRESHOLD 2.5                    //hPa
-#define CONF_PUFF_THRESHOLD 2.5                   //hPa
+#define CONF_SIP_THRESHOLD 3.0                    //hPa
+#define CONF_PUFF_THRESHOLD 3.0                   //hPa
 #define CONF_PRESS_MIN_THRESHOLD 1.0              //hPa
 #define CONF_PRESS_MAX_THRESHOLD 100.0            //hPa
 #define CONF_PRESS_MODE_DEFAULT 2                 //Default pressure mode state = 2 
