@@ -49,7 +49,8 @@ class LSJoystick {
     pointIntType processOutputResponse(pointIntType inputPoint);          //Process the output (Including linearizeOutput methods and speed control)
     int mapFloatInt(float input, float inputStart, float inputEnd, int outputStart, int outputEnd); //Custom map function to map float to int.
     pointFloatType absPoint(pointFloatType inputPoint);                   //Get the absolute value of the point.
-    float magnitudePoint(pointFloatType inputPoint);                      //Calibration/ maximum points in each quadrant and the center point / Compensation point
+    float magnitudePoint(pointFloatType inputPoint);
+    float magnitudePoint(pointFloatType inputPoint, pointFloatType offsetPoint); //Magnitude of a point from offset center point / Compensation point
     int sgn(float val);                                                   //Get the sign of the value.
     pointFloatType magnetInputCalibration[JOY_CALIBR_ARRAY_SIZE];         //Array of calibration points.
     pointFloatType inputPoint;                                            //Raw x and y values used for debugging purposes.
@@ -334,8 +335,10 @@ void LSJoystick::setMinimumRadius(){
   float tempRadius = 0.0;
   //Loop through calibration points and calculate the smallest magnitude from center point
   for (int i = 1; i < JOY_CALIBR_ARRAY_SIZE; i++) {
-    tempRadius = (sqrt(sq(magnetInputCalibration[i].x) + sq(magnetInputCalibration[i].y))/sqrt(2.0));
-    if(_inputRadius==0.0 || tempRadius<_inputRadius) { _inputRadius = tempRadius; }
+    tempRadius = (sqrt(sq(magnetInputCalibration[i].x - magnetInputCalibration[0].x) + sq(magnetInputCalibration[i].y - magnetInputCalibration[0].y))/sqrt(2.0));
+    if(magnitudePoint(magnetInputCalibration[i])> 0.0 && (_inputRadius==0.0 || tempRadius<_inputRadius)) { 
+      _inputRadius = tempRadius; 
+    }
   }
 }
 
@@ -365,8 +368,8 @@ pointFloatType LSJoystick::getInputComp() {
 //*********************************//
 void LSJoystick::updateInputComp() {
   Tlv493dSensor.updateData();
-  magnetInputCalibration[0] = {Tlv493dSensor.getY()*_joystickXDirection, Tlv493dSensor.getX()*_joystickYDirection};
-  setMinimumRadius();
+  //magnetInputCalibration[0] = {Tlv493dSensor.getY()*_joystickXDirection, Tlv493dSensor.getX()*_joystickYDirection};
+  magnetInputCalibration[0] = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};
 }
 
 
@@ -382,19 +385,20 @@ void LSJoystick::updateInputComp() {
 pointFloatType LSJoystick::getInputMax(int quad) {
   Tlv493dSensor.updateData();
   //Apply compensation point
-  pointFloatType tempCalibrationPoint = {Tlv493dSensor.getY()*_joystickXDirection - magnetInputCalibration[0].x, 
-                                        Tlv493dSensor.getX()*_joystickYDirection - magnetInputCalibration[0].y};
+  //pointFloatType tempCalibrationPoint = {Tlv493dSensor.getY()*_joystickXDirection - magnetInputCalibration[0].x, 
+  //                                      Tlv493dSensor.getX()*_joystickYDirection - magnetInputCalibration[0].y};
+  pointFloatType tempCalibrationPoint = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};
 //  Serial.print("x:");
 //  Serial.print(tempCalibrationPoint.x);
 //  Serial.print("y:");
 //  Serial.print(tempCalibrationPoint.y);
 //  Serial.print(",magnitude:");
-//  Serial.println(magnitudePoint(tempCalibrationPoint));
+//  Serial.println(magnitudePoint(tempCalibrationPoint,magnetInputCalibration[0]));
 
 //Update the calibration point and minimum radius 
   if((quad >= 0) && 
   (quad < JOY_CALIBR_ARRAY_SIZE) && 
-  magnitudePoint(tempCalibrationPoint)>magnitudePoint(magnetInputCalibration[quad])){           //The point with larger magnitude is sent as output 
+  magnitudePoint(tempCalibrationPoint,magnetInputCalibration[0])>magnitudePoint(magnetInputCalibration[quad],magnetInputCalibration[0])){           //The point with larger magnitude is sent as output 
     magnetInputCalibration[quad] = tempCalibrationPoint;
     setMinimumRadius();
   }
@@ -434,14 +438,16 @@ void LSJoystick::update() {
   //Get the new readings as a point
   inputPoint = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};   
   //Apply x and y joystick magnet directions to inputPoint to correct it before processing 
-  pointFloatType correctedPoint = {(inputPoint.x)*_joystickXDirection, (inputPoint.y)*_joystickYDirection};
-  pointIntType outputPoint = processInputReading(correctedPoint);  //Map the input readings
+  //pointFloatType correctedPoint = {(inputPoint.x)*_joystickXDirection, (inputPoint.y)*_joystickYDirection};
+  //pointIntType outputPoint = processInputReading(correctedPoint);  //Map the input readings
+  pointIntType outputPoint = processInputReading(inputPoint);     //Map the input readings
   outputPoint = processOutputResponse(outputPoint);               //Proccess output by applying deadzone, speed control, and linearization
   joystickInputBuffer.pushElement(outputPoint);                   //Push new output point to joystickInputBuffer
 //  
 //  Serial.print(Tlv493dSensor.getY());  
 //  Serial.print(",");  
 //  Serial.println(Tlv493dSensor.getX()); 
+
   
 }
 
@@ -559,7 +565,9 @@ pointIntType LSJoystick::linearizeOutput(pointIntType inputPoint){
 pointIntType LSJoystick::processInputReading(pointFloatType inputPoint) {
 
   //Center the input point
-  pointFloatType centeredPoint = {inputPoint.x - magnetInputCalibration[0].x, inputPoint.y - magnetInputCalibration[0].y};
+  //pointFloatType centeredPoint = {inputPoint.x - magnetInputCalibration[0].x, inputPoint.y - magnetInputCalibration[0].y};
+  pointFloatType centeredPoint = {(inputPoint.x)*_joystickXDirection - magnetInputCalibration[0].x, 
+                                  (inputPoint.y)*_joystickYDirection - magnetInputCalibration[0].y};
   
   //Initialize limitPoint and outputPoint
   pointFloatType limitPoint = {0.00, 0.00};
@@ -653,12 +661,18 @@ pointFloatType LSJoystick::absPoint(pointFloatType inputPoint){
 //*********************************//
 // Function   : magnitudePoint 
 // 
-// Description: The magnitude of float point from (0.0 , 0.0)
+// Description: The magnitude of float point from offset point
 // 
 // Arguments :  inputPoint  : pointFloatType : float input point
+//              offsetPoint  : pointFloatType : float offset center point
 // 
 // Return     : magnitude : float : magnitude of float point
 //*********************************//
+float LSJoystick::magnitudePoint(pointFloatType inputPoint, pointFloatType offsetPoint){
+  return (sqrt(sq(inputPoint.x - offsetPoint.x) + sq(inputPoint.y - offsetPoint.y)));
+}
+
+
 float LSJoystick::magnitudePoint(pointFloatType inputPoint){
   return (sqrt(sq(inputPoint.x) + sq(inputPoint.y)));
 }
