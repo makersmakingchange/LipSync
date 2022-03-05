@@ -623,7 +623,7 @@ void setJoystickCalibration(bool responseEnabled, bool apiEnabled) {
   js.clear();                                                                                           //Clear previous calibration values
   int stepNumber = 0;
   canOutputAction = false;
-  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_CALIB_BLINK_TIME, performJoystickCalibration, (int *)stepNumber);  //Start the process
+  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_CALIB_START_TIME, performJoystickCalibration, (int *)stepNumber);  //Start the process
 }
 //***SET JOYSTICK CALIBRATION API FUNCTION***//
 // Function   : setJoystickCalibration

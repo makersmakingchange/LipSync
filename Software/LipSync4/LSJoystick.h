@@ -399,9 +399,6 @@ pointFloatType LSJoystick::getInputMax(int quad) {
   (quad < JOY_CALIBR_ARRAY_SIZE) && 
   magnitudePoint(tempCalibrationPoint,magnetInputCalibration[0])>magnitudePoint(magnetInputCalibration[quad],magnetInputCalibration[0])){           //The point with larger magnitude is sent as output 
     magnetInputCalibration[quad] = tempCalibrationPoint;
-    Serial.print(magnitudePoint(magnetInputCalibration[quad],magnetInputCalibration[0]));
-    Serial.print("-");
-    Serial.println(magnitudePoint(tempCalibrationPoint,magnetInputCalibration[0]));
   }
   
   return magnetInputCalibration[quad];
