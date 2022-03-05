@@ -7,7 +7,7 @@
 #define JOY_BUFF_SIZE 5   //The size of joystickInputBuffer
 
 #define JOY_CALIBR_ARRAY_SIZE 5 //The magnetInputCalibration array size
-#define JOY_AVG_SAMPLE_SIZE 5    //The sample size used for averaging samples 
+#define JOY_MAG_SAMPLE_SIZE 5    //The sample size used for averaging magnet reading samples 
 
 //Joystick magnetic directions
 #define JOY_DIRECTION_DEFAULT 1
@@ -43,6 +43,7 @@ class LSJoystick {
   private:
     Tlv493d Tlv493dSensor = Tlv493d();                                    //Create an object of Tlv493d class
     LSCircularBuffer <pointIntType> joystickInputBuffer;                  //Create a buffer of type pointIntType to push mapped input readings 
+    LSCircularBuffer <pointFloatType> joystickCenterBuffer;               //Create a buffer of type pointFloatType to push center input readings     
     int applyDeadzone(int input);                                         //Apply deadzone to the input based on deadzoneValue and JOY_INPUT_XY_MAX.
     pointIntType processInputReading(pointFloatType inputPoint);          //Process the input readings and map the input reading from square to circle. (-1024 to 1024 output )
     pointIntType linearizeOutput(pointIntType inputPoint);                //Linearize the output.
@@ -80,8 +81,9 @@ class LSJoystick {
     int getOutputRange();                                                 //Get the output range or speed levels.
     void setOutputRange(int rangeLevel);                                  //Set the output range or speed levels.
     void setMinimumRadius();                                              //Set or update the minimum input radius for square to circle mapping.
-    pointFloatType getInputComp();                                        //Get the updated center compensation point from updateInputComp call in initialization Process.
-    void updateInputComp();                                               //Update the center compensation point.
+    pointFloatType getInputCenter();                                      //Get the updated center compensation point.
+    void evaluateInputCenter();                                           //Evaluate the center compensation point.
+    void updateInputCenterBuffer();                                       //Push new center compensation point to joystickCenter
     pointFloatType getInputMax(int quad);                                 //Get the updated maximum input reading from the selected corner of joystick using the input quadrant. (Calibration purposes)
     void setInputMax(int quad, pointFloatType point);                     //Set the maximum input reading for each corner of joystick using the input quadrant. 
     void zeroInputMax(int quad);                                          //Zero the maximum input reading for each corner of joystick using the input quadrant. 
@@ -104,6 +106,7 @@ class LSJoystick {
 //*********************************//
 LSJoystick::LSJoystick() {
   joystickInputBuffer.begin(JOY_BUFF_SIZE);                             //Initialize joystickInputBuffer
+  joystickCenterBuffer.begin(JOY_BUFF_SIZE);                             //Initialize joystickCenterBuffer
 }
 
 //*********************************//
@@ -229,11 +232,11 @@ int LSJoystick::getMagnetZDirection() {
 void LSJoystick::setMagnetZDirection() {
 
   float zReading = 0.0;
-  for (int i = 0 ; i < JOY_AVG_SAMPLE_SIZE ; i++){        //Get the average of 5 z direction reading 
+  for (int i = 0 ; i < JOY_MAG_SAMPLE_SIZE ; i++){        //Get the average of 5 z direction reading 
     Tlv493dSensor.updateData();
     zReading += Tlv493dSensor.getZ();
   }
-  zReading = ((float) zReading) / JOY_AVG_SAMPLE_SIZE;
+  zReading = ((float) zReading) / JOY_MAG_SAMPLE_SIZE;
    
   if (zReading < -1 * JOY_Z_DIRECTION_THRESHOLD)          //Set z direction to inverse 
   {
@@ -347,7 +350,7 @@ void LSJoystick::setMinimumRadius(){
 
 
 //*********************************//
-// Function   : getInputComp 
+// Function   : getInputCenter 
 // 
 // Description: Get the compensation center point from magnetInputCalibration array.
 // 
@@ -355,23 +358,46 @@ void LSJoystick::setMinimumRadius(){
 // 
 // Return     : center point : pointFloatType : The center point
 //*********************************//
-pointFloatType LSJoystick::getInputComp() {
+pointFloatType LSJoystick::getInputCenter() {
   return magnetInputCalibration[0];
 }
 
-
 //*********************************//
-// Function   : updateInputComp 
+// Function   : evaluateInputCenter
 // 
-// Description: Update the compensation center point and store it in magnetInputCalibration array.
+// Description: Evaluate the compensation center point fromjoystickCenterBuffer.
 // 
 // Arguments :  void
 // 
 // Return     : void
 //*********************************//
-void LSJoystick::updateInputComp() {
+void LSJoystick::evaluateInputCenter() {
+  float centerX = 0.0;
+  float centerY = 0.0;
+  pointFloatType centerPoint = {centerX,centerY};
+  for(int centerIndex = 0; centerIndex < JOY_BUFF_SIZE; centerIndex++){
+    centerPoint = joystickCenterBuffer.getElement(centerIndex);
+    centerX+=centerPoint.x;
+    centerY+=centerPoint.y;
+  }
+  centerX=centerX/JOY_BUFF_SIZE;
+  centerY=centerY/JOY_BUFF_SIZE;
+  magnetInputCalibration[0] = {centerX,centerY};
+}
+
+
+//*********************************//
+// Function   : updateInputCenterBuffer
+// 
+// Description: Update the compensation center point and push into joystickCenterBuffer.
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSJoystick::updateInputCenterBuffer() {
   Tlv493dSensor.updateData();
-  magnetInputCalibration[0] = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};
+  joystickCenterBuffer.pushElement({Tlv493dSensor.getY(), Tlv493dSensor.getX()});  
 }
 
 

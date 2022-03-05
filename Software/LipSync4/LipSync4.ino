@@ -14,6 +14,7 @@
 
 int comMode; //0 = None , 1 = USB , 2 = Wireless  
 int debugMode;
+bool ledActionEnabled = false;
 
 //LED module variables
 const ledActionStruct ledActionProperty[]{
@@ -80,7 +81,7 @@ const inputActionStruct sapActionProperty[]{
     {CONF_ACTION_RIGHT_CLICK,        PRESS_SAP_MAIN_STATE_SIP,   0,1000},
     {CONF_ACTION_DRAG,               PRESS_SAP_MAIN_STATE_PUFF,  1000,3000},
     {CONF_ACTION_SCROLL,             PRESS_SAP_MAIN_STATE_SIP,   1000,3000},
-    {CONF_ACTION_CURSOR_CALIBRATION, PRESS_SAP_MAIN_STATE_PUFF,  3000,5000},
+    {CONF_ACTION_CURSOR_CENTER,      PRESS_SAP_MAIN_STATE_PUFF,  3000,5000},
     {CONF_ACTION_MIDDLE_CLICK,       PRESS_SAP_MAIN_STATE_SIP ,  3000,5000}
 };
 
@@ -158,7 +159,7 @@ void setup()
   pollTimerId[4] = pollTimer.setInterval(CONF_DEBUG_POLL_RATE, 0, debugLoop);
 
   
-  enablePoll(false);                              //Enable when the led IBM effect is complete 
+  enablePoll(false);                              //Enable it when the led IBM effect is complete 
 
 } //end setup
 
@@ -490,7 +491,43 @@ void initJoystick()
   getJoystickCalibration(true,false);
 }
 
+void performJoystickCenter(int* args)
+{
+  int stepNumber = (int)args;
+  unsigned long readingDuration = CONF_JOY_INIT_READING_DELAY*CONF_JOY_INIT_READING_NUMBER; //Duration of the center point reading s
+  unsigned long currentReadingStart = CONF_JOY_INIT_START_TIME;                             //Time until start of current reading.
+  unsigned long nextStepStart = currentReadingStart+readingDuration;                        //Time until start of next step.
+  pointFloatType centerPoint;
 
+  if (stepNumber == 0)  //STEP 0: Joystick Compensation Center Point
+  {
+    calibTimerId[1] = calibTimer.setTimer(CONF_JOY_INIT_READING_DELAY, currentReadingStart, CONF_JOY_INIT_READING_NUMBER, performJoystickCenterStep, (int *)stepNumber);
+    ++stepNumber;                                                                                       //Set LED's feedback to show step is already started and get the max reading for the quadrant/step
+    calibTimerId[0] = calibTimer.setTimeout(nextStepStart, performJoystickCenter, (int *)stepNumber);      //Start next step
+  } else
+  {
+    js.evaluateInputCenter();
+    js.setMinimumRadius();                                                                              //Update the minimum cursor operating radius 
+    centerPoint = js.getInputCenter();
+    printResponseFloatPoint(true,true,true,0,"IN,1",true,centerPoint);
+    calibTimer.deleteTimer(0);                                                                          //Delete timer
+    canOutputAction = true;
+  }
+
+}
+
+void performJoystickCenterStep(int* args)
+{
+  if(calibTimer.getNumRuns(1)==1 && ledActionEnabled){                                                                    //Turn Led's ON when timer is running for first time
+    setLedState(LED_ACTION_ON, LED_CLR_ORANGE, 2, 0, 0,CONF_LED_BRIGHTNESS);
+    performLedAction(ledCurrentState);   
+  }
+  js.updateInputCenterBuffer();
+  if(calibTimer.getNumRuns(1)==CONF_JOY_INIT_READING_NUMBER && ledActionEnabled){                                        //Turn Led's OFF when timer is running for last time
+    setLedState(LED_ACTION_OFF, LED_CLR_NONE, 2, 0, 0,CONF_LED_BRIGHTNESS);                           
+    performLedAction(ledCurrentState);      
+  }
+}
 
 void performJoystickCalibration(int* args)
 {
@@ -498,15 +535,9 @@ void performJoystickCalibration(int* args)
   unsigned long readingDuration = CONF_JOY_CALIB_READING_DELAY*CONF_JOY_CALIB_READING_NUMBER; //Duration of the max corner reading 
   unsigned long currentReadingStart = CONF_JOY_CALIB_BLINK_TIME*((stepNumber*2)+1);           //Time until start of current reading.
   unsigned long nextStepStart = currentReadingStart+readingDuration+CONF_JOY_CALIB_STEP_DELAY; //Time until start of next reading.
-  pointFloatType centerPoint;
 
-  if (stepNumber == 0)  //STEP 0: Joystick Compensation Center Point
+  if (stepNumber == 0)  //STEP 0
   {
-    setLedState(LED_ACTION_BLINK, LED_CLR_ORANGE, 2, 1, CONF_JOY_CALIB_BLINK_TIME,CONF_LED_BRIGHTNESS);  // LED Feedback to show start of setJoystickCenter
-    performLedAction(ledCurrentState);
-    setJoystickInitialization(false,false);
-    centerPoint=js.getInputComp();
-    printResponseFloatPoint(true,true,true,0,"CA,0",true,centerPoint);
     ++stepNumber;
     calibTimerId[0] = calibTimer.setTimeout(nextStepStart, performJoystickCalibration, (int *)stepNumber);      // Start next step
   }
@@ -683,6 +714,7 @@ void ledIBMEffect(ledStateStruct* args)
   if (args->ledColorNumber == 0)
   {
     //ledStateTimer.deleteTimer(0); 
+    ledActionEnabled = true;
     enablePoll(true);
   }
   else if (args->ledColorNumber < 7)
@@ -696,7 +728,6 @@ void ledIBMEffect(ledStateStruct* args)
     setLedState(LED_ACTION_OFF, 0, args->ledNumber, args->ledBlinkNumber, (args->ledBlinkTime),args->ledBrightness);
     performLedAction(ledCurrentState);
     ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
-     
   }
 
 }

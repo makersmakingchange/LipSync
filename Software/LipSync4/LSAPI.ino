@@ -505,7 +505,7 @@ void decreaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
 // Return     : void
 //*********************************//
 void getJoystickInitialization(bool responseEnabled, bool apiEnabled) {
-  pointFloatType tempCenterPoint = js.getInputComp();
+  pointFloatType tempCenterPoint = js.getInputCenter();
   js.setMinimumRadius();                                                                        //Update the minimum cursor operating radius 
   printResponseFloatPoint(responseEnabled, apiEnabled, true, 0, "JI,0", true, tempCenterPoint);
 }
@@ -540,10 +540,9 @@ void getJoystickInitialization(bool responseEnabled, bool apiEnabled, String opt
 // Return     : void
 //*********************************//
 void setJoystickInitialization(bool responseEnabled, bool apiEnabled) {
-  js.updateInputComp();
-  pointFloatType tempCenterPoint = js.getInputComp();
-  js.setMinimumRadius();                                                                      //Update the minimum cursor operating radius 
-  printResponseFloatPoint(responseEnabled, apiEnabled, true, 0, "IN,1", true, tempCenterPoint);
+  int stepNumber = 0;
+  canOutputAction = false;
+  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_INIT_START_TIME, performJoystickCenter, (int *)stepNumber);  
 }
 //***SET JOYSTICK INITIALIZATION API FUNCTION***//
 // Function   : setJoystickInitialization
@@ -578,7 +577,7 @@ void setJoystickInitialization(bool responseEnabled, bool apiEnabled, String opt
 void getJoystickCalibration(bool responseEnabled, bool apiEnabled) {
   String commandKey;
   pointFloatType calibrationPointArray[5];
-  calibrationPointArray[0] = js.getInputComp();
+  calibrationPointArray[0] = js.getInputCenter();
   for (int i = 1; i < 5; i++)
   {
     commandKey = "CA" + String(i);
