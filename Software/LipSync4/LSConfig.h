@@ -29,7 +29,7 @@
 
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
-#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"CM\":0,\"SS\":5,\"PM\":0,\"ST\":0.0,\"PT\":0.0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[25.0,25.0],\"CA2\":[-25.0,25.0],\"CA3\":[-25.0,-25.0],\"CA4\":[25.0,-25.0],\"DM\":0}"
+#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"CM\":0,\"SS\":5,\"PM\":0,\"ST\":0.0,\"PT\":0.0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[20.0,20.0],\"CA2\":[-20.0,20.0],\"CA3\":[-20.0,-20.0],\"CA4\":[20.0,-20.0],\"DM\":0}"
 
 //Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 50          //50ms
@@ -79,7 +79,7 @@
 #define CONF_PUFF_THRESHOLD 3.0                   //hPa
 #define CONF_PRESS_MIN_THRESHOLD 1.0              //hPa
 #define CONF_PRESS_MAX_THRESHOLD 100.0            //hPa
-#define CONF_PRESS_MODE_DEFAULT 2                 //Default pressure mode state = 2 
+#define CONF_PRESS_MODE_DEFAULT 1                 //Default pressure mode state = 2 
                                                   // 0 = None or PRESS_MODE_NONE
                                                   // 1 = Absolute or PRESS_MODE_ABS
                                                   // 2 = Differential or PRESS_MODE_DIFF

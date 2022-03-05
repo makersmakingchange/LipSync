@@ -506,6 +506,7 @@ void decreaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
 //*********************************//
 void getJoystickInitialization(bool responseEnabled, bool apiEnabled) {
   pointFloatType tempCenterPoint = js.getInputComp();
+  js.setMinimumRadius();                                                                        //Update the minimum cursor operating radius 
   printResponseFloatPoint(responseEnabled, apiEnabled, true, 0, "JI,0", true, tempCenterPoint);
 }
 //***GET JOYSTICK INITIALIZATION API FUNCTION***//
@@ -541,6 +542,7 @@ void getJoystickInitialization(bool responseEnabled, bool apiEnabled, String opt
 void setJoystickInitialization(bool responseEnabled, bool apiEnabled) {
   js.updateInputComp();
   pointFloatType tempCenterPoint = js.getInputComp();
+  js.setMinimumRadius();                                                                      //Update the minimum cursor operating radius 
   printResponseFloatPoint(responseEnabled, apiEnabled, true, 0, "IN,1", true, tempCenterPoint);
 }
 //***SET JOYSTICK INITIALIZATION API FUNCTION***//
@@ -583,6 +585,7 @@ void getJoystickCalibration(bool responseEnabled, bool apiEnabled) {
     calibrationPointArray[i] = mem.readPoint(CONF_SETTINGS_FILE, commandKey);
     js.setInputMax(i, calibrationPointArray[i]);
   }
+  js.setMinimumRadius();                                                                              ////Update the minimum cursor operating radius 
   printResponseFloatPointArray(responseEnabled, apiEnabled, true, 0, "CA,0", true, "", 5, ',', calibrationPointArray);
 
 }

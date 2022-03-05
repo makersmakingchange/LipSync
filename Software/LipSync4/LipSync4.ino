@@ -490,33 +490,14 @@ void initJoystick()
   getJoystickCalibration(true,false);
 }
 
-//void getJoystickCalibration()
-//{
-//  String commandKey;
-//  pointFloatType maxPoint;
-//  for (int i = 1; i < 5; i++)
-//  {
-//    commandKey = "CA" + String(i);
-//    maxPoint = mem.readPoint(CONF_SETTINGS_FILE, commandKey);
-//    printJoystickFloatData(maxPoint);
-//    js.setInputMax(i, maxPoint);
-//  }
-//}
 
-//void setJoystickCalibration()
-//{
-//  js.clear();                                                                                           //Clear previous calibration values 
-//  int stepNumber = 0;
-//  canOutputAction = false;
-//  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_CALIB_BLINK_TIME, performJoystickCalibration, (int *)stepNumber);  //Start the process  
-//}
 
 void performJoystickCalibration(int* args)
 {
   int stepNumber = (int)args;
-  unsigned long readingDuration = CONF_JOY_CALIB_READING_DELAY*CONF_JOY_CALIB_READING_NUMBER;
-  unsigned long currentReadingStart = CONF_JOY_CALIB_BLINK_TIME*((stepNumber*2)+1);
-  unsigned long nextStepStart = currentReadingStart+readingDuration+CONF_JOY_CALIB_STEP_DELAY;
+  unsigned long readingDuration = CONF_JOY_CALIB_READING_DELAY*CONF_JOY_CALIB_READING_NUMBER; //Duration of the max corner reading 
+  unsigned long currentReadingStart = CONF_JOY_CALIB_BLINK_TIME*((stepNumber*2)+1);           //Time until start of current reading.
+  unsigned long nextStepStart = currentReadingStart+readingDuration+CONF_JOY_CALIB_STEP_DELAY; //Time until start of next reading.
   pointFloatType centerPoint;
 
   if (stepNumber == 0)  //STEP 0: Joystick Compensation Center Point
@@ -533,14 +514,16 @@ void performJoystickCalibration(int* args)
   {
     setLedState(LED_ACTION_BLINK, LED_CLR_PURPLE, 4, stepNumber, CONF_JOY_CALIB_BLINK_TIME,CONF_LED_BRIGHTNESS);    
     performLedAction(ledCurrentState);                                                                  // LED Feedback to show start of performJoystickCalibrationStep
+    js.zeroInputMax(stepNumber);                                                                        //Clear the existing calibration value 
     calibTimerId[1] = calibTimer.setTimer(CONF_JOY_CALIB_READING_DELAY, currentReadingStart, CONF_JOY_CALIB_READING_NUMBER, performJoystickCalibrationStep, (int *)stepNumber);
     ++stepNumber;                                                                                       //Set LED's feedback to show step is already started and get the max reading for the quadrant/step
     calibTimerId[0] = calibTimer.setTimeout(nextStepStart, performJoystickCalibration, (int *)stepNumber);      //Start next step
   } 
   else if (stepNumber == 5)
   {
-    setLedState(LED_ACTION_NONE, LED_CLR_NONE, 4, 0, 0,CONF_LED_BRIGHTNESS_LOW);                            //Turn off Led's
+    setLedState(LED_ACTION_NONE, LED_CLR_NONE, 4, 0, 0,CONF_LED_BRIGHTNESS_LOW);                        //Turn off Led's
     performLedAction(ledCurrentState);
+    js.setMinimumRadius();                                                                              //Update the minimum cursor operating radius 
     calibTimer.deleteTimer(0);                                                                          //Delete timer
     canOutputAction = true;
   }
