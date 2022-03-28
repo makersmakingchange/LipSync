@@ -317,6 +317,8 @@ void LSJoystick::setOutputRange(int rangeLevel){
 
   //Calculate the output range value
   _rangeValue = (int)((0.125 * sq(rangeLevel)) + ( 0.3 * rangeLevel ) + 2);       //Polynomial 
+  // [0:2; 1:2; 2:3; 3:4; 4:5; 5:7; 6:8; 7:10; 8:12; 9:15; 10:18]
+  
   //_rangeValue = (int)((1.05 * exp(( 0.175 * rangeLevel) + 1.1)) - 1);           //Exponential   
   //Serial.print("_rangeValue:");
   //Serial.println(_rangeValue);
