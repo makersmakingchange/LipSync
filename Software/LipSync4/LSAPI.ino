@@ -21,6 +21,7 @@ _functionList getJoystickCalibrationFunction =    {"CA", "0", "0", &getJoystickC
 _functionList setJoystickCalibrationFunction =    {"CA", "1", "1", &setJoystickCalibration};
 _functionList getJoystickDeadZoneFunction =       {"DZ", "0", "0", &getJoystickDeadZone};
 _functionList setJoystickDeadZoneFunction =       {"DZ", "1", "", &setJoystickDeadZone};
+_functionList getJoystickValueFunction =          {"JV", "0", "0", &getJoystickValue};
 
 _functionList getPressureValueFunction =          {"PV", "0", "0", &getPressureValue};
 _functionList getPressureModeFunction =           {"PM", "0", "0", &getPressureMode};
