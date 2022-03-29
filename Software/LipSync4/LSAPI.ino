@@ -42,7 +42,7 @@ _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSetting
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[25] = {
+_functionList apiFunction[26] = {
   getModelNumberFunction,
   getVersionNumberFunction,
   getJoystickSpeedFunction,
@@ -53,6 +53,7 @@ _functionList apiFunction[25] = {
   setJoystickCalibrationFunction,
   getJoystickDeadZoneFunction,
   setJoystickDeadZoneFunction,
+  getJoystickValueFunction,
   getPressureModeFunction,
   setPressureModeFunction,
   getPressureValueFunction,
