@@ -2,12 +2,13 @@
 #ifndef _LSJOYSTICK_H
 #define _LSJOYSTICK_H
 
-#include <Tlv493d.h>      //Infinion TLV493 magnetic sensor
+#include <Tlv493d.h>                    //Infinion TLV493 magnetic sensor
 
-#define JOY_BUFF_SIZE 5   //The size of joystickInputBuffer
+#define JOY_RAW_SIZE 10                 //The size of joystickRawBuffer
+#define JOY_BUFF_SIZE 5                 //The size of joystickInputBuffer
 
-#define JOY_CALIBR_ARRAY_SIZE 5 //The magnetInputCalibration array size
-#define JOY_AVG_SAMPLE_SIZE 5    //The sample size used for averaging samples 
+#define JOY_CALIBR_ARRAY_SIZE 5         //The magnetInputCalibration array size
+#define JOY_AVG_SAMPLE_SIZE 5           //The sample size used for averaging samples 
 
 //Joystick magnetic directions
 #define JOY_DIRECTION_DEFAULT 1
