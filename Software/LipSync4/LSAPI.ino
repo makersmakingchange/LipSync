@@ -4,39 +4,39 @@
 typedef void (*FunctionPointer)(bool, bool, String);      //Type definition for API function pointer
 
 typedef struct {                                  //Type definition for API function list
-  String endpoint;                               //Unique two character end point
-  String code;                                   //Unique one character command code
-  String parameter;                              //Parameter that is passed to function
-  FunctionPointer function;                      //API function pointer
+  String endpoint;                                //Unique two character end point
+  String code;                                    //Unique one character command code
+  String parameter;                               //Parameter that is passed to function
+  FunctionPointer function;                       //API function pointer
 } _functionList;
 
 // Declare individual API functions with command, parameter, and corresponding function
 _functionList getModelNumberFunction =            {"MN", "0", "0", &getModelNumber};
 _functionList getVersionNumberFunction =          {"VN", "0", "0", &getVersionNumber};
 _functionList getJoystickSpeedFunction =          {"SS", "0", "0", &getJoystickSpeed};
-_functionList setJoystickSpeedFunction =          {"SS", "1", "", &setJoystickSpeed};
+_functionList setJoystickSpeedFunction =          {"SS", "1", "",  &setJoystickSpeed};
 _functionList getJoystickInitializationFunction = {"IN", "0", "0", &getJoystickInitialization};
 _functionList setJoystickInitializationFunction = {"IN", "1", "1", &setJoystickInitialization};
 _functionList getJoystickCalibrationFunction =    {"CA", "0", "0", &getJoystickCalibration};
 _functionList setJoystickCalibrationFunction =    {"CA", "1", "1", &setJoystickCalibration};
 _functionList getJoystickDeadZoneFunction =       {"DZ", "0", "0", &getJoystickDeadZone};
-_functionList setJoystickDeadZoneFunction =       {"DZ", "1", "", &setJoystickDeadZone};
+_functionList setJoystickDeadZoneFunction =       {"DZ", "1", "",  &setJoystickDeadZone};
 _functionList getJoystickValueFunction =          {"JV", "0", "0", &getJoystickValue};
 
 _functionList getPressureValueFunction =          {"PV", "0", "0", &getPressureValue};
 _functionList getPressureModeFunction =           {"PM", "0", "0", &getPressureMode};
-_functionList setPressureModeFunction =           {"PM", "1", "", &setPressureMode};
-_functionList getPressureThresholdFunction =      {"DT","0","0",&getPressureThreshold};
+_functionList setPressureModeFunction =           {"PM", "1", "",  &setPressureMode};
+_functionList getPressureThresholdFunction =      {"DT", "0", "0", &getPressureThreshold};
 _functionList getSipPressureThresholdFunction =   {"ST", "0", "0", &getSipPressureThreshold};
-_functionList setSipPressureThresholdFunction =   {"ST", "1", "", &setSipPressureThreshold};
+_functionList setSipPressureThresholdFunction =   {"ST", "1", "",  &setSipPressureThreshold};
 _functionList getPuffPressureThresholdFunction =  {"PT", "0", "0", &getPuffPressureThreshold};
-_functionList setPuffPressureThresholdFunction =  {"PT", "1", "", &setPuffPressureThreshold};
+_functionList setPuffPressureThresholdFunction =  {"PT", "1", "",  &setPuffPressureThreshold};
 
 _functionList getCommunicationModeFunction =      {"CM", "0", "0", &getCommunicationMode};
-_functionList setCommunicationModeFunction =      {"CM", "1", "", &setCommunicationMode};
+_functionList setCommunicationModeFunction =      {"CM", "1", "",  &setCommunicationMode};
 
 _functionList getDebugModeFunction =              {"DM", "0", "0", &getDebugMode};
-_functionList setDebugModeFunction =              {"DM", "1", "", &setDebugMode};
+_functionList setDebugModeFunction =              {"DM", "1", "",  &setDebugMode};
 
 _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSettings};
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
