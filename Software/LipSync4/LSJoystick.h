@@ -43,6 +43,7 @@ typedef struct {
 class LSJoystick {
   private:
     Tlv493d Tlv493dSensor = Tlv493d();                                    //Create an object of Tlv493d class
+    LSCircularBuffer <pointFloatType> joystickRawBuffer;                  //Create a buffer of type pointFloatType to push raw input readings 
     LSCircularBuffer <pointIntType> joystickInputBuffer;                  //Create a buffer of type pointIntType to push mapped input readings 
     int applyDeadzone(int input);                                         //Apply deadzone to the input based on deadzoneValue and JOY_INPUT_XY_MAX.
     pointIntType processInputReading(pointFloatType inputPoint);          //Process the input readings and map the input reading from square to circle. (-1024 to 1024 output )
@@ -89,6 +90,7 @@ class LSJoystick {
     void update();                                                        //Update the joystick reading to get new input from the magnetic sensor and calculate the output.
     int getXOut();                                                        //Get the mapped input x value.
     int getYOut();                                                        //Get the mapped input y value.
+    pointFloatType getXYRaw();                                            //Get the raw x and y values.
     pointFloatType getXYIn();                                             //Get the raw x and y values.
     pointIntType getXYOut();                                              //Get the mapped and processed x and y values.
 
@@ -104,6 +106,7 @@ class LSJoystick {
 // Return     : void
 //*********************************//
 LSJoystick::LSJoystick() {
+  joystickRawBuffer.begin(JOY_RAW_SIZE);                                //Initialize joystickRawBuffer
   joystickInputBuffer.begin(JOY_BUFF_SIZE);                             //Initialize joystickInputBuffer
 }
 
@@ -146,8 +149,9 @@ void LSJoystick::clear() {
   magnetInputCalibration[4] = {0.00, 0.00};
 
 
+  joystickRawBuffer.pushElement({0.0,0.0});           //Initialize joystickRawBuffer
   joystickInputBuffer.pushElement({0, 0});            //Initialize joystickInputBuffer
-
+  
 }
 
 
@@ -451,8 +455,9 @@ void LSJoystick::update() {
   Tlv493dSensor.updateData();
   //Get the new readings as a point
   inputPoint = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};   
+  joystickRawBuffer.pushElement(inputPoint);                      //Push raw points to joystickRawBuffer
   pointIntType outputPoint = processInputReading(inputPoint);     //Map the input readings
-  outputPoint = processOutputResponse(outputPoint);               //Proccess output by applying deadzone, speed control, and linearization
+  outputPoint = processOutputResponse(outputPoint);               //Process output by applying deadzone, speed control, and linearization
   joystickInputBuffer.pushElement(outputPoint);                   //Push new output point to joystickInputBuffer
 //  
 //  Serial.print(Tlv493dSensor.getY());  
@@ -486,6 +491,19 @@ int LSJoystick::getXOut() {
 //*********************************//
 int LSJoystick::getYOut() {
   return joystickInputBuffer.getLastElement().y;
+}
+
+//*********************************//
+// Function   : getXYRaw u
+// 
+// Description: Get the last raw x and y values from joystickRawBuffer
+// 
+// Arguments :  void
+// 
+// Return     : output point : pointFloatType : The raw x and y point
+//*********************************//
+pointFloatType LSJoystick::getXYRaw() {
+  return joystickRawBuffer.getLastElement();
 }
 
 //*********************************//
