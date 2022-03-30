@@ -729,6 +729,55 @@ void setJoystickDeadZone(bool responseEnabled, bool apiEnabled, float inputDeadZ
 void setJoystickDeadZone(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   setJoystickDeadZone(responseEnabled, apiEnabled, optionalParameter.toFloat());
 }
+//***GET JOYSTICK VALUE FUNCTION***//
+// Function   : getJoystickValue
+//
+// Description: This function returns raw joystick value.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : void
+//*********************************//
+void getJoystickValue(bool responseEnabled, bool apiEnabled) {
+  js.update();      //Request new values from joystick class
+  
+  int outputArraySize = 6; 
+  float tempJoystickArray[outputArraySize];
+  pointFloatType tempJoystickRaw = js.getXYRaw(); //Read the raw values
+  pointFloatType tempJoystickIn = js.getXYIn(); //Read the input
+  pointIntType tempJoystickProcessed = js.getXYOut(); //Read the filtered values  
+  tempJoystickArray[0] = tempJoystickRaw.x;
+  tempJoystickArray[1] = tempJoystickRaw.y;
+  tempJoystickArray[2] = tempJoystickIn.x;
+  tempJoystickArray[3] = tempJoystickIn.y;
+  tempJoystickArray[4] = (float)tempJoystickProcessed.x;
+  tempJoystickArray[5] = (float)tempJoystickProcessed.y;
+  
+  printResponseFloatArray(responseEnabled, apiEnabled, true, 0, "JV,0", true, "", outputArraySize, ',', tempJoystickArray);
+  
+}
+//***GET JOYSTICK VALUE API FUNCTION***//
+// Function   : getJoystickValue
+//
+// Description: This function is redefinition of main getPressureValue function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void getJoystickValue(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
+    getJoystickValue(responseEnabled, apiEnabled);
+  }
+}
+
+
 
 //***GET PRESSURE VALUE FUNCTION***//
 // Function   : getPressureValue
