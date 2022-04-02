@@ -23,8 +23,8 @@ const ledActionStruct ledActionProperty[]{
     {CONF_ACTION_RIGHT_CLICK,        3,LED_CLR_NONE,  LED_CLR_BLUE,   LED_ACTION_BLINK},
     {CONF_ACTION_DRAG,               1,LED_CLR_PURPLE,LED_CLR_RED,    LED_ACTION_ON},
     {CONF_ACTION_SCROLL,             3,LED_CLR_PURPLE,LED_CLR_BLUE,   LED_ACTION_ON},
-    {CONF_ACTION_CURSOR_CALIBRATION, 4,LED_CLR_NONE,  LED_CLR_ORANGE, LED_ACTION_BLINK},
     {CONF_ACTION_CURSOR_CENTER,      2,LED_CLR_NONE,  LED_CLR_ORANGE, LED_ACTION_BLINK},
+    {CONF_ACTION_CURSOR_CALIBRATION, 4,LED_CLR_NONE,  LED_CLR_ORANGE, LED_ACTION_BLINK},
     {CONF_ACTION_MIDDLE_CLICK,       2,LED_CLR_NONE,  LED_CLR_PURPLE, LED_ACTION_BLINK},
     {CONF_ACTION_DEC_SPEED,          1,LED_CLR_NONE,  LED_CLR_RED,    LED_ACTION_NONE},
     {CONF_ACTION_INC_SPEED,          3,LED_CLR_NONE,  LED_CLR_BLUE,   LED_ACTION_NONE},
@@ -82,7 +82,8 @@ const inputActionStruct sapActionProperty[]{
     {CONF_ACTION_DRAG,               PRESS_SAP_MAIN_STATE_PUFF,  1000,3000},
     {CONF_ACTION_SCROLL,             PRESS_SAP_MAIN_STATE_SIP,   1000,3000},
     {CONF_ACTION_CURSOR_CENTER,      PRESS_SAP_MAIN_STATE_PUFF,  3000,5000},
-    {CONF_ACTION_MIDDLE_CLICK,       PRESS_SAP_MAIN_STATE_SIP ,  3000,5000}
+    {CONF_ACTION_MIDDLE_CLICK,       PRESS_SAP_MAIN_STATE_SIP,   3000,5000}
+    //{CONF_ACTION_CURSOR_CALIBRATION, PRESS_SAP_MAIN_STATE_SIP,   3000,5000}
 };
 
 //Joystick module variables and structures
@@ -170,6 +171,8 @@ void loop()
   calibTimer.run();
   pollTimer.run();
   settingsEnabled=serialSettings(settingsEnabled); //Check to see if setting option is enabled in Lipsync
+
+
 }
 
 void enablePoll(bool isEnabled){
@@ -501,14 +504,16 @@ void performJoystickCenter(int* args)
 
   if (stepNumber == 0)  //STEP 0: Joystick Compensation Center Point
   {
+    //Start timer to get 5 reading every 100ms
     calibTimerId[1] = calibTimer.setTimer(CONF_JOY_INIT_READING_DELAY, currentReadingStart, CONF_JOY_INIT_READING_NUMBER, performJoystickCenterStep, (int *)stepNumber);
-    ++stepNumber;                                                                                       //Set LED's feedback to show step is already started and get the max reading for the quadrant/step
-    calibTimerId[0] = calibTimer.setTimeout(nextStepStart, performJoystickCenter, (int *)stepNumber);      //Start next step
+    ++stepNumber;                                  
+    ///Start exit step                                                     
+    calibTimerId[0] = calibTimer.setTimeout(nextStepStart, performJoystickCenter, (int *)stepNumber);      
   } else
   {
-    js.evaluateInputCenter();
-    js.setMinimumRadius();                                                                              //Update the minimum cursor operating radius 
-    centerPoint = js.getInputCenter();
+    js.evaluateInputCenter();             //Evaluate the center point using values in the buffer 
+    js.setMinimumRadius();                //Update minimum radius of operation                                                                      //Update the minimum cursor operating radius 
+    centerPoint = js.getInputCenter();    //Get the new center for API output  
     printResponseFloatPoint(true,true,true,0,"IN,1",true,centerPoint);
     calibTimer.deleteTimer(0);                                                                          //Delete timer
     canOutputAction = true;
@@ -518,11 +523,15 @@ void performJoystickCenter(int* args)
 
 void performJoystickCenterStep(int* args)
 {
+  //Turn on and set the second led to orange to indicate start of the process 
   if(calibTimer.getNumRuns(1)==1 && ledActionEnabled){                                                                    //Turn Led's ON when timer is running for first time
     setLedState(LED_ACTION_ON, LED_CLR_ORANGE, 2, 0, 0,CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);   
   }
+  //Push new center values to be evaluated at the end of the process 
   js.updateInputCenterBuffer();
+
+  //Turn off the second led to orange to indicate end of the process 
   if(calibTimer.getNumRuns(1)==CONF_JOY_INIT_READING_NUMBER && ledActionEnabled){                                        //Turn Led's OFF when timer is running for last time
     setLedState(LED_ACTION_OFF, LED_CLR_NONE, 2, 0, 0,CONF_LED_BRIGHTNESS);                           
     performLedAction(ledCurrentState);      
@@ -554,8 +563,9 @@ void performJoystickCalibration(int* args)
   {
     setLedState(LED_ACTION_NONE, LED_CLR_NONE, 4, 0, 0,CONF_LED_BRIGHTNESS_LOW);                        //Turn off Led's
     performLedAction(ledCurrentState);
-    js.setMinimumRadius();                                                                              //Update the minimum cursor operating radius 
-    calibTimer.deleteTimer(0);                                                                          //Delete timer
+    setJoystickInitialization(false, false); 
+    //js.setMinimumRadius();                                                                              //Update the minimum cursor operating radius 
+    //calibTimer.deleteTimer(0);                                                                          //Delete timer
     canOutputAction = true;
   }
 
@@ -566,13 +576,16 @@ void performJoystickCalibrationStep(int* args)
   int stepNumber = (int)args;
   String stepCommand = "CA"+String(stepNumber);                                                       //Command to write new calibration point to Flash memory 
   pointFloatType maxPoint;
-  
+
+  //Turn on and set the all leds to orange to indicate start of the process 
   if(calibTimer.getNumRuns(0)==1){                                                                    //Turn Led's ON when timer is running for first time
     setLedState(LED_ACTION_ON, LED_CLR_ORANGE, 4, 0, 0,CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);   
   }
   
   maxPoint=js.getInputMax(stepNumber);
+
+  //Turn off all the leds to orange to indicate end of the process 
   if(calibTimer.getNumRuns(0)==CONF_JOY_CALIB_READING_NUMBER){                                        //Turn Led's OFF when timer is running for last time
     mem.writePoint(CONF_SETTINGS_FILE,stepCommand,maxPoint);                                          //Store the point in Flash Memory 
     setLedState(LED_ACTION_OFF, LED_CLR_NONE, 4, 0, 0,CONF_LED_BRIGHTNESS);                           
