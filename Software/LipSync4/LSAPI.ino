@@ -509,7 +509,7 @@ void decreaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
 void getJoystickInitialization(bool responseEnabled, bool apiEnabled) {
   pointFloatType tempCenterPoint = js.getInputCenter();
   js.setMinimumRadius();                                                                        //Update the minimum cursor operating radius 
-  printResponseFloatPoint(responseEnabled, apiEnabled, true, 0, "JI,0", true, tempCenterPoint);
+  printResponseFloatPoint(responseEnabled, apiEnabled, true, 0, "IN,0", true, tempCenterPoint);
 }
 //***GET JOYSTICK INITIALIZATION API FUNCTION***//
 // Function   : getJoystickInitialization

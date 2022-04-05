@@ -564,7 +564,7 @@ void performJoystickCalibration(int* args)
     setLedState(LED_ACTION_NONE, LED_CLR_NONE, 4, 0, 0,CONF_LED_BRIGHTNESS_LOW);                        //Turn off Led's
     performLedAction(ledCurrentState);
     setJoystickInitialization(false, false); 
-    //js.setMinimumRadius();                                                                              //Update the minimum cursor operating radius 
+    js.setMinimumRadius();                                                                              //Update the minimum cursor operating radius 
     //calibTimer.deleteTimer(0);                                                                          //Delete timer
     canOutputAction = true;
   }

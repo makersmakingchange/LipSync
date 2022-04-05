@@ -4,8 +4,9 @@
 
 #include <Tlv493d.h>                    //Infinion TLV493 magnetic sensor
 
-#define JOY_RAW_SIZE 10                 //The size of joystickRawBuffer
-#define JOY_BUFF_SIZE 5                 //The size of joystickInputBuffer
+#define JOY_RAW_BUFF_SIZE 10            //The size of joystickRawBuffer
+#define JOY_OUTPUT_BUFF_SIZE 5          //The size of joystickOutputBuffer
+#define JOY_CENTER_BUFF_SIZE 5          //The size of joystickCenterBuffer
 
 #define JOY_CALIBR_ARRAY_SIZE 5         //The magnetInputCalibration array size
 #define JOY_MAG_SAMPLE_SIZE 5           //The sample size used for averaging magnet samples 
@@ -43,8 +44,8 @@ typedef struct {
 class LSJoystick {
   private:
     Tlv493d Tlv493dSensor = Tlv493d();                                    //Create an object of Tlv493d class
-    LSCircularBuffer <pointFloatType> joystickRawBuffer;                  //Create a buffer of type pointFloatType to push raw input readings 
-    LSCircularBuffer <pointIntType> joystickInputBuffer;                  //Create a buffer of type pointIntType to push mapped input readings 
+    LSCircularBuffer <pointFloatType> joystickRawBuffer;                  //Create a buffer of type pointFloatType to push raw readings 
+    LSCircularBuffer <pointIntType> joystickOutputBuffer;                 //Create a buffer of type pointIntType to push mapped readings 
     LSCircularBuffer <pointFloatType> joystickCenterBuffer;               //Create a buffer of type pointFloatType to push center input readings     
     int applyDeadzone(int input);                                         //Apply deadzone to the input based on deadzoneValue and JOY_INPUT_XY_MAX.
     pointIntType processInputReading(pointFloatType inputPoint);          //Process the input readings and map the input reading from square to circle. (-1024 to 1024 output )
@@ -108,9 +109,9 @@ class LSJoystick {
 // Return     : void
 //*********************************//
 LSJoystick::LSJoystick() {
-  joystickRawBuffer.begin(JOY_RAW_SIZE);                                //Initialize joystickRawBuffer
-  joystickInputBuffer.begin(JOY_BUFF_SIZE);                             //Initialize joystickInputBuffer
-  joystickCenterBuffer.begin(JOY_BUFF_SIZE);                             //Initialize joystickCenterBuffer
+  joystickRawBuffer.begin(JOY_RAW_BUFF_SIZE);                       //Initialize joystickRawBuffer
+  joystickOutputBuffer.begin(JOY_OUTPUT_BUFF_SIZE);                 //Initialize joystickOutputBuffer
+  joystickCenterBuffer.begin(JOY_CENTER_BUFF_SIZE);                 //Initialize joystickCenterBuffer
 }
 
 //*********************************//
@@ -130,7 +131,7 @@ void LSJoystick::begin() {
   setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_DEFAULT);  //Set default magnet direction.
   setDeadzone(JOY_DEADZONE_STATUS,JOY_DEADZONE_FACTOR);             //Set default deadzone status and deadzone factor.
   setOutputRange(JOY_OUTPUT_RANGE_LEVEL);                           //Set default output range level or speed level.
-  clear();                                                          //Clear calibration array and joystickInputBuffer.
+  clear();                                                          //Clear calibration array and joystickOutputBuffer.
 }
 
 //*********************************//
@@ -153,7 +154,7 @@ void LSJoystick::clear() {
 
 
   joystickRawBuffer.pushElement({0.0,0.0});           //Initialize joystickRawBuffer
-  joystickInputBuffer.pushElement({0, 0});            //Initialize joystickInputBuffer
+  joystickOutputBuffer.pushElement({0, 0});           //Initialize joystickOutputBuffer
   
 }
 
@@ -382,13 +383,13 @@ void LSJoystick::evaluateInputCenter() {
   float centerX = 0.0;
   float centerY = 0.0;
   pointFloatType centerPoint = {centerX,centerY};
-  for(int centerIndex = 0; centerIndex < JOY_BUFF_SIZE; centerIndex++){
+  for(int centerIndex = 0; centerIndex < JOY_CENTER_BUFF_SIZE; centerIndex++){
     centerPoint = joystickCenterBuffer.getElement(centerIndex);
     centerX+=centerPoint.x;
     centerY+=centerPoint.y;
   }
-  centerX=centerX/JOY_BUFF_SIZE;
-  centerY=centerY/JOY_BUFF_SIZE;
+  centerX=centerX/JOY_CENTER_BUFF_SIZE;
+  centerY=centerY/JOY_CENTER_BUFF_SIZE;
   magnetInputCalibration[0] = {centerX,centerY};
 }
 
@@ -396,7 +397,7 @@ void LSJoystick::evaluateInputCenter() {
 //*********************************//
 // Function   : updateInputCenterBuffer
 // 
-// Description: Update the compensation center point and push into joystickCenterBuffer.
+// Description: Update the compensation center point buffer by pushing new value into joystickCenterBuffer.
 // 
 // Arguments :  void
 // 
@@ -470,7 +471,7 @@ void LSJoystick::zeroInputMax(int quad) {
 //*********************************//
 // Function   : update 
 // 
-// Description: Set the new sensor readings, process data and push to joystickInputBuffer
+// Description: Set the new sensor readings, process data and push to joystickOutputBuffer
 // 
 // Arguments :  void
 // 
@@ -484,11 +485,11 @@ void LSJoystick::update() {
   joystickRawBuffer.pushElement(inputPoint);                      //Push raw points to joystickRawBuffer
   pointIntType outputPoint = processInputReading(inputPoint);     //Map the input readings
   outputPoint = processOutputResponse(outputPoint);               //Process output by applying deadzone, speed control, and linearization
-  joystickInputBuffer.pushElement(outputPoint);                   //Push new output point to joystickInputBuffer
-//  
-//  Serial.print(Tlv493dSensor.getY());  
+  joystickOutputBuffer.pushElement(outputPoint);                  //Push new output point to joystickOutputBuffer
+  
+//  Serial.print(outputPoint.x);  
 //  Serial.print(",");  
-//  Serial.println(Tlv493dSensor.getX()); 
+//  Serial.println(outputPoint.y); 
 
   
 }
@@ -496,27 +497,27 @@ void LSJoystick::update() {
 //*********************************//
 // Function   : getXOut 
 // 
-// Description: Get the last processed output x value from joystickInputBuffer
+// Description: Get the last processed output x value from joystickOutputBuffer
 // 
 // Arguments :  void
 // 
 // Return     : x value : int : The output x value 
 //*********************************//
 int LSJoystick::getXOut() {
-  return joystickInputBuffer.getLastElement().x;
+  return joystickOutputBuffer.getLastElement().x;
 }
 
 //*********************************//
 // Function   : getYOut 
 // 
-// Description: Get the last processed output y value from joystickInputBuffer
+// Description: Get the last processed output y value from joystickOutputBuffer
 // 
 // Arguments :  void
 // 
 // Return     : x value : int : The output x value 
 //*********************************//
 int LSJoystick::getYOut() {
-  return joystickInputBuffer.getLastElement().y;
+  return joystickOutputBuffer.getLastElement().y;
 }
 
 //*********************************//
@@ -535,14 +536,14 @@ pointFloatType LSJoystick::getXYRaw() {
 //*********************************//
 // Function   : getXYOut 
 // 
-// Description: Get the last processed output x and y values from joystickInputBuffer
+// Description: Get the last processed output x and y values from joystickOutputBuffer
 // 
 // Arguments :  void
 // 
 // Return     : output point : pointIntType : The output x and y point
 //*********************************//
 pointIntType LSJoystick::getXYOut() {
-  return joystickInputBuffer.getLastElement();
+  return joystickOutputBuffer.getLastElement();
 }
 
 
@@ -624,9 +625,10 @@ pointIntType LSJoystick::processInputReading(pointFloatType inputPoint) {
   pointIntType outputPoint = {0,0};
   
   //Center the input point
-  pointFloatType centeredPoint = {(inputPoint.x)*_joystickXDirection - magnetInputCalibration[0].x, 
-                                  (inputPoint.y)*_joystickYDirection - magnetInputCalibration[0].y};
-  
+  pointFloatType centeredPoint = {(inputPoint.x - magnetInputCalibration[0].x)*_joystickXDirection, 
+                                  (inputPoint.y - magnetInputCalibration[0].y)*_joystickYDirection};
+
+
   float thetaVal = atan2(centeredPoint.y, centeredPoint.x);         // Get the angel of the point
 
   //Find the limiting point on perimeter of circle
