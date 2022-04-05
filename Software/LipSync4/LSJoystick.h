@@ -20,13 +20,11 @@
 
 #define JOY_INPUT_XY_MAX 1024           //The max range of mapped input from float to int(-1024 to 1024)
 
-//#define JOY_OUTPUT_XY_MAX 10 
-
 #define JOY_CHANGE_TOLERANCE 0.3
 
 #define JOY_DEADZONE_STATUS true        //The default deadzone state (True = enable , False = disable)
 
-#define JOY_DEADZONE_FACTOR 0.12        //The default deadzone factor (%12 of JOY_INPUT_XY_MAX)
+#define JOY_DEADZONE_FACTOR 0.05        //The default deadzone factor (%5 of JOY_INPUT_XY_MAX)
 
 #define JOY_OUTPUT_RANGE_LEVEL 5       //The default output range level or output movement upper range 
 
