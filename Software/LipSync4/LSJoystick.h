@@ -22,6 +22,8 @@
 
 //#define JOY_OUTPUT_XY_MAX 10 
 
+#define JOY_CHANGE_TOLERANCE 0.3
+
 #define JOY_DEADZONE_STATUS true        //The default deadzone state (True = enable , False = disable)
 
 #define JOY_DEADZONE_FACTOR 0.12        //The default deadzone factor (%12 of JOY_INPUT_XY_MAX)
@@ -482,10 +484,18 @@ void LSJoystick::update() {
   Tlv493dSensor.updateData();
   //Get the new readings as a point
   inputPoint = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};   
+  
+  pointFloatType prevInputPoint = joystickRawBuffer.getLastElement();
+  bool skipChange = abs(inputPoint.x - prevInputPoint.x) < JOY_CHANGE_TOLERANCE 
+                 && abs(inputPoint.y - prevInputPoint.y)  < JOY_CHANGE_TOLERANCE;
+  
   joystickRawBuffer.pushElement(inputPoint);                      //Push raw points to joystickRawBuffer
-  pointIntType outputPoint = processInputReading(inputPoint);     //Map the input readings
-  outputPoint = processOutputResponse(outputPoint);               //Process output by applying deadzone, speed control, and linearization
-  joystickOutputBuffer.pushElement(outputPoint);                  //Push new output point to joystickOutputBuffer
+  if(!skipChange){
+    pointIntType outputPoint = processInputReading(inputPoint);     //Map the input readings
+    outputPoint = processOutputResponse(outputPoint);               //Process output by applying deadzone, speed control, and linearization
+    joystickOutputBuffer.pushElement(outputPoint);                  //Push new output point to joystickOutputBuffer    
+  }
+
   
 //  Serial.print(outputPoint.x);  
 //  Serial.print(",");  
