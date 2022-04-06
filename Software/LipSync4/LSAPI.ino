@@ -745,13 +745,15 @@ void getJoystickValue(bool responseEnabled, bool apiEnabled) {
   
   int outputArraySize = 6; 
   float tempJoystickArray[outputArraySize];
-  pointFloatType tempJoystickRaw = js.getXYRaw(); //Read the raw values
-  pointFloatType tempJoystickIn = js.getXYIn(); //Read the input
-  pointIntType tempJoystickProcessed = js.getXYOut(); //Read the filtered values  
+  
+  pointFloatType tempJoystickRaw = js.getXYRaw();                                 //Read the raw values
+  pointIntType tempJoystickIn = js.getXYIn();                                     //Read the input
+  pointIntType tempJoystickProcessed = js.getXYOut();                             //Read the filtered values  
+  
   tempJoystickArray[0] = tempJoystickRaw.x;
   tempJoystickArray[1] = tempJoystickRaw.y;
-  tempJoystickArray[2] = tempJoystickIn.x;
-  tempJoystickArray[3] = tempJoystickIn.y;
+  tempJoystickArray[2] = (float)tempJoystickIn.x;
+  tempJoystickArray[3] = (float)tempJoystickIn.y;
   tempJoystickArray[4] = (float)tempJoystickProcessed.x;
   tempJoystickArray[5] = (float)tempJoystickProcessed.y;
   

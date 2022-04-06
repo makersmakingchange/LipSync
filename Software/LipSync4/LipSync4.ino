@@ -293,6 +293,7 @@ void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inp
   bool canEvaluateAction = true;
   //Output action logic
   int tempActionIndex = 0;
+  //Handle input action when it's in hold state
   if ((
     actionState.secondaryState == INPUT_SEC_STATE_RELEASED) &&
     (outputAction == CONF_ACTION_SCROLL ||
@@ -302,8 +303,10 @@ void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inp
     canEvaluateAction = false;
   }
 
+  //Loop over all possible outputs
   for (int actionIndex = 0; actionIndex < actionSize && canEvaluateAction && canOutputAction; actionIndex++)
   {
+    //Detected input release in defined time limits. Perform output action based on action index
     if (actionState.mainState == actionProperty[actionIndex].inputActionState &&
       actionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
       actionState.elapsedTime >= actionProperty[actionIndex].inputActionStartTime &&
@@ -323,7 +326,7 @@ void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inp
       performOutputAction(tempActionIndex);
 
       break;
-    }
+    } //Detected input start in defined time limits. Perform led action based on action index
     else if (actionState.mainState == actionProperty[actionIndex].inputActionState &&
       actionState.secondaryState == INPUT_SEC_STATE_STARTED &&
       actionState.elapsedTime >= actionProperty[actionIndex].inputActionStartTime &&
@@ -634,10 +637,11 @@ void initDebug()
 void debugLoop(){
   if(debugMode==CONF_DEBUG_MODE_JOYSTICK){
     js.update(); //Request new values from joystick class
-    pointFloatType debugJoystickArray[2];
-    debugJoystickArray[0] = js.getXYIn();  //Read the raw values
-    debugJoystickArray[1] = {(float)js.getXYOut().x,(float)js.getXYOut().y}; //Read the filtered values
-    printResponseFloatPointArray(true,true,true,0,"DEBUG,1",true,"", 2, ',', debugJoystickArray);    
+    pointFloatType debugJoystickArray[3];
+    debugJoystickArray[0] = js.getXYRaw();                                                          //Read the raw values
+    debugJoystickArray[1] = {(float)js.getXYIn().x,(float)js.getXYIn().y};                          //Read the filtered values
+    debugJoystickArray[2] = {(float)js.getXYOut().x,(float)js.getXYOut().y};                        //Read the output values
+    printResponseFloatPointArray(true,true,true,0,"DEBUG,1",true,"", 3, ',', debugJoystickArray);    
   }
   else if(debugMode==CONF_DEBUG_MODE_PRESSURE){  //Use update values from pressureLoop()
     //ps.update(); //Request new pressure difference from sensor and push it to array

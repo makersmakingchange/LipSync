@@ -5,6 +5,7 @@
 #include <Tlv493d.h>                    //Infinion TLV493 magnetic sensor
 
 #define JOY_RAW_BUFF_SIZE 10            //The size of joystickRawBuffer
+#define JOY_INPUT_BUFF_SIZE 5        //The size of joystickInputBuffer
 #define JOY_OUTPUT_BUFF_SIZE 5          //The size of joystickOutputBuffer
 #define JOY_CENTER_BUFF_SIZE 5          //The size of joystickCenterBuffer
 
@@ -20,13 +21,15 @@
 
 #define JOY_INPUT_XY_MAX 1024           //The max range of mapped input from float to int(-1024 to 1024)
 
-#define JOY_CHANGE_TOLERANCE 0.3
+#define JOY_INPUT_CHANGE_TOLERANCE 0.10 //The output change tolerance in mT
 
-#define JOY_DEADZONE_STATUS true        //The default deadzone state (True = enable , False = disable)
+#define JOY_INPUT_DEADZONE 0.5          //The input deadzone in mT
 
-#define JOY_DEADZONE_FACTOR 0.05        //The default deadzone factor (%5 of JOY_INPUT_XY_MAX)
+#define JOY_OUTPUT_DEADZONE_STATUS true //The default output deadzone state (True = enable , False = disable)
 
-#define JOY_OUTPUT_RANGE_LEVEL 5       //The default output range level or output movement upper range 
+#define JOY_OUTPUT_DEADZONE_FACTOR 0.05 //The default output deadzone factor (%5 of JOY_INPUT_XY_MAX)
+
+#define JOY_OUTPUT_RANGE_LEVEL 5        //The default output range level or output movement upper range 
 
 //Struct of float point
 typedef struct {
@@ -45,9 +48,11 @@ class LSJoystick {
   private:
     Tlv493d Tlv493dSensor = Tlv493d();                                    //Create an object of Tlv493d class
     LSCircularBuffer <pointFloatType> joystickRawBuffer;                  //Create a buffer of type pointFloatType to push raw readings 
+    LSCircularBuffer <pointIntType> joystickInputBuffer;                  //Create a buffer of type pointIntType to push mapped and filtered readings 
     LSCircularBuffer <pointIntType> joystickOutputBuffer;                 //Create a buffer of type pointIntType to push mapped readings 
     LSCircularBuffer <pointFloatType> joystickCenterBuffer;               //Create a buffer of type pointFloatType to push center input readings     
     int applyDeadzone(int input);                                         //Apply deadzone to the input based on deadzoneValue and JOY_INPUT_XY_MAX.
+    bool canSkipInputChange(pointFloatType inputPoint);                  //Check if the output change can be skipped (Low-Pass Filter)
     pointIntType processInputReading(pointFloatType inputPoint);          //Process the input readings and map the input reading from square to circle. (-1024 to 1024 output )
     pointIntType linearizeOutput(pointIntType inputPoint);                //Linearize the output.
     pointIntType processOutputResponse(pointIntType inputPoint);          //Process the output (Including linearizeOutput methods and speed control)
@@ -57,7 +62,9 @@ class LSJoystick {
     float magnitudePoint(pointFloatType inputPoint, pointFloatType offsetPoint); //Magnitude of a point from offset center point / Compensation point
     int sgn(float val);                                                   //Get the sign of the value.
     pointFloatType magnetInputCalibration[JOY_CALIBR_ARRAY_SIZE];         //Array of calibration points.
-    pointFloatType inputPoint;                                            //Raw x and y values used for debugging purposes.
+    pointFloatType _rawPoint;                                             //Raw x and y values used for debugging purposes.
+    pointIntType _inputPoint;                                             //Mapped and filtered x and y values
+    pointIntType _outputPoint;                                            //Output x and y values
     int _joystickXDirection;                                              //Corrected x value after applying _magnetXDirection
     int _joystickYDirection;                                              //Corrected y value after applying _magnetYDirection
     int _magnetZDirection;                                                //Direction of z ( if the board has flipped and has resulted in z-axis being flipped )
@@ -69,6 +76,7 @@ class LSJoystick {
     int _rangeLevel;                                                      //The range level from 0 to 10 which is used as speed levels.
     int _rangeValue;                                                      //The calculated range value based on range level and an equation. This is maximum output value  for each range level.
     float _inputRadius;                                                   //The minimum radius of operating area calculated using calibration points.
+    bool _skipInputChange;                                                //The flag to low-pass filter the input changes 
   public:
     LSJoystick();                                                         //Constructor
     void begin();
@@ -91,11 +99,11 @@ class LSJoystick {
     void setInputMax(int quad, pointFloatType point);                     //Set the maximum input reading for each corner of joystick using the input quadrant. 
     void zeroInputMax(int quad);                                          //Zero the maximum input reading for each corner of joystick using the input quadrant. 
     void update();                                                        //Update the joystick reading to get new input from the magnetic sensor and calculate the output.
-    int getXOut();                                                        //Get the mapped input x value.
-    int getYOut();                                                        //Get the mapped input y value.
+    int getXOut();                                                        //Get the output x value.
+    int getYOut();                                                        //Get the output y value.
     pointFloatType getXYRaw();                                            //Get the raw x and y values.
-    pointFloatType getXYIn();                                             //Get the raw x and y values.
-    pointIntType getXYOut();                                              //Get the mapped and processed x and y values.
+    pointIntType getXYIn();                                               //Get the mapped and filtered x and y values.
+    pointIntType getXYOut();                                              //Get the output x and y values.
 
 };
 
@@ -110,6 +118,7 @@ class LSJoystick {
 //*********************************//
 LSJoystick::LSJoystick() {
   joystickRawBuffer.begin(JOY_RAW_BUFF_SIZE);                       //Initialize joystickRawBuffer
+  joystickInputBuffer.begin(JOY_INPUT_BUFF_SIZE);                   //Initialize joystickInputBuffer
   joystickOutputBuffer.begin(JOY_OUTPUT_BUFF_SIZE);                 //Initialize joystickOutputBuffer
   joystickCenterBuffer.begin(JOY_CENTER_BUFF_SIZE);                 //Initialize joystickCenterBuffer
 }
@@ -125,13 +134,14 @@ LSJoystick::LSJoystick() {
 //*********************************//
 void LSJoystick::begin() {
 
-  _inputRadius = 0.0;                                               //Initialize _inputRadius
+  _inputRadius = 0.0;                                                   //Initialize _inputRadius
+  _skipInputChange = false;                                            //Initialize _skipInputChange
 
   Tlv493dSensor.begin();
-  setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_DEFAULT);  //Set default magnet direction.
-  setDeadzone(JOY_DEADZONE_STATUS,JOY_DEADZONE_FACTOR);             //Set default deadzone status and deadzone factor.
-  setOutputRange(JOY_OUTPUT_RANGE_LEVEL);                           //Set default output range level or speed level.
-  clear();                                                          //Clear calibration array and joystickOutputBuffer.
+  setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_DEFAULT);      //Set default magnet direction.
+  setDeadzone(JOY_OUTPUT_DEADZONE_STATUS,JOY_OUTPUT_DEADZONE_FACTOR);   //Set default deadzone status and deadzone factor.
+  setOutputRange(JOY_OUTPUT_RANGE_LEVEL);                               //Set default output range level or speed level.
+  clear();                                                              //Clear calibration array and joystickOutputBuffer.
 }
 
 //*********************************//
@@ -154,6 +164,7 @@ void LSJoystick::clear() {
 
 
   joystickRawBuffer.pushElement({0.0,0.0});           //Initialize joystickRawBuffer
+  joystickInputBuffer.pushElement({0, 0});            //Initialize joystickInputBuffer
   joystickOutputBuffer.pushElement({0, 0});           //Initialize joystickOutputBuffer
   
 }
@@ -481,25 +492,16 @@ void LSJoystick::update() {
 
   Tlv493dSensor.updateData();
   //Get the new readings as a point
-  inputPoint = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};   
-  
-  pointFloatType prevInputPoint = joystickRawBuffer.getLastElement();
-  bool skipChange = abs(inputPoint.x - prevInputPoint.x) < JOY_CHANGE_TOLERANCE 
-                 && abs(inputPoint.y - prevInputPoint.y)  < JOY_CHANGE_TOLERANCE;
-  
-  joystickRawBuffer.pushElement(inputPoint);                      //Push raw points to joystickRawBuffer
-  if(!skipChange){
-    pointIntType outputPoint = processInputReading(inputPoint);     //Map the input readings
-    outputPoint = processOutputResponse(outputPoint);               //Process output by applying deadzone, speed control, and linearization
-    joystickOutputBuffer.pushElement(outputPoint);                  //Push new output point to joystickOutputBuffer    
-  }
+  _rawPoint = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};   
+  _skipInputChange = canSkipInputChange(_rawPoint);
+  joystickRawBuffer.pushElement(_rawPoint);                  //Push raw points to joystickRawBuffer : DON'T MOVE THIS
 
-  
-//  Serial.print(outputPoint.x);  
-//  Serial.print(",");  
-//  Serial.println(outputPoint.y); 
-
-  
+  if(!_skipInputChange){
+    _inputPoint = processInputReading(_rawPoint);            //Mapped and filtered input readings
+    joystickInputBuffer.pushElement(_inputPoint);            //Push new output point to joystickOutputBuffer
+    _outputPoint = processOutputResponse(_inputPoint);       //Process output by applying deadzone, speed control, and linearization
+    joystickOutputBuffer.pushElement(_outputPoint);          //Push new output point to joystickOutputBuffer    
+  } 
 }
 
 //*********************************//
@@ -529,7 +531,7 @@ int LSJoystick::getYOut() {
 }
 
 //*********************************//
-// Function   : getXYRaw u
+// Function   : getXYRaw
 // 
 // Description: Get the last raw x and y values from joystickRawBuffer
 // 
@@ -540,6 +542,21 @@ int LSJoystick::getYOut() {
 pointFloatType LSJoystick::getXYRaw() {
   return joystickRawBuffer.getLastElement();
 }
+
+
+//*********************************//
+// Function   : getXYIn 
+// 
+// Description: Get the mapped x and y input point
+// 
+// Arguments :  void
+// 
+// Return     : input point : pointIntType : The input x and y point
+//*********************************//
+pointIntType LSJoystick::getXYIn() {
+  return joystickInputBuffer.getLastElement();
+}
+
 
 //*********************************//
 // Function   : getXYOut 
@@ -552,20 +569,6 @@ pointFloatType LSJoystick::getXYRaw() {
 //*********************************//
 pointIntType LSJoystick::getXYOut() {
   return joystickOutputBuffer.getLastElement();
-}
-
-
-//*********************************//
-// Function   : getXYIn 
-// 
-// Description: Get the mapped x and y input point
-// 
-// Arguments :  void
-// 
-// Return     : input point : pointFloatType : The input x and y point
-//*********************************//
-pointFloatType LSJoystick::getXYIn() {
-  return inputPoint;
 }
 
 
@@ -601,6 +604,22 @@ int LSJoystick::applyDeadzone(int input){
 }
 
 //*********************************//
+// Function   : canSkipInputChange 
+// 
+// Description: Check if the input change can be skipped  
+// 
+// Arguments :  inputPoint : pointFloatType : raw input reading
+// 
+// Return     : skipInputChange : bool : skip processing if it's true
+//*********************************//
+bool LSJoystick::canSkipInputChange(pointFloatType inputPoint){      
+  pointFloatType prevInputPoint = joystickRawBuffer.getLastElement();           //Get the previous point from buffer 
+  bool skipInputChange = abs(_rawPoint.x - prevInputPoint.x) < JOY_INPUT_CHANGE_TOLERANCE 
+                 && abs(_rawPoint.y - prevInputPoint.y)  < JOY_INPUT_CHANGE_TOLERANCE;
+  return skipInputChange;
+}
+
+//*********************************//
 // Function   : linearizeOutput 
 // 
 // Description: Linearize Output value
@@ -628,13 +647,16 @@ pointIntType LSJoystick::linearizeOutput(pointIntType inputPoint){
 //*********************************//
 pointIntType LSJoystick::processInputReading(pointFloatType inputPoint) {
 
-  //Initialize limitPoint and outputPoint
+  //Initialize limitPoint, centeredPoint and outputPoint
   pointFloatType limitPoint = {0.00, 0.00};
+  pointFloatType centeredPoint = {0.00, 0.00};
   pointIntType outputPoint = {0,0};
   
-  //Center the input point
-  pointFloatType centeredPoint = {(inputPoint.x - magnetInputCalibration[0].x)*_joystickXDirection, 
-                                  (inputPoint.y - magnetInputCalibration[0].y)*_joystickYDirection};
+  if ((sq(inputPoint.x) + sq(inputPoint.y)) >= sq(JOY_INPUT_DEADZONE)) {
+    //Center the input point
+    centeredPoint = {(inputPoint.x - magnetInputCalibration[0].x)*_joystickXDirection, 
+                    (inputPoint.y - magnetInputCalibration[0].y)*_joystickYDirection};
+  }
 
 
   float thetaVal = atan2(centeredPoint.y, centeredPoint.x);         // Get the angel of the point
@@ -645,7 +667,7 @@ pointIntType LSJoystick::processInputReading(pointFloatType inputPoint) {
 
   //Compare the magnitude of two points from center
   //Output point on perimeter of circle if it's outside
-  if ((sq(centeredPoint.y) + sq(centeredPoint.x)) >= sq(_inputRadius)) {
+  if ((sq(centeredPoint.x) + sq(centeredPoint.y)) >= sq(_inputRadius)) {
     centeredPoint.x = limitPoint.x; 
     centeredPoint.y = limitPoint.y; 
 //    Serial.print(centeredPoint.x);  
