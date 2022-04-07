@@ -360,7 +360,8 @@ void LSPressure::updatePressure() {
     float tempRefVal = pressure_event.pressure;  //Set a temporary reference value to new reference pressure reading 
     //Update compensation pressure value if reference pressure is changed using tolerance value 
     if(abs(refVal-tempRefVal)>=refTolVal && tempRefVal > 0.00){ 
-        compVal+=refVal-tempRefVal;               //Add the reference pressure change to the compensation value 
+        //compVal+=refVal-tempRefVal;                //Add the reference pressure change to the compensation value 
+        compVal=mainVal-tempRefVal;               //Update the compensation value 
       }    
       if(tempRefVal > 0.00) { refVal=tempRefVal; } // Update the reference pressure value 
    };
@@ -414,7 +415,6 @@ void LSPressure::updateState() {
       //New state: {Sip or puff, released, time}      
       else if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_STARTED){
         sapCurrState = {sapPrevState.mainState, PRESS_SAP_SEC_STATE_RELEASED, sapPrevState.elapsedTime};
-        setZeroPressure();
         //Serial.println("c");
         //Serial.println(refVal);
       }

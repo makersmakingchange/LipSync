@@ -91,7 +91,7 @@
                                                   // 2 = Differential or PRESS_MODE_DIFF
 
 //Led Default settings
-#define CONF_LED_BRIGHTNESS 50 
+#define CONF_LED_BRIGHTNESS 150 
 #define CONF_LED_BRIGHTNESS_LOW 10 
 #define CONF_LED_BRIGHTNESS_HIGH 150 
 
