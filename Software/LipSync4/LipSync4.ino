@@ -12,6 +12,13 @@
 #include "LSOutput.h"
 #include "LSMemory.h"
 
+//Firmware : LipSync4
+//Developed by : MakersMakingChange
+//VERSION: Alpha 2 (06 April 2022) 
+//Copyright Neil Squire Society 2022. 
+//LICENSE: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
+
+
 int comMode; //0 = None , 1 = USB , 2 = Wireless  
 int debugMode;
 bool ledActionEnabled = false;
@@ -21,7 +28,7 @@ const ledActionStruct ledActionProperty[]{
     {CONF_ACTION_NOTHING,            1,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
     {CONF_ACTION_LEFT_CLICK,         1,LED_CLR_NONE,  LED_CLR_MAGENTA,LED_ACTION_BLINK},
     {CONF_ACTION_RIGHT_CLICK,        3,LED_CLR_NONE,  LED_CLR_BLUE,   LED_ACTION_BLINK},
-    {CONF_ACTION_DRAG,               1,LED_CLR_PURPLE,LED_CLR_RED,    LED_ACTION_ON},
+    {CONF_ACTION_DRAG,               1,LED_CLR_PURPLE,LED_CLR_MAGENTA,LED_ACTION_ON},
     {CONF_ACTION_SCROLL,             3,LED_CLR_PURPLE,LED_CLR_BLUE,   LED_ACTION_ON},
     {CONF_ACTION_CURSOR_CENTER,      2,LED_CLR_NONE,  LED_CLR_ORANGE, LED_ACTION_BLINK},
     {CONF_ACTION_CURSOR_CALIBRATION, 4,LED_CLR_NONE,  LED_CLR_ORANGE, LED_ACTION_BLINK},
@@ -83,7 +90,6 @@ const inputActionStruct sapActionProperty[]{
     {CONF_ACTION_SCROLL,             PRESS_SAP_MAIN_STATE_SIP,   1000,3000},
     {CONF_ACTION_CURSOR_CENTER,      PRESS_SAP_MAIN_STATE_PUFF,  3000,5000},
     {CONF_ACTION_MIDDLE_CLICK,       PRESS_SAP_MAIN_STATE_SIP,   3000,5000}
-    //{CONF_ACTION_CURSOR_CALIBRATION, PRESS_SAP_MAIN_STATE_SIP,   3000,5000}
 };
 
 //Joystick module variables and structures
@@ -115,44 +121,54 @@ LSMemory mem;
 LSInput ib(inputButtonPinArray, CONF_BUTTON_NUMBER);
 LSInput is(inputSwitchPinArray, CONF_SWITCH_NUMBER); //Starts an instance of the object
 
-LSJoystick js; //Starts an instance of the LSJoystick object
+LSJoystick js;                                       //Starts an instance of the LSJoystick object
 
-LSPressure ps; //Starts an instance of the LSPressure object
+LSPressure ps;                                       //Starts an instance of the LSPressure object
 
-LSOutput led; //Starts an instance of the LSOutput led object
+LSOutput led;                                        //Starts an instance of the LSOutput LED object
 
-LSUSBMouse mouse; //Starts an instance of the usb mouse object
-LSBLEMouse btmouse;
+LSUSBMouse mouse;                                    //Starts an instance of the USB mouse object
+LSBLEMouse btmouse;                                  //Starts an instance of the BLE mouse object
 
+
+//***MICROCONTROLLER AND PERIPHERAL CONFIGURATION***//
+// Function   : setup 
+// 
+// Description: This function handles the initialization of variables, pins, methods, libraries. This function only runs once at powerup or reset.
+// 
+// Parameters :  void
+// 
+// Return     : void
+//*********************************//
 void setup()
 {
-
+  // Begin HID mouse 
   mouse.begin();
   btmouse.begin();
 
   Serial.begin(115200);
-  // Wait until serial port is opened
   //while (!TinyUSBDevice.mounted())
   //while (!Serial) { delay(10); }
 
-  delay(1000);
+  delay(1000);                                                  //TO BE REMOVED 
   
-  initMemory();
+  initMemory();                                                 //Initialize Memory 
 
-  initLed();
+  initLed();                                                    //Initialize LED Feedback 
 
-  initSipAndPuff();
+  initSipAndPuff();                                             //Initialize Sip And Puff 
 
-  initInput();
+  initInput();                                                  //Initialize input buttons and input switches 
 
-  initJoystick();
+  initJoystick();                                               //Initialize Joystick 
 
-  initCommunicationMode();
+  initCommunicationMode();                                      //Initialize Communication Mode
 
-  initDebug();
+  initDebug();                                                  //Initialize Debug Mode operation 
 
-  srartupFeedback();
+  startupFeedback();                                            //Startup IBM LED Feedback 
 
+  //Configure poll timer to perform each feature as a separate loop
   pollTimerId[0] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, 0, joystickLoop);
   pollTimerId[1] = pollTimer.setInterval(CONF_PRESSURE_POLL_RATE, 0, pressureLoop);
   pollTimerId[2] = pollTimer.setInterval(CONF_INPUT_POLL_RATE, 0, inputLoop);
@@ -164,17 +180,34 @@ void setup()
 
 } //end setup
 
+
+//***START OF MAIN LOOP***//
+// Function   : loop 
+// 
+// Description: This function loops consecutively and responses to changes.
+// 
+// Parameters :  void
+// 
+// Return     : void
+//*********************************//
 void loop()
 {
-
   ledStateTimer.run();
   calibTimer.run();
   pollTimer.run();
   settingsEnabled=serialSettings(settingsEnabled); //Check to see if setting option is enabled in Lipsync
-
-
 }
 
+//***ENABLE POLL FUNCTION***//
+// Function   : enablePoll 
+// 
+// Description: This function enables polling by enabling poll timers. It can be used to disable main features 
+//              during initialization.
+//
+// Parameters : isEnabled : bool : enable polling if it's True
+// 
+// Return     : void 
+//****************************************//
 void enablePoll(bool isEnabled){
   if(isEnabled){
     getDebugMode(false,false);
@@ -195,17 +228,36 @@ void enablePoll(bool isEnabled){
 // Memory Functions
 //*********************************//
 
+//***INITIALIZE MEMORY FUNCTION***//
+// Function   : initMemory 
+// 
+// Description: This function initializes flash memory to store settings 
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void initMemory()
 {
-  mem.begin();
-  //mem.format();
-  mem.initialize(CONF_SETTINGS_FILE, CONF_SETTINGS_JSON);
+  mem.begin();                                                      //Begin memory 
+  //mem.format();                                                   //DON'T UNCOMMENT
+  mem.initialize(CONF_SETTINGS_FILE, CONF_SETTINGS_JSON);           //Initialize flash memory to store settings 
 }
 
+//***RESET MEMORY FUNCTION***//
+// Function   : resetMemory 
+// 
+// Description: This function formats and removes existing text files in flash memory.
+//              It initializes flash memory to store settings after formatting.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void resetMemory()
 {
-  mem.format();
-  mem.initialize(CONF_SETTINGS_FILE, CONF_SETTINGS_JSON);
+  mem.format();                                                    //Format and remove existing text files in flash memory 
+  mem.initialize(CONF_SETTINGS_FILE, CONF_SETTINGS_JSON);          //Initialize flash memory to store settings 
 }
 
 
@@ -213,6 +265,16 @@ void resetMemory()
 // Communication Mode Functions
 //*********************************//
 
+//***INITIALIZE COMMUNICATION FUNCTION***//
+// Function   : initCommunicationMode 
+// 
+// Description: This function initializes communication mode or configures communication mode
+//              based on stored settings in the flash memory (0 = None , 1 = USB , 2 = Wireless)
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void initCommunicationMode()
 {
   comMode = getCommunicationMode(false,false);
@@ -223,26 +285,45 @@ void initCommunicationMode()
 // Input Functions
 //*********************************//
 
+
+//***INITIALIZE INPUTS FUNCTION***//
+// Function   : initInput 
+// 
+// Description: This function initializes inputs including input buttons and input switches.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void initInput()
 {
 
-  ib.begin();
-  is.begin();
-  buttonActionSize = sizeof(buttonActionProperty) / sizeof(inputActionStruct);
-  switchActionSize = sizeof(switchActionProperty) / sizeof(inputActionStruct);
+  ib.begin();                                                                     //Begin input buttons    
+  is.begin();                                                                     //Begin input switches  
+  buttonActionSize = sizeof(buttonActionProperty) / sizeof(inputActionStruct);    //Size of total available input button actions
+  switchActionSize = sizeof(switchActionProperty) / sizeof(inputActionStruct);    //Size of total available input switch actions
 }
 
-//The loop handling inputs
+//***INPUT LOOP FUNCTION***//
+// Function   : inputLoop 
+// 
+// Description: This function handles input button and input switch actions.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void inputLoop()
 {
-
+  //Request new values
   ib.update();
-  is.update(); //Request new values
+  is.update(); 
 
   //Get the last state change
   buttonState = ib.getInputState();
   switchState = is.getInputState();
 
+  //Evaluate Output Actions
   evaluateOutputAction(buttonState, buttonActionSize,buttonActionProperty);
   evaluateOutputAction(switchState, switchActionSize,switchActionProperty);
 }
@@ -251,17 +332,34 @@ void inputLoop()
 // Sip and Puff Functions
 //*********************************//
 
+
+//***INITIALIZE SIP AND PUFF FUNCTION***//
+// Function   : initSipAndPuff 
+// 
+// Description: This function initializes sip and puff as inputs.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void initSipAndPuff()
 {
-
-  ps.begin();
-  getPressureMode(true,false);
-  getPressureThreshold(true,false);
-  sapActionSize = sizeof(sapActionProperty) / sizeof(inputActionStruct);
+  ps.begin();                                                                     //Begin sip and puff 
+  getPressureMode(true,false);                                                    //Get the pressure mode stored in flash memory ( 1 = Absolute , 2 = Differential )
+  getPressureThreshold(true,false);                                               //Get sip and puff pressure thresholds stored in flash memory 
+  sapActionSize = sizeof(sapActionProperty) / sizeof(inputActionStruct);          //Size of total available sip and puff actions
 }
 
 
-//The loop handling pressure polling, sip and puff state evaluation
+//***PRESSURE LOOP FUNCTION***//
+// Function   : inputLoop 
+// 
+// Description: This function handles pressure polling, sip and puff state evaluation.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void pressureLoop()
 {
 
@@ -276,18 +374,40 @@ void pressureLoop()
   evaluateOutputAction(sapActionState, sapActionSize,sapActionProperty);
 }
 
+//***RELEASE OUTPUT FUNCTION***//
+// Function   : releaseOutputAction 
+// 
+// Description: This function handles release of mouse hold actions.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void releaseOutputAction()
 {
-  setLedDefault();
+  setLedDefault();                                                            //Set default led feedback 
+  //Release left click if it's in drag mode and left mouse button is pressed.
   if (outputAction == CONF_ACTION_DRAG && (mouse.isPressed(MOUSE_LEFT) || btmouse.isPressed(MOUSE_LEFT)))
   {
     mouse.release(MOUSE_LEFT);
     btmouse.release(MOUSE_LEFT);
   }
+  //Set new state of current output action 
   outputAction = CONF_ACTION_NOTHING;
   canOutputAction = true;
 }
 
+//***EVALUATE OUTPUT ACTION FUNCTION***//
+// Function   : evaluateOutputAction 
+// 
+// Description: This function evaluates and performs output action
+//
+// Parameters : actionState : inputStateStruct : Current input state 
+//              actionSize : int : size of available actions
+//              actionProperty : const inputActionStruct : array of all possible actions
+// 
+// Return     : void 
+//****************************************//
 void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inputActionStruct actionProperty[])
 {
   bool canEvaluateAction = true;
@@ -299,6 +419,7 @@ void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inp
     (outputAction == CONF_ACTION_SCROLL ||
       outputAction == CONF_ACTION_DRAG))
   {
+    //Set new state of current output action 
     releaseOutputAction();
     canEvaluateAction = false;
   }
@@ -312,9 +433,10 @@ void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inp
       actionState.elapsedTime >= actionProperty[actionIndex].inputActionStartTime &&
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
-
+      //Get action index 
       tempActionIndex = actionProperty[actionIndex].inputActionNumber;
-      
+
+      //Set Led state 
       setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
       ledActionProperty[tempActionIndex].ledEndColor, 
       ledActionProperty[tempActionIndex].ledNumber, 
@@ -323,6 +445,7 @@ void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inp
       CONF_LED_BRIGHTNESS);
       outputAction = tempActionIndex;
 
+      //Perform output action and led action 
       performOutputAction(tempActionIndex);
 
       break;
@@ -332,16 +455,17 @@ void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inp
       actionState.elapsedTime >= actionProperty[actionIndex].inputActionStartTime &&
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
+      //Get action index 
+      tempActionIndex = actionProperty[actionIndex].inputActionNumber; 
 
-      tempActionIndex = actionProperty[actionIndex].inputActionNumber; //used for releasing drag or scroll
-      
+      //Set Led state 
       setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
       ledActionProperty[tempActionIndex].ledStartColor, 
       ledActionProperty[tempActionIndex].ledNumber, 
       0, 
       0, 
       CONF_LED_BRIGHTNESS);
-
+      //Perform led action 
       performLedAction(ledCurrentState);
 
       break;
@@ -349,9 +473,18 @@ void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inp
   }  
 }
 
+//***PERFORM OUTPUT ACTION FUNCTION***//
+// Function   : performOutputAction 
+// 
+// Description: This function performs output action
+//
+// Parameters : action : int : action index number 
+// 
+// Return     : void 
+//****************************************//
 void performOutputAction(int action)
 {
-  
+  //Perform led action 
   performLedAction(ledCurrentState);
   switch (action)
   {
@@ -424,6 +557,15 @@ void performOutputAction(int action)
   }
 }
 
+//***CURSOR LEFT CLICK FUNCTION***//
+// Function   : cursorLeftClick 
+// 
+// Description: This function performs cursor left click action.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void cursorLeftClick(void)
 {
   //Serial.println("Left Click");
@@ -437,6 +579,15 @@ void cursorLeftClick(void)
   }
 }
 
+//***CURSOR RIGHT CLICK FUNCTION***//
+// Function   : cursorRightClick 
+// 
+// Description: This function performs cursor right click action.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void cursorRightClick(void)
 {
   //Serial.println("Right Click");
@@ -450,6 +601,15 @@ void cursorRightClick(void)
   }
 }
 
+//***CURSOR MIDDLE CLICK FUNCTION***//
+// Function   : cursorMiddleClick 
+// 
+// Description: This function performs cursor middle click action.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void cursorMiddleClick(void)
 {
   //Serial.println("Middle Click");
@@ -463,6 +623,15 @@ void cursorMiddleClick(void)
   }
 }
 
+//***DRAG FUNCTION***//
+// Function   : cursorDrag 
+// 
+// Description: This function performs cursor drag action.
+//
+// Parameters : void
+// 
+// Return     : void 
+//********************//
 void cursorDrag(void)
 {
   //Serial.println("Drag");
@@ -475,7 +644,15 @@ void cursorDrag(void)
     btmouse.press(MOUSE_LEFT);
   }
 }
-
+//***CURSOR SCROLL FUNCTION***//
+// Function   : cursorScroll 
+// 
+// Description: This function is an operating mode that enables scrolling action.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void cursorScroll(void)
 {
   //Serial.println("Scroll");
@@ -486,17 +663,34 @@ void cursorScroll(void)
 // Joystick Functions
 //*********************************//
 
+//***INITIALIZE JOYSTICK FUNCTION***//
+// Function   : initJoystick 
+// 
+// Description: This function initializes joystick as input.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void initJoystick()
 {
-
-  js.begin();
-  js.setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_INVERSE);       //x,y 
-  getJoystickDeadZone(true,false);
-  getJoystickSpeed(true,false);
-  setJoystickInitialization(true,false);
-  getJoystickCalibration(true,false);
+  js.begin();                                                               //Begin joystick 
+  js.setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_INVERSE);       //Set x and y magnet direction 
+  getJoystickDeadZone(true,false);                                          //Get joystick deadzone stored in flash memory 
+  getJoystickSpeed(true,false);                                             //Get joystick cursor speed stored in flash memory 
+  setJoystickInitialization(true,false);                                    //Perform joystick center initialization
+  getJoystickCalibration(true,false);                                       //Get joystick calibration points stored in flash memory 
 }
 
+//***PERFORM JOYSTICK CENTER FUNCTION***//
+// Function   : performJoystickCenter 
+// 
+// Description: This function performs joystick center point initialization.
+//
+// Parameters : * args : int : pointer of step number 
+// 
+// Return     : void 
+//****************************************//
 void performJoystickCenter(int* args)
 {
   int stepNumber = (int)args;
@@ -514,16 +708,25 @@ void performJoystickCenter(int* args)
     calibTimerId[0] = calibTimer.setTimeout(nextStepStart, performJoystickCenter, (int *)stepNumber);      
   } else
   {
-    js.evaluateInputCenter();             //Evaluate the center point using values in the buffer 
-    js.setMinimumRadius();                //Update minimum radius of operation                                                                      //Update the minimum cursor operating radius 
-    centerPoint = js.getInputCenter();    //Get the new center for API output  
+    js.evaluateInputCenter();                                                      //Evaluate the center point using values in the buffer 
+    js.setMinimumRadius();                                                         //Update minimum radius of operation            
+    centerPoint = js.getInputCenter();                                             //Get the new center for API output  
     printResponseFloatPoint(true,true,true,0,"IN,1",true,centerPoint);
-    calibTimer.deleteTimer(0);                                                                          //Delete timer
+    calibTimer.deleteTimer(0);                                                     //Delete timer
     canOutputAction = true;
   }
 
 }
 
+//***PERFORM JOYSTICK CENTER STEP FUNCTION***//
+// Function   : performJoystickCenterStep 
+// 
+// Description: This function performs the actual joystick center point initialization step.
+//
+// Parameters : * args : int : pointer of step number 
+// 
+// Return     : void 
+//****************************************//
 void performJoystickCenterStep(int* args)
 {
   //Turn on and set the second led to orange to indicate start of the process 
@@ -541,6 +744,15 @@ void performJoystickCenterStep(int* args)
   }
 }
 
+//***PERFORM JOYSTICK CALIBRATION FUNCTION***//
+// Function   : performJoystickCalibration 
+// 
+// Description: This function performs joystick maximum point calibration in a recursive fashion.
+//
+// Parameters : * args : int : pointer of step number 
+// 
+// Return     : void 
+//****************************************//
 void performJoystickCalibration(int* args)
 {
   int stepNumber = (int)args;
@@ -568,12 +780,19 @@ void performJoystickCalibration(int* args)
     performLedAction(ledCurrentState);
     setJoystickInitialization(false, false); 
     js.setMinimumRadius();                                                                              //Update the minimum cursor operating radius 
-    //calibTimer.deleteTimer(0);                                                                          //Delete timer
     canOutputAction = true;
   }
 
 }
-
+//***PERFORM JOYSTICK CALIBRATION STEP FUNCTION***//
+// Function   : performJoystickCalibrationStep 
+// 
+// Description: This function performs the actual joystick maximum point calibration step in a recursive fashion.
+//
+// Parameters : * args : int : pointer of step number 
+// 
+// Return     : void 
+//****************************************//
 void performJoystickCalibrationStep(int* args)
 {
   int stepNumber = (int)args;
@@ -586,7 +805,7 @@ void performJoystickCalibrationStep(int* args)
     performLedAction(ledCurrentState);   
   }
   
-  maxPoint=js.getInputMax(stepNumber);
+  maxPoint=js.getInputMax(stepNumber);                                                                //Get maximum x and y for the step number 
 
   //Turn off all the leds to orange to indicate end of the process 
   if(calibTimer.getNumRuns(0)==CONF_JOY_CALIB_READING_NUMBER){                                        //Turn Led's OFF when timer is running for last time
@@ -597,22 +816,37 @@ void performJoystickCalibrationStep(int* args)
   }
 }
 
-
-//The loop handling joystick
-
+//***JOYSTICK LOOP FUNCTION***//
+// Function   : joystickLoop 
+// 
+// Description: This function handles joystick move and scroll actions.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void joystickLoop()
 {
 
-  js.update(); //Request new values
+  js.update();                                                        //Request new values
 
-  pointIntType joyOutPoint = js.getXYOut(); //Read the filtered values
+  pointIntType joyOutPoint = js.getXYOut();                           //Read the filtered values
 
-  performJystick(joyOutPoint);
+  performJoystick(joyOutPoint);                                       //Perform joystick move action
 }
 
-void performJystick(pointIntType inputPoint)
+//***PERFORM JOYSTICK FUNCTION***//
+// Function   : performJoystick 
+// 
+// Description: This function performs joystick move and scroll actions.
+//
+// Parameters : inputPoint : pointIntType : The output cursor x and y
+// 
+// Return     : void 
+//****************************************//
+void performJoystick(pointIntType inputPoint)
 {
-
+  //0 = None , 1 = USB , 2 = Wireless  
   if (comMode == CONF_COM_MODE_USB)
   {
     (outputAction == CONF_ACTION_SCROLL) ? mouse.scroll(round(inputPoint.y / 5)) : mouse.move(inputPoint.x, -inputPoint.y);
@@ -628,12 +862,30 @@ void performJystick(pointIntType inputPoint)
 // Debug Functions
 //*********************************//
 
+//***INITIALIZE DEBUG FUNCTION***//
+// Function   : initDebug 
+// 
+// Description: This function initializes debug mode and debug state.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void initDebug()
 {
-  debugMode = getDebugMode(false, false);
-  setDebugState(debugMode);
+  debugMode = getDebugMode(false, false);                                   //Get debug mode number stored in flash memory 
+  setDebugState(debugMode);                                                 //Set debug operation state based on the debug mode
 }
 
+//***DEBUG LOOP FUNCTION***//
+// Function   : debugLoop 
+// 
+// Description: This function outputs debug data based on debug mode.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void debugLoop(){
   if(debugMode==CONF_DEBUG_MODE_JOYSTICK){
     js.update(); //Request new values from joystick class
@@ -674,12 +926,21 @@ void debugLoop(){
   }
 }
 
-void setDebugState(int inputDebugState) {
-  if (inputDebugState==CONF_DEBUG_MODE_NONE) {
+//***SET DEBUG STATE FUNCTION***//
+// Function   : setDebugState 
+// 
+// Description: This function configures the state of operation based on the debug mode
+//
+// Parameters : inputDebugMode : int : The current debug mode
+// 
+// Return     : void 
+//****************************************//
+void setDebugState(int inputDebugMode) {
+  if (inputDebugMode==CONF_DEBUG_MODE_NONE) {
     pollTimer.enable(0);                      //Enable joystick data polling 
     pollTimer.disable(4);                     //Disable debug data polling 
   } 
-  else if (inputDebugState==CONF_DEBUG_MODE_JOYSTICK) {
+  else if (inputDebugMode==CONF_DEBUG_MODE_JOYSTICK) {
     pollTimer.disable(0);                     //Disable joystick data polling 
     pollTimer.enable(4);                      //Enable debug data polling 
   }
@@ -693,22 +954,52 @@ void setDebugState(int inputDebugState) {
 // LED Functions
 //*********************************//
 
+//***INITIALIZE LED FUNCTION***//
+// Function   : initLed 
+// 
+// Description: This function initializes LED output as feedback method.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void initLed()
 {
-
   led.begin();
   ledTimerId=0;
   *ledCurrentState = { 0, 0, 0, 0, 0, 0 };
 }
 
-
-void srartupFeedback()
+//***STARTUP INITIALIZATION LED FUNCTION***//
+// Function   : startupFeedback 
+// 
+// Description: This function performs the startup initialization feedback.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void startupFeedback()
 {
   setLedState(LED_ACTION_BLINK, 1, 4, 4, CONF_LED_STARTUP_COLOR_TIME, CONF_LED_BRIGHTNESS);
   ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
 
 }
 
+//***SET LED STATE FUNCTION***//
+// Function   : setLedState 
+// 
+// Description: This function sets LED states based on led number, blink number, color number, blink delay , and brightness.
+//
+// Parameters : ledAction      : int : led action ( NOTHING , ON , OFF , BLINK )
+//              ledColorNumber : int : led color number 
+//              ledNumber      : int : led number ( 1, 2, 3, 4 or all )
+//              ledBlinkNumber : int : led blink number 
+//              ledBlinkTime : unsigned long : led blink delay time 
+//              ledBrightness : int : led brightness
+// 
+// Return     : void 
+//****************************************//
 void setLedState(int ledAction, int ledColorNumber, int ledNumber, int ledBlinkNumber, unsigned long ledBlinkTime, int ledBrightness)
 { //Set led state after output action is performed
   if (ledNumber <= OUTPUT_RGB_LED_NUM + 1)
@@ -725,12 +1016,19 @@ void setLedState(int ledAction, int ledColorNumber, int ledNumber, int ledBlinkN
 
 
 
+//***LED IBM EFFECT FUNCTION***//
+// Function   : ledIBMEffect 
+// 
+// Description: This function performs the IBM LED effect based on step number.
+//
+// Parameters : args : ledStateStruct* : It includes step number.
+// 
+// Return     : void 
+//****************************************//
 void ledIBMEffect(ledStateStruct* args)
 {
-  
   if (args->ledColorNumber == 0)
   {
-    //ledStateTimer.deleteTimer(0); 
     ledActionEnabled = true;
     enablePoll(true);
   }
@@ -749,6 +1047,15 @@ void ledIBMEffect(ledStateStruct* args)
 
 }
 
+//***LED BLINK EFFECT FUNCTION***//
+// Function   : ledBlinkEffect 
+// 
+// Description: This function performs the blink LED effect based on step number, led number passed by arguments.
+//
+// Parameters : args : ledStateStruct* : It includes step number, led number.
+// 
+// Return     : void 
+//****************************************//
 void ledBlinkEffect(ledStateStruct* args){
   if(ledStateTimer.getNumRuns(0) % 2){
      led.setLedColor(args->ledNumber, 0, args->ledBrightness);
@@ -764,77 +1071,139 @@ void ledBlinkEffect(ledStateStruct* args){
   }   
 }
 
+//***TURN ALL LEDS OFF FUNCTION***//
+// Function   : turnLedAllOff 
+// 
+// Description: This function turns off all the LEDs.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void turnLedAllOff()
 {
   led.clearLedAll();
 }
 
-
+//***TURN LED OFF FUNCTION***//
+// Function   : turnLedOff 
+// 
+// Description: This function turns off the specified LED based on led number passed by arguments.
+//
+// Parameters : args : ledStateStruct* : It includes led number.
+// 
+// Return     : void 
+//****************************************//
 void turnLedOff(ledStateStruct* args)
 {
   led.clearLed(args->ledNumber);
 }
 
-
+//***TURN LED ON FUNCTION***//
+// Function   : turnLedOff 
+// 
+// Description: This function turns on the specified LED based on led number passed by arguments.
+//
+// Parameters : args : ledStateStruct* : It includes led number.
+// 
+// Return     : void 
+//****************************************//
 void turnLedOn(ledStateStruct* args)
 {
   led.setLedColor(args->ledNumber, args->ledColorNumber, args->ledBrightness);
 }
 
+
+//***BLINK LED FUNCTION***//
+// Function   : blinkLed 
+// 
+// Description: This function blinks the specified LED based on led number and number of blinks passed by arguments.
+//
+// Parameters : args : ledStateStruct* : It includes led number and number of blinks.
+// 
+// Return     : void 
+//****************************************//
 void blinkLed(ledStateStruct* args)
 {
   ledTimerId = ledStateTimer.setTimer(args->ledBlinkTime, 0, ((args->ledBlinkNumber)*2)+1, ledBlinkEffect, ledCurrentState);
 }
 
+//***SET DEFAULT LED EFFECT FUNCTION***//
+// Function   : setLedDefault 
+// 
+// Description: This function sets the LED to default operating color based on led number and color passed by arguments.
+//
+// Parameters : args : ledStateStruct* : It includes led number and color.
+// 
+// Return     : void 
+//****************************************//
 void setLedDefault(){
-  
+  //Clear if it's in USB MODE
   if (comMode == CONF_COM_MODE_USB)
   {
     led.clearLedAll();
   }
   else if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected())
-  {
+  { //Clear and set second LED to blue if it's in BLE MODE
     led.clearLedAll();
     led.setLedColor(2, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
   }
 }
 
+//***BLE FEEDBACK LOOP FUNCTION***//
+// Function   : bleFeedbackLoop 
+// 
+// Description: This function performs the default LED effect to indicate the device is in BLE mode.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
 void bleFeedbackLoop()
 {
+  //Set second LED to blue if it's in BLE MODE and connected 
   if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected())
   {
     led.setLedColor(2, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
-  }
+  } //Clear second LED if it's in BLE MODE, but it's NOT connected 
   else if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected()==false)
   {
     led.clearLed(2);
   }
 }
 
-
+//***PERFORM LED ACTION FUNCTION***//
+// Function   : performLedAction 
+// 
+// Description: This function performs LED actions based on led number, blink number, color number, blink delay , and brightness.
+//
+// Parameters : args : ledStateStruct* : It includes led number, blink number, color number, blink delay , and brightness.
+// 
+// Return     : void 
+//****************************************//
 void performLedAction(ledStateStruct* args)
 {
-  switch (args->ledAction)
+  switch (args->ledAction)                                            //Get led action 
   {
-  case LED_ACTION_NONE:
-  {
-    setLedDefault();
-    break;
-  }
-  case LED_ACTION_OFF:
-  {
-    turnLedOff(args);
-    break;
-  }
-  case LED_ACTION_ON:
-  {
-    turnLedOn(args);
-    break;
-  }
-  case LED_ACTION_BLINK:
-  {
-    blinkLed(args);
-    break;
-  }
+    case LED_ACTION_NONE:
+    {
+      setLedDefault();
+      break;
+    }
+    case LED_ACTION_OFF:
+    {
+      turnLedOff(args);
+      break;
+    }
+    case LED_ACTION_ON:
+    {
+      turnLedOn(args);
+      break;
+    }
+    case LED_ACTION_BLINK:
+    {
+      blinkLed(args);
+      break;
+    }
   }
 }
