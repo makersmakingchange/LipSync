@@ -1,3 +1,10 @@
+//Firmware: LipSync4
+//Developed by: MakersMakingChange
+//VERSION: Alpha 2 (06 April 2022) 
+//Copyright Neil Squire Society 2022. 
+//LICENSE: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
+
+
 #include <Wire.h>
 #include "LSTimer.h"
 #include "LSUtils.h"
@@ -11,13 +18,6 @@
 #include "LSJoystick.h"
 #include "LSOutput.h"
 #include "LSMemory.h"
-
-//Firmware : LipSync4
-//Developed by : MakersMakingChange
-//VERSION: Alpha 2 (06 April 2022) 
-//Copyright Neil Squire Society 2022. 
-//LICENSE: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
-
 
 int comMode; //0 = None , 1 = USB , 2 = Wireless  
 int debugMode;
