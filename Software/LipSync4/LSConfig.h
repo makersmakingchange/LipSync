@@ -1,3 +1,12 @@
+/* 
+* File: LSConfig.h
+* Firmware: LipSync4
+* Developed by: MakersMakingChange
+* Version: Alpha 2 (06 April 2022) 
+* Copyright Neil Squire Society 2022. 
+* License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
+*/
+
 //***DO NOT CHANGE***//
 #define CONF_LIPSYNC_MODEL 1                              //Mouse = 1 , Gamepad = 2
 #define CONF_LIPSYNC_VERSION 1.0

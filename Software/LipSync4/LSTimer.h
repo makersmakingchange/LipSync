@@ -1,11 +1,14 @@
-/*
- * Based on SimpleTimer.h
- *
- */
+/* 
+* File: LSTimer.h
+* Firmware: LipSync4
+* Edited by: MakersMakingChange
+* Based on: SimpleTimer.h
+* Version: Alpha 2 (06 April 2022) 
+*/
+ 
 //Header definition
 #ifndef _LSTIMER_H
 #define _LSTIMER_H
-
 
 template<typename T>
 class LSTimer {
