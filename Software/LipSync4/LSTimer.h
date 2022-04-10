@@ -2,7 +2,7 @@
 * File: LSTimer.h
 * Firmware: LipSync4
 * Edited by: MakersMakingChange
-* Based on: SimpleTimer.h
+* Based on: SimpleTimer.h (https://github.com/jfturcot/SimpleTimer)
 * Version: Alpha 2 (06 April 2022) 
 */
  

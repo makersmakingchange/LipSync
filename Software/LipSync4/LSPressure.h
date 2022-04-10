@@ -42,6 +42,8 @@
 #define PRESS_SAP_SEC_STATE_STARTED 1   //Started : Sip or puff being performed 
 #define PRESS_SAP_SEC_STATE_RELEASED 2  //Released : Sip or puff was just released 
 
+#define PRESS_SAP_ACTION_TIMEOUT 60000  //Rest timer
+
 //Pressure structure 
 typedef struct {
   float mainPressure;     //Stand-alone I2C Sensor reading 
@@ -447,7 +449,7 @@ void LSPressure::updateState() {
   }
 
   //No action in 1 minute : reset timer
-  if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_WAITING && mainStateTimer.elapsedTime(sapStateTimerId)>CONF_ACTION_TIMEOUT){
+  if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_WAITING && mainStateTimer.elapsedTime(sapStateTimerId)>PRESS_SAP_ACTION_TIMEOUT){
       setZeroPressure();                                   //Update pressure compensation value 
       //Reset and start the timer    
       mainStateTimer.restartTimer(sapStateTimerId);   

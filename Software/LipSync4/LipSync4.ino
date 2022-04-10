@@ -443,8 +443,8 @@ void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inp
       setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
       ledActionProperty[tempActionIndex].ledEndColor, 
       ledActionProperty[tempActionIndex].ledNumber, 
-      1, 
-      CONF_LED_REACTION_TIME, 
+      CONF_INPUT_LED_BLINK, 
+      CONF_INPUT_LED_DELAY, 
       CONF_LED_BRIGHTNESS);
       outputAction = tempActionIndex;
 
@@ -779,7 +779,7 @@ void performJoystickCalibration(int* args)
   } 
   else if (stepNumber == 5)
   {
-    setLedState(LED_ACTION_NONE, LED_CLR_NONE, 4, 0, 0,CONF_LED_BRIGHTNESS_LOW);                        //Turn off Led's
+    setLedState(LED_ACTION_NONE, LED_CLR_NONE, 4, 0, 0,CONF_LED_BRIGHTNESS);                            //Turn off Led's
     performLedAction(ledCurrentState);
     setJoystickInitialization(false, false); 
     js.setMinimumRadius();                                                                              //Update the minimum cursor operating radius 
@@ -984,7 +984,7 @@ void initLed()
 //****************************************//
 void startupFeedback()
 {
-  setLedState(LED_ACTION_BLINK, 1, 4, 4, CONF_LED_STARTUP_COLOR_TIME, CONF_LED_BRIGHTNESS);
+  setLedState(LED_ACTION_BLINK, 1, 4, 4, CONF_STARTUP_LED_STEP_TIME, CONF_LED_BRIGHTNESS);
   ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
 
 }
@@ -1069,7 +1069,7 @@ void ledBlinkEffect(ledStateStruct* args){
 
   if(ledStateTimer.getNumRuns(0)==((args->ledBlinkNumber)*2)+1){
     
-     setLedState(LED_ACTION_NONE, LED_CLR_NONE, 0, 0, 0,CONF_LED_BRIGHTNESS_LOW);
+     setLedState(LED_ACTION_NONE, LED_CLR_NONE, 0, 0, 0,CONF_LED_BRIGHTNESS);
      
   }   
 }
