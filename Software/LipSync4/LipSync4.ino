@@ -1,3 +1,13 @@
+/* 
+* File: LipSync4.ino
+* Firmware: LipSync4
+* Developed by: MakersMakingChange
+* Version: Alpha 2 (06 April 2022) 
+* Copyright Neil Squire Society 2022. 
+* License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
+*/
+
+
 #include <Wire.h>
 #include "LSTimer.h"
 #include "LSUtils.h"
@@ -11,13 +21,6 @@
 #include "LSJoystick.h"
 #include "LSOutput.h"
 #include "LSMemory.h"
-
-//Firmware : LipSync4
-//Developed by : MakersMakingChange
-//VERSION: Alpha 2 (06 April 2022) 
-//Copyright Neil Squire Society 2022. 
-//LICENSE: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
-
 
 int comMode; //0 = None , 1 = USB , 2 = Wireless  
 int debugMode;
@@ -47,28 +50,31 @@ LSTimer<ledStateStruct> ledStateTimer;
 //Input module variables
 
 int buttonActionSize, switchActionSize;
+unsigned long buttonActionMaxTime, switchActionMaxTime;
 inputStateStruct buttonState, switchState;
 
 const inputActionStruct switchActionProperty[]{
     {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_NONE,       0,0},
-    {CONF_ACTION_LEFT_CLICK,         INPUT_MAIN_STATE_S1_PRESSED, 0,1000},
-    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S2_PRESSED, 0,1000},
-    {CONF_ACTION_RIGHT_CLICK,        INPUT_MAIN_STATE_S3_PRESSED, 0,1000},
-    {CONF_ACTION_DRAG,               INPUT_MAIN_STATE_S1_PRESSED, 1000,3000},
-    {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED, 1000,3000},
-    {CONF_ACTION_SCROLL,             INPUT_MAIN_STATE_S3_PRESSED, 1000,3000},
-    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S1_PRESSED, 3000,10000},
-    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S2_PRESSED, 3000,10000},
-    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S3_PRESSED, 3000,10000},
+    {CONF_ACTION_LEFT_CLICK,         INPUT_MAIN_STATE_S1_PRESSED, 0,3000},
+    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S2_PRESSED, 0,3000},
+    {CONF_ACTION_RIGHT_CLICK,        INPUT_MAIN_STATE_S3_PRESSED, 0,3000},
+    {CONF_ACTION_DRAG,               INPUT_MAIN_STATE_S1_PRESSED, 3000,5000},
+    {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED, 3000,5000},
+    {CONF_ACTION_SCROLL,             INPUT_MAIN_STATE_S3_PRESSED, 3000,5000},
+    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S1_PRESSED, 5000,10000},
+    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S2_PRESSED, 5000,10000},
+    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S3_PRESSED, 5000,10000},
 };
 
 const inputActionStruct buttonActionProperty[]{
     {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_NONE,        0,0},
-    {CONF_ACTION_DEC_SPEED,          INPUT_MAIN_STATE_S1_PRESSED,  0,1000},
-    {CONF_ACTION_INC_SPEED,          INPUT_MAIN_STATE_S3_PRESSED,  0,1000},
-    {CONF_ACTION_CURSOR_CENTER,      INPUT_MAIN_STATE_S2_PRESSED,  0,1000},
-    {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED,  1000,3000},
-    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S13_PRESSED, 0,1000}
+    {CONF_ACTION_DEC_SPEED,          INPUT_MAIN_STATE_S1_PRESSED,  0,3000},
+    {CONF_ACTION_CURSOR_CENTER,      INPUT_MAIN_STATE_S2_PRESSED,  0,3000},
+    {CONF_ACTION_INC_SPEED,          INPUT_MAIN_STATE_S3_PRESSED,  0,3000},
+    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S1_PRESSED,  3000,5000},
+    {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED,  3000,5000},
+    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S3_PRESSED,  3000,5000},
+    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S13_PRESSED, 0,5000}
 };
 
 int inputButtonPinArray[] = { CONF_BUTTON1_PIN, CONF_BUTTON2_PIN, CONF_BUTTON3_PIN };
@@ -81,6 +87,7 @@ pressureStruct pressureValues = { 0.0, 0.0, 0.0 };
 inputStateStruct sapActionState;
 
 int sapActionSize;
+unsigned long sapActionMaxTime = 0;
 
 const inputActionStruct sapActionProperty[]{
     {CONF_ACTION_NOTHING,            PRESS_SAP_MAIN_STATE_NONE,  0,0},
@@ -302,6 +309,8 @@ void initInput()
   is.begin();                                                                     //Begin input switches  
   buttonActionSize = sizeof(buttonActionProperty) / sizeof(inputActionStruct);    //Size of total available input button actions
   switchActionSize = sizeof(switchActionProperty) / sizeof(inputActionStruct);    //Size of total available input switch actions
+  buttonActionMaxTime = getActionMaxTime(buttonActionSize,buttonActionProperty);  //Maximum button action end time
+  switchActionMaxTime = getActionMaxTime(switchActionSize,switchActionProperty);  //Maximum switch action end time  
 }
 
 //***INPUT LOOP FUNCTION***//
@@ -324,8 +333,8 @@ void inputLoop()
   switchState = is.getInputState();
 
   //Evaluate Output Actions
-  evaluateOutputAction(buttonState, buttonActionSize,buttonActionProperty);
-  evaluateOutputAction(switchState, switchActionSize,switchActionProperty);
+  evaluateOutputAction(buttonState, buttonActionMaxTime, buttonActionSize, buttonActionProperty);
+  evaluateOutputAction(switchState, switchActionMaxTime, switchActionSize, switchActionProperty);
 }
 
 //*********************************//
@@ -348,8 +357,33 @@ void initSipAndPuff()
   getPressureMode(true,false);                                                    //Get the pressure mode stored in flash memory ( 1 = Absolute , 2 = Differential )
   getPressureThreshold(true,false);                                               //Get sip and puff pressure thresholds stored in flash memory 
   sapActionSize = sizeof(sapActionProperty) / sizeof(inputActionStruct);          //Size of total available sip and puff actions
+  sapActionMaxTime = getActionMaxTime(sapActionSize,sapActionProperty);           //Maximum end action time
+  
 }
 
+
+//***GET ACTION MAX TIME FUNCTION***//
+// Function   : getActionMaxTime 
+// 
+// Description: This function finds the maximum end action time
+//
+// Parameters : actionSize : int : size of available actions
+//              actionProperty : const inputActionStruct : array of all possible actions
+// 
+// Return     : actionMaxTime : unsigned long : maximum end action time
+//****************************************//
+unsigned long getActionMaxTime(int actionSize,const inputActionStruct actionProperty[])
+{
+  unsigned long actionMaxTime = 0;
+  //Loop over all possible outputs
+  for (int actionIndex = 0; actionIndex < actionSize; actionIndex++)
+  {
+    if(actionMaxTime < actionProperty[actionIndex].inputActionEndTime){
+       actionMaxTime = actionProperty[actionIndex].inputActionEndTime;
+    }
+  }
+  return actionMaxTime;
+}
 
 //***PRESSURE LOOP FUNCTION***//
 // Function   : inputLoop 
@@ -371,7 +405,7 @@ void pressureLoop()
   sapActionState = ps.getState();
 
   //Output action logic
-  evaluateOutputAction(sapActionState, sapActionSize,sapActionProperty);
+  evaluateOutputAction(sapActionState, sapActionMaxTime, sapActionSize, sapActionProperty);
 }
 
 //***RELEASE OUTPUT FUNCTION***//
@@ -403,12 +437,13 @@ void releaseOutputAction()
 // Description: This function evaluates and performs output action
 //
 // Parameters : actionState : inputStateStruct : Current input state 
+//              actionMaxEndTime : unsigned long : maximum end action time
 //              actionSize : int : size of available actions
 //              actionProperty : const inputActionStruct : array of all possible actions
 // 
 // Return     : void 
 //****************************************//
-void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inputActionStruct actionProperty[])
+void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxEndTime, int actionSize, const inputActionStruct actionProperty[])
 {
   bool canEvaluateAction = true;
   //Output action logic
@@ -422,6 +457,11 @@ void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inp
     //Set new state of current output action 
     releaseOutputAction();
     canEvaluateAction = false;
+  } //Detected input release after defined time limits. 
+  else if (actionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
+      actionState.elapsedTime > actionMaxEndTime){
+      //Set Led color to default 
+      setLedDefault();      
   }
 
   //Loop over all possible outputs
@@ -436,16 +476,20 @@ void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inp
       //Get action index 
       tempActionIndex = actionProperty[actionIndex].inputActionNumber;
 
+      //Set Led color to default 
+      setLedDefault();
       //Set Led state 
       setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
       ledActionProperty[tempActionIndex].ledEndColor, 
       ledActionProperty[tempActionIndex].ledNumber, 
-      1, 
-      CONF_LED_REACTION_TIME, 
+      CONF_INPUT_LED_BLINK, 
+      CONF_INPUT_LED_DELAY, 
       CONF_LED_BRIGHTNESS);
       outputAction = tempActionIndex;
 
-      //Perform output action and led action 
+      //Perform led action 
+      performLedAction(ledCurrentState);
+      //Perform output action 
       performOutputAction(tempActionIndex);
 
       break;
@@ -458,8 +502,10 @@ void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inp
       //Get action index 
       tempActionIndex = actionProperty[actionIndex].inputActionNumber; 
 
+      //Set Led color to default 
+      setLedDefault();
       //Set Led state 
-      setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
+      setLedState(LED_ACTION_ON, 
       ledActionProperty[tempActionIndex].ledStartColor, 
       ledActionProperty[tempActionIndex].ledNumber, 
       0, 
@@ -484,8 +530,6 @@ void evaluateOutputAction(inputStateStruct actionState, int actionSize,const inp
 //****************************************//
 void performOutputAction(int action)
 {
-  //Perform led action 
-  performLedAction(ledCurrentState);
   switch (action)
   {
     case CONF_ACTION_NOTHING:
@@ -695,12 +739,16 @@ void performJoystickCenter(int* args)
 {
   int stepNumber = (int)args;
   unsigned long readingDuration = CONF_JOY_INIT_READING_DELAY*CONF_JOY_INIT_READING_NUMBER; //Duration of the center point reading s
-  unsigned long currentReadingStart = CONF_JOY_INIT_START_TIME;                             //Time until start of current reading.
+  unsigned long currentReadingStart = CONF_JOY_INIT_START_DELAY + (CONF_JOY_INIT_STEP_BLINK_DELAY*((CONF_JOY_INIT_STEP_BLINK*2)+1));                             //Time until start of current reading.
   unsigned long nextStepStart = currentReadingStart+readingDuration;                        //Time until start of next step.
   pointFloatType centerPoint;
 
   if (stepNumber == 0)  //STEP 0: Joystick Compensation Center Point
   {
+    if(ledActionEnabled){
+      setLedState(LED_ACTION_BLINK, LED_CLR_PURPLE, 2, CONF_JOY_INIT_STEP_BLINK, CONF_JOY_INIT_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
+      performLedAction(ledCurrentState);                                                                  // LED Feedback to show start of performJoystickCalibrationStep
+    }
     //Start timer to get 5 reading every 100ms
     calibTimerId[1] = calibTimer.setTimer(CONF_JOY_INIT_READING_DELAY, currentReadingStart, CONF_JOY_INIT_READING_NUMBER, performJoystickCenterStep, (int *)stepNumber);
     ++stepNumber;                                  
@@ -757,17 +805,20 @@ void performJoystickCalibration(int* args)
 {
   int stepNumber = (int)args;
   unsigned long readingDuration = CONF_JOY_CALIB_READING_DELAY*CONF_JOY_CALIB_READING_NUMBER; //Duration of the max corner reading 
-  unsigned long currentReadingStart = CONF_JOY_CALIB_BLINK_TIME*((stepNumber*2)+1);           //Time until start of current reading.
-  unsigned long nextStepStart = currentReadingStart+readingDuration+CONF_JOY_CALIB_STEP_DELAY; //Time until start of next reading.
+  unsigned long currentReadingStart = CONF_JOY_CALIB_STEP_DELAY + (CONF_JOY_CALIB_STEP_BLINK_DELAY*((CONF_JOY_CALIB_STEP_BLINK*2)+1));                             //Time until start of current reading
+  //Time until start of current reading.
+  unsigned long nextStepStart = currentReadingStart+readingDuration+CONF_JOY_CALIB_START_DELAY; //Time until start of next reading.
 
   if (stepNumber == 0)  //STEP 0
   {
+    setLedState(LED_ACTION_BLINK, LED_CLR_PURPLE, 4, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
+    performLedAction(ledCurrentState);   
     ++stepNumber;
     calibTimerId[0] = calibTimer.setTimeout(nextStepStart, performJoystickCalibration, (int *)stepNumber);      // Start next step
   }
   else if (stepNumber < 5) //STEP 1-4: Joystick Calibration Corner Points 
   {
-    setLedState(LED_ACTION_BLINK, LED_CLR_PURPLE, 4, stepNumber, CONF_JOY_CALIB_BLINK_TIME,CONF_LED_BRIGHTNESS);    
+    setLedState(LED_ACTION_BLINK, LED_CLR_PURPLE, 4, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
     performLedAction(ledCurrentState);                                                                  // LED Feedback to show start of performJoystickCalibrationStep
     js.zeroInputMax(stepNumber);                                                                        //Clear the existing calibration value 
     calibTimerId[1] = calibTimer.setTimer(CONF_JOY_CALIB_READING_DELAY, currentReadingStart, CONF_JOY_CALIB_READING_NUMBER, performJoystickCalibrationStep, (int *)stepNumber);
@@ -776,7 +827,7 @@ void performJoystickCalibration(int* args)
   } 
   else if (stepNumber == 5)
   {
-    setLedState(LED_ACTION_NONE, LED_CLR_NONE, 4, 0, 0,CONF_LED_BRIGHTNESS_LOW);                        //Turn off Led's
+    setLedState(LED_ACTION_NONE, LED_CLR_NONE, 4, 0, 0,CONF_LED_BRIGHTNESS);                            //Turn off Led's
     performLedAction(ledCurrentState);
     setJoystickInitialization(false, false); 
     js.setMinimumRadius();                                                                              //Update the minimum cursor operating radius 
@@ -981,7 +1032,7 @@ void initLed()
 //****************************************//
 void startupFeedback()
 {
-  setLedState(LED_ACTION_BLINK, 1, 4, 4, CONF_LED_STARTUP_COLOR_TIME, CONF_LED_BRIGHTNESS);
+  setLedState(LED_ACTION_BLINK, 1, 4, 4, CONF_STARTUP_LED_STEP_TIME, CONF_LED_BRIGHTNESS);
   ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
 
 }
@@ -1066,7 +1117,7 @@ void ledBlinkEffect(ledStateStruct* args){
 
   if(ledStateTimer.getNumRuns(0)==((args->ledBlinkNumber)*2)+1){
     
-     setLedState(LED_ACTION_NONE, LED_CLR_NONE, 0, 0, 0,CONF_LED_BRIGHTNESS_LOW);
+     setLedState(LED_ACTION_NONE, LED_CLR_NONE, 0, 0, 0,CONF_LED_BRIGHTNESS);
      
   }   
 }

@@ -1,7 +1,15 @@
+/* 
+* File: LSPressure.h
+* Firmware: LipSync4
+* Developed by: MakersMakingChange
+* Version: Alpha 2 (06 April 2022) 
+* Copyright Neil Squire Society 2022. 
+* License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
+*/
+
 //Header definition
 #ifndef _LSPRESSURE_H
 #define _LSPRESSURE_H
-
 
 #include <Adafruit_LPS35HW.h>   // Stand-alone i2C Pressure Sensor
 #include <Adafruit_BMP280.h>    // Pressure Sensor onboard Feather nRF5285280 Sense
@@ -33,6 +41,8 @@
 #define PRESS_SAP_SEC_STATE_WAITING 0   //Waiting : No sip or puff
 #define PRESS_SAP_SEC_STATE_STARTED 1   //Started : Sip or puff being performed 
 #define PRESS_SAP_SEC_STATE_RELEASED 2  //Released : Sip or puff was just released 
+
+#define PRESS_SAP_ACTION_TIMEOUT 60000  //Rest timer
 
 //Pressure structure 
 typedef struct {
@@ -439,7 +449,7 @@ void LSPressure::updateState() {
   }
 
   //No action in 1 minute : reset timer
-  if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_WAITING && mainStateTimer.elapsedTime(sapStateTimerId)>CONF_ACTION_TIMEOUT){
+  if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_WAITING && mainStateTimer.elapsedTime(sapStateTimerId)>PRESS_SAP_ACTION_TIMEOUT){
       setZeroPressure();                                   //Update pressure compensation value 
       //Reset and start the timer    
       mainStateTimer.restartTimer(sapStateTimerId);   

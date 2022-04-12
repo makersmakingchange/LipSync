@@ -1,3 +1,13 @@
+
+/* 
+* File: LSOutput.h
+* Firmware: LipSync4
+* Developed by: MakersMakingChange
+* Version: Alpha 2 (06 April 2022) 
+* Copyright Neil Squire Society 2022. 
+* License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
+*/
+
 //Header definition
 #ifndef _LSOUTPUT_H
 #define _LSOUTPUT_H
@@ -18,6 +28,7 @@
 #define LED_CLR_YELLOW 7
 #define LED_CLR_GREEN 8
 #define LED_CLR_TEAL 9
+#define LED_CLR_WHITE 10
 
 #define LED_ACTION_NONE 0
 #define LED_ACTION_OFF 1
@@ -54,7 +65,8 @@ const colorStruct colorProperty[] {
     {LED_CLR_ORANGE,"Orange",{60,20,0}},
     {LED_CLR_YELLOW,"Yellow",{50,60,0}}, 
     {LED_CLR_GREEN,"Green",{0,60,0}},
-    {LED_CLR_TEAL,"Teal",{0,128,128}}
+    {LED_CLR_TEAL,"Teal",{0,128,128}},
+    {LED_CLR_WHITE,"White",{255,255,255}}
 };   
 
 

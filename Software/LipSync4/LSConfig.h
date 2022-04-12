@@ -1,3 +1,12 @@
+/* 
+* File: LSConfig.h
+* Firmware: LipSync4
+* Developed by: MakersMakingChange
+* Version: Alpha 2 (06 April 2022) 
+* Copyright Neil Squire Society 2022. 
+* License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
+*/
+
 //***DO NOT CHANGE***//
 #define CONF_LIPSYNC_MODEL 1                              //Mouse = 1 , Gamepad = 2
 #define CONF_LIPSYNC_VERSION 1.0
@@ -29,7 +38,7 @@
 
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
-#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"CM\":0,\"SS\":5,\"PM\":0,\"ST\":0.0,\"PT\":0.0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[20.0,20.0],\"CA2\":[-20.0,20.0],\"CA3\":[-20.0,-20.0],\"CA4\":[20.0,-20.0],\"DM\":0}"
+#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"CM\":0,\"SS\":5,\"PM\":0,\"ST\":0.0,\"PT\":0.0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[15.0,15.0],\"CA2\":[-15.0,15.0],\"CA3\":[-15.0,-15.0],\"CA4\":[15.0,-15.0],\"DM\":0}"
 
 //Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 50          //50ms
@@ -64,21 +73,40 @@
 //***CAN BE CHANGED***//
 #define CONF_API_ENABLED true               //Enable or Disable API
 
+//Communication Method Default settings
+#define CONF_COM_MODE_DEFAULT 1             //0 = None , 1 = USB , 2 = Wireless  
+
+//Led Default settings
+#define CONF_LED_BRIGHTNESS 150
+
+//Startup Default settings
+#define CONF_STARTUP_LED_STEP_TIME 500      //Time for each color
+
 //Joystick Default settings
 #define CONF_JOY_DEADZONE_DEFAULT 0.12
 #define CONF_JOY_MIN_DEADZONE 0.01
 #define CONF_JOY_MAX_DEADZONE 1.0
-#define CONF_JOY_CALIB_BLINK_TIME 300
-#define CONF_JOY_CALIB_START_TIME 300
+#define CONF_JOY_CALIB_START_DELAY 500
+#define CONF_JOY_CALIB_STEP_DELAY 2000
+#define CONF_JOY_CALIB_STEP_BLINK 1
+#define CONF_JOY_CALIB_STEP_BLINK_DELAY 150
 #define CONF_JOY_CALIB_READING_DELAY 200
 #define CONF_JOY_CALIB_READING_NUMBER 10
-#define CONF_JOY_CALIB_STEP_DELAY 2000
 
-#define CONF_JOY_INIT_START_TIME 500
+#define CONF_JOY_INIT_START_DELAY 500
+#define CONF_JOY_INIT_STEP_BLINK 1
+#define CONF_JOY_INIT_STEP_BLINK_DELAY 150
 #define CONF_JOY_INIT_READING_DELAY 100
 #define CONF_JOY_INIT_READING_NUMBER 5
 
 #define CONF_JOY_SPEED_LEVEL_DEFAULT 5
+#define CONF_JOY_SPEED_CHANGE_LED_DELAY 150
+#define CONF_JOY_SPEED_CHANGE_LED_BLINK 1
+#define CONF_JOY_SPEED_DEC_LED_NUMBER 1
+#define CONF_JOY_SPEED_INC_LED_NUMBER 3
+#define CONF_JOY_SPEED_LIMIT_LED_DELAY 50
+#define CONF_JOY_SPEED_LIMIT_LED_BLINK 3
+#define CONF_JOY_SPEED_LIMIT_LED_NUMBER 4
 
 //Sip and Puff Default settings
 #define CONF_SIP_THRESHOLD 3.0                    //hPa
@@ -90,21 +118,14 @@
                                                   // 1 = Absolute or PRESS_MODE_ABS
                                                   // 2 = Differential or PRESS_MODE_DIFF
 
-//Led Default settings
-#define CONF_LED_BRIGHTNESS 150 
-#define CONF_LED_BRIGHTNESS_LOW 10 
-#define CONF_LED_BRIGHTNESS_HIGH 150 
 
-#define CONF_LED_REACTION_TIME 200        //Led ON time for input actions 
-#define CONF_LED_STARTUP_COLOR_TIME 500   //Time for each color
+#define CONF_INPUT_LED_DELAY 150          //Led blink time for input actions 
+#define CONF_INPUT_LED_BLINK 1            //Led blink number  for input actions 
 
-#define CONF_COM_MODE_DEFAULT 1           //0 = None , 1 = USB , 2 = Wireless  
-
+//Debug Default settings
 #define CONF_DEBUG_MODE_DEFAULT  0        //Default debug mode state = Off 
                                           // 0 = Off
                                           // 1 = joystick debug On
                                           // 2 = pressure debug On
                                           // 3 = buttons debug On
                                           // 4 = switch debug on
-
-#define CONF_ACTION_TIMEOUT 60000         //Rest timer?

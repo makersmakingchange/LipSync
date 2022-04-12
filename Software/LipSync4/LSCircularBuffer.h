@@ -1,8 +1,10 @@
-/*
- *  Based on CircularBuffer.h
- *
- */
-
+/* 
+* File: LSCircularBuffer.h
+* Firmware: LipSync4
+* Edited by: MakersMakingChange
+* Based on: CircularBuffer.h
+* Version: Alpha 2 (06 April 2022) 
+*/
 //Header definition
 #ifndef _LSCIRCULARBUFFER_H
 #define _LSCIRCULARBUFFER_H

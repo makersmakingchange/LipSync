@@ -1,4 +1,11 @@
-
+/* 
+* File: LSAPI.ino
+* Firmware: LipSync4
+* Developed by: MakersMakingChange
+* Version: Alpha 2 (06 April 2022) 
+* Copyright Neil Squire Society 2022. 
+* License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
+*/
 
 //***API FUNCTIONS***// - DO NOT CHANGE
 typedef void (*FunctionPointer)(bool, bool, String);      //Type definition for API function pointer
@@ -457,10 +464,20 @@ void increaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
 
   tempJoystickSpeedLevel++;
   if(tempJoystickSpeedLevel <= CONF_JOY_SPEED_LEVEL_MAX){
-    setLedState(LED_ACTION_BLINK, LED_CLR_BLUE, 3, tempJoystickSpeedLevel+1, 50, CONF_LED_BRIGHTNESS);   //Blink tempJoystickSpeedLevel times
+    setLedState(LED_ACTION_BLINK, 
+    LED_CLR_BLUE, 
+    CONF_JOY_SPEED_INC_LED_NUMBER, 
+    CONF_JOY_SPEED_CHANGE_LED_BLINK, 
+    CONF_JOY_SPEED_CHANGE_LED_DELAY, 
+    CONF_LED_BRIGHTNESS);   //Blink once
   } 
   else{
-    setLedState(LED_ACTION_BLINK, LED_CLR_PURPLE, 4, 6, 50, CONF_LED_BRIGHTNESS);   //Blink 6 times
+    setLedState(LED_ACTION_BLINK, 
+    LED_CLR_PURPLE, 
+    CONF_JOY_SPEED_LIMIT_LED_NUMBER, 
+    CONF_JOY_SPEED_LIMIT_LED_BLINK, 
+    CONF_JOY_SPEED_LIMIT_LED_DELAY, 
+    CONF_LED_BRIGHTNESS);   //Blink 3 times
   }
 
   setJoystickSpeed(responseEnabled, apiEnabled, tempJoystickSpeedLevel);
@@ -483,10 +500,20 @@ void decreaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
 
   tempJoystickSpeedLevel--;
   if(tempJoystickSpeedLevel >= CONF_JOY_SPEED_LEVEL_MIN){
-    setLedState(LED_ACTION_BLINK, LED_CLR_RED, 1, tempJoystickSpeedLevel+1, 50, CONF_LED_BRIGHTNESS);   //Blink tempJoystickSpeedLevel times
+    setLedState(LED_ACTION_BLINK, 
+    LED_CLR_MAGENTA, 
+    CONF_JOY_SPEED_DEC_LED_NUMBER, 
+    CONF_JOY_SPEED_CHANGE_LED_BLINK, 
+    CONF_JOY_SPEED_CHANGE_LED_DELAY, 
+    CONF_LED_BRIGHTNESS);   //Blink once
   } 
   else{
-    setLedState(LED_ACTION_BLINK, LED_CLR_PURPLE, 4, 6, 50, CONF_LED_BRIGHTNESS);   //Blink 6 times
+    setLedState(LED_ACTION_BLINK, 
+    LED_CLR_PURPLE, 
+    CONF_JOY_SPEED_LIMIT_LED_NUMBER, 
+    CONF_JOY_SPEED_LIMIT_LED_BLINK, 
+    CONF_JOY_SPEED_LIMIT_LED_DELAY, 
+    CONF_LED_BRIGHTNESS);   //Blink 3 times
   }
   
     
@@ -544,7 +571,7 @@ void getJoystickInitialization(bool responseEnabled, bool apiEnabled, String opt
 void setJoystickInitialization(bool responseEnabled, bool apiEnabled) {
   int stepNumber = 0;
   canOutputAction = false;
-  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_INIT_START_TIME, performJoystickCenter, (int *)stepNumber);  
+  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_INIT_START_DELAY, performJoystickCenter, (int *)stepNumber);  
 }
 //***SET JOYSTICK INITIALIZATION API FUNCTION***//
 // Function   : setJoystickInitialization
@@ -624,7 +651,7 @@ void setJoystickCalibration(bool responseEnabled, bool apiEnabled) {
   js.clear();                                                                                           //Clear previous calibration values
   int stepNumber = 0;
   canOutputAction = false;
-  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_CALIB_START_TIME, performJoystickCalibration, (int *)stepNumber);  //Start the process
+  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_CALIB_START_DELAY, performJoystickCalibration, (int *)stepNumber);  //Start the process
 }
 //***SET JOYSTICK CALIBRATION API FUNCTION***//
 // Function   : setJoystickCalibration

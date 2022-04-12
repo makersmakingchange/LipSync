@@ -1,3 +1,12 @@
+/* 
+* File: LSJoystick.h
+* Firmware: LipSync4
+* Developed by: MakersMakingChange
+* Version: Alpha 2 (06 April 2022) 
+* Copyright Neil Squire Society 2022. 
+* License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
+*/
+
 //Header definition
 #ifndef _LSJOYSTICK_H
 #define _LSJOYSTICK_H
@@ -5,7 +14,7 @@
 #include <Tlv493d.h>                    //Infinion TLV493 magnetic sensor
 
 #define JOY_RAW_BUFF_SIZE 10            //The size of joystickRawBuffer
-#define JOY_INPUT_BUFF_SIZE 5        //The size of joystickInputBuffer
+#define JOY_INPUT_BUFF_SIZE 5           //The size of joystickInputBuffer
 #define JOY_OUTPUT_BUFF_SIZE 5          //The size of joystickOutputBuffer
 #define JOY_CENTER_BUFF_SIZE 5          //The size of joystickCenterBuffer
 
@@ -30,18 +39,6 @@
 #define JOY_OUTPUT_DEADZONE_FACTOR 0.05 //The default output deadzone factor (%5 of JOY_INPUT_XY_MAX)
 
 #define JOY_OUTPUT_RANGE_LEVEL 5        //The default output range level or output movement upper range 
-
-//Struct of float point
-typedef struct {
-  float x;
-  float y;
-} pointFloatType;
-
-//Struct of int point
-typedef struct {
-  int x;
-  int y;
-} pointIntType;
 
 
 class LSJoystick {
