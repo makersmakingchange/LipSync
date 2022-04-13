@@ -30,7 +30,7 @@
 
 #define JOY_INPUT_XY_MAX 1024           //The max range of mapped input from float to int(-1024 to 1024)
 
-#define JOY_INPUT_CHANGE_TOLERANCE 0.10 //The output change tolerance in mT
+#define JOY_INPUT_CHANGE_TOLERANCE 0.1 //The output change tolerance in mT
 
 #define JOY_INPUT_DEADZONE 0.5          //The input deadzone in mT
 
@@ -353,11 +353,13 @@ void LSJoystick::setOutputRange(int rangeLevel){
 //*********************************//
 void LSJoystick::setMinimumRadius(){
   float tempRadius = 0.0;
+  pointFloatType tempPoint = {15.0,15.0};
+  _inputRadius = magnitudePoint(tempPoint,magnetInputCalibration[0])/sqrt(2.0);
   //Loop through calibration points and calculate the smallest magnitude from center point
   for (int i = 1; i < JOY_CALIBR_ARRAY_SIZE; i++) {
     tempRadius = (sqrt(sq(magnetInputCalibration[i].x - magnetInputCalibration[0].x) + sq(magnetInputCalibration[i].y - magnetInputCalibration[0].y))/sqrt(2.0));
     //Make sure the calibration point is valid and initial value of _inputRadius is charged 
-    if(magnitudePoint(magnetInputCalibration[i])> 0.0 && (_inputRadius==0.0 || tempRadius<_inputRadius)) {  //Set smallest magnitude as radius
+    if(magnitudePoint(magnetInputCalibration[i])> 0.0 && (tempRadius<_inputRadius)) {  //Set smallest magnitude as radius
       _inputRadius = tempRadius; 
     }
   }
@@ -675,9 +677,8 @@ pointIntType LSJoystick::processInputReading(pointFloatType inputPoint) {
     outputPoint.x = mapFloatInt(centeredPoint.x, -1*_inputRadius, _inputRadius, -1*JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX);
     outputPoint.y = mapFloatInt(centeredPoint.y, -1*_inputRadius, _inputRadius, -1*JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX);
  
-//    Serial.print(outputPoint.x);  
-//    Serial.print(",");  
-//    Serial.println(outputPoint.y); 
+ 
+
  
   return outputPoint;
 }

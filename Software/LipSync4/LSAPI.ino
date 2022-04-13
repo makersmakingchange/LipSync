@@ -1204,9 +1204,11 @@ void getCommunicationMode(bool responseEnabled, bool apiEnabled, String optional
 //*********************************//
 void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommunicationMode) {
   String commandKey = "CM";
+  
   if ((inputCommunicationMode >= CONF_COM_MODE_MIN) && (inputCommunicationMode <= CONF_COM_MODE_MAX))
   {
     comMode = inputCommunicationMode;
+    setCommunicationModeLed(comMode);
     setLedDefault();
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputCommunicationMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "CM,1", true, inputCommunicationMode);
@@ -1217,6 +1219,26 @@ void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommun
 
   }
 
+}
+
+//***SET COMMUNICATION MODE LED FUNCTION***//
+// Function   : setCommunicationModeLed
+//
+// Description: This function sets the color communication mode blink LED action.
+//
+// Parameters :  inputCommunicationMode : int : The new communication mode state ( 0 = None, 1 = USB , 2 = BLE )
+//
+// Return     : void
+//*********************************//
+void setCommunicationModeLed(int inputCommunicationMode) {
+    int modeLedColor = LED_CLR_NONE;
+    if(inputCommunicationMode==CONF_COM_MODE_USB) {
+      modeLedColor = LED_CLR_WHITE;
+    } else if (inputCommunicationMode==CONF_COM_MODE_BLE) {
+      modeLedColor = LED_CLR_BLUE;
+    }
+    setLedState(LED_ACTION_BLINK, modeLedColor, CONF_COM_MODE_LED_NUMBER, CONF_COM_MODE_LED_BLINK, CONF_COM_MODE_LED_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
+    performLedAction(ledCurrentState);   
 }
 //***SET COMMUNICATION MODE API FUNCTION***//
 // Function   : setCommunicationMode
