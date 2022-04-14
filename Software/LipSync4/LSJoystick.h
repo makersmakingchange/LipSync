@@ -2,7 +2,7 @@
 * File: LSJoystick.h
 * Firmware: LipSync4
 * Developed by: MakersMakingChange
-* Version: Alpha 2 (06 April 2022) 
+* Version: Alpha 2 (14 April 2022) 
 * Copyright Neil Squire Society 2022. 
 * License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
 */

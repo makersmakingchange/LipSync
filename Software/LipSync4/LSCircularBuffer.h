@@ -3,7 +3,7 @@
 * Firmware: LipSync4
 * Edited by: MakersMakingChange
 * Based on: CircularBuffer.h
-* Version: Alpha 2 (06 April 2022) 
+* Version: Alpha 2 (14 April 2022) 
 */
 //Header definition
 #ifndef _LSCIRCULARBUFFER_H
