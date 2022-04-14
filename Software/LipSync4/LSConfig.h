@@ -38,13 +38,13 @@
 
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
-#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"CM\":0,\"SS\":5,\"PM\":0,\"ST\":0.0,\"PT\":0.0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[20.0,20.0],\"CA2\":[-20.0,20.0],\"CA3\":[-20.0,-20.0],\"CA4\":[20.0,-20.0],\"DM\":0}"
+#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"CM\":0,\"SS\":5,\"PM\":0,\"ST\":0.0,\"PT\":0.0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[15.0,15.0],\"CA2\":[-15.0,15.0],\"CA3\":[-15.0,-15.0],\"CA4\":[15.0,-15.0],\"DM\":0}"
 
 //Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 50          //50ms
 #define CONF_PRESSURE_POLL_RATE 50          //50ms
 #define CONF_INPUT_POLL_RATE 50             //50ms
-#define CONF_BLE_FEEDBACK_POLL_RATE 1000    //1s
+#define CONF_BT_FEEDBACK_POLL_RATE 1000    //1s
 #define CONF_DEBUG_POLL_RATE 100            //100ms
 
 //Joystick values 
@@ -82,28 +82,44 @@
 //Startup Default settings
 #define CONF_STARTUP_LED_STEP_TIME 500      //Time for each color
 
-//Joystick Default settings
+//Joystick Deadzone Default settings
 #define CONF_JOY_DEADZONE_DEFAULT 0.12
 #define CONF_JOY_MIN_DEADZONE 0.01
 #define CONF_JOY_MAX_DEADZONE 1.0
-#define CONF_JOY_CALIB_BLINK_TIME 300
-#define CONF_JOY_CALIB_START_TIME 300
-#define CONF_JOY_CALIB_READING_DELAY 200
-#define CONF_JOY_CALIB_READING_NUMBER 10
-#define CONF_JOY_CALIB_STEP_DELAY 2000
 
-#define CONF_JOY_INIT_START_TIME 500
+//Joystick calibration points and related LED feedback settings
+#define CONF_JOY_CALIB_START_DELAY 1000
+#define CONF_JOY_CALIB_START_LED_COLOR LED_CLR_PURPLE                                           //Joystick Calibration process start and end color
+#define CONF_JOY_CALIB_STEP_DELAY 1500
+#define CONF_JOY_CALIB_LED_NUMBER 4
+#define CONF_JOY_CALIB_LED_COLOR LED_CLR_RED                                                    //The color indicates the joystick Calibration process 
+#define CONF_JOY_CALIB_STEP_BLINK 1
+#define CONF_JOY_CALIB_STEP_BLINK_DELAY 150
+#define CONF_JOY_CALIB_READING_DELAY 200
+#define CONF_JOY_CALIB_STEP_BLINK_COLOR LED_CLR_YELLOW                                          //The color indicates the joystick Calibration about to start
+#define CONF_JOY_CALIB_READING_NUMBER 10
+
+//Joystick center initialization and related LED feedback settings 
+#define CONF_JOY_INIT_START_DELAY 1000
+#define CONF_JOY_INIT_LED_NUMBER 2
+#define CONF_JOY_INIT_LED_COLOR LED_CLR_RED                                                     //Center initialization actual step color 
+#define CONF_JOY_INIT_STEP_BLINK 1
+#define CONF_JOY_INIT_STEP_BLINK_DELAY 150
+#define CONF_JOY_INIT_STEP_BLINK_COLOR LED_CLR_YELLOW                                           //Center initialization start blink color 
 #define CONF_JOY_INIT_READING_DELAY 100
 #define CONF_JOY_INIT_READING_NUMBER 5
 
+//Joystick cursor speed change and related LED feedback settings 
 #define CONF_JOY_SPEED_LEVEL_DEFAULT 5
 #define CONF_JOY_SPEED_CHANGE_LED_DELAY 150
 #define CONF_JOY_SPEED_CHANGE_LED_BLINK 1
 #define CONF_JOY_SPEED_DEC_LED_NUMBER 1
+#define CONF_JOY_SPEED_DEC_LED_COLOR LED_CLR_PURPLE                                            //Decrease speed color
 #define CONF_JOY_SPEED_INC_LED_NUMBER 3
+#define CONF_JOY_SPEED_INC_LED_COLOR LED_CLR_PURPLE                                            //Increase speed color
 #define CONF_JOY_SPEED_LIMIT_LED_DELAY 50
 #define CONF_JOY_SPEED_LIMIT_LED_BLINK 3
-#define CONF_JOY_SPEED_LIMIT_LED_NUMBER 4
+#define CONF_JOY_SPEED_LIMIT_LED_COLOR LED_CLR_RED                                             //Out of range limit speed color
 
 //Sip and Puff Default settings
 #define CONF_SIP_THRESHOLD 3.0                    //hPa
@@ -115,14 +131,28 @@
                                                   // 1 = Absolute or PRESS_MODE_ABS
                                                   // 2 = Differential or PRESS_MODE_DIFF
 
-
+//Inputs and related LED feedback settings
 #define CONF_INPUT_LED_DELAY 150          //Led blink time for input actions 
 #define CONF_INPUT_LED_BLINK 1            //Led blink number  for input actions 
 
+//Communication Mode Default settings
+#define CONF_COM_MODE_LED_NUMBER  2
+#define CONF_COM_MODE_LED_BLINK   1
+#define CONF_COM_MODE_LED_BLINK_DELAY   1000
+
+
+//Joystick center initialization and related LED feedback settings 
+#define CONF_BT_SCAN_BLINK_DELAY 500
+#define CONF_BT_SCAN_BLINK_NUMBER 1
+#define CONF_BT_LED_NUMBER 2
+#define CONF_BT_LED_COLOR LED_CLR_BLUE 
+#define CONF_BT_LED_BRIGHTNESS CONF_LED_BRIGHTNESS
+
 //Debug Default settings
-#define CONF_DEBUG_MODE_DEFAULT  0        //Default debug mode state = Off 
-                                          // 0 = Off
-                                          // 1 = joystick debug On
-                                          // 2 = pressure debug On
-                                          // 3 = buttons debug On
-                                          // 4 = switch debug on
+#define CONF_DEBUG_MODE_DEFAULT  0        // Default debug mode state = Off 
+                                          // 0 = Debug mode is Off
+                                          // 1 = Joystick debug mode is On
+                                          // 2 = Pressure debug mode is On
+                                          // 3 = Buttons debug mode is On
+                                          // 4 = Switch debug mode is On
+                                          // 5 = Sip & Puff state debug mode is On

@@ -465,7 +465,7 @@ void increaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
   tempJoystickSpeedLevel++;
   if(tempJoystickSpeedLevel <= CONF_JOY_SPEED_LEVEL_MAX){
     setLedState(LED_ACTION_BLINK, 
-    LED_CLR_BLUE, 
+    CONF_JOY_SPEED_INC_LED_COLOR, 
     CONF_JOY_SPEED_INC_LED_NUMBER, 
     CONF_JOY_SPEED_CHANGE_LED_BLINK, 
     CONF_JOY_SPEED_CHANGE_LED_DELAY, 
@@ -473,8 +473,8 @@ void increaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
   } 
   else{
     setLedState(LED_ACTION_BLINK, 
-    LED_CLR_PURPLE, 
-    CONF_JOY_SPEED_LIMIT_LED_NUMBER, 
+    CONF_JOY_SPEED_LIMIT_LED_COLOR, 
+    CONF_JOY_SPEED_INC_LED_NUMBER, 
     CONF_JOY_SPEED_LIMIT_LED_BLINK, 
     CONF_JOY_SPEED_LIMIT_LED_DELAY, 
     CONF_LED_BRIGHTNESS);   //Blink 3 times
@@ -501,7 +501,7 @@ void decreaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
   tempJoystickSpeedLevel--;
   if(tempJoystickSpeedLevel >= CONF_JOY_SPEED_LEVEL_MIN){
     setLedState(LED_ACTION_BLINK, 
-    LED_CLR_MAGENTA, 
+    CONF_JOY_SPEED_DEC_LED_COLOR, 
     CONF_JOY_SPEED_DEC_LED_NUMBER, 
     CONF_JOY_SPEED_CHANGE_LED_BLINK, 
     CONF_JOY_SPEED_CHANGE_LED_DELAY, 
@@ -509,8 +509,8 @@ void decreaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
   } 
   else{
     setLedState(LED_ACTION_BLINK, 
-    LED_CLR_PURPLE, 
-    CONF_JOY_SPEED_LIMIT_LED_NUMBER, 
+    CONF_JOY_SPEED_LIMIT_LED_COLOR, 
+    CONF_JOY_SPEED_DEC_LED_NUMBER, 
     CONF_JOY_SPEED_LIMIT_LED_BLINK, 
     CONF_JOY_SPEED_LIMIT_LED_DELAY, 
     CONF_LED_BRIGHTNESS);   //Blink 3 times
@@ -571,7 +571,7 @@ void getJoystickInitialization(bool responseEnabled, bool apiEnabled, String opt
 void setJoystickInitialization(bool responseEnabled, bool apiEnabled) {
   int stepNumber = 0;
   canOutputAction = false;
-  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_INIT_START_TIME, performJoystickCenter, (int *)stepNumber);  
+  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_INIT_START_DELAY, performJoystickCenter, (int *)stepNumber);  
 }
 //***SET JOYSTICK INITIALIZATION API FUNCTION***//
 // Function   : setJoystickInitialization
@@ -651,7 +651,7 @@ void setJoystickCalibration(bool responseEnabled, bool apiEnabled) {
   js.clear();                                                                                           //Clear previous calibration values
   int stepNumber = 0;
   canOutputAction = false;
-  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_CALIB_START_TIME, performJoystickCalibration, (int *)stepNumber);  //Start the process
+  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_CALIB_START_DELAY, performJoystickCalibration, (int *)stepNumber);  //Start the process
 }
 //***SET JOYSTICK CALIBRATION API FUNCTION***//
 // Function   : setJoystickCalibration
@@ -1204,9 +1204,11 @@ void getCommunicationMode(bool responseEnabled, bool apiEnabled, String optional
 //*********************************//
 void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommunicationMode) {
   String commandKey = "CM";
+  
   if ((inputCommunicationMode >= CONF_COM_MODE_MIN) && (inputCommunicationMode <= CONF_COM_MODE_MAX))
   {
     comMode = inputCommunicationMode;
+    setCommunicationModeLed(comMode);
     setLedDefault();
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputCommunicationMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "CM,1", true, inputCommunicationMode);
@@ -1217,6 +1219,26 @@ void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommun
 
   }
 
+}
+
+//***SET COMMUNICATION MODE LED FUNCTION***//
+// Function   : setCommunicationModeLed
+//
+// Description: This function sets the color communication mode blink LED action.
+//
+// Parameters :  inputCommunicationMode : int : The new communication mode state ( 0 = None, 1 = USB , 2 = BLE )
+//
+// Return     : void
+//*********************************//
+void setCommunicationModeLed(int inputCommunicationMode) {
+    int modeLedColor = LED_CLR_NONE;
+    if(inputCommunicationMode==CONF_COM_MODE_USB) {
+      modeLedColor = LED_CLR_WHITE;
+    } else if (inputCommunicationMode==CONF_COM_MODE_BLE) {
+      modeLedColor = LED_CLR_BLUE;
+    }
+    setLedState(LED_ACTION_BLINK, modeLedColor, CONF_COM_MODE_LED_NUMBER, CONF_COM_MODE_LED_BLINK, CONF_COM_MODE_LED_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
+    performLedAction(ledCurrentState);   
 }
 //***SET COMMUNICATION MODE API FUNCTION***//
 // Function   : setCommunicationMode
