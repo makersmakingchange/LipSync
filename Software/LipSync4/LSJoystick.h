@@ -28,6 +28,8 @@
 
 #define JOY_Z_DIRECTION_THRESHOLD 9     //The threshold used in z axis direction detection 
 
+#define JOY_RAW_XY_MAX 15.0             //The max raw x or y of a calibration point in mT
+
 #define JOY_INPUT_XY_MAX 1024           //The max range of mapped input from float to int(-1024 to 1024)
 
 #define JOY_INPUT_CHANGE_TOLERANCE 0.1 //The output change tolerance in mT
@@ -353,7 +355,7 @@ void LSJoystick::setOutputRange(int rangeLevel){
 //*********************************//
 void LSJoystick::setMinimumRadius(){
   float tempRadius = 0.0;
-  pointFloatType tempPoint = {15.0,15.0};
+  pointFloatType tempPoint = {JOY_RAW_XY_MAX,JOY_RAW_XY_MAX};
   _inputRadius = magnitudePoint(tempPoint,magnetInputCalibration[0])/sqrt(2.0);
   //Loop through calibration points and calculate the smallest magnitude from center point
   for (int i = 1; i < JOY_CALIBR_ARRAY_SIZE; i++) {

@@ -141,7 +141,7 @@
 #define CONF_COM_MODE_LED_BLINK_DELAY   1000
 
 
-//Joystick center initialization and related LED feedback settings 
+//Bluetooth connection and related LED feedback settings 
 #define CONF_BT_SCAN_BLINK_DELAY 500
 #define CONF_BT_SCAN_BLINK_NUMBER 1
 #define CONF_BT_LED_NUMBER 2
