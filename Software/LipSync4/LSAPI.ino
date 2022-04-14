@@ -465,7 +465,7 @@ void increaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
   tempJoystickSpeedLevel++;
   if(tempJoystickSpeedLevel <= CONF_JOY_SPEED_LEVEL_MAX){
     setLedState(LED_ACTION_BLINK, 
-    LED_CLR_BLUE, 
+    CONF_JOY_SPEED_INC_LED_COLOR, 
     CONF_JOY_SPEED_INC_LED_NUMBER, 
     CONF_JOY_SPEED_CHANGE_LED_BLINK, 
     CONF_JOY_SPEED_CHANGE_LED_DELAY, 
@@ -473,8 +473,8 @@ void increaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
   } 
   else{
     setLedState(LED_ACTION_BLINK, 
-    LED_CLR_PURPLE, 
-    CONF_JOY_SPEED_LIMIT_LED_NUMBER, 
+    CONF_JOY_SPEED_LIMIT_LED_COLOR, 
+    CONF_JOY_SPEED_INC_LED_NUMBER, 
     CONF_JOY_SPEED_LIMIT_LED_BLINK, 
     CONF_JOY_SPEED_LIMIT_LED_DELAY, 
     CONF_LED_BRIGHTNESS);   //Blink 3 times
@@ -501,7 +501,7 @@ void decreaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
   tempJoystickSpeedLevel--;
   if(tempJoystickSpeedLevel >= CONF_JOY_SPEED_LEVEL_MIN){
     setLedState(LED_ACTION_BLINK, 
-    LED_CLR_MAGENTA, 
+    CONF_JOY_SPEED_DEC_LED_COLOR, 
     CONF_JOY_SPEED_DEC_LED_NUMBER, 
     CONF_JOY_SPEED_CHANGE_LED_BLINK, 
     CONF_JOY_SPEED_CHANGE_LED_DELAY, 
@@ -509,8 +509,8 @@ void decreaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
   } 
   else{
     setLedState(LED_ACTION_BLINK, 
-    LED_CLR_PURPLE, 
-    CONF_JOY_SPEED_LIMIT_LED_NUMBER, 
+    CONF_JOY_SPEED_LIMIT_LED_COLOR, 
+    CONF_JOY_SPEED_DEC_LED_NUMBER, 
     CONF_JOY_SPEED_LIMIT_LED_BLINK, 
     CONF_JOY_SPEED_LIMIT_LED_DELAY, 
     CONF_LED_BRIGHTNESS);   //Blink 3 times

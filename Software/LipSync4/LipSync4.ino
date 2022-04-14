@@ -12,6 +12,7 @@
 #include "LSTimer.h"
 #include "LSUtils.h"
 #include <ArduinoJson.h>
+#include "LSOutput.h"
 #include "LSConfig.h"
 #include "LSUSB.h"
 #include "LSBLE.h"
@@ -19,31 +20,40 @@
 #include "LSInput.h"
 #include "LSPressure.h"
 #include "LSJoystick.h"
-#include "LSOutput.h"
 #include "LSMemory.h"
 
-int comMode; //0 = None , 1 = USB , 2 = Wireless  
-int debugMode;
-bool ledActionEnabled = false;
+//Communication mode and debug mode variables
+int comMode;                                                                                                // 0 = None , 1 = USB , 2 = Wireless  
+int debugMode;                                                                                              // 0 = Debug mode is Off
+                                                                                                            // 1 = Joystick debug mode is On
+                                                                                                            // 2 = Pressure debug mode is On
+                                                                                                            // 3 = Buttons debug mode is On
+                                                                                                            // 4 = Switch debug mode is On
+                                                                                                            // 5 = Sip & Puff state debug mode is On
+//Bluetooth connection variables
+bool btIsConnected = false;
 
 //LED module variables
+bool ledActionEnabled = false;
+
+//LED Action for all available output actions 
 const ledActionStruct ledActionProperty[]{
     {CONF_ACTION_NOTHING,            1,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
     {CONF_ACTION_LEFT_CLICK,         1,LED_CLR_NONE,  LED_CLR_MAGENTA,LED_ACTION_BLINK},
-    {CONF_ACTION_RIGHT_CLICK,        3,LED_CLR_NONE,  LED_CLR_BLUE,   LED_ACTION_BLINK},
-    {CONF_ACTION_DRAG,               1,LED_CLR_PURPLE,LED_CLR_MAGENTA,LED_ACTION_ON},
-    {CONF_ACTION_SCROLL,             3,LED_CLR_PURPLE,LED_CLR_BLUE,   LED_ACTION_ON},
+    {CONF_ACTION_RIGHT_CLICK,        3,LED_CLR_NONE,  LED_CLR_MAGENTA,LED_ACTION_BLINK},
+    {CONF_ACTION_DRAG,               1,LED_CLR_YELLOW,LED_CLR_MAGENTA,LED_ACTION_ON},
+    {CONF_ACTION_SCROLL,             3,LED_CLR_YELLOW,LED_CLR_MAGENTA,LED_ACTION_ON},
     {CONF_ACTION_CURSOR_CENTER,      2,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
     {CONF_ACTION_CURSOR_CALIBRATION, 4,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_MIDDLE_CLICK,       2,LED_CLR_NONE,  LED_CLR_PURPLE, LED_ACTION_BLINK},
-    {CONF_ACTION_DEC_SPEED,          1,LED_CLR_NONE,  LED_CLR_MAGENTA,LED_ACTION_NONE},
-    {CONF_ACTION_INC_SPEED,          3,LED_CLR_NONE,  LED_CLR_BLUE,   LED_ACTION_NONE},
-    {CONF_ACTION_CHANGE_MODE,        2,LED_CLR_NONE,  LED_CLR_BLUE,   LED_ACTION_BLINK}
+    {CONF_ACTION_MIDDLE_CLICK,       2,LED_CLR_NONE,  LED_CLR_MAGENTA,LED_ACTION_BLINK},
+    {CONF_ACTION_DEC_SPEED,          1,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_INC_SPEED,          3,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_CHANGE_MODE,        2,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE}
 };
 
 ledStateStruct* ledCurrentState = new ledStateStruct;
 
-int ledTimerId;
+int ledTimerId[3];
 
 LSTimer<ledStateStruct> ledStateTimer;
 
@@ -110,7 +120,7 @@ LSTimer<int> calibTimer;
 
 //Timer related variables
 
-int pollTimerId[5];
+int pollTimerId[6];
 
 LSTimer<void> pollTimer;
 
@@ -179,9 +189,8 @@ void setup()
   pollTimerId[0] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, 0, joystickLoop);
   pollTimerId[1] = pollTimer.setInterval(CONF_PRESSURE_POLL_RATE, 0, pressureLoop);
   pollTimerId[2] = pollTimer.setInterval(CONF_INPUT_POLL_RATE, 0, inputLoop);
-  pollTimerId[3] = pollTimer.setInterval(CONF_BLE_FEEDBACK_POLL_RATE, 0, bleFeedbackLoop);
+  pollTimerId[3] = pollTimer.setInterval(CONF_BT_FEEDBACK_POLL_RATE, 0, btFeedbackLoop);
   pollTimerId[4] = pollTimer.setInterval(CONF_DEBUG_POLL_RATE, 0, debugLoop);
-
   
   enablePoll(false);                              //Enable it when the led IBM effect is complete 
 
@@ -221,7 +230,6 @@ void enablePoll(bool isEnabled){
     pollTimer.enable(1); 
     pollTimer.enable(2);    
     pollTimer.enable(3);  
-    //setLedDefault();
   } else {
     pollTimer.disable(0);    
     pollTimer.disable(1);
@@ -419,7 +427,6 @@ void pressureLoop()
 //****************************************//
 void releaseOutputAction()
 {
-  setLedDefault();                                                            //Set default led feedback 
   //Release left click if it's in drag mode and left mouse button is pressed.
   if (outputAction == CONF_ACTION_DRAG && (mouse.isPressed(MOUSE_LEFT) || btmouse.isPressed(MOUSE_LEFT)))
   {
@@ -454,6 +461,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
     (outputAction == CONF_ACTION_SCROLL ||
       outputAction == CONF_ACTION_DRAG))
   {
+    setLedDefault();                                                            //Set default led feedback 
     //Set new state of current output action 
     releaseOutputAction();
     canEvaluateAction = false;
@@ -746,7 +754,7 @@ void performJoystickCenter(int* args)
   if (stepNumber == 0)  //STEP 0: Joystick Compensation Center Point
   {
     if(ledActionEnabled){
-      setLedState(LED_ACTION_BLINK, LED_CLR_PURPLE, CONF_JOY_INIT_LED_NUMBER, CONF_JOY_INIT_STEP_BLINK, CONF_JOY_INIT_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
+      setLedState(LED_ACTION_BLINK, CONF_JOY_INIT_STEP_BLINK_COLOR, CONF_JOY_INIT_LED_NUMBER, CONF_JOY_INIT_STEP_BLINK, CONF_JOY_INIT_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
       performLedAction(ledCurrentState);                                                                  // LED Feedback to show start of performJoystickCalibrationStep
     }
     //Start timer to get 5 reading every 100ms
@@ -761,6 +769,7 @@ void performJoystickCenter(int* args)
     centerPoint = js.getInputCenter();                                             //Get the new center for API output  
     printResponseFloatPoint(true,true,true,0,"IN,1",true,centerPoint);
     calibTimer.deleteTimer(0);                                                     //Delete timer
+    setLedDefault();                                                               //Set default led feedback 
     canOutputAction = true;
   }
 
@@ -779,7 +788,7 @@ void performJoystickCenterStep(int* args)
 {
   //Turn on and set the second led to orange to indicate start of the process 
   if(calibTimer.getNumRuns(1)==1 && ledActionEnabled){                                                                    //Turn Led's ON when timer is running for first time
-    setLedState(LED_ACTION_ON, LED_CLR_ORANGE, CONF_JOY_INIT_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);
+    setLedState(LED_ACTION_ON, CONF_JOY_INIT_LED_COLOR, CONF_JOY_INIT_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);   
   }
   //Push new center values to be evaluated at the end of the process 
@@ -812,14 +821,14 @@ void performJoystickCalibration(int* args)
   if (stepNumber == 0)  //STEP 0: Calibration started
   {
     pollTimer.disable(0);                                                                                             //Disable joystick data polling 
-    setLedState(LED_ACTION_BLINK, LED_CLR_PURPLE, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
+    setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_START_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
     performLedAction(ledCurrentState);   
     ++stepNumber;
     calibTimerId[0] = calibTimer.setTimeout(currentReadingStart, performJoystickCalibration, (int *)stepNumber);      // Start next step
   }
   else if (stepNumber < 5) //STEP 1-4: Joystick Calibration Corner Points 
   {
-    setLedState(LED_ACTION_BLINK, LED_CLR_PURPLE, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
+    setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_STEP_BLINK_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
     performLedAction(ledCurrentState);                                                                  // LED Feedback to show start of performJoystickCalibrationStep
     js.zeroInputMax(stepNumber);                                                                        //Clear the existing calibration value 
 
@@ -835,9 +844,10 @@ void performJoystickCalibration(int* args)
   }
   else //STEP 6: Calibration ended
   {
-    setLedState(LED_ACTION_BLINK, LED_CLR_PURPLE, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);                          //Turn off Led's
+    setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_START_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);                          //Turn off Led's
     performLedAction(ledCurrentState);
     js.setMinimumRadius();                                                                                                      //Update the minimum cursor operating radius 
+    setLedDefault();
     canOutputAction = true;
     pollTimer.enable(0);                                                                                                        //Enable joystick data polling 
   }
@@ -861,7 +871,7 @@ void performJoystickCalibrationStep(int* args)
 
   //Turn on and set the all leds to orange to indicate start of the process 
   if(calibTimer.getNumRuns(0)==1){                                                                    //Turn Led's ON when timer is running for first time
-    setLedState(LED_ACTION_ON, LED_CLR_ORANGE, 4, 0, 0,CONF_LED_BRIGHTNESS);
+    setLedState(LED_ACTION_ON, CONF_JOY_CALIB_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);   
   }
   
@@ -870,7 +880,7 @@ void performJoystickCalibrationStep(int* args)
   //Turn off all the leds to orange to indicate end of the process 
   if(calibTimer.getNumRuns(0)==CONF_JOY_CALIB_READING_NUMBER){                                        //Turn Led's OFF when timer is running for last time
     mem.writePoint(CONF_SETTINGS_FILE,stepKey,maxPoint);                                          //Store the point in Flash Memory 
-    setLedState(LED_ACTION_OFF, LED_CLR_NONE, 4, 0, 0,CONF_LED_BRIGHTNESS);                           
+    setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);                           
     performLedAction(ledCurrentState);      
     printResponseFloatPoint(true,true,true,0,stepCommand,true,maxPoint);
   }
@@ -947,7 +957,8 @@ void initDebug()
 // Return     : void 
 //****************************************//
 void debugLoop(){
-  if(debugMode==CONF_DEBUG_MODE_JOYSTICK){
+  //Debug mode is off if the debug mode is #0
+  if(debugMode==CONF_DEBUG_MODE_JOYSTICK){                   //Debug #1
     js.update(); //Request new values from joystick class
     pointFloatType debugJoystickArray[3];
     debugJoystickArray[0] = js.getXYRaw();                                                          //Read the raw values
@@ -955,7 +966,7 @@ void debugLoop(){
     debugJoystickArray[2] = {(float)js.getXYOut().x,(float)js.getXYOut().y};                        //Read the output values
     printResponseFloatPointArray(true,true,true,0,"DEBUG,1",true,"", 3, ',', debugJoystickArray);    
   }
-  else if(debugMode==CONF_DEBUG_MODE_PRESSURE){  //Use update values from pressureLoop()
+  else if(debugMode==CONF_DEBUG_MODE_PRESSURE){              //Debug #2
     //ps.update(); //Request new pressure difference from sensor and push it to array
     float debugPressureArray[3];
     debugPressureArray[0] = ps.getMainPressure();  //Read the main pressure 
@@ -963,21 +974,21 @@ void debugLoop(){
     debugPressureArray[2] = ps.getDiffPressure();  //Read the diff pressure
     printResponseFloatArray(true,true,true,0,"DEBUG,2",true,"", 3, ',', debugPressureArray);    
   }
-  else if(debugMode==CONF_DEBUG_MODE_BUTTON){  
+  else if(debugMode==CONF_DEBUG_MODE_BUTTON){                //Debug #3
     int debugButtonArray[3];
     debugButtonArray[0] = buttonState.mainState;             //Read the main state 
     debugButtonArray[1] = buttonState.secondaryState;        //Read the secondary state
     debugButtonArray[2] = (int) buttonState.elapsedTime;     //Read the Elapsed Time     
     printResponseIntArray(true,true,true,0,"DEBUG,3",true,"", 3, ',', debugButtonArray);    
   }
-  else if(debugMode==CONF_DEBUG_MODE_SWITCH){  
+  else if(debugMode==CONF_DEBUG_MODE_SWITCH){                //Debug #4
     int debugSwitchArray[3];
     debugSwitchArray[0] = switchState.mainState;             //Read the main state 
     debugSwitchArray[1] = switchState.secondaryState;        //Read the secondary state 
     debugSwitchArray[2] = (int) switchState.elapsedTime;     //Read the Elapsed Time    
     printResponseIntArray(true,true,true,0,"DEBUG,4",true,"", 3, ',', debugSwitchArray);    
   }
-  else if(debugMode==CONF_DEBUG_MODE_SAP){  
+  else if(debugMode==CONF_DEBUG_MODE_SAP){                   //Debug #5
     int debugSapArray[3];
     debugSapArray[0] = sapActionState.mainState;             //Read the main state 
     debugSapArray[1] = sapActionState.secondaryState;        //Read the secondary state 
@@ -1026,7 +1037,6 @@ void setDebugState(int inputDebugMode) {
 void initLed()
 {
   led.begin();
-  ledTimerId=0;
   *ledCurrentState = { 0, 0, 0, 0, 0, 0 };
 }
 
@@ -1042,7 +1052,7 @@ void initLed()
 void startupFeedback()
 {
   setLedState(LED_ACTION_BLINK, 1, 4, 4, CONF_STARTUP_LED_STEP_TIME, CONF_LED_BRIGHTNESS);
-  ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
+  ledTimerId[0] = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
 
 }
 
@@ -1074,8 +1084,6 @@ void setLedState(int ledAction, int ledColorNumber, int ledNumber, int ledBlinkN
   }
 }
 
-
-
 //***LED IBM EFFECT FUNCTION***//
 // Function   : ledIBMEffect 
 // 
@@ -1087,22 +1095,17 @@ void setLedState(int ledAction, int ledColorNumber, int ledNumber, int ledBlinkN
 //****************************************//
 void ledIBMEffect(ledStateStruct* args)
 {
-  if (args->ledColorNumber == 0)
-  {
-    ledActionEnabled = true;
-    enablePoll(true);
-  }
-  else if (args->ledColorNumber < 7)
+  if (args->ledColorNumber < 7)
   {
     led.setLedColor(args->ledNumber, args->ledColorNumber, args->ledBrightness);
     setLedState(args->ledAction, (args->ledColorNumber)+1, args->ledNumber, args->ledBlinkNumber, (args->ledBlinkTime),args->ledBrightness);
-    ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
+    ledTimerId[1] = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
   } 
   else if (args->ledColorNumber == 7)
   {
-    setLedState(LED_ACTION_OFF, 0, args->ledNumber, args->ledBlinkNumber, (args->ledBlinkTime),args->ledBrightness);
-    performLedAction(ledCurrentState);
-    ledTimerId = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
+    setLedDefault();
+    ledActionEnabled = true;
+    enablePoll(true);
   }
 
 }
@@ -1126,10 +1129,28 @@ void ledBlinkEffect(ledStateStruct* args){
 
   if(ledStateTimer.getNumRuns(0)==((args->ledBlinkNumber)*2)+1){
     
-     setLedState(LED_ACTION_NONE, LED_CLR_NONE, 0, 0, 0,CONF_LED_BRIGHTNESS);
-     
+     setLedDefault();
   }   
 }
+
+//***LED BLUETOOTH SCAN EFFECT FUNCTION***//
+// Function   : ledBtScanEffect 
+// 
+// Description: This function performs bluetooth scan blink LED effect.
+// 
+// Return     : void 
+//****************************************//
+void ledBtScanEffect(){
+  if(pollTimer.getNumRuns(5) % 2){
+     led.setLedColor(CONF_BT_LED_NUMBER, 0, CONF_BT_LED_BRIGHTNESS);
+  } 
+  else{
+    led.setLedColor(CONF_BT_LED_NUMBER, CONF_BT_LED_COLOR, CONF_BT_LED_BRIGHTNESS);
+  }
+
+}
+
+
 
 //***TURN ALL LEDS OFF FUNCTION***//
 // Function   : turnLedAllOff 
@@ -1185,7 +1206,7 @@ void turnLedOn(ledStateStruct* args)
 //****************************************//
 void blinkLed(ledStateStruct* args)
 {
-  ledTimerId = ledStateTimer.setTimer(args->ledBlinkTime, 0, ((args->ledBlinkNumber)*2)+1, ledBlinkEffect, ledCurrentState);
+  ledTimerId[2] = ledStateTimer.setTimer(args->ledBlinkTime, 0, ((args->ledBlinkNumber)*2)+1, ledBlinkEffect, ledCurrentState);
 }
 
 //***SET DEFAULT LED EFFECT FUNCTION***//
@@ -1199,37 +1220,39 @@ void blinkLed(ledStateStruct* args)
 //****************************************//
 void setLedDefault(){
   //Clear if it's in USB MODE
-  if (comMode == CONF_COM_MODE_USB)
-  {
-    led.clearLedAll();
-  }
-  else if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected())
-  { //Clear and set second LED to blue if it's in BLE MODE
-    led.clearLedAll();
+  led.clearLedAll();
+  if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected())
+  { //Set second LED to blue if it's in BLE MODE
     led.setLedColor(2, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
   }
 }
 
-//***BLE FEEDBACK LOOP FUNCTION***//
-// Function   : bleFeedbackLoop 
+//***BLUETOOTH SCAN AND LED FEEDBACK LOOP FUNCTION***//
+// Function   : btFeedbackLoop 
 // 
-// Description: This function performs the default LED effect to indicate the device is in BLE mode.
+// Description: This function performs the default LED effects to indicate the device is connected.
 //
 // Parameters : void
 // 
 // Return     : void 
 //****************************************//
-void bleFeedbackLoop()
+void btFeedbackLoop()
 {
-  //Set second LED to blue if it's in BLE MODE and connected 
-  if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected())
+  //Get the current bluetooth connection state
+  bool tempIsConnected = btmouse.isConnected();
+  //Perform bluetooth LED blinking if bluetooth is not connected and wasn't connected before 
+  if (comMode == CONF_COM_MODE_BLE && tempIsConnected==false && tempIsConnected == btIsConnected)
   {
-    led.setLedColor(2, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
-  } //Clear second LED if it's in BLE MODE, but it's NOT connected 
-  else if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected()==false)
+    btIsConnected = false;
+    pollTimerId[5] = pollTimer.setTimer(CONF_BT_SCAN_BLINK_DELAY, 0, ((CONF_BT_SCAN_BLINK_NUMBER*2)+1), ledBtScanEffect);
+
+  } //Set the default LED effect if bluetooth connection state is changed 
+  else if (comMode == CONF_COM_MODE_BLE && tempIsConnected != btIsConnected)
   {
-    led.clearLed(2);
+    btIsConnected = tempIsConnected;
+    setLedDefault();
   }
+
 }
 
 //***PERFORM LED ACTION FUNCTION***//
