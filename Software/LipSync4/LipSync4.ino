@@ -48,7 +48,8 @@ const ledActionStruct ledActionProperty[]{
     {CONF_ACTION_MIDDLE_CLICK,       2,LED_CLR_NONE,  LED_CLR_MAGENTA,LED_ACTION_BLINK},
     {CONF_ACTION_DEC_SPEED,          1,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
     {CONF_ACTION_INC_SPEED,          3,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_CHANGE_MODE,        2,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE}
+    {CONF_ACTION_CHANGE_MODE,        2,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_FACTORY_RESET,      4,LED_CLR_YELLOW,LED_CLR_NONE,   LED_ACTION_NONE}
 };
 
 ledStateStruct* ledCurrentState = new ledStateStruct;
@@ -84,7 +85,8 @@ const inputActionStruct buttonActionProperty[]{
     {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S1_PRESSED,  3000,5000},
     {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED,  3000,5000},
     {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S3_PRESSED,  3000,5000},
-    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S13_PRESSED, 0,5000}
+    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S13_PRESSED, 0,3000},
+    {CONF_ACTION_FACTORY_RESET,      INPUT_MAIN_STATE_S13_PRESSED, 3000,5000}
 };
 
 int inputButtonPinArray[] = { CONF_BUTTON1_PIN, CONF_BUTTON2_PIN, CONF_BUTTON3_PIN };
@@ -597,6 +599,12 @@ void performOutputAction(int action)
     {
       //Change communication mode
       toggleCommunicationMode(true,false);
+      break;
+    }
+    case CONF_ACTION_FACTORY_RESET:
+    {
+      //Perform Factory Reset
+      factoryReset(true,false);
       break;
     }
   }

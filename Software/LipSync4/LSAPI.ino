@@ -1420,6 +1420,12 @@ void resetSettings(bool responseEnabled, bool apiEnabled, String optionalParamet
 // Return     : void
 //***************************//
 void factoryReset(bool responseEnabled, bool apiEnabled) {
+
+  //Set all LEDs to red to indicate factory reset process 
+  setLedState(LED_ACTION_ON, LED_CLR_RED, 4, 0, 0,CONF_LED_BRIGHTNESS);                           
+  performLedAction(ledCurrentState);  
+
+  //Factory reset process 
   resetMemory();
   setCommunicationMode(false, false, CONF_COM_MODE_DEFAULT);
   setDebugMode(false, false, CONF_DEBUG_MODE_DEFAULT);
@@ -1427,7 +1433,11 @@ void factoryReset(bool responseEnabled, bool apiEnabled) {
   setSipPressureThreshold(false, false, CONF_SIP_THRESHOLD);
   setPuffPressureThreshold(false, false, CONF_PUFF_THRESHOLD);
   setJoystickSpeed(false, false, CONF_JOY_SPEED_LEVEL_DEFAULT);  
-  printResponseInt(responseEnabled, apiEnabled, true, 0, "FR,1", true, 0);
+  printResponseInt(responseEnabled, apiEnabled, true, 0, "FR,1", true, 1);
+
+  //Clear all LEDs to indicate factory reset process is finished 
+  setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);                           
+  performLedAction(ledCurrentState);  
 
 }
 //***FACTORY RESET API FUNCTION***//
