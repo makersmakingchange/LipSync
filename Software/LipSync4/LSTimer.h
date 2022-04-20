@@ -3,7 +3,7 @@
 * Firmware: LipSync4
 * Edited by: MakersMakingChange
 * Based on: SimpleTimer.h (https://github.com/jfturcot/SimpleTimer)
-* Version: Alpha 2 (14 April 2022) 
+* Version: Closed-Beta (20 April 2022)
 */
  
 //Header definition
