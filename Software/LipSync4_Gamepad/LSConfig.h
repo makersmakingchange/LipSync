@@ -8,7 +8,7 @@
 */
 
 //***DO NOT CHANGE***//
-#define CONF_LIPSYNC_MODEL 1                              //Mouse = 1 , Gamepad = 2
+#define CONF_LIPSYNC_MODEL 2                              //Mouse = 1 , Gamepad = 2
 #define CONF_LIPSYNC_VERSION 1.0
 
 //Input pins
@@ -25,28 +25,32 @@
 
 //Output action numbers
 #define CONF_ACTION_NOTHING 0                              // No action
-#define CONF_ACTION_LEFT_CLICK 1                           // Generates a short left click
-#define CONF_ACTION_RIGHT_CLICK 2                          // Generates a short right click
-#define CONF_ACTION_DRAG 3                                 // Initiates drag mode, holding down left click until cancelled
-#define CONF_ACTION_SCROLL 4                               // Initiates scroll mode. Vertical motion generates mouse scroll wheel movement.
-#define CONF_ACTION_CURSOR_CENTER 5                        // Center the joystick 
-#define CONF_ACTION_CURSOR_CALIBRATION 6                   // Initiates the joystick calibration.
-#define CONF_ACTION_MIDDLE_CLICK 7                         // Generates a short middle click
-#define CONF_ACTION_DEC_SPEED 8                            // Decrease cursor movement speed
-#define CONF_ACTION_INC_SPEED 9                            // Increase cursor movement speed
-#define CONF_ACTION_CHANGE_MODE 10                         // Change communication mode
-#define CONF_ACTION_FACTORY_RESET 11                       // Factory Reset
+#define CONF_ACTION_B1_PRESS 1                             // Generates a Button 1 press
+#define CONF_ACTION_B2_PRESS 2                             // Generates a Button 2 press
+#define CONF_ACTION_B3_PRESS 3                             // Generates a Button 3 press
+#define CONF_ACTION_B4_PRESS 4                             // Generates a Button 4 press
+#define CONF_ACTION_B5_PRESS 5                             // Generates a Button 5 press
+#define CONF_ACTION_B6_PRESS 6                             // Generates a Button 6 press
+#define CONF_ACTION_B7_PRESS 7                             // Generates a Button 7 press
+#define CONF_ACTION_B8_PRESS 8                             // Generates a Button 8 press
+#define CONF_ACTION_JOYSTICK_CENTER 9                      // Center the joystick 
+#define CONF_ACTION_JOYSTICK_CALIBRATION 10                // Initiates the joystick calibration.
+#define CONF_ACTION_DEC_SPEED 11                           // Decrease cursor movement speed
+#define CONF_ACTION_INC_SPEED 12                           // Increase cursor movement speed
+#define CONF_ACTION_CHANGE_MODE 13                         // Change communication mode
+#define CONF_ACTION_FACTORY_RESET 14                       // Factory Reset
 
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
-#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"CM\":0,\"SS\":5,\"PM\":0,\"ST\":0.0,\"PT\":0.0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[15.0,15.0],\"CA2\":[-15.0,15.0],\"CA3\":[-15.0,-15.0],\"CA4\":[15.0,-15.0],\"DM\":0}"
+#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"CM\":0,\"OM\":0,\"SS\":5,\"PM\":0,\"ST\":0.0,\"PT\":0.0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[15.0,15.0],\"CA2\":[-15.0,15.0],\"CA3\":[-15.0,-15.0],\"CA4\":[15.0,-15.0],\"DM\":0}"
 
 //Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 50          //50ms
 #define CONF_PRESSURE_POLL_RATE 50          //50ms
 #define CONF_INPUT_POLL_RATE 50             //50ms
-#define CONF_BT_FEEDBACK_POLL_RATE 1000    //1s
 #define CONF_DEBUG_POLL_RATE 100            //100ms
+
+#define CONF_BUTTON_CLICK_DELAY 150         //150ms
 
 //Joystick values 
 #define CONF_JOY_SPEED_LEVEL_MIN 0
@@ -59,6 +63,14 @@
 
 #define CONF_COM_MODE_MIN 1
 #define CONF_COM_MODE_MAX 2
+
+//Operation mode values 
+#define CONF_OPR_MODE_NONE     0 
+#define CONF_OPR_MODE_DIGITAL  1
+#define CONF_OPR_MODE_ANALOG   2
+
+#define CONF_OPR_MODE_MIN 1
+#define CONF_OPR_MODE_MAX 2
 
 //Debug mode values 
 #define CONF_DEBUG_MODE_NONE      0 
@@ -76,6 +88,9 @@
 
 //Communication Method Default settings
 #define CONF_COM_MODE_DEFAULT 1             //0 = None , 1 = USB , 2 = Wireless  
+
+//Operation Method Default settings
+#define CONF_OPR_MODE_DEFAULT 1             //0 = None , 1 = Digital , 2 = Analog  
 
 //Led Default settings
 #define CONF_LED_BRIGHTNESS 150
@@ -140,6 +155,11 @@
 #define CONF_COM_MODE_LED_NUMBER  2
 #define CONF_COM_MODE_LED_BLINK   1
 #define CONF_COM_MODE_LED_BLINK_DELAY   1000
+
+//Operation Mode Default settings
+#define CONF_OPR_MODE_LED_NUMBER  2
+#define CONF_OPR_MODE_LED_BLINK   1
+#define CONF_OPR_MODE_LED_BLINK_DELAY   1000
 
 
 //Bluetooth connection and related LED feedback settings 

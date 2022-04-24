@@ -39,8 +39,8 @@ _functionList setSipPressureThresholdFunction =   {"ST", "1", "",  &setSipPressu
 _functionList getPuffPressureThresholdFunction =  {"PT", "0", "0", &getPuffPressureThreshold};
 _functionList setPuffPressureThresholdFunction =  {"PT", "1", "",  &setPuffPressureThreshold};
 
-_functionList getCommunicationModeFunction =      {"CM", "0", "0", &getCommunicationMode};
-_functionList setCommunicationModeFunction =      {"CM", "1", "",  &setCommunicationMode};
+_functionList getOperationModeFunction =          {"OM", "0", "0", &getOperationMode};
+_functionList setOperationModeFunction =          {"OM", "1", "",  &setOperationMode};
 
 _functionList getDebugModeFunction =              {"DM", "0", "0", &getDebugMode};
 _functionList setDebugModeFunction =              {"DM", "1", "",  &setDebugMode};
@@ -69,8 +69,8 @@ _functionList apiFunction[26] = {
   setSipPressureThresholdFunction,
   getPuffPressureThresholdFunction,
   setPuffPressureThresholdFunction,
-  getCommunicationModeFunction,
-  setCommunicationModeFunction,
+  getOperationModeFunction,
+  setOperationModeFunction,
   getDebugModeFunction,
   setDebugModeFunction,
   resetSettingsFunction,
@@ -906,7 +906,7 @@ void setPressureMode(bool responseEnabled, bool apiEnabled, int inputPressureMod
   String commandKey = "PM";
   if ((inputPressureMode >= PRESS_MODE_MIN) && (inputPressureMode <= PRESS_MODE_MAX))
   {
-    comMode = inputPressureMode;
+    operationMode = inputPressureMode;
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputPressureMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "PM,1", true, inputPressureMode);
   ps.setPressureMode(inputPressureMode);
@@ -1145,36 +1145,36 @@ void setPuffPressureThreshold(bool responseEnabled, bool apiEnabled, String opti
   setPuffPressureThreshold(responseEnabled, apiEnabled, optionalParameter.toFloat());
 }
 
-//***GET COMMUNICATION MODE FUNCTION***//
-// Function   : getCommunicationMode
+//***GET OPERATION MODE FUNCTION***//
+// Function   : getOperationMode
 //
-// Description: This function retrieves the state of communication mode.
+// Description: This function retrieves the state of Operation mode.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
 //
-// Return     : communicationMode : int : The current state of communication method.
+// Return     : operationMode : int : The current state of operation method.
 //*********************************//
-int getCommunicationMode(bool responseEnabled, bool apiEnabled) {
-  String commandKey = "CM";
-  int tempComMode;
-  tempComMode = mem.readInt(CONF_SETTINGS_FILE, commandKey);
+int getOperationMode(bool responseEnabled, bool apiEnabled) {
+  String commandKey = "OM";
+  int tempOperationMode;
+  tempOperationMode = mem.readInt(CONF_SETTINGS_FILE, commandKey);
 
-  if ((tempComMode < CONF_COM_MODE_MIN) || (tempComMode > CONF_COM_MODE_MAX)) {
-    tempComMode = CONF_COM_MODE_DEFAULT;
-    mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempComMode);
+  if ((tempOperationMode < CONF_OPR_MODE_MIN) || (tempOperationMode > CONF_OPR_MODE_MAX)) {
+    tempOperationMode = CONF_OPR_MODE_DEFAULT;
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempOperationMode);
   }
 
-  printResponseInt(responseEnabled, apiEnabled, true, 0, "CM,0", true, tempComMode);
+  printResponseInt(responseEnabled, apiEnabled, true, 0, "OM,0", true, tempOperationMode);
 
-  return tempComMode;
+  return tempOperationMode;
 }
-//***GET COMMUNICATION MODE API FUNCTION***//
-// Function   : getCommunicationMode
+//***GET OPERATION MODE API FUNCTION***//
+// Function   : getOperationMode
 //
-// Description: This function is redefinition of main getCommunicationMode function to match the types of API function arguments.
+// Description: This function is redefinition of main getOperationMode function to match the types of API function arguments.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
@@ -1183,67 +1183,67 @@ int getCommunicationMode(bool responseEnabled, bool apiEnabled) {
 //               optionalParameter : String : The input parameter string should contain one element with value of zero.
 //
 // Return     : void
-void getCommunicationMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+void getOperationMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
-    getCommunicationMode(responseEnabled, apiEnabled);
+    getOperationMode(responseEnabled, apiEnabled);
   }
 }
 
-//***SET COMMUNICATION MODE FUNCTION***//
-// Function   : setCommunicationMode
+//***SET OPERATION MODE FUNCTION***//
+// Function   : setOperationMode
 //
-// Description: This function sets the state of communication mode.
+// Description: This function sets the state of operation mode.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               inputCommunicationMode : int : The new communication mode state ( 0 = None, 1 = USB , 2 = BLE )
+//               inputOperationMode : int : The new operation mode state ( 0 = None, 1 = Digital , 2 = Analog )
 //
 // Return     : void
 //*********************************//
-void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommunicationMode) {
-  String commandKey = "CM";
+void setOperationMode(bool responseEnabled, bool apiEnabled, int inputOperationMode) {
+  String commandKey = "OM";
   
-  if ((inputCommunicationMode >= CONF_COM_MODE_MIN) && (inputCommunicationMode <= CONF_COM_MODE_MAX))
+  if ((inputOperationMode >= CONF_OPR_MODE_MIN) && (inputOperationMode <= CONF_OPR_MODE_MAX))
   {
-    comMode = inputCommunicationMode;
-    setCommunicationModeLed(comMode);
+    operationMode = inputOperationMode;
+    setOperationModeLed(operationMode);
     setLedDefault();
-    mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputCommunicationMode);
-    printResponseInt(responseEnabled, apiEnabled, true, 0, "CM,1", true, inputCommunicationMode);
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputOperationMode);
+    printResponseInt(responseEnabled, apiEnabled, true, 0, "OM,1", true, inputOperationMode);
 
   }
   else {
-    printResponseInt(responseEnabled, apiEnabled, false, 3, "CM,1", true, inputCommunicationMode);
+    printResponseInt(responseEnabled, apiEnabled, false, 3, "OM,1", true, inputOperationMode);
 
   }
 
 }
 
-//***SET COMMUNICATION MODE LED FUNCTION***//
-// Function   : setCommunicationModeLed
+//***SET OPERATION MODE LED FUNCTION***//
+// Function   : setOperationModeLed
 //
-// Description: This function sets the color communication mode blink LED action.
+// Description: This function sets the color operation mode blink LED action.
 //
-// Parameters :  inputCommunicationMode : int : The new communication mode state ( 0 = None, 1 = USB , 2 = BLE )
+// Parameters :  inputOperationMode : int : The new operation mode state ( 0 = None, 1 = USB , 2 = BLE )
 //
 // Return     : void
 //*********************************//
-void setCommunicationModeLed(int inputCommunicationMode) {
+void setOperationModeLed(int inputOperationMode) {
     int modeLedColor = LED_CLR_NONE;
-    if(inputCommunicationMode==CONF_COM_MODE_USB) {
+    if(inputOperationMode==CONF_OPR_MODE_DIGITAL) {
       modeLedColor = LED_CLR_WHITE;
-    } else if (inputCommunicationMode==CONF_COM_MODE_BLE) {
+    } else if (inputOperationMode==CONF_OPR_MODE_ANALOG) {
       modeLedColor = LED_CLR_BLUE;
     }
-    setLedState(LED_ACTION_BLINK, modeLedColor, CONF_COM_MODE_LED_NUMBER, CONF_COM_MODE_LED_BLINK, CONF_COM_MODE_LED_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
+    setLedState(LED_ACTION_BLINK, modeLedColor, CONF_OPR_MODE_LED_NUMBER, CONF_OPR_MODE_LED_BLINK, CONF_OPR_MODE_LED_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
     performLedAction(ledCurrentState);   
 }
-//***SET COMMUNICATION MODE API FUNCTION***//
-// Function   : setCommunicationMode
+//***SET OPERATION MODE API FUNCTION***//
+// Function   : setOperationMode
 //
-// Description: This function is redefinition of main setCommunicationMode function to match the types of API function arguments.
+// Description: This function is redefinition of main setOperationMode function to match the types of API function arguments.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
@@ -1252,15 +1252,14 @@ void setCommunicationModeLed(int inputCommunicationMode) {
 //               optionalParameter : String : The input parameter string should contain one element with value of zero.
 //
 // Return     : void
-void setCommunicationMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
-  setCommunicationMode(responseEnabled, apiEnabled, optionalParameter.toInt());
+void setOperationMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  setOperationMode(responseEnabled, apiEnabled, optionalParameter.toInt());
 }
 
 
-//***TOGGLE COMMUNICATION MODE FUNCTION***//
-// Function   : toggleCommunicationMode
-//
-// Description: This function is used to toggle or increment communication mode.
+//***TOGGLE OPERATION MODE FUNCTION***//
+// Function   : toggleOperationMode
+// Description: This function is used to toggle or increment operation mode.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
@@ -1268,16 +1267,16 @@ void setCommunicationMode(bool responseEnabled, bool apiEnabled, String optional
 //                                   Manual response is sent if it's set to false.
 //
 // Return     : void
-void toggleCommunicationMode(bool responseEnabled, bool apiEnabled) {
-  if (comMode < CONF_COM_MODE_MAX)
+void toggleOperationMode(bool responseEnabled, bool apiEnabled) {
+  if (operationMode < CONF_OPR_MODE_MAX)
   {
-    comMode++;
+    operationMode++;
   }
   else
   {
-    comMode = CONF_COM_MODE_MIN;
+    operationMode = CONF_OPR_MODE_MIN;
   }
-  setCommunicationMode(responseEnabled, apiEnabled, comMode);
+  setOperationMode(responseEnabled, apiEnabled, operationMode);
 }
 
 
@@ -1427,7 +1426,7 @@ void factoryReset(bool responseEnabled, bool apiEnabled) {
 
   //Factory reset process 
   resetMemory();
-  setCommunicationMode(false, false, CONF_COM_MODE_DEFAULT);
+  setOperationMode(false, false, CONF_COM_MODE_DEFAULT);
   setDebugMode(false, false, CONF_DEBUG_MODE_DEFAULT);
   setJoystickDeadZone(false, false, CONF_JOY_DEADZONE_DEFAULT);
   setSipPressureThreshold(false, false, CONF_SIP_THRESHOLD);

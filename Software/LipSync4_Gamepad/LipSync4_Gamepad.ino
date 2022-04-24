@@ -1,8 +1,8 @@
 /* 
-* File: LipSync4.ino
-* Firmware: LipSync4
+* File: LipSync4_Gamepad.ino
+* Firmware: LipSync4 Gamepad
 * Developed by: MakersMakingChange
-* Version: Closed-Beta (20 April 2022) 
+* Version: Alpha 2 (20 April 2022) 
 * Copyright Neil Squire Society 2022. 
 * License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
 */
@@ -14,16 +14,15 @@
 #include <ArduinoJson.h>
 #include "LSOutput.h"
 #include "LSConfig.h"
-#include "LSUSB.h"
-#include "LSBLE.h"
+#include "LSGamepad.h"
 #include "LSCircularBuffer.h"
 #include "LSInput.h"
 #include "LSPressure.h"
 #include "LSJoystick.h"
 #include "LSMemory.h"
 
-//Communication mode and debug mode variables
-int comMode;                                                                                                // 0 = None , 1 = USB , 2 = Wireless  
+//Operation mode and debug mode variables
+int operationMode;                                                                                          // 0 = None, 1 = Digital , 2 = Analog 
 int debugMode;                                                                                              // 0 = Debug mode is Off
                                                                                                             // 1 = Joystick debug mode is On
                                                                                                             // 2 = Pressure debug mode is On
@@ -38,18 +37,21 @@ bool ledActionEnabled = false;
 
 //LED Action for all available output actions 
 const ledActionStruct ledActionProperty[]{
-    {CONF_ACTION_NOTHING,            1,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_LEFT_CLICK,         1,LED_CLR_NONE,  LED_CLR_MAGENTA,LED_ACTION_BLINK},
-    {CONF_ACTION_RIGHT_CLICK,        3,LED_CLR_NONE,  LED_CLR_MAGENTA,LED_ACTION_BLINK},
-    {CONF_ACTION_DRAG,               1,LED_CLR_YELLOW,LED_CLR_MAGENTA,LED_ACTION_ON},
-    {CONF_ACTION_SCROLL,             3,LED_CLR_YELLOW,LED_CLR_MAGENTA,LED_ACTION_ON},
-    {CONF_ACTION_CURSOR_CENTER,      2,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_CURSOR_CALIBRATION, 4,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_MIDDLE_CLICK,       2,LED_CLR_NONE,  LED_CLR_MAGENTA,LED_ACTION_BLINK},
-    {CONF_ACTION_DEC_SPEED,          1,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_INC_SPEED,          3,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_CHANGE_MODE,        2,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_FACTORY_RESET,      4,LED_CLR_YELLOW,LED_CLR_NONE,   LED_ACTION_NONE}
+    {CONF_ACTION_NOTHING,             4,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_B1_PRESS,            4,LED_CLR_NONE,  LED_CLR_MAGENTA,LED_ACTION_BLINK},
+    {CONF_ACTION_B2_PRESS,            4,LED_CLR_NONE,  LED_CLR_MAGENTA,LED_ACTION_BLINK},
+    {CONF_ACTION_B3_PRESS,            4,LED_CLR_NONE,  LED_CLR_MAGENTA,LED_ACTION_BLINK},
+    {CONF_ACTION_B4_PRESS,            4,LED_CLR_YELLOW,LED_CLR_MAGENTA,LED_ACTION_BLINK},
+    {CONF_ACTION_B5_PRESS,            4,LED_CLR_YELLOW,LED_CLR_MAGENTA,LED_ACTION_BLINK},
+    {CONF_ACTION_B6_PRESS,            4,LED_CLR_YELLOW,LED_CLR_MAGENTA,LED_ACTION_BLINK},
+    {CONF_ACTION_B7_PRESS,            4,LED_CLR_YELLOW,LED_CLR_MAGENTA,LED_ACTION_BLINK},
+    {CONF_ACTION_B8_PRESS,            4,LED_CLR_YELLOW,LED_CLR_MAGENTA,LED_ACTION_BLINK},
+    {CONF_ACTION_JOYSTICK_CENTER,     2,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_JOYSTICK_CALIBRATION,4,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_DEC_SPEED,           1,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_INC_SPEED,           3,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_CHANGE_MODE,         2,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_FACTORY_RESET,       4,LED_CLR_YELLOW,LED_CLR_NONE,   LED_ACTION_NONE}
 };
 
 ledStateStruct* ledCurrentState = new ledStateStruct;
@@ -65,28 +67,28 @@ unsigned long buttonActionMaxTime, switchActionMaxTime;
 inputStateStruct buttonState, switchState;
 
 const inputActionStruct switchActionProperty[]{
-    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_NONE,       0,0},
-    {CONF_ACTION_LEFT_CLICK,         INPUT_MAIN_STATE_S1_PRESSED, 0,3000},
-    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S2_PRESSED, 0,3000},
-    {CONF_ACTION_RIGHT_CLICK,        INPUT_MAIN_STATE_S3_PRESSED, 0,3000},
-    {CONF_ACTION_DRAG,               INPUT_MAIN_STATE_S1_PRESSED, 3000,5000},
-    {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED, 3000,5000},
-    {CONF_ACTION_SCROLL,             INPUT_MAIN_STATE_S3_PRESSED, 3000,5000},
-    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S1_PRESSED, 5000,10000},
-    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S2_PRESSED, 5000,10000},
-    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S3_PRESSED, 5000,10000},
+    {CONF_ACTION_NOTHING,              INPUT_MAIN_STATE_NONE,       0,0},
+    {CONF_ACTION_B1_PRESS,             INPUT_MAIN_STATE_S1_PRESSED, 0,3000},
+    {CONF_ACTION_B2_PRESS,             INPUT_MAIN_STATE_S2_PRESSED, 0,3000},
+    {CONF_ACTION_B3_PRESS,             INPUT_MAIN_STATE_S3_PRESSED, 0,3000},
+    {CONF_ACTION_B4_PRESS,             INPUT_MAIN_STATE_S1_PRESSED, 3000,5000},
+    {CONF_ACTION_B5_PRESS,             INPUT_MAIN_STATE_S2_PRESSED, 3000,5000},
+    {CONF_ACTION_B6_PRESS,             INPUT_MAIN_STATE_S3_PRESSED, 3000,5000},
+    {CONF_ACTION_B7_PRESS,             INPUT_MAIN_STATE_S1_PRESSED, 5000,10000},
+    {CONF_ACTION_B8_PRESS,             INPUT_MAIN_STATE_S2_PRESSED, 5000,10000},
+    {CONF_ACTION_NOTHING,              INPUT_MAIN_STATE_S3_PRESSED, 5000,10000},
 };
 
 const inputActionStruct buttonActionProperty[]{
-    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_NONE,        0,0},
-    {CONF_ACTION_DEC_SPEED,          INPUT_MAIN_STATE_S1_PRESSED,  0,3000},
-    {CONF_ACTION_CURSOR_CENTER,      INPUT_MAIN_STATE_S2_PRESSED,  0,3000},
-    {CONF_ACTION_INC_SPEED,          INPUT_MAIN_STATE_S3_PRESSED,  0,3000},
-    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S1_PRESSED,  3000,5000},
-    {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED,  3000,5000},
-    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S3_PRESSED,  3000,5000},
-    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S13_PRESSED, 0,3000},
-    {CONF_ACTION_FACTORY_RESET,      INPUT_MAIN_STATE_S13_PRESSED, 3000,5000}
+    {CONF_ACTION_NOTHING,              INPUT_MAIN_STATE_NONE,        0,0},
+    {CONF_ACTION_DEC_SPEED,            INPUT_MAIN_STATE_S1_PRESSED,  0,3000},
+    {CONF_ACTION_JOYSTICK_CENTER,      INPUT_MAIN_STATE_S2_PRESSED,  0,3000},
+    {CONF_ACTION_INC_SPEED,            INPUT_MAIN_STATE_S3_PRESSED,  0,3000},
+    {CONF_ACTION_NOTHING,              INPUT_MAIN_STATE_S1_PRESSED,  3000,5000},
+    {CONF_ACTION_CHANGE_MODE,          INPUT_MAIN_STATE_S2_PRESSED,  3000,5000},
+    {CONF_ACTION_NOTHING,              INPUT_MAIN_STATE_S3_PRESSED,  3000,5000},
+    {CONF_ACTION_JOYSTICK_CALIBRATION, INPUT_MAIN_STATE_S13_PRESSED, 0,3000},
+    {CONF_ACTION_FACTORY_RESET,        INPUT_MAIN_STATE_S13_PRESSED, 3000,5000}
 };
 
 int inputButtonPinArray[] = { CONF_BUTTON1_PIN, CONF_BUTTON2_PIN, CONF_BUTTON3_PIN };
@@ -103,12 +105,12 @@ unsigned long sapActionMaxTime = 0;
 
 const inputActionStruct sapActionProperty[]{
     {CONF_ACTION_NOTHING,            PRESS_SAP_MAIN_STATE_NONE,  0,0},
-    {CONF_ACTION_LEFT_CLICK,         PRESS_SAP_MAIN_STATE_PUFF,  0,3000},
-    {CONF_ACTION_RIGHT_CLICK,        PRESS_SAP_MAIN_STATE_SIP,   0,3000},
-    {CONF_ACTION_DRAG,               PRESS_SAP_MAIN_STATE_PUFF,  3000,5000},
-    {CONF_ACTION_SCROLL,             PRESS_SAP_MAIN_STATE_SIP,   3000,5000},
-    {CONF_ACTION_CURSOR_CENTER,      PRESS_SAP_MAIN_STATE_PUFF,  5000,10000},
-    {CONF_ACTION_MIDDLE_CLICK,       PRESS_SAP_MAIN_STATE_SIP,   5000,10000}
+    {CONF_ACTION_B1_PRESS,           PRESS_SAP_MAIN_STATE_PUFF,  0,3000},
+    {CONF_ACTION_B2_PRESS,           PRESS_SAP_MAIN_STATE_SIP,   0,3000},
+    {CONF_ACTION_B3_PRESS,           PRESS_SAP_MAIN_STATE_PUFF,  3000,5000},
+    {CONF_ACTION_B4_PRESS,           PRESS_SAP_MAIN_STATE_SIP,   3000,5000},
+    {CONF_ACTION_JOYSTICK_CENTER,    PRESS_SAP_MAIN_STATE_PUFF,  5000,10000},
+    {CONF_ACTION_B5_PRESS,           PRESS_SAP_MAIN_STATE_SIP,   5000,10000}
 };
 
 //Joystick module variables and structures
@@ -146,8 +148,7 @@ LSPressure ps;                                       //Starts an instance of the
 
 LSOutput led;                                        //Starts an instance of the LSOutput LED object
 
-LSUSBMouse mouse;                                    //Starts an instance of the USB mouse object
-LSBLEMouse btmouse;                                  //Starts an instance of the BLE mouse object
+LSGamepad gamepad;                                    //Starts an instance of the USB gamepad object
 
 
 //***MICROCONTROLLER AND PERIPHERAL CONFIGURATION***//
@@ -161,9 +162,8 @@ LSBLEMouse btmouse;                                  //Starts an instance of the
 //*********************************//
 void setup()
 {
-  // Begin HID mouse 
-  mouse.begin();
-  btmouse.begin();
+  // Begin HID gamepad 
+  gamepad.begin();
 
   Serial.begin(115200);
   //while (!TinyUSBDevice.mounted())
@@ -181,7 +181,7 @@ void setup()
 
   initJoystick();                                               //Initialize Joystick 
 
-  initCommunicationMode();                                      //Initialize Communication Mode
+  initOperationMode();                                          //Initialize operation Mode
 
   initDebug();                                                  //Initialize Debug Mode operation 
 
@@ -191,8 +191,7 @@ void setup()
   pollTimerId[0] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, 0, joystickLoop);
   pollTimerId[1] = pollTimer.setInterval(CONF_PRESSURE_POLL_RATE, 0, pressureLoop);
   pollTimerId[2] = pollTimer.setInterval(CONF_INPUT_POLL_RATE, 0, inputLoop);
-  pollTimerId[3] = pollTimer.setInterval(CONF_BT_FEEDBACK_POLL_RATE, 0, btFeedbackLoop);
-  pollTimerId[4] = pollTimer.setInterval(CONF_DEBUG_POLL_RATE, 0, debugLoop);
+  pollTimerId[3] = pollTimer.setInterval(CONF_DEBUG_POLL_RATE, 0, debugLoop);
   
   enablePoll(false);                              //Enable it when the led IBM effect is complete 
 
@@ -231,13 +230,11 @@ void enablePoll(bool isEnabled){
     getDebugMode(false,false);
     pollTimer.enable(1); 
     pollTimer.enable(2);    
-    pollTimer.enable(3);  
   } else {
     pollTimer.disable(0);    
     pollTimer.disable(1);
     pollTimer.disable(2);
     pollTimer.disable(3);  
-    pollTimer.disable(4); 
   }
 }
 
@@ -282,19 +279,19 @@ void resetMemory()
 // Communication Mode Functions
 //*********************************//
 
-//***INITIALIZE COMMUNICATION FUNCTION***//
-// Function   : initCommunicationMode 
+//***INITIALIZE OPERATION FUNCTION***//
+// Function   : initOperationMode 
 // 
-// Description: This function initializes communication mode or configures communication mode
-//              based on stored settings in the flash memory (0 = None , 1 = USB , 2 = Wireless)
+// Description: This function initializes operation mode or configures operation mode
+//              based on stored settings in the flash memory (0 = None, 1 = Digital , 2 = Analog)
 //
 // Parameters : void
 // 
 // Return     : void 
 //****************************************//
-void initCommunicationMode()
+void initOperationMode()
 {
-  comMode = getCommunicationMode(false,false);
+  operationMode = getOperationMode(false,false);
 }
 
 
@@ -429,12 +426,6 @@ void pressureLoop()
 //****************************************//
 void releaseOutputAction()
 {
-  //Release left click if it's in drag mode and left mouse button is pressed.
-  if (outputAction == CONF_ACTION_DRAG && (mouse.isPressed(MOUSE_LEFT) || btmouse.isPressed(MOUSE_LEFT)))
-  {
-    mouse.release(MOUSE_LEFT);
-    btmouse.release(MOUSE_LEFT);
-  }
   //Set new state of current output action 
   outputAction = CONF_ACTION_NOTHING;
   canOutputAction = true;
@@ -457,18 +448,8 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
   bool canEvaluateAction = true;
   //Output action logic
   int tempActionIndex = 0;
-  //Handle input action when it's in hold state
-  if ((
-    actionState.secondaryState == INPUT_SEC_STATE_RELEASED) &&
-    (outputAction == CONF_ACTION_SCROLL ||
-      outputAction == CONF_ACTION_DRAG))
-  {
-    setLedDefault();                                                            //Set default led feedback 
-    //Set new state of current output action 
-    releaseOutputAction();
-    canEvaluateAction = false;
-  } //Detected input release after defined time limits. 
-  else if (actionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
+  //Detected input release after defined time limits. 
+  if (actionState.secondaryState == INPUT_SEC_STATE_RELEASED &&
       actionState.elapsedTime > actionMaxEndTime){
       //Set Led color to default 
       setLedDefault();      
@@ -540,47 +521,62 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
 //****************************************//
 void performOutputAction(int action)
 {
+  
   switch (action)
   {
     case CONF_ACTION_NOTHING:
     {
       break;
     }
-    case CONF_ACTION_LEFT_CLICK:
+    case CONF_ACTION_B1_PRESS:
     {
-      cursorLeftClick();
+      gamepadButtonClick(action);
       break;
     }
-    case CONF_ACTION_RIGHT_CLICK:
+    case CONF_ACTION_B2_PRESS:
     {
-      cursorRightClick();
+      gamepadButtonClick(action);
       break;
     }
-    case CONF_ACTION_DRAG:
+    case CONF_ACTION_B3_PRESS:
     {
-      cursorDrag();
+      gamepadButtonClick(action);
       break;
     }
-    case CONF_ACTION_SCROLL:
+    case CONF_ACTION_B4_PRESS:
     {
-      cursorScroll(); //Enter Scroll mode
+      gamepadButtonClick(action);
       break;
     }
-    case CONF_ACTION_CURSOR_CENTER:
+    case CONF_ACTION_B5_PRESS:
+    {
+      gamepadButtonClick(action);
+      break;
+    }
+    case CONF_ACTION_B6_PRESS:
+    {
+      gamepadButtonClick(action);
+      break;
+    }
+    case CONF_ACTION_B7_PRESS:
+    {
+      gamepadButtonClick(action);
+      break;
+    }
+    case CONF_ACTION_B8_PRESS:
+    {
+      gamepadButtonClick(action);
+      break;
+    }
+    case CONF_ACTION_JOYSTICK_CENTER:
     {
       //Perform cursor center
       setJoystickInitialization(true,false);
       break;
     }
-    case CONF_ACTION_CURSOR_CALIBRATION:
+    case CONF_ACTION_JOYSTICK_CALIBRATION:
     {
       setJoystickCalibration(true,false);
-      break;
-    }
-    case CONF_ACTION_MIDDLE_CLICK:
-    {
-      //Perform cursor middle click
-      cursorMiddleClick();
       break;
     }
     case CONF_ACTION_DEC_SPEED:
@@ -597,8 +593,8 @@ void performOutputAction(int action)
     }
     case CONF_ACTION_CHANGE_MODE:
     {
-      //Change communication mode
-      toggleCommunicationMode(true,false);
+      //Change operation mode
+      toggleOperationMode(true,false);
       break;
     }
     case CONF_ACTION_FACTORY_RESET:
@@ -608,115 +604,65 @@ void performOutputAction(int action)
       break;
     }
   }
-  if(action==CONF_ACTION_DRAG || action==CONF_ACTION_SCROLL){
-    canOutputAction = false;
-  }
-  else {
-    outputAction=CONF_ACTION_NOTHING;
-    canOutputAction = true;
+  outputAction=CONF_ACTION_NOTHING;
+  canOutputAction = true;
+}
+
+//***GAMEPAD BUTTON PRESS FUNCTION***//
+// Function   : gamepadButtonPress 
+// 
+// Description: This function performs button press action.
+//
+// Parameters : int : buttonNumber
+// 
+// Return     : void 
+//****************************************//
+void gamepadButtonPress(int buttonNumber)
+{
+  //Serial.println("Button Press");
+  if (buttonNumber >0 && buttonNumber <=8 )
+  {
+    gamepad.press(buttonNumber-1);
+    gamepad.send();
   }
 }
 
-//***CURSOR LEFT CLICK FUNCTION***//
-// Function   : cursorLeftClick 
+//***GAMEPAD BUTTON CLICK FUNCTION***//
+// Function   : gamepadButtonClick
 // 
-// Description: This function performs cursor left click action.
+// Description: This function performs button click action.
+//
+// Parameters : int : buttonNumber
+// 
+// Return     : void 
+//****************************************//
+void gamepadButtonClick(int buttonNumber)
+{
+  //Serial.println("Button click");
+  if (buttonNumber >0 && buttonNumber <=8 )
+  {
+    gamepadButtonPress(buttonNumber);
+    pollTimerId[4] = pollTimer.setTimeout(CONF_BUTTON_CLICK_DELAY, gamepadButtonRelease); 
+  }
+
+}
+
+//***GAMEPAD BUTTON RELEASE FUNCTION***//
+// Function   : gamepadButtonRelease 
+// 
+// Description: This function performs button release action.
 //
 // Parameters : void
 // 
 // Return     : void 
 //****************************************//
-void cursorLeftClick(void)
+void gamepadButtonRelease()
 {
-  //Serial.println("Left Click");
-  if (comMode == CONF_COM_MODE_USB)
-  {
-    mouse.click(MOUSE_LEFT);
-  }
-  else if (comMode == CONF_COM_MODE_BLE)
-  {
-    btmouse.click(MOUSE_LEFT);
-  }
+  //Serial.println("Button Release");
+  gamepad.releaseAll();
+  gamepad.send();
 }
 
-//***CURSOR RIGHT CLICK FUNCTION***//
-// Function   : cursorRightClick 
-// 
-// Description: This function performs cursor right click action.
-//
-// Parameters : void
-// 
-// Return     : void 
-//****************************************//
-void cursorRightClick(void)
-{
-  //Serial.println("Right Click");
-  if (comMode == CONF_COM_MODE_USB)
-  {
-    mouse.click(MOUSE_RIGHT);
-  }
-  else if (comMode == CONF_COM_MODE_BLE)
-  {
-    btmouse.click(MOUSE_RIGHT);
-  }
-}
-
-//***CURSOR MIDDLE CLICK FUNCTION***//
-// Function   : cursorMiddleClick 
-// 
-// Description: This function performs cursor middle click action.
-//
-// Parameters : void
-// 
-// Return     : void 
-//****************************************//
-void cursorMiddleClick(void)
-{
-  //Serial.println("Middle Click");
-  if (comMode == CONF_COM_MODE_USB)
-  {
-    mouse.click(MOUSE_MIDDLE);
-  }
-  else if (comMode == CONF_COM_MODE_BLE)
-  {
-    btmouse.click(MOUSE_MIDDLE);
-  }
-}
-
-//***DRAG FUNCTION***//
-// Function   : cursorDrag 
-// 
-// Description: This function performs cursor drag action.
-//
-// Parameters : void
-// 
-// Return     : void 
-//********************//
-void cursorDrag(void)
-{
-  //Serial.println("Drag");
-  if (comMode == CONF_COM_MODE_USB)
-  {
-    mouse.press(MOUSE_LEFT);
-  }
-  else if (comMode == CONF_COM_MODE_BLE)
-  {
-    btmouse.press(MOUSE_LEFT);
-  }
-}
-//***CURSOR SCROLL FUNCTION***//
-// Function   : cursorScroll 
-// 
-// Description: This function is an operating mode that enables scrolling action.
-//
-// Parameters : void
-// 
-// Return     : void 
-//****************************************//
-void cursorScroll(void)
-{
-  //Serial.println("Scroll");
-}
 
 
 //*********************************//
@@ -737,6 +683,7 @@ void initJoystick()
   js.begin();                                                               //Begin joystick 
   js.setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_INVERSE);       //Set x and y magnet direction 
   getJoystickDeadZone(true,false);                                          //Get joystick deadzone stored in flash memory 
+  js.setOutputMode(JOY_OUTPUT_GAMEPAD_MODE);                                //Set output mode to gamepad
   getJoystickSpeed(true,false);                                             //Get joystick cursor speed stored in flash memory 
   setJoystickInitialization(true,false);                                    //Perform joystick center initialization
   getJoystickCalibration(true,false);                                       //Get joystick calibration points stored in flash memory 
@@ -916,23 +863,16 @@ void joystickLoop()
 //***PERFORM JOYSTICK FUNCTION***//
 // Function   : performJoystick 
 // 
-// Description: This function performs joystick move and scroll actions.
+// Description: This function performs joystick move
 //
-// Parameters : inputPoint : pointIntType : The output cursor x and y
+// Parameters : inputPoint : pointIntType : The output gamepad x and y
 // 
 // Return     : void 
 //****************************************//
 void performJoystick(pointIntType inputPoint)
 {
-  //0 = None , 1 = USB , 2 = Wireless  
-  if (comMode == CONF_COM_MODE_USB)
-  {
-    (outputAction == CONF_ACTION_SCROLL) ? mouse.scroll(round(inputPoint.y / 5)) : mouse.move(inputPoint.x, -inputPoint.y);
-  }
-  else if (comMode == CONF_COM_MODE_BLE)
-  {
-    (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(round(inputPoint.y / 5)) : btmouse.move(inputPoint.x, -inputPoint.y);
-  }
+  gamepad.move(inputPoint.x, -inputPoint.y);
+  gamepad.send();
 }
 
 
@@ -1017,14 +957,14 @@ void debugLoop(){
 void setDebugState(int inputDebugMode) {
   if (inputDebugMode==CONF_DEBUG_MODE_NONE) {
     pollTimer.enable(0);                      //Enable joystick data polling 
-    pollTimer.disable(4);                     //Disable debug data polling 
+    pollTimer.disable(3);                     //Disable debug data polling 
   } 
   else if (inputDebugMode==CONF_DEBUG_MODE_JOYSTICK) {
     pollTimer.disable(0);                     //Disable joystick data polling 
-    pollTimer.enable(4);                      //Enable debug data polling 
+    pollTimer.enable(3);                      //Enable debug data polling 
   }
   else {
-    pollTimer.enable(4);                      //Enable debug data polling 
+    pollTimer.enable(3);                      //Enable debug data polling 
   }
 }
 
@@ -1141,24 +1081,6 @@ void ledBlinkEffect(ledStateStruct* args){
   }   
 }
 
-//***LED BLUETOOTH SCAN EFFECT FUNCTION***//
-// Function   : ledBtScanEffect 
-// 
-// Description: This function performs bluetooth scan blink LED effect.
-// 
-// Return     : void 
-//****************************************//
-void ledBtScanEffect(){
-  if(pollTimer.getNumRuns(5) % 2){
-     led.setLedColor(CONF_BT_LED_NUMBER, 0, CONF_BT_LED_BRIGHTNESS);
-  } 
-  else{
-    led.setLedColor(CONF_BT_LED_NUMBER, CONF_BT_LED_COLOR, CONF_BT_LED_BRIGHTNESS);
-  }
-
-}
-
-
 
 //***TURN ALL LEDS OFF FUNCTION***//
 // Function   : turnLedAllOff 
@@ -1227,41 +1149,10 @@ void blinkLed(ledStateStruct* args)
 // Return     : void 
 //****************************************//
 void setLedDefault(){
-  //Clear if it's in USB MODE
+  //Clear 
   led.clearLedAll();
-  if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected())
-  { //Set second LED to blue if it's in BLE MODE
-    led.setLedColor(2, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
-  }
 }
 
-//***BLUETOOTH SCAN AND LED FEEDBACK LOOP FUNCTION***//
-// Function   : btFeedbackLoop 
-// 
-// Description: This function performs the default LED effects to indicate the device is connected.
-//
-// Parameters : void
-// 
-// Return     : void 
-//****************************************//
-void btFeedbackLoop()
-{
-  //Get the current bluetooth connection state
-  bool tempIsConnected = btmouse.isConnected();
-  //Perform bluetooth LED blinking if bluetooth is not connected and wasn't connected before 
-  if (comMode == CONF_COM_MODE_BLE && tempIsConnected==false && tempIsConnected == btIsConnected)
-  {
-    btIsConnected = false;
-    pollTimerId[5] = pollTimer.setTimer(CONF_BT_SCAN_BLINK_DELAY, 0, ((CONF_BT_SCAN_BLINK_NUMBER*2)+1), ledBtScanEffect);
-
-  } //Set the default LED effect if bluetooth connection state is changed 
-  else if (comMode == CONF_COM_MODE_BLE && tempIsConnected != btIsConnected)
-  {
-    btIsConnected = tempIsConnected;
-    setLedDefault();
-  }
-
-}
 
 //***PERFORM LED ACTION FUNCTION***//
 // Function   : performLedAction 

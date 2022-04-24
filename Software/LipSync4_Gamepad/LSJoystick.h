@@ -43,6 +43,10 @@
 #define JOY_OUTPUT_RANGE_LEVEL 5        //The default output range level or output movement upper range 
 
 
+#define JOY_OUTPUT_CURSOR_MODE  1       //Output x and y values for cursor 
+#define JOY_OUTPUT_GAMEPAD_MODE 2       //Output x and y values for gamepad 
+
+
 class LSJoystick {
   private:
     Tlv493d Tlv493dSensor = Tlv493d();                                    //Create an object of Tlv493d class
@@ -74,6 +78,7 @@ class LSJoystick {
     int _deadzoneValue;                                                   //The calculated deadzone value based on deadzone factor and maximum value JOY_INPUT_XY_MAX.
     int _rangeLevel;                                                      //The range level from 0 to 10 which is used as speed levels.
     int _rangeValue;                                                      //The calculated range value based on range level and an equation. This is maximum output value  for each range level.
+    int _outputMode;
     float _inputRadius;                                                   //The minimum radius of operating area calculated using calibration points.
     bool _skipInputChange;                                                //The flag to low-pass filter the input changes 
   public:
@@ -90,6 +95,7 @@ class LSJoystick {
     void setDeadzone(bool deadzoneEnabled,float deadzoneFactor);          //Enable or disable deadzone and set deadzone scale factor (0.12) 
     int getOutputRange();                                                 //Get the output range or speed levels.
     void setOutputRange(int rangeLevel);                                  //Set the output range or speed levels.
+    void setOutputMode(int outputMode);                                   //Set the output mode ( Cursor = 1, Gamepad = 2 );
     void setMinimumRadius();                                              //Set or update the minimum input radius for square to circle mapping.
     pointFloatType getInputCenter();                                      //Get the updated center compensation point.
     void evaluateInputCenter();                                           //Evaluate the center compensation point.
@@ -134,12 +140,14 @@ LSJoystick::LSJoystick() {
 void LSJoystick::begin() {
 
   _inputRadius = 0.0;                                                   //Initialize _inputRadius
-  _skipInputChange = false;                                            //Initialize _skipInputChange
+  _skipInputChange = false;                                             //Initialize _skipInputChange
 
   Tlv493dSensor.begin();
   setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_DEFAULT);      //Set default magnet direction.
   setDeadzone(JOY_OUTPUT_DEADZONE_STATUS,JOY_OUTPUT_DEADZONE_FACTOR);   //Set default deadzone status and deadzone factor.
+  setOutputMode(JOY_OUTPUT_CURSOR_MODE);                                //Set default output mode.
   setOutputRange(JOY_OUTPUT_RANGE_LEVEL);                               //Set default output range level or speed level.
+
   clear();                                                              //Clear calibration array and joystickOutputBuffer.
 }
 
@@ -334,14 +342,32 @@ int LSJoystick::getOutputRange(){
 //*********************************//
 void LSJoystick::setOutputRange(int rangeLevel){
 
-  //Calculate the output range value
-  _rangeValue = (int)((0.125 * sq(rangeLevel)) + ( 0.3 * rangeLevel ) + 2);       //Polynomial 
-  // [0:2; 1:2; 2:3; 3:4; 4:5; 5:7; 6:8; 7:10; 8:12; 9:15; 10:18]
-  
-  //_rangeValue = (int)((1.05 * exp(( 0.175 * rangeLevel) + 1.1)) - 1);           //Exponential   
-  //Serial.print("_rangeValue:");
-  //Serial.println(_rangeValue);
+  if(_outputMode == JOY_OUTPUT_CURSOR_MODE){
+    //Calculate the output range value
+    _rangeValue = (int)((0.125 * sq(rangeLevel)) + ( 0.3 * rangeLevel ) + 2);       //Polynomial 
+    // [0:2; 1:2; 2:3; 3:4; 4:5; 5:7; 6:8; 7:10; 8:12; 9:15; 10:18]
+    
+    //_rangeValue = (int)((1.05 * exp(( 0.175 * rangeLevel) + 1.1)) - 1);           //Exponential   
+    //Serial.print("_rangeValue:");
+    //Serial.println(_rangeValue);   
+  } else if(_outputMode == JOY_OUTPUT_GAMEPAD_MODE){
+    _rangeValue = 127;
+  }
+
   _rangeLevel = rangeLevel;
+}
+
+//*********************************//
+// Function   : setOutputMode 
+// 
+// Description: Set the output mode
+// 
+// Arguments :  int : outputMode : Cursor = 1, Gamepad = 2 
+// 
+// Return     : void
+//*********************************//
+void LSJoystick::setOutputMode(int outputMode){
+  _outputMode = outputMode;
 }
 
 //*********************************//
@@ -667,8 +693,8 @@ pointIntType LSJoystick::processInputReading(pointFloatType inputPoint) {
   limitPoint.y = sgn(centeredPoint.y) * abs(sin(thetaVal)*_inputRadius);
 
   //Compare the magnitude of two points from center
-  //Output point on perimeter of circle if it's outside
-  if ((sq(centeredPoint.x) + sq(centeredPoint.y)) >= sq(_inputRadius)) {
+  //Output point on perimeter of circle if it's outside in cursor mode
+  if (((sq(centeredPoint.x) + sq(centeredPoint.y)) >= sq(_inputRadius)) && (_outputMode == JOY_OUTPUT_CURSOR_MODE)) {
     centeredPoint.x = limitPoint.x; 
     centeredPoint.y = limitPoint.y; 
 //    Serial.print(centeredPoint.x);  
