@@ -25,14 +25,14 @@
 
 //Output action numbers
 #define CONF_ACTION_NOTHING 0                              // No action
-#define CONF_ACTION_B1_PRESS 1                             // Generates a Button 1 press
-#define CONF_ACTION_B2_PRESS 2                             // Generates a Button 2 press
-#define CONF_ACTION_B3_PRESS 3                             // Generates a Button 3 press
-#define CONF_ACTION_B4_PRESS 4                             // Generates a Button 4 press
-#define CONF_ACTION_B5_PRESS 5                             // Generates a Button 5 press
-#define CONF_ACTION_B6_PRESS 6                             // Generates a Button 6 press
-#define CONF_ACTION_B7_PRESS 7                             // Generates a Button 7 press
-#define CONF_ACTION_B8_PRESS 8                             // Generates a Button 8 press
+#define CONF_ACTION_B1_PRESS 1                             // Generates a Button 1 press or button X1(Left USB)/View(Right USB) press in XAC  
+#define CONF_ACTION_B2_PRESS 2                             // Generates a Button 2 press or button X2(Left USB)/Menu(Right USB) press in XAC    
+#define CONF_ACTION_B3_PRESS 3                             // Generates a Button 3 press or button LS(Left USB)/RS(Right USB) press in XAC
+#define CONF_ACTION_B4_PRESS 4                             // Generates a Button 4 press or button LB(Left USB)/RB(Right USB) press in XAC 
+#define CONF_ACTION_B5_PRESS 5                             // Generates a Button 5 press or button A(Left USB)/X(Right USB) press in XAC
+#define CONF_ACTION_B6_PRESS 6                             // Generates a Button 6 press or button B(Left USB)/Y(Right USB) press in XAC
+#define CONF_ACTION_B7_PRESS 7                             // Generates a Button 7 press or button View(Left USB)/X1(Right USB) press in XAC  
+#define CONF_ACTION_B8_PRESS 8                             // Generates a Button 8 press or button Menu(Left USB)/X2(Right USB) press in XAC  
 #define CONF_ACTION_JOYSTICK_CENTER 9                      // Center the joystick 
 #define CONF_ACTION_JOYSTICK_CALIBRATION 10                // Initiates the joystick calibration.
 #define CONF_ACTION_DEC_SPEED 11                           // Decrease cursor movement speed
@@ -50,7 +50,7 @@
 #define CONF_INPUT_POLL_RATE 50             //50ms
 #define CONF_DEBUG_POLL_RATE 100            //100ms
 
-#define CONF_BUTTON_CLICK_DELAY 150         //150ms
+#define CONF_BUTTON_PRESS_DELAY 150         //150ms
 
 //Joystick values 
 #define CONF_JOY_SPEED_LEVEL_MIN 0

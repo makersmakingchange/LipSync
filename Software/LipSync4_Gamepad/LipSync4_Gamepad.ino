@@ -118,6 +118,10 @@ const inputActionStruct sapActionProperty[]{
 int xVal;
 int yVal;
 
+int actionTimerId[1];
+
+LSTimer<int> actionTimer;
+
 int calibTimerId[2];
 
 LSTimer<int> calibTimer;
@@ -211,6 +215,7 @@ void loop()
 {
   ledStateTimer.run();
   calibTimer.run();
+  actionTimer.run();
   pollTimer.run();
   settingsEnabled=serialSettings(settingsEnabled); //Check to see if setting option is enabled in Lipsync
 }
@@ -341,7 +346,13 @@ void inputLoop()
 
   //Evaluate Output Actions
   evaluateOutputAction(buttonState, buttonActionMaxTime, buttonActionSize, buttonActionProperty);
-  evaluateOutputAction(switchState, switchActionMaxTime, switchActionSize, switchActionProperty);
+
+  if(operationMode == CONF_OPR_MODE_DIGITAL){
+     evaluateOutputAction(switchState, switchActionMaxTime, switchActionSize, switchActionProperty);
+  }
+  else if(operationMode == CONF_OPR_MODE_ANALOG){
+     evaluateAnalogOutputAction(switchState, switchActionMaxTime, switchActionSize, switchActionProperty);
+  }
 }
 
 //*********************************//
@@ -510,6 +521,77 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
   }  
 }
 
+//***EVALUATE OUTPUT ANALOG ACTION FUNCTION***//
+// Function   : evaluateAnalogOutputAction 
+// 
+// Description: This function evaluates and performs output analog action
+//
+// Parameters : actionState : inputStateStruct : Current input state 
+//              actionMaxEndTime : unsigned long : maximum end action time
+//              actionSize : int : size of available actions
+//              actionProperty : const inputActionStruct : array of all possible actions
+// 
+// Return     : void 
+//****************************************//
+void evaluateAnalogOutputAction(inputStateStruct actionState, unsigned long actionMaxEndTime, int actionSize, const inputActionStruct actionProperty[])
+{
+  bool canEvaluateAction = true;
+  //Output action logic
+  int tempActionIndex = 0;
+
+  //Loop over all possible outputs
+  for (int actionIndex = 0; actionIndex < actionSize && canEvaluateAction && canOutputAction; actionIndex++)
+  {
+    //Detected input release in defined time limits. Perform output action based on action index
+    if (actionState.mainState == actionProperty[actionIndex].inputActionState &&
+      actionState.secondaryState == INPUT_SEC_STATE_STARTED)
+    {
+      //Get action index 
+      tempActionIndex = actionProperty[actionIndex].inputActionNumber;
+
+      //Set Led color to default 
+      setLedDefault();
+      //Set Led state 
+      setLedState(LED_ACTION_ON, 
+      ledActionProperty[tempActionIndex].ledEndColor, 
+      ledActionProperty[tempActionIndex].ledNumber, 
+      0, 
+      0, 
+      CONF_LED_BRIGHTNESS);
+      outputAction = tempActionIndex;
+
+      //Perform led action 
+      performLedAction(ledCurrentState);
+      //Perform output action 
+      performOutputAction(tempActionIndex);
+
+      break;
+    } //Detected input start in defined time limits. Perform led action based on action index
+    else if (actionState.mainState == actionProperty[actionIndex].inputActionState &&
+      actionState.secondaryState == INPUT_SEC_STATE_RELEASED)
+    {
+      //Get action index 
+      tempActionIndex = actionProperty[actionIndex].inputActionNumber; 
+
+      //Set Led color to default 
+      setLedDefault();
+      //Perform led action 
+      setLedState(LED_ACTION_OFF, 
+      LED_CLR_NONE, 
+      ledActionProperty[tempActionIndex].ledNumber, 
+      0, 
+      0, 
+      CONF_LED_BRIGHTNESS);
+      //Perform led action 
+      performLedAction(ledCurrentState);
+      //Perform output action 
+      performOutputAction(CONF_ACTION_NOTHING);
+
+      break;
+    }    
+  }  
+}
+
 //***PERFORM OUTPUT ACTION FUNCTION***//
 // Function   : performOutputAction 
 // 
@@ -526,46 +608,48 @@ void performOutputAction(int action)
   {
     case CONF_ACTION_NOTHING:
     {
+      //actionTimerId[0] = actionTimer.setTimeout(CONF_BUTTON_PRESS_DELAY, gamepadButtonRelease, (int *)action); 
+      gamepadButtonReleaseAll();
       break;
     }
     case CONF_ACTION_B1_PRESS:
     {
-      gamepadButtonClick(action);
+      gamepadButtonPress(action);
       break;
     }
     case CONF_ACTION_B2_PRESS:
     {
-      gamepadButtonClick(action);
+      gamepadButtonPress(action);
       break;
     }
     case CONF_ACTION_B3_PRESS:
     {
-      gamepadButtonClick(action);
+      gamepadButtonPress(action);
       break;
     }
     case CONF_ACTION_B4_PRESS:
     {
-      gamepadButtonClick(action);
+      gamepadButtonPress(action);
       break;
     }
     case CONF_ACTION_B5_PRESS:
     {
-      gamepadButtonClick(action);
+      gamepadButtonPress(action);
       break;
     }
     case CONF_ACTION_B6_PRESS:
     {
-      gamepadButtonClick(action);
+      gamepadButtonPress(action);
       break;
     }
     case CONF_ACTION_B7_PRESS:
     {
-      gamepadButtonClick(action);
+      gamepadButtonPress(action);
       break;
     }
     case CONF_ACTION_B8_PRESS:
     {
-      gamepadButtonClick(action);
+      gamepadButtonPress(action);
       break;
     }
     case CONF_ACTION_JOYSTICK_CENTER:
@@ -604,7 +688,10 @@ void performOutputAction(int action)
       break;
     }
   }
-  outputAction=CONF_ACTION_NOTHING;
+  if(operationMode == CONF_OPR_MODE_DIGITAL){
+    actionTimerId[0] = actionTimer.setTimeout(CONF_BUTTON_PRESS_DELAY, gamepadButtonRelease, (int *)action); 
+    outputAction=CONF_ACTION_NOTHING;   
+  }
   canOutputAction = true;
 }
 
@@ -641,8 +728,9 @@ void gamepadButtonClick(int buttonNumber)
   //Serial.println("Button click");
   if (buttonNumber >0 && buttonNumber <=8 )
   {
-    gamepadButtonPress(buttonNumber);
-    pollTimerId[4] = pollTimer.setTimeout(CONF_BUTTON_CLICK_DELAY, gamepadButtonRelease); 
+    gamepad.press(buttonNumber-1);
+    gamepad.send();
+    actionTimerId[0] = actionTimer.setTimeout(CONF_BUTTON_PRESS_DELAY, gamepadButtonRelease, (int *)buttonNumber); 
   }
 
 }
@@ -652,11 +740,33 @@ void gamepadButtonClick(int buttonNumber)
 // 
 // Description: This function performs button release action.
 //
+// Parameters : int* : args
+// 
+// Return     : void 
+//****************************************//
+void gamepadButtonRelease(int* args)
+{
+  int buttonNumber = (int)args;
+  //Serial.println("Button Release");
+  if (buttonNumber >0 && buttonNumber <=8){
+    gamepad.release(buttonNumber-1);
+    gamepad.send();
+  }
+
+}
+
+
+
+//***GAMEPAD BUTTON RELEASE FUNCTION***//
+// Function   : gamepadButtonReleaseAll 
+// 
+// Description: This function performs button release action.
+//
 // Parameters : void
 // 
 // Return     : void 
 //****************************************//
-void gamepadButtonRelease()
+void gamepadButtonReleaseAll()
 {
   //Serial.println("Button Release");
   gamepad.releaseAll();
