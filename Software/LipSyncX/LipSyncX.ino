@@ -2,8 +2,8 @@
 * File: LipSyncX.ino
 * Firmware: LipSync X
 * Developed by: MakersMakingChange
-* Version: Alpha 2 (14 April 2022) 
-* Copyright Neil Squire Society 2022. 
+* Version: Alpha 2 (14 March 2023) USB ONLY
+* Copyright Neil Squire Society 2023. 
 * License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
 */
 
@@ -15,23 +15,19 @@
 #include "LSOutput.h"
 #include "LSConfig.h"
 #include "LSUSB.h"
-#include "LSBLE.h"
 #include "LSCircularBuffer.h"
 #include "LSInput.h"
 #include "LSPressure.h"
 #include "LSJoystick.h"
 #include "LSMemory.h"
 
-//Communication mode and debug mode variables
-int comMode;                                                                                                // 0 = None , 1 = USB , 2 = Wireless  
+//Debug mode variables
 int debugMode;                                                                                              // 0 = Debug mode is Off
                                                                                                             // 1 = Joystick debug mode is On
                                                                                                             // 2 = Pressure debug mode is On
                                                                                                             // 3 = Buttons debug mode is On
                                                                                                             // 4 = Switch debug mode is On
                                                                                                             // 5 = Sip & Puff state debug mode is On
-//Bluetooth connection variables
-bool btIsConnected = false;
 
 //LED module variables
 bool ledActionEnabled = false;
@@ -48,7 +44,6 @@ const ledActionStruct ledActionProperty[]{
     {CONF_ACTION_MIDDLE_CLICK,       2,LED_CLR_NONE,  LED_CLR_MAGENTA,LED_ACTION_BLINK},
     {CONF_ACTION_DEC_SPEED,          1,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
     {CONF_ACTION_INC_SPEED,          3,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_CHANGE_MODE,        2,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
     {CONF_ACTION_FACTORY_RESET,      4,LED_CLR_YELLOW,LED_CLR_NONE,   LED_ACTION_NONE}
 };
 
@@ -70,7 +65,7 @@ const inputActionStruct switchActionProperty[]{
     {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S2_PRESSED, 0,3000},
     {CONF_ACTION_RIGHT_CLICK,        INPUT_MAIN_STATE_S3_PRESSED, 0,3000},
     {CONF_ACTION_DRAG,               INPUT_MAIN_STATE_S1_PRESSED, 3000,5000},
-    {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED, 3000,5000},
+    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S2_PRESSED, 3000,5000},
     {CONF_ACTION_SCROLL,             INPUT_MAIN_STATE_S3_PRESSED, 3000,5000},
     {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S1_PRESSED, 5000,10000},
     {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S2_PRESSED, 5000,10000},
@@ -83,7 +78,7 @@ const inputActionStruct buttonActionProperty[]{
     {CONF_ACTION_CURSOR_CENTER,      INPUT_MAIN_STATE_S2_PRESSED,  0,3000},
     {CONF_ACTION_INC_SPEED,          INPUT_MAIN_STATE_S3_PRESSED,  0,3000},
     {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S1_PRESSED,  3000,5000},
-    {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED,  3000,5000},
+    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S2_PRESSED,  3000,5000},
     {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S3_PRESSED,  3000,5000},
     {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S13_PRESSED, 0,3000},
     {CONF_ACTION_FACTORY_RESET,      INPUT_MAIN_STATE_S13_PRESSED, 3000,5000}
@@ -147,7 +142,6 @@ LSPressure ps;                                       //Starts an instance of the
 LSOutput led;                                        //Starts an instance of the LSOutput LED object
 
 LSUSBMouse mouse;                                    //Starts an instance of the USB mouse object
-LSBLEMouse btmouse;                                  //Starts an instance of the BLE mouse object
 
 
 //***MICROCONTROLLER AND PERIPHERAL CONFIGURATION***//
@@ -163,7 +157,6 @@ void setup()
 {
   // Begin HID mouse 
   mouse.begin();
-  btmouse.begin();
 
   Serial.begin(115200);
   //while (!TinyUSBDevice.mounted())
@@ -181,8 +174,6 @@ void setup()
 
   initJoystick();                                               //Initialize Joystick 
 
-  initCommunicationMode();                                      //Initialize Communication Mode
-
   initDebug();                                                  //Initialize Debug Mode operation 
 
   startupFeedback();                                            //Startup IBM LED Feedback 
@@ -191,8 +182,7 @@ void setup()
   pollTimerId[0] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, 0, joystickLoop);
   pollTimerId[1] = pollTimer.setInterval(CONF_PRESSURE_POLL_RATE, 0, pressureLoop);
   pollTimerId[2] = pollTimer.setInterval(CONF_INPUT_POLL_RATE, 0, inputLoop);
-  pollTimerId[3] = pollTimer.setInterval(CONF_BT_FEEDBACK_POLL_RATE, 0, btFeedbackLoop);
-  pollTimerId[4] = pollTimer.setInterval(CONF_DEBUG_POLL_RATE, 0, debugLoop);
+  pollTimerId[3] = pollTimer.setInterval(CONF_DEBUG_POLL_RATE, 0, debugLoop);
   
   enablePoll(false);                              //Enable it when the led IBM effect is complete 
 
@@ -230,14 +220,12 @@ void enablePoll(bool isEnabled){
   if(isEnabled){
     getDebugMode(false,false);
     pollTimer.enable(1); 
-    pollTimer.enable(2);    
-    pollTimer.enable(3);  
+    pollTimer.enable(2);   
   } else {
     pollTimer.disable(0);    
     pollTimer.disable(1);
     pollTimer.disable(2);
     pollTimer.disable(3);  
-    pollTimer.disable(4); 
   }
 }
 
@@ -277,25 +265,6 @@ void resetMemory()
   mem.initialize(CONF_SETTINGS_FILE, CONF_SETTINGS_JSON);          //Initialize flash memory to store settings 
 }
 
-
-//*********************************//
-// Communication Mode Functions
-//*********************************//
-
-//***INITIALIZE COMMUNICATION FUNCTION***//
-// Function   : initCommunicationMode 
-// 
-// Description: This function initializes communication mode or configures communication mode
-//              based on stored settings in the flash memory (0 = None , 1 = USB , 2 = Wireless)
-//
-// Parameters : void
-// 
-// Return     : void 
-//****************************************//
-void initCommunicationMode()
-{
-  comMode = getCommunicationMode(false,false);
-}
 
 
 //*********************************//
@@ -430,10 +399,9 @@ void pressureLoop()
 void releaseOutputAction()
 {
   //Release left click if it's in drag mode and left mouse button is pressed.
-  if (outputAction == CONF_ACTION_DRAG && (mouse.isPressed(MOUSE_LEFT) || btmouse.isPressed(MOUSE_LEFT)))
+  if (outputAction == CONF_ACTION_DRAG && mouse.isPressed(MOUSE_LEFT))
   {
     mouse.release(MOUSE_LEFT);
-    btmouse.release(MOUSE_LEFT);
   }
   //Set new state of current output action 
   outputAction = CONF_ACTION_NOTHING;
@@ -595,12 +563,6 @@ void performOutputAction(int action)
       increaseJoystickSpeed(true,false);
       break;
     }
-    case CONF_ACTION_CHANGE_MODE:
-    {
-      //Change communication mode
-      toggleCommunicationMode(true,false);
-      break;
-    }
     case CONF_ACTION_FACTORY_RESET:
     {
       //Perform Factory Reset
@@ -629,14 +591,7 @@ void performOutputAction(int action)
 void cursorLeftClick(void)
 {
   //Serial.println("Left Click");
-  if (comMode == CONF_COM_MODE_USB)
-  {
-    mouse.click(MOUSE_LEFT);
-  }
-  else if (comMode == CONF_COM_MODE_BLE)
-  {
-    btmouse.click(MOUSE_LEFT);
-  }
+  mouse.click(MOUSE_LEFT);
 }
 
 //***CURSOR RIGHT CLICK FUNCTION***//
@@ -651,14 +606,7 @@ void cursorLeftClick(void)
 void cursorRightClick(void)
 {
   //Serial.println("Right Click");
-  if (comMode == CONF_COM_MODE_USB)
-  {
-    mouse.click(MOUSE_RIGHT);
-  }
-  else if (comMode == CONF_COM_MODE_BLE)
-  {
-    btmouse.click(MOUSE_RIGHT);
-  }
+  mouse.click(MOUSE_RIGHT);
 }
 
 //***CURSOR MIDDLE CLICK FUNCTION***//
@@ -673,14 +621,7 @@ void cursorRightClick(void)
 void cursorMiddleClick(void)
 {
   //Serial.println("Middle Click");
-  if (comMode == CONF_COM_MODE_USB)
-  {
-    mouse.click(MOUSE_MIDDLE);
-  }
-  else if (comMode == CONF_COM_MODE_BLE)
-  {
-    btmouse.click(MOUSE_MIDDLE);
-  }
+  mouse.click(MOUSE_MIDDLE);
 }
 
 //***DRAG FUNCTION***//
@@ -695,14 +636,7 @@ void cursorMiddleClick(void)
 void cursorDrag(void)
 {
   //Serial.println("Drag");
-  if (comMode == CONF_COM_MODE_USB)
-  {
-    mouse.press(MOUSE_LEFT);
-  }
-  else if (comMode == CONF_COM_MODE_BLE)
-  {
-    btmouse.press(MOUSE_LEFT);
-  }
+  mouse.press(MOUSE_LEFT);
 }
 //***CURSOR SCROLL FUNCTION***//
 // Function   : cursorScroll 
@@ -924,15 +858,8 @@ void joystickLoop()
 //****************************************//
 void performJoystick(pointIntType inputPoint)
 {
-  //0 = None , 1 = USB , 2 = Wireless  
-  if (comMode == CONF_COM_MODE_USB)
-  {
-    (outputAction == CONF_ACTION_SCROLL) ? mouse.scroll(round(inputPoint.y / 5)) : mouse.move(inputPoint.x, -inputPoint.y);
-  }
-  else if (comMode == CONF_COM_MODE_BLE)
-  {
-    (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(round(inputPoint.y / 5)) : btmouse.move(inputPoint.x, -inputPoint.y);
-  }
+  (outputAction == CONF_ACTION_SCROLL) ? mouse.scroll(round(inputPoint.y / 5)) : mouse.move(inputPoint.x, -inputPoint.y);
+
 }
 
 
@@ -1017,14 +944,14 @@ void debugLoop(){
 void setDebugState(int inputDebugMode) {
   if (inputDebugMode==CONF_DEBUG_MODE_NONE) {
     pollTimer.enable(0);                      //Enable joystick data polling 
-    pollTimer.disable(4);                     //Disable debug data polling 
+    pollTimer.disable(3);                     //Disable debug data polling 
   } 
   else if (inputDebugMode==CONF_DEBUG_MODE_JOYSTICK) {
     pollTimer.disable(0);                     //Disable joystick data polling 
-    pollTimer.enable(4);                      //Enable debug data polling 
+    pollTimer.enable(3);                      //Enable debug data polling 
   }
   else {
-    pollTimer.enable(4);                      //Enable debug data polling 
+    pollTimer.enable(3);                      //Enable debug data polling 
   }
 }
 
@@ -1141,23 +1068,6 @@ void ledBlinkEffect(ledStateStruct* args){
   }   
 }
 
-//***LED BLUETOOTH SCAN EFFECT FUNCTION***//
-// Function   : ledBtScanEffect 
-// 
-// Description: This function performs bluetooth scan blink LED effect.
-// 
-// Return     : void 
-//****************************************//
-void ledBtScanEffect(){
-  if(pollTimer.getNumRuns(5) % 2){
-     led.setLedColor(CONF_BT_LED_NUMBER, 0, CONF_BT_LED_BRIGHTNESS);
-  } 
-  else{
-    led.setLedColor(CONF_BT_LED_NUMBER, CONF_BT_LED_COLOR, CONF_BT_LED_BRIGHTNESS);
-  }
-
-}
-
 
 
 //***TURN ALL LEDS OFF FUNCTION***//
@@ -1229,39 +1139,9 @@ void blinkLed(ledStateStruct* args)
 void setLedDefault(){
   //Clear if it's in USB MODE
   led.clearLedAll();
-  if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected())
-  { //Set second LED to blue if it's in BLE MODE
-    led.setLedColor(2, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
-  }
 }
 
-//***BLUETOOTH SCAN AND LED FEEDBACK LOOP FUNCTION***//
-// Function   : btFeedbackLoop 
-// 
-// Description: This function performs the default LED effects to indicate the device is connected.
-//
-// Parameters : void
-// 
-// Return     : void 
-//****************************************//
-void btFeedbackLoop()
-{
-  //Get the current bluetooth connection state
-  bool tempIsConnected = btmouse.isConnected();
-  //Perform bluetooth LED blinking if bluetooth is not connected and wasn't connected before 
-  if (comMode == CONF_COM_MODE_BLE && tempIsConnected==false && tempIsConnected == btIsConnected)
-  {
-    btIsConnected = false;
-    pollTimerId[5] = pollTimer.setTimer(CONF_BT_SCAN_BLINK_DELAY, 0, ((CONF_BT_SCAN_BLINK_NUMBER*2)+1), ledBtScanEffect);
 
-  } //Set the default LED effect if bluetooth connection state is changed 
-  else if (comMode == CONF_COM_MODE_BLE && tempIsConnected != btIsConnected)
-  {
-    btIsConnected = tempIsConnected;
-    setLedDefault();
-  }
-
-}
 
 //***PERFORM LED ACTION FUNCTION***//
 // Function   : performLedAction 
