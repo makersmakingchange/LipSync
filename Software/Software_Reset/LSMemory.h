@@ -19,6 +19,18 @@ using namespace Adafruit_LittleFS_Namespace;
 
 #define BUFFER_SIZE  512
 
+//Struct of float point
+typedef struct {
+  float x;
+  float y;
+} pointFloatType;
+
+//Struct of int point
+typedef struct {
+  int x;
+  int y;
+} pointIntType;
+
 DynamicJsonDocument doc(1024);
 //Initialize FileSystem
 File file(InternalFS);
