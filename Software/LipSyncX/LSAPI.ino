@@ -22,6 +22,8 @@ _functionList getModelNumberFunction =            {"MN", "0", "0", &getModelNumb
 _functionList getVersionNumberFunction =          {"VN", "0", "0", &getVersionNumber};
 _functionList getJoystickSpeedFunction =          {"SS", "0", "0", &getJoystickSpeed};
 _functionList setJoystickSpeedFunction =          {"SS", "1", "",  &setJoystickSpeed};
+_functionList getScrollLevelFunction =            {"SL", "0", "0", &getScrollLevel};
+_functionList setScrollLevelFunction =            {"SL", "1", "",  &setScrollLevel};
 _functionList getJoystickInitializationFunction = {"IN", "0", "0", &getJoystickInitialization};
 _functionList setJoystickInitializationFunction = {"IN", "1", "1", &setJoystickInitialization};
 _functionList getJoystickCalibrationFunction =    {"CA", "0", "0", &getJoystickCalibration};
@@ -49,11 +51,13 @@ _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSetting
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[26] = {
+_functionList apiFunction[28] = {
   getModelNumberFunction,
   getVersionNumberFunction,
   getJoystickSpeedFunction,
   setJoystickSpeedFunction,
+  getScrollLevelFunction,
+  setScrollLevelFunction,
   getJoystickInitializationFunction,
   setJoystickInitializationFunction,
   getJoystickCalibrationFunction,
@@ -446,6 +450,110 @@ void setJoystickSpeed(bool responseEnabled, bool apiEnabled, int inputSpeedLevel
 void setJoystickSpeed(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   setJoystickSpeed(responseEnabled, apiEnabled, optionalParameter.toInt());
 }
+
+
+//***GET SCROLL LEVEL FUNCTION***//
+// Function   : getScrollLevel
+//
+// Description: This function retrieves the current scroll level.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : void
+//*********************************//
+int getScrollLevel(bool responseEnabled, bool apiEnabled) {
+  String commandKey = "SL";
+  int tempScrollLevel = CONF_SCROLL_LEVEL_DEFAULT;
+  if (CONF_API_ENABLED) {
+    tempScrollLevel = mem.readInt(CONF_SETTINGS_FILE, commandKey);
+    if ((tempScrollLevel < CONF_SCROLL_LEVEL_MIN) || (tempScrollLevel > CONF_SCROLL_LEVEL_MAX)) {
+      tempScrollLevel = CONF_SCROLL_LEVEL_DEFAULT;
+      mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempScrollLevel);
+    }
+    
+  }
+  //js.setOutputRange(tempScrollLevel);
+  printResponseInt(responseEnabled, apiEnabled, true, 0, "SL,0", true, tempScrollLevel);
+
+  return tempScrollLevel;
+}
+//***GET JOYSTICK LEVEL FUNCTION***//
+// Function   : getScrollLevel
+//
+// Description: This function is redefinition of main getScrollLevel function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void getScrollLevel(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
+    getScrollLevel(responseEnabled, apiEnabled);
+  }
+}
+
+//***SET SCROLL LEVEL FUNCTION***//
+// Function   : setScrollLevel
+//
+// Description: This function sets the current scroll level.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               inputScrollLevel : bool : The new scroll speed level.
+//
+// Return     : void
+//*********************************//
+void setScrollLevel(bool responseEnabled, bool apiEnabled, int inputScrollLevel) {
+  String commandKey = "SL";
+  bool isValidLevel = true;
+  int tempScrollLevel = inputScrollLevel;
+  
+  if ((tempScrollLevel >= CONF_SCROLL_LEVEL_MIN) && (tempScrollLevel <= CONF_SCROLL_LEVEL_MAX)) { //Check if inputLevelCounter is valid
+    // Valid inputScrollLevel
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempScrollLevel);
+    if (!CONF_API_ENABLED) {
+      tempScrollLevel = CONF_SCROLL_LEVEL_DEFAULT;
+    }
+    performLedAction(ledCurrentState);
+    isValidLevel = true;
+    scrollLevel = tempScrollLevel;
+  }
+  else {
+    //Invalid inputScrollLevel
+    tempScrollLevel = mem.readInt(CONF_SETTINGS_FILE, commandKey);
+    performLedAction(ledCurrentState);
+    isValidLevel = false;
+  }
+
+  //js.setOutputRange(tempScrollLevel);
+  int responseCode = 0;
+  (isValidLevel) ? responseCode = 0 : responseCode = 3;
+  printResponseInt(responseEnabled, apiEnabled, isValidLevel, responseCode, "SL,1", true, tempScrollLevel);
+}
+//***SET SCROLL LEVEL API FUNCTION***//
+// Function   : setScrollLevel
+//
+// Description: This function is redefinition of main setScrollLevel function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void setScrollLevel(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  setScrollLevel(responseEnabled, apiEnabled, optionalParameter.toInt());
+}
+
 
 //***INCREASE JOYSTICK SPEED LEVEL FUNCTION***//
 // Function   : increaseJoystickSpeed

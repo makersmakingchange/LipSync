@@ -2,7 +2,7 @@
 * File: LipSyncX.ino
 * Firmware: LipSync X
 * Developed by: MakersMakingChange
-* Version: Alpha 2 (14 April 2022) 
+* Version: Alpha 2 (05 September 2023) 
 * Copyright Neil Squire Society 2022. 
 * License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
 */
@@ -122,11 +122,13 @@ LSTimer<int> calibTimer;
 
 //Timer related variables
 
-int pollTimerId[6];
+int pollTimerId[7];
 
 LSTimer<void> pollTimer;
 
 //General
+
+int scrollLevel = 0;
 
 int outputAction;
 bool canOutputAction = true;
@@ -193,6 +195,7 @@ void setup()
   pollTimerId[2] = pollTimer.setInterval(CONF_INPUT_POLL_RATE, 0, inputLoop);
   pollTimerId[3] = pollTimer.setInterval(CONF_BT_FEEDBACK_POLL_RATE, 0, btFeedbackLoop);
   pollTimerId[4] = pollTimer.setInterval(CONF_DEBUG_POLL_RATE, 0, debugLoop);
+  pollTimerId[5] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, CONF_SCROLL_POLL_RATE, joystickLoop);
   
   enablePoll(false);                              //Enable it when the led IBM effect is complete 
 
@@ -238,6 +241,7 @@ void enablePoll(bool isEnabled){
     pollTimer.disable(2);
     pollTimer.disable(3);  
     pollTimer.disable(4); 
+    pollTimer.disable(5);
   }
 }
 
@@ -473,7 +477,13 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       //Set Led color to default 
       setLedDefault();      
   }
-
+  if(outputAction == CONF_ACTION_SCROLL){
+    pollTimer.enable(5);
+    pollTimer.disable(0);
+  }else if (outputAction != CONF_ACTION_SCROLL){
+    pollTimer.enable(0);
+    pollTimer.disable(5);
+  }
   //Loop over all possible outputs
   for (int actionIndex = 0; actionIndex < actionSize && canEvaluateAction && canOutputAction; actionIndex++)
   {
@@ -716,6 +726,7 @@ void cursorDrag(void)
 void cursorScroll(void)
 {
   //Serial.println("Scroll");
+  outputAction=CONF_ACTION_SCROLL;
 }
 
 
@@ -738,6 +749,7 @@ void initJoystick()
   js.setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_INVERSE);       //Set x and y magnet direction 
   getJoystickDeadZone(true,false);                                          //Get joystick deadzone stored in flash memory 
   getJoystickSpeed(true,false);                                             //Get joystick cursor speed stored in flash memory 
+  scrollLevel = getScrollLevel(true,false);                                 //Get scroll level stored in flash memory 
   setJoystickInitialization(true,false);                                    //Perform joystick center initialization
   getJoystickCalibration(true,false);                                       //Get joystick calibration points stored in flash memory 
 }
@@ -858,6 +870,8 @@ void performJoystickCalibration(int* args)
     setLedDefault();
     canOutputAction = true;
     pollTimer.enable(0);                                                                                                        //Enable joystick data polling 
+    pollTimer.enable(5);                                                                                                        //Enable joystick data polling 
+
   }
 
 }
@@ -927,12 +941,34 @@ void performJoystick(pointIntType inputPoint)
   //0 = None , 1 = USB , 2 = Wireless  
   if (comMode == CONF_COM_MODE_USB)
   {
-    (outputAction == CONF_ACTION_SCROLL) ? mouse.scroll(round(inputPoint.y / 5)) : mouse.move(inputPoint.x, -inputPoint.y);
+    (outputAction == CONF_ACTION_SCROLL) ? mouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : mouse.move(inputPoint.x, -inputPoint.y);
+
   }
   else if (comMode == CONF_COM_MODE_BLE)
   {
-    (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(round(inputPoint.y / 5)) : btmouse.move(inputPoint.x, -inputPoint.y);
+    (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : btmouse.move(inputPoint.x, -inputPoint.y);
   }
+}
+
+//***FSR SCROLL MOVEMENT MODIFIER FUNCTION***//
+// Function   : scrollModifier
+//
+// Description: This function converts y cursor movements to y scroll movements based on y cursor value and scroll speed level.
+//
+// Parameters : cursorValue : const int : y cursor value.
+//              cursorMaxValue : const int : maximum y cursor value.
+//              scrollLevelValue : const int : scroll speed level value.
+//
+// Return     : cursorOutput : int : The modified scroll value.
+//****************************************//
+int scrollModifier(const int cursorValue, const int cursorMaxValue, const int scrollLevelValue)
+{
+  int scrollOutput = 0;
+  int scrollMaxSpeed = round((1.0 * pow(CONF_SCROLL_MOVE_MAX, scrollLevelValue / 10.0)) + CONF_SCROLL_MOVE_BASE);
+
+  scrollOutput = map(cursorValue, 0, cursorMaxValue, 0, scrollMaxSpeed);
+  scrollOutput = -1 * constrain(scrollOutput, -1 * scrollMaxSpeed, scrollMaxSpeed);
+  return scrollOutput;
 }
 
 
@@ -1018,9 +1054,12 @@ void setDebugState(int inputDebugMode) {
   if (inputDebugMode==CONF_DEBUG_MODE_NONE) {
     pollTimer.enable(0);                      //Enable joystick data polling 
     pollTimer.disable(4);                     //Disable debug data polling 
+    pollTimer.enable(5);                      //Enable scroll data polling 
+
   } 
   else if (inputDebugMode==CONF_DEBUG_MODE_JOYSTICK) {
     pollTimer.disable(0);                     //Disable joystick data polling 
+    pollTimer.disable(5);                     //Disable scroll data polling 
     pollTimer.enable(4);                      //Enable debug data polling 
   }
   else {

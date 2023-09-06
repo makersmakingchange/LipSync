@@ -22,7 +22,9 @@
 
 //uint8_t const _ascii2keycode[128][2] = {HID_ASCII_TO_KEYCODE};
 
-uint8_t const desc_hid_report[] =
+uint8_t const
+
+desc_hid_report[] =
 {
     TUD_HID_REPORT_DESC_KEYBOARD( HID_REPORT_ID(RID_KEYBOARD) ),
     TUD_HID_REPORT_DESC_MOUSE( HID_REPORT_ID(RID_MOUSE) )

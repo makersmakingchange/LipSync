@@ -90,6 +90,7 @@ class LSJoystick {
     void setDeadzone(bool deadzoneEnabled,float deadzoneFactor);          //Enable or disable deadzone and set deadzone scale factor (0.12) 
     int getOutputRange();                                                 //Get the output range or speed levels.
     void setOutputRange(int rangeLevel);                                  //Set the output range or speed levels.
+    int getMinimumRadius();                                               //Get the minimum input radius for square to circle mapping.
     void setMinimumRadius();                                              //Set or update the minimum input radius for square to circle mapping.
     pointFloatType getInputCenter();                                      //Get the updated center compensation point.
     void evaluateInputCenter();                                           //Evaluate the center compensation point.
@@ -342,6 +343,19 @@ void LSJoystick::setOutputRange(int rangeLevel){
   //Serial.print("_rangeValue:");
   //Serial.println(_rangeValue);
   _rangeLevel = rangeLevel;
+}
+
+//*********************************//
+// Function   : getMinimumRadius 
+// 
+// Description: Get the minimum operating range as radius of circle from center point using calibration points.
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+int LSJoystick::getMinimumRadius(){
+  return _inputRadius;
 }
 
 //*********************************//

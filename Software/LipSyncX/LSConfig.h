@@ -39,13 +39,14 @@
 
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
-#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"CM\":0,\"SS\":5,\"PM\":0,\"ST\":0.0,\"PT\":0.0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[15.0,15.0],\"CA2\":[-15.0,15.0],\"CA3\":[-15.0,-15.0],\"CA4\":[15.0,-15.0],\"DM\":0}"
+#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"CM\":0,\"SS\":5,\"SL\":5,\"PM\":0,\"ST\":0.0,\"PT\":0.0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[15.0,15.0],\"CA2\":[-15.0,15.0],\"CA3\":[-15.0,-15.0],\"CA4\":[15.0,-15.0],\"DM\":0}"
 
 //Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 50          //50ms
+#define CONF_SCROLL_POLL_RATE 150           //150ms
 #define CONF_PRESSURE_POLL_RATE 50          //50ms
 #define CONF_INPUT_POLL_RATE 50             //50ms
-#define CONF_BT_FEEDBACK_POLL_RATE 1000    //1s
+#define CONF_BT_FEEDBACK_POLL_RATE 1000     //1s
 #define CONF_DEBUG_POLL_RATE 100            //100ms
 
 //Joystick values 
@@ -121,6 +122,26 @@
 #define CONF_JOY_SPEED_LIMIT_LED_DELAY 50
 #define CONF_JOY_SPEED_LIMIT_LED_BLINK 3
 #define CONF_JOY_SPEED_LIMIT_LED_COLOR LED_CLR_RED                                             //Out of range limit speed color
+
+//Scroll level change and related LED feedback settings 
+#define CONF_SCROLL_CHANGE_LED_DELAY 150
+#define CONF_SCROLL_CHANGE_LED_BLINK 1
+#define CONF_SCROLL_DEC_LED_NUMBER 1
+#define CONF_SCROLL_DEC_LED_COLOR LED_CLR_PURPLE                                            //Decrease scroll level color
+#define CONF_SCROLL_INC_LED_NUMBER 3
+#define CONF_SCROLL_INC_LED_COLOR LED_CLR_PURPLE                                            //Increase scroll level color
+#define CONF_SCROLL_LIMIT_LED_DELAY 50
+#define CONF_SCROLL_LIMIT_LED_BLINK 3
+#define CONF_SCROLL_LIMIT_LED_COLOR LED_CLR_RED                                             //Out of range limit scroll level color
+
+//Scroll level values 
+#define CONF_SCROLL_LEVEL_DEFAULT 5
+#define CONF_SCROLL_LEVEL_MIN 1
+#define CONF_SCROLL_LEVEL_MAX 10
+#define CONF_SCROLL_MOVE_MIN  1
+#define CONF_SCROLL_MOVE_MAX  10
+#define CONF_SCROLL_MOVE_BASE 1
+
 
 //Sip and Puff Default settings
 #define CONF_SIP_THRESHOLD 3.0                    //hPa
