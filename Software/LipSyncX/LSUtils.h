@@ -1,11 +1,12 @@
 /* 
-* File: LSUtils.h
-* Firmware: LipSync4
+* File: LipSyncX.ino
+* Firmware: LipSync X
 * Developed by: MakersMakingChange
-* Version: Alpha 2 (14 April 2022) 
+* Version: Beta (09 November 2023) 
 * Copyright Neil Squire Society 2022. 
 * License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
 */
+
 
 //Struct of float point
 typedef struct {
@@ -55,3 +56,12 @@ typedef struct {
   int secondaryState;            //waiting = 0, started = 1, released = 2
   unsigned long elapsedTime;     //in ms
 } inputStateStruct;
+
+//acceleration structure
+typedef struct
+{
+  uint8_t accNumber;
+  float accCoefficient;
+  uint8_t accStartSpeed;
+  uint8_t accEndSpeed;
+} accStruct;

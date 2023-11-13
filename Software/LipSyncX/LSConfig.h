@@ -1,11 +1,12 @@
 /* 
-* File: LSConfig.h
-* Firmware: LipSync4
+* File: LipSyncX.ino
+* Firmware: LipSync X
 * Developed by: MakersMakingChange
-* Version: Alpha 2 (14 April 2022) 
+* Version: Beta (09 November 2023) 
 * Copyright Neil Squire Society 2022. 
 * License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
 */
+
 
 //***DO NOT CHANGE***//
 #define CONF_LIPSYNC_MODEL 1                              //Mouse = 1 , Gamepad = 2
@@ -39,7 +40,7 @@
 
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
-#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"CM\":0,\"SS\":5,\"SL\":5,\"PM\":0,\"ST\":0.0,\"PT\":0.0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[15.0,15.0],\"CA2\":[-15.0,15.0],\"CA3\":[-15.0,-15.0],\"CA4\":[15.0,-15.0],\"DM\":0}"
+#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"CM\":0,\"SS\":5,\"SL\":5,\"PM\":0,\"ST\":0.0,\"PT\":0.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[15.0,15.0],\"CA2\":[-15.0,15.0],\"CA3\":[-15.0,-15.0],\"CA4\":[15.0,-15.0],\"DM\":0}"
 
 //Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 50          //50ms
@@ -122,6 +123,12 @@
 #define CONF_JOY_SPEED_LIMIT_LED_DELAY 50
 #define CONF_JOY_SPEED_LIMIT_LED_BLINK 3
 #define CONF_JOY_SPEED_LIMIT_LED_COLOR LED_CLR_RED                                             //Out of range limit speed color
+
+//Joystick cursor acceletaion change 
+#define CONF_JOY_ACCELERATION_LEVEL_MAX 10
+#define CONF_JOY_ACCELERATION_LEVEL_MIN -10
+#define CONF_JOY_ACCELERATION_LEVEL_DEFAULT 0
+
 
 //Scroll level change and related LED feedback settings 
 #define CONF_SCROLL_CHANGE_LED_DELAY 150

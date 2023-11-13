@@ -2,7 +2,7 @@
 * File: LipSyncX.ino
 * Firmware: LipSync X
 * Developed by: MakersMakingChange
-* Version: Alpha 2 (05 September 2023) 
+* Version: Beta (09 November 2023) 
 * Copyright Neil Squire Society 2022. 
 * License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
 */
@@ -89,6 +89,20 @@ const inputActionStruct buttonActionProperty[]{
     {CONF_ACTION_FACTORY_RESET,      INPUT_MAIN_STATE_S13_PRESSED, 3000,5000}
 };
 
+const accStruct accProperty[]{
+    {0, 1.0,  0,0},
+    {1, 1.0,  0,0},
+    {2, 1.0,  0,0},
+    {3, 1.0,  0,0},
+    {4, 1.0,  0,0},
+    {5, 1.0,  0,0},
+    {6, 1.0,  0,0},
+    {7, 1.0,  0,0},
+    {8, 1.0,  0,0},
+    {9, 1.0,  0,0}
+    
+};
+
 int inputButtonPinArray[] = { CONF_BUTTON1_PIN, CONF_BUTTON2_PIN, CONF_BUTTON3_PIN };
 int inputSwitchPinArray[] = { CONF_SWITCH1_PIN, CONF_SWITCH2_PIN, CONF_SWITCH3_PIN };
 
@@ -152,6 +166,7 @@ LSUSBMouse mouse;                                    //Starts an instance of the
 LSBLEMouse btmouse;                                  //Starts an instance of the BLE mouse object
 
 
+int acceleration = 0;
 //***MICROCONTROLLER AND PERIPHERAL CONFIGURATION***//
 // Function   : setup 
 // 
@@ -175,6 +190,8 @@ void setup()
   
   initMemory();                                                 //Initialize Memory 
 
+  initAcceletaion();
+  
   initLed();                                                    //Initialize LED Feedback 
 
   initSipAndPuff();                                             //Initialize Sip And Puff 
@@ -281,6 +298,23 @@ void resetMemory()
   mem.initialize(CONF_SETTINGS_FILE, CONF_SETTINGS_JSON);          //Initialize flash memory to store settings 
 }
 
+//*********************************//
+// Acceletaion Functions
+//*********************************//
+
+//***INITIALIZE ACCELERATION FUNCTION***//
+// Function   : initAcceletaion 
+// 
+// Description: This function initializes acceletaion 
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void initAcceletaion()
+{
+//  acceleration=getJoystickAcceleration(false,false);
+}
 
 //*********************************//
 // Communication Mode Functions
@@ -941,12 +975,12 @@ void performJoystick(pointIntType inputPoint)
   //0 = None , 1 = USB , 2 = Wireless  
   if (comMode == CONF_COM_MODE_USB)
   {
-    (outputAction == CONF_ACTION_SCROLL) ? mouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : mouse.move(inputPoint.x, -inputPoint.y);
+    (outputAction == CONF_ACTION_SCROLL) ? mouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : mouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration));
 
   }
   else if (comMode == CONF_COM_MODE_BLE)
   {
-    (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : btmouse.move(inputPoint.x, -inputPoint.y);
+    (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : btmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration));
   }
 }
 
@@ -969,6 +1003,32 @@ int scrollModifier(const int cursorValue, const int cursorMaxValue, const int sc
   scrollOutput = map(cursorValue, 0, cursorMaxValue, 0, scrollMaxSpeed);
   scrollOutput = -1 * constrain(scrollOutput, -1 * scrollMaxSpeed, scrollMaxSpeed);
   return scrollOutput;
+}
+
+
+//***ACCELERATION MOVEMENT MODIFIER FUNCTION***//
+// Function   : accelerationModifier
+//
+// Description: This function converts y cursor movements to y scroll movements based on y cursor value and acceleration level.
+//
+// Parameters : cursorValue : const int : y cursor value.
+//              cursorMaxValue : const int : maximum y cursor value.
+//              accelerationValue : const int : acceleration level value.
+//
+// Return     : cursorOutput : int : The modified acceleration value.
+//****************************************//
+int accelerationModifier(const int cursorValue, const int cursorMaxValue, const int accelerationValue)
+{
+  int accelerationOutput = 0;
+  
+  if(accelerationOutput<0){
+      accelerationOutput = round((1.0* pow(cursorValue, 1.0 + (acceleration * 0.025))));
+  }
+  else if(accelerationOutput>0){
+      accelerationOutput = round(1.0* pow(cursorValue, -1.0*(1.0 + (acceleration * 0.025))));
+  }
+  accelerationOutput = -1 * constrain(accelerationOutput, -1 * cursorMaxValue, cursorMaxValue);
+  return accelerationOutput;
 }
 
 
@@ -1150,7 +1210,6 @@ void ledIBMEffect(ledStateStruct* args)
   } 
   else if (args->ledColorNumber == 7)
   {
-    setLedDefault();
     ledActionEnabled = true;
     enablePoll(true);
   }
@@ -1175,7 +1234,7 @@ void ledBlinkEffect(ledStateStruct* args){
   }
 
   if(ledStateTimer.getNumRuns(0)==((args->ledBlinkNumber)*2)+1){
-    
+    //
      setLedDefault();
   }   
 }
@@ -1236,10 +1295,10 @@ void turnLedOff(ledStateStruct* args)
 // 
 // Return     : void 
 //****************************************//
-void turnLedOn(ledStateStruct* args)
-{
-  led.setLedColor(args->ledNumber, args->ledColorNumber, args->ledBrightness);
-}
+//void turnLedOn(ledStateStruct* args)
+//{
+//  led.setLedColor(args->ledNumber, args->ledColorNumber, args->ledBrightness);
+//}
 
 
 //***BLINK LED FUNCTION***//
@@ -1322,12 +1381,12 @@ void performLedAction(ledStateStruct* args)
     }
     case LED_ACTION_OFF:
     {
-      turnLedOff(args);
+      //turnLedOff(args);
       break;
     }
     case LED_ACTION_ON:
     {
-      turnLedOn(args);
+      //turnLedOn(args);
       break;
     }
     case LED_ACTION_BLINK:

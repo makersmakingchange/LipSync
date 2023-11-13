@@ -1,8 +1,8 @@
 /* 
-* File: LSAPI.ino
-* Firmware: LipSync4
+* File: LipSyncX.ino
+* Firmware: LipSync X
 * Developed by: MakersMakingChange
-* Version: Alpha 2 (14 April 2022) 
+* Version: Beta (09 November 2023) 
 * Copyright Neil Squire Society 2022. 
 * License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
 */
@@ -41,6 +41,9 @@ _functionList setSipPressureThresholdFunction =   {"ST", "1", "",  &setSipPressu
 _functionList getPuffPressureThresholdFunction =  {"PT", "0", "0", &getPuffPressureThreshold};
 _functionList setPuffPressureThresholdFunction =  {"PT", "1", "",  &setPuffPressureThreshold};
 
+_functionList getJoystickAccelerationFunction =   {"AV", "0", "0", &getJoystickAcceleration};
+_functionList setJoystickAccelerationFunction =   {"AV", "1", "0", &setJoystickAcceleration};
+
 _functionList getCommunicationModeFunction =      {"CM", "0", "0", &getCommunicationMode};
 _functionList setCommunicationModeFunction =      {"CM", "1", "",  &setCommunicationMode};
 
@@ -51,7 +54,7 @@ _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSetting
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[28] = {
+_functionList apiFunction[29] = {
   getModelNumberFunction,
   getVersionNumberFunction,
   getJoystickSpeedFunction,
@@ -73,6 +76,8 @@ _functionList apiFunction[28] = {
   setSipPressureThresholdFunction,
   getPuffPressureThresholdFunction,
   setPuffPressureThresholdFunction,
+  getJoystickAcceleration,
+  setJoystickAcceleration,
   getCommunicationModeFunction,
   setCommunicationModeFunction,
   getDebugModeFunction,
@@ -1252,6 +1257,155 @@ void setPuffPressureThreshold(bool responseEnabled, bool apiEnabled, float input
 void setPuffPressureThreshold(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   setPuffPressureThreshold(responseEnabled, apiEnabled, optionalParameter.toFloat());
 }
+
+//***GET JOYSTICK ACCELERATION FUNCTION***//
+// Function   : getJoystickAcceleration
+//
+// Description: This function retrieves the current joystick speed level.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : void
+//*********************************//
+int getJoystickAcceleration(bool responseEnabled, bool apiEnabled) {
+  String commandKey = "AV";
+  int tempJoystickAccelerationLevel = CONF_JOY_ACCELERATION_LEVEL_DEFAULT;
+  if (CONF_API_ENABLED) {
+    tempJoystickAccelerationLevel = mem.readInt(CONF_SETTINGS_FILE, commandKey);
+    if ((tempJoystickAccelerationLevel < CONF_JOY_ACCELERATION_LEVEL_MIN) || (tempJoystickAccelerationLevel > CONF_JOY_ACCELERATION_LEVEL_MAX)) {
+      tempJoystickAccelerationLevel = CONF_JOY_ACCELERATION_LEVEL_DEFAULT;
+      mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempJoystickAccelerationLevel);
+    }
+    
+  }
+  printResponseInt(responseEnabled, apiEnabled, true, 0, "AV,0", true, tempJoystickAccelerationLevel);
+
+  return tempJoystickAccelerationLevel;
+}
+//***GET JOYSTICK ACCELERATION IO API FUNCTION***//
+// Function   : getJoystickAcceleration
+//
+// Description: This function is redefinition of main getJoystickAcceleration function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void getJoystickAcceleration(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
+    getJoystickAcceleration(responseEnabled, apiEnabled);
+  }
+}
+
+//***SET JOYSTICK ACCELERATION FUNCTION***//
+// Function   : setJoystickAcceleration
+//
+// Description: This function sets the current joystick acceleration level.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               inputAccelerationLevel : bool : The new joystick acceleration level.
+//
+// Return     : void
+//*********************************//
+void setJoystickAcceleration(bool responseEnabled, bool apiEnabled, int inputAccelerationLevel) {
+  String commandKey = "AV";
+  bool isValidAcceleration = true;
+  int tempJoystickAccelerationLevel = inputAccelerationLevel;
+  
+  if ((tempJoystickAccelerationLevel >= CONF_JOY_ACCELERATION_LEVEL_MIN) && (tempJoystickAccelerationLevel <= CONF_JOY_ACCELERATION_LEVEL_MAX)) { //Check if inputAccelerationCounter is valid
+    // Valid inputAccelerationLevel
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempJoystickAccelerationLevel);
+    if (!CONF_API_ENABLED) {
+      tempJoystickAccelerationLevel = CONF_JOY_ACCELERATION_LEVEL_DEFAULT;
+    }
+    isValidAcceleration = true;
+  }
+  else {
+    //Invalid inputAccelerationLevel
+    tempJoystickAccelerationLevel = mem.readInt(CONF_SETTINGS_FILE, commandKey);
+    isValidAcceleration = false;
+  }
+
+
+  int responseCode = 0;
+  (isValidAcceleration) ? responseCode = 0 : responseCode = 3;
+  printResponseInt(responseEnabled, apiEnabled, isValidAcceleration, responseCode, "AV,1", true, tempJoystickAccelerationLevel);
+}
+//***SET JOYSTICK ACCELERATION API FUNCTION***//
+// Function   : setJoystickAcceleration
+//
+// Description: This function is redefinition of main setJoystickAcceleration function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void setJoystickAcceleration(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  setJoystickAcceleration(responseEnabled, apiEnabled, optionalParameter.toInt());
+}
+
+
+
+//***INCREASE/ACCELERATE JOYSTICK MOVEMENT FUNCTION***//
+// Function   : increaseJoystickAcceleration
+//
+// Description: This function increases the joystick acceleration level by one.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : void
+//*********************************//
+void increaseJoystickAcceleration(bool responseEnabled, bool apiEnabled) {
+  int tempJoystickAccelerationLevel=acceleration;
+  tempJoystickAccelerationLevel++;
+  if(tempJoystickAccelerationLevel <= CONF_JOY_ACCELERATION_LEVEL_MAX){
+    setJoystickAcceleration(responseEnabled, apiEnabled, tempJoystickAccelerationLevel);
+  } 
+  else{
+  }
+
+}
+
+
+
+//***DECREASE/DECELERATE JOYSTICK MOVEMENT FUNCTION***//
+// Function   : decreaseJoystickAcceleration
+//
+// Description: This function decreases the joystick acceleration level by one.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : void
+//*********************************//
+void decreaseJoystickAcceleration(bool responseEnabled, bool apiEnabled) {
+  int tempJoystickAccelerationLevel=acceleration;
+  tempJoystickAccelerationLevel--;
+  if(tempJoystickAccelerationLevel <= CONF_JOY_ACCELERATION_LEVEL_MIN){
+    setJoystickAcceleration(responseEnabled, apiEnabled, tempJoystickAccelerationLevel);
+  } 
+  else{
+  }
+
+}
+
 
 //***GET COMMUNICATION MODE FUNCTION***//
 // Function   : getCommunicationMode
