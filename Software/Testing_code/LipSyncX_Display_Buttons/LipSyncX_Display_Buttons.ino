@@ -15,8 +15,8 @@
 #define SCREEN_ADDRESS 0x3D ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-#define PIN_BUTTON_SEL    0
-#define PIN_BUTTON_NEXT   1
+#define PIN_BUTTON_SEL    3
+#define PIN_BUTTON_NEXT   10
 
 #define MAIN_MENU   0
 #define CALIB_MENU  1
