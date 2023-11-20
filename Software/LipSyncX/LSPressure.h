@@ -2,7 +2,7 @@
 * File: LSPressure.h
 * Firmware: LipSync4
 * Developed by: MakersMakingChange
-* Version: Alpha 2 (14 April 2022) 
+* Version: Beta (20 November 2023) 
 * Copyright Neil Squire Society 2022. 
 * License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
 */
@@ -11,8 +11,9 @@
 #ifndef _LSPRESSURE_H
 #define _LSPRESSURE_H
 
-#include <Adafruit_LPS35HW.h>   // Stand-alone i2C Pressure Sensor
-#include <Adafruit_BMP280.h>    // Pressure Sensor onboard Feather nRF5285280 Sense
+#include <Adafruit_LPS35HW.h>   // Tube pressure sensor
+#include <Adafruit_LPS2X.h>     // Ambient pressure sensor
+#define LPS22_I2CADDR 0x5C      // Modified LPS22 address
 
 #define PRESS_BUFF_SIZE 5       //The size of pressureBuffer
 #define PRESS_SAP_BUFF_SIZE 12  //The size of sip and puff state buffer 
@@ -55,8 +56,8 @@ typedef struct {
 class LSPressure {
   private: 
     Adafruit_LPS35HW lps35hw = Adafruit_LPS35HW();        //Create an object of Adafruit_LPS35HW class
-    Adafruit_BMP280 bmp;                                  //Create an object of Adafruit_BMP280 class
-    Adafruit_Sensor *bmp_pressure = bmp.getPressureSensor();
+    Adafruit_LPS22 lps22;                                 //Create an object of Adafruit_LPS22 class
+    Adafruit_Sensor *lps22_pressure = lps22.getPressureSensor(); // Retrieve pressure sensor from LPS22
     LSCircularBuffer <pressureStruct> pressureBuffer;   //Create a buffer of type pressureStruct to push pressure readings 
     LSCircularBuffer <inputStateStruct> sapBuffer;      //Create a buffer of type inputStateStruct to push sap states 
     int filterMode;                                     //Filter Mode : NONE or AVERAGE     
@@ -124,15 +125,17 @@ LSPressure::LSPressure() {
 //*********************************//
 void LSPressure::begin() {
 
-  //BMP280 Pressure sensor setups
+  //LPS35HW Pressure sensor setup
   if (!lps35hw.begin_I2C()) {
     Serial.println(F("Couldn't find LPS35HW chip"));
+    //todo this should throw an error
   }
-  //BMP280 Onboard Pressure sensor setups
-  if (!bmp.begin()) {
-    Serial.println(F("Could not find a valid BMP280 sensor"));
-    while (1) delay(10);
+  //LPS22 Pressure sensor setup
+  if (!lps22.begin(LPS22_I2CADDR)) {
+    Serial.println(F("Couldn't find LPS22 chip"));
+    //todo this should throw an error
   } 
+
 
   setFilterMode(PRESS_FILTER_NONE);         //Set the default filter mode to none
 
@@ -142,13 +145,9 @@ void LSPressure::begin() {
 
   setThreshold(PRESS_SAP_DEFAULT_THRESHOLD,PRESS_SAP_DEFAULT_THRESHOLD); //Set the default sip and puff thresholds
 
-  lps35hw.setDataRate(LPS35HW_RATE_25_HZ);          //Options: 1 Hz, 10Hz, 25Hz, 50Hz, 75Hz
+  lps35hw.setDataRate(LPS35HW_RATE_25_HZ);  //Options: 1 Hz, 10Hz, 25Hz, 50Hz, 75Hz
 
-  bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     //Operating Mode
-                Adafruit_BMP280::SAMPLING_NONE,     //Temperature oversampling
-                Adafruit_BMP280::SAMPLING_X4,       //Pressure oversampling 
-                Adafruit_BMP280::FILTER_X16,        //Filtering. 
-                Adafruit_BMP280::STANDBY_MS_1000);  //Standby time in ms.       
+  lps.setDataRate(LPS22_RATE_25HZ);         // Options: 1-shot, 
 
   clear();      //Clear buffers and make sure no sip and puff action is set as previous actions
 
@@ -252,7 +251,7 @@ float LSPressure::getCompPressure() {
     //Keep reading until we have a valid main and reference pressure values > 0.0
     do{     
       tempMainVal = lps35hw.readPressure();
-      bmp_pressure->getEvent(&pressure_event);
+      lps22_pressure->getEvent(&pressure_event);
       tempRefVal=pressure_event.pressure;
     } while (tempMainVal <= 0.00 || tempRefVal <= 0.00);
     
@@ -366,7 +365,7 @@ void LSPressure::updatePressure() {
 
   //If pressure mode is differential  
   if(pressureMode==PRESS_MODE_DIFF) {
-    bmp_pressure->getEvent(&pressure_event); 
+    lps22_pressure->getEvent(&pressure_event); 
     float tempRefVal = pressure_event.pressure;  //Set a temporary reference value to new reference pressure reading 
     //Update compensation pressure value if reference pressure is changed using tolerance value 
     if(abs(refVal-tempRefVal)>=refTolVal && tempRefVal > 0.00){ 
