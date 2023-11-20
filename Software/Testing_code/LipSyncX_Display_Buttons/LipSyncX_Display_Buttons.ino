@@ -160,7 +160,7 @@ void displayCursor(void) {
   if (selectedText.length() > 9){
     scrollOn = true;
     scrollPos = 12;
-    delay(500);                           // may need to remove this
+    delay(200);                           // may need to remove this
     scrollLongText();
   } else {
     scrollOn = false;

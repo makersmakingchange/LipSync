@@ -28,6 +28,8 @@ void setup() {
 
   pinMode(PIN_LED_MOUSE, OUTPUT);
   pinMode(PIN_LED_GAMEPAD, OUTPUT);
+  digitalWrite(PIN_LED_MOUSE, LOW);
+  digitalWrite(PIN_LED_GAMEPAD, LOW);
 
   delay(500);
 
