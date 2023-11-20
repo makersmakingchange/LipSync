@@ -10,11 +10,6 @@
 #define PIN_BUTTON_SEL    3
 #define PIN_BUTTON_NEXT   10
 
-#define MODE_MOUSE    0
-#define MODE_GAMEPAD  1
-
-int mode = MODE_MOUSE;
-
 bool buttonSelPressed = false;
 bool buttonNextPressed = false;
 bool buttonSelPrevPressed = false;
