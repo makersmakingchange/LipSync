@@ -14,8 +14,8 @@
 
 #include <Adafruit_NeoPixel.h>
 
-#define OUTPUT_RGB_LED_PIN A1 //Output pin for neopixel
-#define OUTPUT_RGB_LED_NUM 3  //Number of leds
+//#define OUTPUT_RGB_LED_PIN A1 //Output pin for neopixel
+//#define OUTPUT_RGB_LED_NUM 0  //Number of leds
 
 //Led color code
 #define LED_CLR_NONE 0
@@ -38,7 +38,7 @@
 #define LED_STATE_OFF 0
 #define LED_STATE_ON 1
 
-Adafruit_NeoPixel ledPixels = Adafruit_NeoPixel(OUTPUT_RGB_LED_NUM, OUTPUT_RGB_LED_PIN, NEO_GRB + NEO_KHZ800);
+//Adafruit_NeoPixel ledPixels = Adafruit_NeoPixel(OUTPUT_RGB_LED_NUM, OUTPUT_RGB_LED_PIN, NEO_GRB + NEO_KHZ800);
 
 
 struct rgbStruct {
@@ -94,22 +94,30 @@ LSOutput::LSOutput() {
 
 void LSOutput::begin() {
 
-  pinMode(OUTPUT_RGB_LED_PIN, OUTPUT);
-  ledPixels.begin();
-  clearLedAll();
+  // Hub LEDs
+  pinMode(CONF_LED_MOUSE_PIN, OUTPUT);
+  pinMode(CONF_LED_GAMEPADMOUSE_PIN, OUTPUT);
+
+ // Microcontroller LED
+  pinMode(LED_RED, OUTPUT);
+  pinMode(LED_GREEN, OUTPUT);
+  pinMode(LED_BLUE, OUTPUT); 
+
+  //ledPixels.begin();
+  //clearLedAll();
 }
 
 
 //***CLEAR ALL RGB LED FUNCTION***//
 
 void LSOutput::clearLedAll() {
-  clearLed(OUTPUT_RGB_LED_NUM+1);
+  //clearLed(OUTPUT_RGB_LED_NUM+1);
 }
 
 //***CLEAR RGB LED FUNCTION***//
 
 void LSOutput::clearLed(int ledNumber) {
-  setLedColor(ledNumber,LED_CLR_NONE,255);
+  //setLedColor(ledNumber,LED_CLR_NONE,255);
 }
 
 
@@ -117,16 +125,18 @@ void LSOutput::clearLed(int ledNumber) {
 
 uint32_t LSOutput::getLedColor(int ledNumber) {
 
-  uint32_t colorValue = ledPixels.getPixelColor(ledNumber-1);
+  //uint32_t colorValue = ledPixels.getPixelColor(ledNumber-1);
   
   return colorValue;
+
 }
 
 
 //***GET RGB LED BRIGHTNESS FUNCTION***//
 
 uint8_t LSOutput::getLedBrightness() {
-  return (ledPixels.getBrightness());
+  return 0
+//  return (ledPixels.getBrightness());
 }
 
 
@@ -134,8 +144,8 @@ uint8_t LSOutput::getLedBrightness() {
 //***SET RGB LED BRIGHTNESS FUNCTION***//
 
 void LSOutput::setLedBrightness(int ledBrightness) {
-  ledPixels.setBrightness(ledBrightness);
-  ledPixels.show();
+  // ledPixels.setBrightness(ledBrightness);
+  // ledPixels.show();
 }
 
 
@@ -143,16 +153,16 @@ void LSOutput::setLedBrightness(int ledBrightness) {
 
 void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness) {
   
-    if(ledNumber>=1 && ledNumber <=OUTPUT_RGB_LED_NUM) {
-      ledPixels.setPixelColor(ledNumber-1, ledPixels.Color(colorProperty[ledColorNumber].colorCode.g,colorProperty[ledColorNumber].colorCode.r,colorProperty[ledColorNumber].colorCode.b));
-    }
-    else if (ledNumber==OUTPUT_RGB_LED_NUM+1) {
-      for (int i = 0; i < OUTPUT_RGB_LED_NUM; i++) {
-        ledPixels.setPixelColor(i, ledPixels.Color(colorProperty[ledColorNumber].colorCode.g,colorProperty[ledColorNumber].colorCode.r,colorProperty[ledColorNumber].colorCode.b));            
-      }
-    }
-    ledPixels.setBrightness(ledBrightness);
-    ledPixels.show();
+    // if(ledNumber>=1 && ledNumber <=OUTPUT_RGB_LED_NUM) {
+    //   ledPixels.setPixelColor(ledNumber-1, ledPixels.Color(colorProperty[ledColorNumber].colorCode.g,colorProperty[ledColorNumber].colorCode.r,colorProperty[ledColorNumber].colorCode.b));
+    // }
+    // else if (ledNumber==OUTPUT_RGB_LED_NUM+1) {
+    //   for (int i = 0; i < OUTPUT_RGB_LED_NUM; i++) {
+    //     ledPixels.setPixelColor(i, ledPixels.Color(colorProperty[ledColorNumber].colorCode.g,colorProperty[ledColorNumber].colorCode.r,colorProperty[ledColorNumber].colorCode.b));            
+    //   }
+    // }
+    // ledPixels.setBrightness(ledBrightness);
+    // ledPixels.show();
 }
 
 
