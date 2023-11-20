@@ -13,16 +13,23 @@
 #define CONF_LIPSYNC_VERSION 1.0
 
 //Input pins
-#define CONF_BUTTON1_PIN 5                                 // Pushbutton S1
-#define CONF_BUTTON2_PIN 6                                 // Pushbutton S2
-#define CONF_BUTTON3_PIN 9                                 // Pushbutton S3
-#define CONF_SWITCH1_PIN A2                                // 3.5mm jack SW1
-#define CONF_SWITCH2_PIN 11                                // 3.5mm jack SW2
-#define CONF_SWITCH3_PIN 10                                // 3.5mm jack SW3
+#define CONF_BUTTON1_PIN 10                                // Pushbutton S1
+#define CONF_BUTTON2_PIN 3                                 // Pushbutton S2
+//#define CONF_BUTTON3_PIN 9                                 // Pushbutton S3
+#define CONF_SWITCH1_PIN A1                                // 3.5mm jack SW1
+#define CONF_SWITCH2_PIN A2                                // 3.5mm jack SW2
+#define CONF_SWITCH3_PIN A3                                // 3.5mm jack SW3
 
 //Input buttons and switch values 
-#define CONF_BUTTON_NUMBER 3
+#define CONF_BUTTON_NUMBER 2
 #define CONF_SWITCH_NUMBER 3
+
+//Output LEDS
+#define CONF_LED_MOUSE_PIN 9
+#define CONF_LED_GAMEPAD_PIN 7
+
+//Output Buzzer
+#define CONF_BUZZER_PIN 6
 
 //Output action numbers
 #define CONF_ACTION_NOTHING 0                              // No action
