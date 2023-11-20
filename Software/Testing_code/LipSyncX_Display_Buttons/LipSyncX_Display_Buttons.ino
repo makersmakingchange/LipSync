@@ -40,7 +40,7 @@ int prevMenu = -1;
 int currentSelection = 0;
 int selectedLine; 
 
-int mode = MODE_GAMEPAD;
+int mode = MODE_MOUSE;
 int cursorSpeedLevel = 5;
 bool bluetoothOn = false;
 
@@ -78,7 +78,7 @@ void setup() {
   pinMode(PIN_BUTTON_SEL, INPUT_PULLUP);
   pinMode(PIN_BUTTON_NEXT, INPUT_PULLUP);
 
-  Serial.begin(9600);
+  Serial.begin(115200);
   
   delay(500); // Start up delay so screen is ready to write to
 
