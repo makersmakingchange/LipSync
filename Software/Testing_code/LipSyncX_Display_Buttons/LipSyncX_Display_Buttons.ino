@@ -64,7 +64,8 @@ String selectedText;
 
 String mainMenuText[4] = {"Calibrate", "Mode", "Cursor speed", "Bluetooth"};
 String calibMenuText[4] = {"Center reset", "Full Calibration", "... Back"};
-String modeMenuText[4] = {"M: ", "New mode:", "<mode>", "... Back"};
+//String modeMenuText[4] = {"M: ", "New mode:", "<mode>", "... Back"};
+String modeMenuText[4] = {" MOUSE ", " GAMEPAD ", "Change mode", "... Back"};
 String modeConfirmText[4] = {"Change", "mode?", "Confirm", "... Back"};
 String cursorSpMenuText[4] = {"  ", "Increase", "Decrease", "... Back"};
 String bluetoothMenuText[4] = {"Bluetooth:", "<>", "Turn <>", "... Back"};
@@ -419,6 +420,7 @@ void calibMenu(void) {
 
 void modeMenu(void) {
   currentMenu = MODE_MENU;
+  /*
   if (mode == MODE_MOUSE){
       modeMenuText[0] = "M: MOUSE";
       modeMenuText[2] = "GAMEPAD";
@@ -426,12 +428,26 @@ void modeMenu(void) {
       modeMenuText[0] = "M: GAMEPAD";
       modeMenuText[2] = "MOUSE";
   }
+  */
 
   currentMenuLength = modeMenuLen;
   currentMenuText = modeMenuText;
   cursorStart = 2;
 
   displayMenu();
+
+  display.setTextColor(SSD1306_BLACK, SSD1306_WHITE); // Draw 'inverse' 
+  if (mode == MODE_MOUSE){
+      display.setCursor(0, 0);
+      display.print(" MOUSE ");
+      
+  } else if (mode == MODE_GAMEPAD){
+      display.setCursor(0, 16);
+      display.print(" GAMEPAD ");
+  }
+
+  display.display();
+  display.setTextColor(SSD1306_WHITE, SSD1306_BLACK); // Draw 'inverse' 
   
 }
 
