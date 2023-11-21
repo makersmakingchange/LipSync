@@ -131,7 +131,7 @@ void LSPressure::begin() {
     //todo this should throw an error
   }
   //LPS22 Pressure sensor setup
-  if (!lps22.begin(LPS22_I2CADDR)) {
+  if (!lps22.begin_I2C(LPS22_I2CADDR)) {
     Serial.println(F("Couldn't find LPS22 chip"));
     //todo this should throw an error
   } 
@@ -147,7 +147,7 @@ void LSPressure::begin() {
 
   lps35hw.setDataRate(LPS35HW_RATE_25_HZ);  //Options: 1 Hz, 10Hz, 25Hz, 50Hz, 75Hz
 
-  lps.setDataRate(LPS22_RATE_25HZ);         // Options: 1-shot, 
+  lps22.setDataRate(LPS22_RATE_25_HZ);         // Options: 1-shot, 
 
   clear();      //Clear buffers and make sure no sip and puff action is set as previous actions
 
