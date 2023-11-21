@@ -2,18 +2,18 @@
 * File: LipSyncX.ino
 * Firmware: LipSync X
 * Developed by: MakersMakingChange
-* Version: Beta (09 November 2023) 
-* Copyright Neil Squire Society 2022. 
+* Version: Beta (11 November 2023) 
+* Copyright Neil Squire Society 2023. 
 * License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
 */
 
 
 #include <Wire.h>
+#include "LSConfig.h"
 #include "LSTimer.h"
 #include "LSUtils.h"
 #include <ArduinoJson.h>
 #include "LSOutput.h"
-#include "LSConfig.h"
 #include "LSUSB.h"
 #include "LSBLE.h"
 #include "LSCircularBuffer.h"
