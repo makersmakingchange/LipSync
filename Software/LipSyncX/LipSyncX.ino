@@ -103,7 +103,8 @@ const accStruct accProperty[]{
     
 };
 
-int inputButtonPinArray[] = { CONF_BUTTON1_PIN, CONF_BUTTON2_PIN, CONF_BUTTON3_PIN };
+//int inputButtonPinArray[] = { CONF_BUTTON1_PIN, CONF_BUTTON2_PIN, CONF_BUTTON3_PIN };
+int inputButtonPinArray[] = { CONF_BUTTON1_PIN, CONF_BUTTON2_PIN};
 int inputSwitchPinArray[] = { CONF_SWITCH1_PIN, CONF_SWITCH2_PIN, CONF_SWITCH3_PIN };
 
 //Pressure module variables
