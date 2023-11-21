@@ -72,6 +72,7 @@ const colorStruct colorProperty[] {
 
 class LSOutput {
   private:
+  int ledBrightness;
 
   public:
     LSOutput();
@@ -96,7 +97,7 @@ void LSOutput::begin() {
 
   // Hub LEDs
   pinMode(CONF_LED_MOUSE_PIN, OUTPUT);
-  pinMode(CONF_LED_GAMEPADMOUSE_PIN, OUTPUT);
+  pinMode(CONF_LED_GAMEPAD_PIN, OUTPUT);
 
  // Microcontroller LED
   pinMode(LED_RED, OUTPUT);
@@ -127,7 +128,8 @@ uint32_t LSOutput::getLedColor(int ledNumber) {
 
   //uint32_t colorValue = ledPixels.getPixelColor(ledNumber-1);
   
-  return colorValue;
+  return 0;
+  //return colorValue;
 
 }
 
@@ -135,7 +137,7 @@ uint32_t LSOutput::getLedColor(int ledNumber) {
 //***GET RGB LED BRIGHTNESS FUNCTION***//
 
 uint8_t LSOutput::getLedBrightness() {
-  return 0
+  return 0;
 //  return (ledPixels.getBrightness());
 }
 

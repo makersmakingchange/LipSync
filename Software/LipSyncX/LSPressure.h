@@ -56,7 +56,7 @@ typedef struct {
 class LSPressure {
   private: 
     Adafruit_LPS35HW lps35hw = Adafruit_LPS35HW();        //Create an object of Adafruit_LPS35HW class
-    Adafruit_LPS22 lps22;                                 //Create an object of Adafruit_LPS22 class
+    Adafruit_LPS22 lps22;                                 //Create an object of Adafruit_LPS2X class
     Adafruit_Sensor *lps22_pressure = lps22.getPressureSensor(); // Retrieve pressure sensor from LPS22
     LSCircularBuffer <pressureStruct> pressureBuffer;   //Create a buffer of type pressureStruct to push pressure readings 
     LSCircularBuffer <inputStateStruct> sapBuffer;      //Create a buffer of type inputStateStruct to push sap states 
