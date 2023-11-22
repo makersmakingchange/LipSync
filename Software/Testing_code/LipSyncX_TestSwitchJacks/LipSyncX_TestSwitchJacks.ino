@@ -40,6 +40,7 @@ void setup() {
   delay(100);
 
   Serial.println("Setup");
+  
 }
 
 void loop() {
@@ -63,21 +64,21 @@ void switchActions(void){
     Serial.println("Switch S1 pressed");
     digitalWrite(PIN_LED_GAMEPAD, LOW);
     digitalWrite(PIN_LED_MOUSE, HIGH);
-    tone(PIN_BUZZER, 65);
+    tone(PIN_BUZZER, 523);
     delay(1000);
     noTone(PIN_BUZZER);
   } else if (!switchS2Pressed && switchS2PrevPressed) {
     Serial.println("Switch S2 pressed");
     digitalWrite(PIN_LED_GAMEPAD, HIGH);
     digitalWrite(PIN_LED_MOUSE, LOW);
-    tone(PIN_BUZZER, 262);
+    tone(PIN_BUZZER, 1047);
     delay(1000);
     noTone(PIN_BUZZER);
   } else if (!switchS3Pressed && switchS3PrevPressed) {
     Serial.println("Switch S3 pressed");
     digitalWrite(PIN_LED_GAMEPAD, HIGH);
     digitalWrite(PIN_LED_MOUSE, HIGH);
-    tone(PIN_BUZZER, 1047);
+    tone(PIN_BUZZER, 2093);
     delay(1000);
     noTone(PIN_BUZZER);
   } else {

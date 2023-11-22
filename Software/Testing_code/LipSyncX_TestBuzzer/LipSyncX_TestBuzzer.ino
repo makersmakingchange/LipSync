@@ -24,7 +24,7 @@ void setup() {
 
   delay(500);
 
-  tone(PIN_BUZZER, 1000);
+  tone(PIN_BUZZER, 1047);
 
   delay(1000);
 
@@ -53,7 +53,7 @@ void readButtons(void){
 
 void buttonActions(void){
   if (buttonNextPressed){
-    tone(PIN_BUZZER, 1000);
+    tone(PIN_BUZZER, 1047);
     Serial.println("Next pressed");
     delay(1000);
   } else{
