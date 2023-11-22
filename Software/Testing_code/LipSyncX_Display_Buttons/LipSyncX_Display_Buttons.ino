@@ -420,15 +420,6 @@ void calibMenu(void) {
 
 void modeMenu(void) {
   currentMenu = MODE_MENU;
-  /*
-  if (mode == MODE_MOUSE){
-      modeMenuText[0] = "M: MOUSE";
-      modeMenuText[2] = "GAMEPAD";
-  } else if (mode == MODE_GAMEPAD){
-      modeMenuText[0] = "M: GAMEPAD";
-      modeMenuText[2] = "MOUSE";
-  }
-  */
 
   currentMenuLength = modeMenuLen;
   currentMenuText = modeMenuText;
