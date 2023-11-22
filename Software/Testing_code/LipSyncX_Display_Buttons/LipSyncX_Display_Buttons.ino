@@ -436,7 +436,7 @@ void modeMenu(void) {
 
   displayMenu();
 
-  display.setTextColor(SSD1306_BLACK, SSD1306_WHITE); // Draw 'inverse' 
+  display.setTextColor(SSD1306_BLACK, SSD1306_WHITE); // Draw 'inverse' coloured text
   if (mode == MODE_MOUSE){
       display.setCursor(0, 0);
       display.print(" MOUSE ");
@@ -447,7 +447,7 @@ void modeMenu(void) {
   }
 
   display.display();
-  display.setTextColor(SSD1306_WHITE, SSD1306_BLACK); // Draw 'inverse' 
+  display.setTextColor(SSD1306_WHITE, SSD1306_BLACK); // Reset text colour to white on black
   
 }
 
