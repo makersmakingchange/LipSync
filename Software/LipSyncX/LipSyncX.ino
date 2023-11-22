@@ -972,6 +972,137 @@ int scrollModifier(const int cursorValue, const int cursorMaxValue, const int sc
 }
 
 
+//***PERFORM SIP AND PUFF CALIBRATION FUNCTION***//
+// Function   : performSipAndPuffCalibration 
+// 
+// Description: This function performs Sip And Puff calibration in a recursive fashion.
+//
+// Parameters : * args : int : pointer of step number 
+// 
+// Return     : void 
+//****************************************//
+void performSipAndPuffCalibration(int* args)
+{
+  int stepNumber = (int)args;
+  unsigned long readingDuration = CONF_SIP_AND_PUFF_CALIB_READING_DELAY*CONF_SIP_AND_PUFF_CALIB_READING_NUMBER; //Duration of the max corner reading ( 2 seconds )
+  unsigned long currentReadingStart = CONF_SIP_AND_PUFF_CALIB_STEP_DELAY + (CONF_SIP_AND_PUFF_CALIB_STEP_BLINK_DELAY*((CONF_JOY_CALIB_STEP_BLINK*2)+1));                             //Time until start of current reading
+  //Time until start of current reading. (1.5 + (3*300) seconds )
+  unsigned long nextStepStart = currentReadingStart+readingDuration+CONF_SIP_AND_PUFF_CALIB_START_DELAY; //Time until start of next reading. ( 2.4 + 2 + 1 seconds )
+
+  if (stepNumber == 0)  //STEP 0: Calibration started
+  {
+    pollTimer.disable(1);                                                                                             //Disable data polling 
+    setLedState(LED_ACTION_BLINK, CONF_SIP_AND_PUFF_CALIB_START_LED_COLOR, CONF_SIP_AND_PUFF_CALIB_LED_NUMBER, CONF_SIP_AND_PUFF_CALIB_STEP_BLINK, CONF_SIP_AND_PUFF_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
+    performLedAction(ledCurrentState);   
+    ++stepNumber;
+    calibTimerId[1] = calibTimer.setTimeout(currentReadingStart, performSipAndPuffCalibration, (int *)stepNumber);      // Start next step
+  }
+  else if (stepNumber == 1 ) //STEP 1: Sip Calibration Min
+  {
+    setLedState(LED_ACTION_BLINK, CONF_SIP_AND_PUFF_CALIB_STEP_BLINK_COLOR, CONF_SIP_AND_PUFF_CALIB_LED_NUMBER, CONF_SIP_AND_PUFF_CALIB_STEP_BLINK, CONF_SIP_AND_PUFF_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
+    performLedAction(ledCurrentState);                                                                  // LED Feedback to show start of performing calibration ateps
+
+    calibTimerId[1] = calibTimer.setTimer(CONF_SIP_AND_PUFF_CALIB_READING_DELAY, currentReadingStart, CONF_SIP_AND_PUFF_CALIB_READING_NUMBER, performSipCalibration, (int *)stepNumber);
+    ++stepNumber;                                                                                                               //Set LED's feedback to show step is already started and get the max reading for the quadrant/step
+    calibTimerId[1] = calibTimer.setTimeout(nextStepStart, performSipAndPuffCalibration, (int *)stepNumber);                      //Start next step
+  } 
+  else if (stepNumber == 2) //STEP 2: Sip Calibration Max
+  {
+    setLedState(LED_ACTION_BLINK, CONF_SIP_AND_PUFF_CALIB_STEP_BLINK_COLOR, CONF_SIP_AND_PUFF_CALIB_LED_NUMBER, CONF_SIP_AND_PUFF_CALIB_STEP_BLINK, CONF_SIP_AND_PUFF_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
+    performLedAction(ledCurrentState);                                                                  // LED Feedback to show start of performing calibration ateps
+
+    calibTimerId[1] = calibTimer.setTimer(CONF_SIP_AND_PUFF_CALIB_READING_DELAY, currentReadingStart, CONF_SIP_AND_PUFF_CALIB_READING_NUMBER, performSipCalibration, (int *)stepNumber);
+    ++stepNumber;                                                                                                               //Set LED's feedback to show step is already started and get the max reading for the quadrant/step
+    calibTimerId[1] = calibTimer.setTimeout(nextStepStart, performSipAndPuffCalibration, (int *)stepNumber);                      //Start next step
+  } 
+  else if (stepNumber == 3 ) //STEP 3: Puff Calibration Min
+  {
+    setLedState(LED_ACTION_BLINK, CONF_SIP_AND_PUFF_CALIB_STEP_BLINK_COLOR, CONF_SIP_AND_PUFF_CALIB_LED_NUMBER, CONF_SIP_AND_PUFF_CALIB_STEP_BLINK, CONF_SIP_AND_PUFF_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
+    performLedAction(ledCurrentState);                                                                  // LED Feedback to show start of performing calibration ateps
+
+    calibTimerId[1] = calibTimer.setTimer(CONF_SIP_AND_PUFF_CALIB_READING_DELAY, currentReadingStart, CONF_SIP_AND_PUFF_CALIB_READING_NUMBER, performPuffCalibration, (int *)stepNumber);
+    ++stepNumber;                                                                                                               //Set LED's feedback to show step is already started and get the max reading for the quadrant/step
+    calibTimerId[1] = calibTimer.setTimeout(nextStepStart, performSipAndPuffCalibration, (int *)stepNumber);                      //Start next step
+  } 
+  else if (stepNumber ==4 ) //STEP 4: Puff Calibration Max
+  {
+    setLedState(LED_ACTION_BLINK, CONF_SIP_AND_PUFF_CALIB_STEP_BLINK_COLOR, CONF_SIP_AND_PUFF_CALIB_LED_NUMBER, CONF_SIP_AND_PUFF_CALIB_STEP_BLINK, CONF_SIP_AND_PUFF_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
+    performLedAction(ledCurrentState);                                                                  // LED Feedback to show start of performing calibration ateps
+
+    calibTimerId[1] = calibTimer.setTimer(CONF_SIP_AND_PUFF_CALIB_READING_DELAY, currentReadingStart, CONF_SIP_AND_PUFF_CALIB_READING_NUMBER, performPuffCalibration, (int *)stepNumber);
+    ++stepNumber;                                                                                                               //Set LED's feedback to show step is already started and get the max reading for the quadrant/step
+    calibTimerId[1] = calibTimer.setTimeout(nextStepStart, performSipAndPuffCalibration, (int *)stepNumber);                      //Start next step
+  } 
+  else //STEP 5: Calibration ended
+  {
+    setLedState(LED_ACTION_BLINK, CONF_SIP_AND_PUFF_CALIB_START_LED_COLOR, CONF_SIP_AND_PUFF_CALIB_LED_NUMBER, CONF_SIP_AND_PUFF_CALIB_STEP_BLINK, CONF_SIP_AND_PUFF_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);                          //Turn off Led's
+    performLedAction(ledCurrentState);
+    setLedDefault();
+    //canOutputAction = true;
+    pollTimer.enable(1);                                                                                                        //Enable data polling 
+
+  }
+
+}
+//***PERFORM SIP CALIBRATION STEP FUNCTION***//
+// Function   : performSipCalibrationStep 
+// 
+// Description: This function performs Sip calibration step in a recursive fashion.
+//
+// Parameters : * args : int : pointer of step number 
+// 
+// Return     : void 
+//****************************************//
+void performSipCalibrationStep(int* args)
+{
+  int stepNumber = (int)args;
+  String stepKey = "CP"+String(stepNumber);                                                            //Key to write new calibration point to Flash memory 
+  String stepCommand = "CP,"+String(stepNumber);                                                       //Command to output calibration point via serial
+  float sipValue;
+  //Turn on and set the all leds to orange to indicate start of the process 
+  if(calibTimer.getNumRuns(0)==1){                                                                    //Turn Led's ON when timer is running for first time
+    setLedState(LED_ACTION_ON, CONF_SIP_AND_PUFF_CALIB_LED_COLOR, CONF_SIP_AND_PUFF_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);
+    performLedAction(ledCurrentState);   
+  }
+
+  //Turn off all the leds to orange to indicate end of the process 
+  if(calibTimer.getNumRuns(0)==CONF_SIP_AND_PUFF_CALIB_READING_NUMBER){     
+    mem.writeFloat(CONF_SETTINGS_FILE,stepKey,puffValue);                                                  //Store the point in Flash Memory 
+    setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_SIP_AND_PUFF_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);                           
+    performLedAction(ledCurrentState);      
+    printResponseFloat(true,true,true,0,stepCommand,true,sipValue);
+  }
+}
+//***PERFORM PUFF CALIBRATION STEP FUNCTION***//
+// Function   : performPuffCalibrationStep 
+// 
+// Description: This function performs Puff calibration step in a recursive fashion.
+//
+// Parameters : * args : int : pointer of step number 
+// 
+// Return     : void 
+//****************************************//
+void performPuffCalibrationStep(int* args)
+{
+  int stepNumber = (int)args;
+  String stepKey = "CP"+String(stepNumber);                                                            //Key to write new calibration point to Flash memory 
+  String stepCommand = "CP,"+String(stepNumber);                                                       //Command to output calibration point via serial
+  float puffValue;
+  //Turn on and set the all leds to orange to indicate start of the process 
+  if(calibTimer.getNumRuns(0)==1){                                                                    //Turn Led's ON when timer is running for first time
+    setLedState(LED_ACTION_ON, CONF_SIP_AND_PUFF_CALIB_LED_COLOR, CONF_SIP_AND_PUFF_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);
+    performLedAction(ledCurrentState);   
+  }
+
+  //Turn off all the leds to orange to indicate end of the process 
+  if(calibTimer.getNumRuns(0)==CONF_SIP_AND_PUFF_CALIB_READING_NUMBER){     
+    mem.writeFloat(CONF_SETTINGS_FILE,stepKey,puffValue);                                                  //Store the point in Flash Memory 
+    setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_SIP_AND_PUFF_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);                           
+    performLedAction(ledCurrentState);      
+    printResponseIntPoint(true,true,true,0,stepCommand,true,puffValue);
+  }
+}
+
 //*********************************//
 // Debug Functions
 //*********************************//

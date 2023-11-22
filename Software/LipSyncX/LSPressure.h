@@ -71,8 +71,8 @@ class LSPressure {
     int sapStateTimerId;                                //The id for the sap state timer
     inputStateStruct sapCurrState;                      //The current state of sip and puff
     inputStateStruct sapPrevState;                      //The previous state of sip and puff
-    float sipThreshold;                                 //Sip Threshold 
-    float puffThreshold;                                //Puff Threshold 
+    int sipThreshold;                                 //Sip Threshold 
+    int puffThreshold;                                //Puff Threshold 
     int sapMainState;                                   //The value which represents the current main state (example: PRESS_SAP_MAIN_STATE_PUFF) 
   public:
     LSPressure();                                       //Constructor
@@ -85,9 +85,9 @@ class LSPressure {
     float getCompPressure();                            //Get Compensation pressure (mainVal- refVal)
     void setCompPressure();                             //Set Compensation pressure compVal = (mainVal- refVal)
     void setZeroPressure();                             //Zero the base reference pressure and update Compensation pressure value 
-    void setThreshold(float s, float p);                //Set sip and puff thresholds
-    void setSipThreshold(float s);                      //Set sip threshold
-    void setPuffThreshold(float p);                     //Set puff threshold
+    void setThreshold(int s, int p);                //Set sip and puff thresholds
+    void setSipThreshold(int s);                      //Set sip threshold
+    void setPuffThreshold(int p);                     //Set puff threshold
     void update();                                      //Update the pressure buffer and sip and puff buffer with new readings 
     void updatePressure();                              //Update the pressure buffer with new readings 
     void updateState();                                 //Update the and puff buffer with new states 
@@ -305,12 +305,12 @@ void LSPressure::setZeroPressure() {
 // Function   : setThreshold 
 // 
 // Description: Set the sip and puff pressure thresholds in hPa
-// Arguments :  s : float : Sip pressure threshold
-//              p : float : Puff pressure threshold
+// Arguments :  s : int : Sip pressure threshold
+//              p : int : Puff pressure threshold
 // 
 // Return     : void
 //*********************************//
-void LSPressure::setThreshold(float s, float p){
+void LSPressure::setThreshold(int s, int p){
   sipThreshold = s;
   puffThreshold = p;
 }
@@ -323,7 +323,7 @@ void LSPressure::setThreshold(float s, float p){
 // 
 // Return     : void
 //*********************************//
-void LSPressure::setSipThreshold(float s){
+void LSPressure::setSipThreshold(int s){
   sipThreshold = s;
 }
 
@@ -331,11 +331,11 @@ void LSPressure::setSipThreshold(float s){
 // Function   : setPuffThreshold 
 // 
 // Description: Set puff pressure threshold in hPa
-// Arguments :  p : float : Puff pressure threshold
+// Arguments :  p : int : Puff pressure threshold
 // 
 // Return     : void
 //*********************************//
-void LSPressure::setPuffThreshold(float p){
+void LSPressure::setPuffThreshold(int p){
   puffThreshold = p;
 }
 
@@ -398,10 +398,17 @@ void LSPressure::updateState() {
   sapPrevState = sapBuffer.getLastElement();  //Get the previous state
   float pressureValue = getDiffPressure();    //Get the current pressure difference 
   //check for sip and puff conditions
-  if (pressureValue > puffThreshold)  { 
-    sapMainState = PRESS_SAP_MAIN_STATE_PUFF;
-  } else if (pressureValue < -1*sipThreshold)  { 
+  String commandKey;
+  pointFloatType calibrationPointArray[4];
+  for (int i = 1; i =< 4; i++)
+  {
+    commandKey = "CP" + String(i);
+    calibrationPointArray[i-1] = mem.readFloat(CONF_SETTINGS_FILE, commandKey);
+  }
+  if (pressureValue > 1.0 * sipThreshold * (calibrationPointArray[2]-calibrationPointArray[1])  { 
     sapMainState = PRESS_SAP_MAIN_STATE_SIP;
+  } else if (pressureValue < -1.0*puffThreshold * (calibrationPointArray[4]-calibrationPointArray[3])  { 
+    sapMainState = PRESS_SAP_MAIN_STATE_PUFF;
   } else {
     sapMainState = PRESS_SAP_MAIN_STATE_NONE;
   }

@@ -38,8 +38,16 @@ _functionList setPressureModeFunction =           {"PM", "1", "",  &setPressureM
 _functionList getPressureThresholdFunction =      {"DT", "0", "0", &getPressureThreshold};
 _functionList getSipPressureThresholdFunction =   {"ST", "0", "0", &getSipPressureThreshold};
 _functionList setSipPressureThresholdFunction =   {"ST", "1", "",  &setSipPressureThreshold};
-_functionList getPuffPressureThresholdFunction =  {"PT", "0", "0", &getPuffPressureThreshold};
-_functionList setPuffPressureThresholdFunction =  {"PT", "1", "",  &setPuffPressureThreshold};
+
+_functionList getSipCalibrationFunction =  {"CS", "0", "0", &getSipCalibration};
+_functionList setSipCalibrationFunction =  {"CS", "1", "1",  &setPuffCalibration};
+
+_functionList getPuffCalibrationFunction =  {"CP", "0", "0", &getSipCalibration};
+_functionList setPuffCalibrationFunction =  {"CP", "1", "1",  &setPuffCalibration};
+
+
+_functionList getJoystickCalibrationFunction =    {"CA", "0", "0", &getJoystickCalibration};
+_functionList setJoystickCalibrationFunction =    {"CA", "1", "1", &setJoystickCalibration};
 
 _functionList getCommunicationModeFunction =      {"CM", "0", "0", &getCommunicationMode};
 _functionList setCommunicationModeFunction =      {"CM", "1", "",  &setCommunicationMode};
@@ -51,7 +59,7 @@ _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSetting
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[28] = {
+_functionList apiFunction[32] = {
   getModelNumberFunction,
   getVersionNumberFunction,
   getJoystickSpeedFunction,
@@ -73,6 +81,10 @@ _functionList apiFunction[28] = {
   setSipPressureThresholdFunction,
   getPuffPressureThresholdFunction,
   setPuffPressureThresholdFunction,
+  getSipCalibration,
+  setSipCalibration,
+  getPuffCalibration,
+  setPuffCalibration,  
   getCommunicationModeFunction,
   setCommunicationModeFunction,
   getDebugModeFunction,
@@ -1055,11 +1067,11 @@ void setPressureMode(bool responseEnabled, bool apiEnabled, String optionalParam
 //*********************************//
 void getPressureThreshold(bool responseEnabled, bool apiEnabled) {
 
-  float tempPressureThreshold[2];
+  int tempPressureThreshold[2];
   tempPressureThreshold[0] = getSipPressureThreshold(false, false);
   tempPressureThreshold[1] = getPuffPressureThreshold(false, false);
 
-  printResponseFloatArray(responseEnabled, apiEnabled, true, 0, "DT,0", true, "", 2, ',', tempPressureThreshold);
+  printResponseIntArray(responseEnabled, apiEnabled, true, 0, "DT,0", true, "", 2, ',', tempPressureThreshold);
 
 }
 //***GET PRESSURE VALUE API FUNCTION***//
@@ -1080,7 +1092,7 @@ void getPressureThreshold(bool responseEnabled, bool apiEnabled, String optional
   }
 }
 
-//***GET PRESSURE THRESHOLD FUNCTION***//
+//***GET SIP PRESSURE THRESHOLD FUNCTION***//
 // Function   : getSipPressureThreshold
 //
 // Description: This function returns the current sip pressure threshold.
@@ -1102,7 +1114,7 @@ float getSipPressureThreshold(bool responseEnabled, bool apiEnabled) {
     mem.writeFloat(CONF_SETTINGS_FILE, commandKey, tempSipThreshold);
   }
   ps.setSipThreshold(tempSipThreshold);
-  printResponseFloat(responseEnabled, apiEnabled, true, 0, "ST,0", true, tempSipThreshold);
+  printResponseInt(responseEnabled, apiEnabled, true, 0, "ST,0", true, tempSipThreshold);
   return tempSipThreshold;
 }
 //***GET PRESSURE THRESHOLD API FUNCTION***//
@@ -1132,20 +1144,19 @@ void getSipPressureThreshold(bool responseEnabled, bool apiEnabled, String optio
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               inputSipThreshold : float : The new sip pressure threshold.
+//               inputSipThreshold : int : The new sip pressure threshold.
 //
 // Return     : void
 //*********************************//
-void setSipPressureThreshold(bool responseEnabled, bool apiEnabled, float inputSipThreshold) {
+void setSipPressureThreshold(bool responseEnabled, bool apiEnabled, int inputSipThreshold) {
   String commandKey = "ST";
-
   if (inputSipThreshold > CONF_PRESS_MIN_THRESHOLD && inputSipThreshold < CONF_PRESS_MAX_THRESHOLD) {
     mem.writeFloat(CONF_SETTINGS_FILE, commandKey, inputSipThreshold);
     ps.setSipThreshold(inputSipThreshold);
-    printResponseFloat(responseEnabled, apiEnabled, true, 0, "ST,1", true, inputSipThreshold);
+    printResponseInt(responseEnabled, apiEnabled, true, 0, "ST,1", true, inputSipThreshold);
   }
   else {
-    printResponseFloat(responseEnabled, apiEnabled, false, 3, "ST,1", true, inputSipThreshold);
+    printResponseInt(responseEnabled, apiEnabled, false, 3, "ST,1", true, inputSipThreshold);
 
   }
 }
@@ -1177,17 +1188,17 @@ void setSipPressureThreshold(bool responseEnabled, bool apiEnabled, String optio
 //
 // Return     : void
 //*********************************//
-float getPuffPressureThreshold(bool responseEnabled, bool apiEnabled) {
+int getPuffPressureThreshold(bool responseEnabled, bool apiEnabled) {
   String commandKey = "PT";
-  float tempPuffThreshold;
-  tempPuffThreshold = mem.readFloat(CONF_SETTINGS_FILE, commandKey);
+  int tempPuffThreshold;
+  tempPuffThreshold = mem.readInt(CONF_SETTINGS_FILE, commandKey);
 
-  if ((tempPuffThreshold <= 0.0) || (tempPuffThreshold >= CONF_PRESS_MAX_THRESHOLD)) {
+  if ((tempPuffThreshold <= 0) || (tempPuffThreshold >= CONF_PRESS_MAX_THRESHOLD)) {
     tempPuffThreshold = CONF_PUFF_THRESHOLD;
-    mem.writeFloat(CONF_SETTINGS_FILE, commandKey, tempPuffThreshold);
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempPuffThreshold);
   }
   ps.setPuffThreshold(tempPuffThreshold);
-  printResponseFloat(responseEnabled, apiEnabled, true, 0, "PT,0", true, tempPuffThreshold);
+  printResponseInt(responseEnabled, apiEnabled, true, 0, "PT,0", true, tempPuffThreshold);
 
   return tempPuffThreshold;
 }
@@ -1220,20 +1231,20 @@ void getPuffPressureThreshold(bool responseEnabled, bool apiEnabled, String opti
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               inputPuffThreshold : float : The new sip pressure threshold in percentage.
+//               inputPuffThreshold : int : The new sip pressure threshold in percentage.
 //
 // Return     : void
 //*********************************//
-void setPuffPressureThreshold(bool responseEnabled, bool apiEnabled, float inputPuffThreshold) {
+void setPuffPressureThreshold(bool responseEnabled, bool apiEnabled, int inputPuffThreshold) {
   String commandKey = "PT";
 
   if (inputPuffThreshold > CONF_PRESS_MIN_THRESHOLD && inputPuffThreshold < CONF_PRESS_MAX_THRESHOLD) {
-    mem.writeFloat(CONF_SETTINGS_FILE, commandKey, inputPuffThreshold);
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputPuffThreshold);
     ps.setPuffThreshold(inputPuffThreshold);
-    printResponseFloat(responseEnabled, apiEnabled, true, 0, "PT,1", true, inputPuffThreshold);
+    printResponseInt(responseEnabled, apiEnabled, true, 0, "PT,1", true, inputPuffThreshold);
   }
   else {
-    printResponseFloat(responseEnabled, apiEnabled, false, 3, "PT,1", true, inputPuffThreshold);
+    printResponseInt(responseEnabled, apiEnabled, false, 3, "PT,1", true, inputPuffThreshold);
 
   }
 }
@@ -1252,6 +1263,167 @@ void setPuffPressureThreshold(bool responseEnabled, bool apiEnabled, float input
 void setPuffPressureThreshold(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   setPuffPressureThreshold(responseEnabled, apiEnabled, optionalParameter.toFloat());
 }
+
+-------------
+//***GET SIP CALIBRATION FUNCTION***//
+// Function   : getSipCalibration
+//
+// Description: This function retrieves Sip Calibration.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : void
+//*********************************//
+void getSipCalibration(bool responseEnabled, bool apiEnabled) {
+  String commandKey;
+  pointFloatType calibrationPointArray[2];
+  for (int i = 1; i =< 2; i++)
+  {
+    commandKey = "CP" + String(i);
+    calibrationPointArray[i-1] = mem.readFloat(CONF_SETTINGS_FILE, commandKey);
+  }
+  printResponseFloatPointArray(responseEnabled, apiEnabled, true, 0, "CS,0", true, "", 2, ',', calibrationArray);
+
+}
+//***SIP CALIBRATION API FUNCTION***//
+// Function   : getSipCalibration
+//
+// Description: This function is redefinition of main getSipCalibration function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void getSipCalibration(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
+    getSipCalibration(responseEnabled, apiEnabled);
+  }
+}
+
+//***SET SIP CALIBRATION FUNCTION***//
+// Function   : setSipCalibration
+//
+// Description: This function starts the Sip Calibration.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : void
+//*********************************//
+void setSipCalibration(bool responseEnabled, bool apiEnabled) {
+  String commandKey;
+  for (int i = 1; i =< 2; i++)
+  {
+    commandKey = "CP" + String(i);
+    calibTimerId[1] = calibTimer.setTimeout(CONF_SIP_AND_PUFF_CALIB_START_DELAY, performSipAndPuffCalibration, (int *)stepNumber);  //Start the process
+  }
+
+}
+//***SET SIP CALIBRATION API FUNCTION***//
+// Function   : setSipCalibration
+//
+// Description: This function is redefinition of main setSipCalibration function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void setSipCalibration(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 1) {
+    setSipCalibration(responseEnabled, apiEnabled);
+  }}
+
+//***GET PUFF CALIBRATION FUNCTION***//
+//
+// Description: This function retrieves Puff Calibration.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : void
+//*********************************//
+void getPuffCalibration(bool responseEnabled, bool apiEnabled) {
+  String commandKey;
+  pointFloatType calibrationPointArray[2];
+  for (int i = 3; i =< 4; i++)
+  {
+    commandKey = "CP" + String(i);
+    calibrationPointArray[i-2] = mem.readFloat(CONF_SETTINGS_FILE, commandKey);
+  }
+  printResponseFloatPointArray(responseEnabled, apiEnabled, true, 0, "CP,0", true, "", 2, ',', calibrationPointArray);
+
+}
+
+//***GET PUFF CALIBRATION API FUNCTION***//
+// Function   : getPuffCalibration
+//
+// Description: This function is redefinition of main getPuffCalibration function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void getPuffPCalibration(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
+    getPuffPCalibration(responseEnabled, apiEnabled);
+  }
+}
+
+
+//***SET PUFF CALIBRATION FUNCTION***//
+// Function   : setPuffCalibration
+//
+// Description: This function starts the puff Calibration.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : void
+//*********************************//
+void setPuffCalibration(bool responseEnabled, bool apiEnabled) {
+  String commandKey;
+  for (int i = 3; i =< 4; i++)
+  {
+    commandKey = "CP" + String(i);
+    calibTimerId[1] = calibTimer.setTimeout(CONF_SIP_AND_PUFF_CALIB_START_DELAY, performSipAndPuffCalibration, (int *)stepNumber);  //Start the process
+  }
+}
+//***SET PUFF CALIBRATION API FUNCTION***//
+// Function   : setPuffCalibration
+//
+// Description: This function is redefinition of main setPuffCalibration function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void setPuffCalibration(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 1) {
+    setPuffCalibration(responseEnabled, apiEnabled);
+  }}
+
+
 
 //***GET COMMUNICATION MODE FUNCTION***//
 // Function   : getCommunicationMode

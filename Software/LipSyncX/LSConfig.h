@@ -39,7 +39,7 @@
 
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
-#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"CM\":0,\"SS\":5,\"SL\":5,\"PM\":0,\"ST\":0.0,\"PT\":0.0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[15.0,15.0],\"CA2\":[-15.0,15.0],\"CA3\":[-15.0,-15.0],\"CA4\":[15.0,-15.0],\"DM\":0}"
+#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"CM\":0,\"SS\":5,\"SL\":5,\"PM\":0,\"ST\":0,\"PT\":0,\"DZ\":0.0,\"CP1\":0.0,\"CP2\":0.0,\"CP3\":0:0,\"CP4\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[15.0,15.0],\"CA2\":[-15.0,15.0],\"CA3\":[-15.0,-15.0],\"CA4\":[15.0,-15.0],\"DM\":0}"
 
 //Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 50          //50ms
@@ -142,12 +142,23 @@
 #define CONF_SCROLL_MOVE_MAX  10
 #define CONF_SCROLL_MOVE_BASE 1
 
+//Sip and Puff calibration points and related LED feedback settings
+#define CONF_SIP_AND_PUFF_CALIB_START_DELAY 1000
+#define CONF_SIP_AND_PUFF_CALIB_START_LED_COLOR LED_CLR_PURPLE                                           //Sip and Puff Calibration process start and end color
+#define CONF_SIP_AND_PUFF_CALIB_STEP_DELAY 1500
+#define CONF_SIP_AND_PUFF_CALIB_LED_NUMBER 4
+#define CONF_SIP_AND_PUFF_CALIB_LED_COLOR LED_CLR_RED                                                    //The color indicates the joystick Calibration process 
+#define CONF_SIP_AND_PUFF_CALIB_STEP_BLINK 1
+#define CONF_SIP_AND_PUFF_CALIB_STEP_BLINK_DELAY 150
+#define CONF_SIP_AND_PUFF_CALIB_READING_DELAY 200
+#define CONF_SIP_AND_PUFF_CALIB_STEP_BLINK_COLOR LED_CLR_YELLOW                                          //The color indicates the SIP_AND_PUFFstick Calibration about to start
+#define CONF_JOY_CALIB_READING_NUMBER 10
 
 //Sip and Puff Default settings
-#define CONF_SIP_THRESHOLD 3.0                    //hPa
-#define CONF_PUFF_THRESHOLD 3.0                   //hPa
-#define CONF_PRESS_MIN_THRESHOLD 1.0              //hPa
-#define CONF_PRESS_MAX_THRESHOLD 100.0            //hPa
+#define CONF_SIP_THRESHOLD 3                      //%
+#define CONF_PUFF_THRESHOLD 3                     //%
+#define CONF_PRESS_MIN_THRESHOLD 1                //%
+#define CONF_PRESS_MAX_THRESHOLD 100              //%
 #define CONF_PRESS_MODE_DEFAULT 1                 //Default pressure mode state = 2 
                                                   // 0 = None or PRESS_MODE_NONE
                                                   // 1 = Absolute or PRESS_MODE_ABS
