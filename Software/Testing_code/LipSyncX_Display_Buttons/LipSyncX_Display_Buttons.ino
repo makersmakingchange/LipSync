@@ -18,6 +18,9 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define PIN_BUTTON_SEL    3
 #define PIN_BUTTON_NEXT   10
 
+#define PIN_LED_MOUSE   7
+#define PIN_LED_GAMEPAD 9
+
 #define MAIN_MENU   0
 #define CALIB_MENU  1
 #define MODE_MENU   2
@@ -61,7 +64,8 @@ String selectedText;
 
 String mainMenuText[4] = {"Calibrate", "Mode", "Cursor speed", "Bluetooth"};
 String calibMenuText[4] = {"Center reset", "Full Calibration", "... Back"};
-String modeMenuText[4] = {"Mode: ", "New mode:", "<mode>", "... Back"};
+//String modeMenuText[4] = {"M: ", "New mode:", "<mode>", "... Back"};
+String modeMenuText[4] = {" MOUSE ", " GAMEPAD ", "Change mode", "... Back"};
 String modeConfirmText[4] = {"Change", "mode?", "Confirm", "... Back"};
 String cursorSpMenuText[4] = {"  ", "Increase", "Decrease", "... Back"};
 String bluetoothMenuText[4] = {"Bluetooth:", "<>", "Turn <>", "... Back"};
@@ -78,7 +82,23 @@ void setup() {
   pinMode(PIN_BUTTON_SEL, INPUT_PULLUP);
   pinMode(PIN_BUTTON_NEXT, INPUT_PULLUP);
 
+  pinMode(PIN_LED_MOUSE, OUTPUT);
+  pinMode(PIN_LED_GAMEPAD, OUTPUT);
+  digitalWrite(PIN_LED_MOUSE, LOW);
+  digitalWrite(PIN_LED_GAMEPAD, LOW);
+
   Serial.begin(115200);
+
+  switch (mode){
+    case MODE_MOUSE:
+      digitalWrite(PIN_LED_GAMEPAD, LOW);
+      digitalWrite(PIN_LED_MOUSE, HIGH);
+      break;
+    case MODE_GAMEPAD:
+      digitalWrite(PIN_LED_MOUSE, LOW);
+      digitalWrite(PIN_LED_GAMEPAD, HIGH);
+      break;
+  }
   
   delay(500); // Start up delay so screen is ready to write to
 
@@ -295,8 +315,12 @@ void inputSelect(void){
             
             if (mode == MODE_MOUSE){
               mode = MODE_GAMEPAD;
+              digitalWrite(PIN_LED_MOUSE, LOW);
+              digitalWrite(PIN_LED_GAMEPAD, HIGH);
             } else if (mode == MODE_GAMEPAD){
               mode = MODE_MOUSE;
+              digitalWrite(PIN_LED_GAMEPAD, LOW);
+              digitalWrite(PIN_LED_MOUSE, HIGH);
             }
 
             display.clearDisplay();
@@ -396,19 +420,34 @@ void calibMenu(void) {
 
 void modeMenu(void) {
   currentMenu = MODE_MENU;
+  /*
   if (mode == MODE_MOUSE){
-      modeMenuText[0] = "Mode: MOUSE";
+      modeMenuText[0] = "M: MOUSE";
       modeMenuText[2] = "GAMEPAD";
   } else if (mode == MODE_GAMEPAD){
-      modeMenuText[0] = "Mode: GAMEPAD";
+      modeMenuText[0] = "M: GAMEPAD";
       modeMenuText[2] = "MOUSE";
   }
+  */
 
   currentMenuLength = modeMenuLen;
   currentMenuText = modeMenuText;
   cursorStart = 2;
 
   displayMenu();
+
+  display.setTextColor(SSD1306_BLACK, SSD1306_WHITE); // Draw 'inverse' 
+  if (mode == MODE_MOUSE){
+      display.setCursor(0, 0);
+      display.print(" MOUSE ");
+      
+  } else if (mode == MODE_GAMEPAD){
+      display.setCursor(0, 16);
+      display.print(" GAMEPAD ");
+  }
+
+  display.display();
+  display.setTextColor(SSD1306_WHITE, SSD1306_BLACK); // Draw 'inverse' 
   
 }
 
