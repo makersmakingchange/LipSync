@@ -1,6 +1,6 @@
 /*******************
   This is an exmaple of the OLED screen menu for the LipSyncX
-  Last edited: November 14, 2023
+  Last edited: November 23, 2023
  *******************/
 
 #include <SPI.h>
@@ -181,7 +181,7 @@ void displayCursor(void) {
   display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
 
   // Show cursor on text line of selection index, erase previous cursor
-  display.setCursor(0, 16 * cursorStart);  // ADD VARIABLE for start row, so if selection items are only rows 3 and 4 it starts on row 3
+  display.setCursor(0, 16 * cursorStart);  
   for (int i = 0; i < currentMenuLength; i++) {    
     if (i == currentSelection) {
       display.println(">");
