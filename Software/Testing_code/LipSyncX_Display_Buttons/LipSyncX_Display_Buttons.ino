@@ -1,6 +1,6 @@
 /*******************
   This is an exmaple of the OLED screen menu for the LipSyncX
-  Last edited: November 14, 2023
+  Last edited: November 23, 2023
  *******************/
 
 #include <SPI.h>
@@ -22,17 +22,25 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define PIN_LED_GAMEPAD 9
 
 #define MAIN_MENU   0
-#define CALIB_MENU  1
-#define MODE_MENU   2
-#define CURSOR_SP_MENU   3
-#define BLUETOOTH_MENU   4
+#define EXIT_MENU   1
+#define CALIB_MENU  2
+#define MODE_MENU   3
+#define CURSOR_SP_MENU   4
+#define ADVANCED_MENU    5
+#define BLUETOOTH_MENU   6
+
 
 //Calibration pages
 #define CENTER_RESET_PAGE 11
 #define FULL_CALIB_PAGE   12
 
-#define MODE_MOUSE    0
-#define MODE_GAMEPAD  1
+//Advanced Menus
+#define SOUND_MENU        51
+#define SIP_PUFF_MENU     52
+
+#define MODE_MOUSE_USB  0
+#define MODE_MOUSE_BT   1
+#define MODE_GAMEPAD    2
 
 #define SCROLL_DELAY_MILLIS   100
 
@@ -43,9 +51,11 @@ int prevMenu = -1;
 int currentSelection = 0;
 int selectedLine; 
 
-int mode = MODE_MOUSE;
+int mode = MODE_MOUSE_USB;
+int tempMode = MODE_MOUSE_USB;
 int cursorSpeedLevel = 5;
 bool bluetoothOn = false;
+bool soundOn = true;
 
 bool scrollOn = false;
 long scrollDelayTimer = millis();
@@ -62,21 +72,25 @@ int currentMenuLength;
 String *currentMenuText;
 String selectedText;
 
-String mainMenuText[4] = {"Calibrate", "Mode", "Cursor speed", "Bluetooth"};
+String mainMenuText[5] = {"Exit Menu", "Calibrate", "Mode", "Cursor speed", "Advanced"};
+String exitConfirmText[4] = {"Exit", "settings?", "Confirm", "... Back"};
 String calibMenuText[4] = {"Center reset", "Full Calibration", "... Back"};
-//String modeMenuText[4] = {"M: ", "New mode:", "<mode>", "... Back"};
-String modeMenuText[4] = {" MOUSE ", " GAMEPAD ", "Change mode", "... Back"};
+String modeMenuText[4] = {"MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back"};
 String modeConfirmText[4] = {"Change", "mode?", "Confirm", "... Back"};
 String cursorSpMenuText[4] = {"  ", "Increase", "Decrease", "... Back"};
 String bluetoothMenuText[4] = {"Bluetooth:", "<>", "Turn <>", "... Back"};
+String advancedMenuText[2] = {"Sound", "Sip & Puff"};
+String soundMenuText[4] = {"Sound:", "<>", "Turn <>", "... Back"};
 
-const int mainMenuLen = 4;
+// Number of selectable options in each menu
+const int mainMenuLen = 5;
+const int exitConfirmLen = 2;
 const int calibMenuLen = 3;
-const int modeMenuLen = 2;
+const int modeMenuLen = 4;
 const int cursorSpMenuLen = 3;
 const int bluetoothMenuLen = 2;
-
-//String mainMenuText = "Hello";
+const int advancedMenuLen = 2;
+const int soundMenuLen = 2;
 
 void setup() {
   pinMode(PIN_BUTTON_SEL, INPUT_PULLUP);
@@ -90,7 +104,11 @@ void setup() {
   Serial.begin(115200);
 
   switch (mode){
-    case MODE_MOUSE:
+    case MODE_MOUSE_USB:
+      digitalWrite(PIN_LED_GAMEPAD, LOW);
+      digitalWrite(PIN_LED_MOUSE, HIGH);
+      break;
+    case MODE_MOUSE_BT:
       digitalWrite(PIN_LED_GAMEPAD, LOW);
       digitalWrite(PIN_LED_MOUSE, HIGH);
       break;
@@ -163,7 +181,7 @@ void displayCursor(void) {
   display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
 
   // Show cursor on text line of selection index, erase previous cursor
-  display.setCursor(0, 16 * cursorStart);  // ADD VARIABLE for start row, so if selection items are only rows 3 and 4 it starts on row 3
+  display.setCursor(0, 16 * cursorStart);  
   for (int i = 0; i < currentMenuLength; i++) {    
     if (i == currentSelection) {
       display.println(">");
@@ -196,7 +214,7 @@ void nextSelection(void) {
   }
 
   currentSelection++;
-  if (currentSelection >= currentMenuLength) {       // CHANGE THIS TO USE MENU LENGTH
+  if (currentSelection >= currentMenuLength) {   
     currentSelection = 0;
   }
 
@@ -206,8 +224,6 @@ void nextSelection(void) {
 
 
 void scrollLongText(void){
-  //use selectedText to display
-
   int minPos = -12 * selectedText.length();
   
   display.setTextSize(2);                                   // 2x scale text
@@ -268,6 +284,9 @@ void inputSelect(void){
           case MAIN_MENU:
             mainMenu();
             break;
+          case EXIT_MENU:
+            exitConfirmMenu();
+            break;
           case CALIB_MENU:
             calibMenu();
             break;
@@ -276,6 +295,9 @@ void inputSelect(void){
             break;
           case CURSOR_SP_MENU:
             cursorSpeedMenu();
+            break;
+          case ADVANCED_MENU:
+            advancedMenu();
             break;
           case BLUETOOTH_MENU:
             bluetoothMenu();
@@ -295,54 +317,14 @@ void inputSelect(void){
         }
         break;
       case MODE_MENU:
-        switch (currentSelection){         
-          case 0:             // change mode
-             //confirm mode change?
-            currentMenuText = modeConfirmText;
-            currentMenuLength = 2;
-            cursorStart = 2;
-            currentSelection = 0;
-            displayMenu();
-
-            while (!buttonSelPressed){
-              readButtons();
-              inputNext();
-            }
-
-            if (currentSelection == 1){
-              break;
-            }
-            
-            if (mode == MODE_MOUSE){
-              mode = MODE_GAMEPAD;
-              digitalWrite(PIN_LED_MOUSE, LOW);
-              digitalWrite(PIN_LED_GAMEPAD, HIGH);
-            } else if (mode == MODE_GAMEPAD){
-              mode = MODE_MOUSE;
-              digitalWrite(PIN_LED_GAMEPAD, LOW);
-              digitalWrite(PIN_LED_MOUSE, HIGH);
-            }
-
-            display.clearDisplay();
-            display.setCursor(0,0);
-            display.println("Resetting");
-            display.println("device");
-            display.display();
-
-            delay(2000);
-            
-            //conduct mode change
-
-            //remove this for final code, becuase device will reset
-            readButtons();
-            currentMenu = MAIN_MENU;
-            mainMenu();
-            break;
-            
-          case 1:             // ... Back
-            currentMenu = MAIN_MENU;
-            mainMenu();
-            break;
+        if (currentSelection < (modeMenuLen - 1)){
+          // Confirm mode change
+          tempMode = currentSelection;
+          if (tempMode != mode){
+            confirmModeChange();
+          }
+        } else if (currentSelection == (modeMenuLen-1)){
+          mainMenu();
         }
         break;
       case CURSOR_SP_MENU:
@@ -355,7 +337,6 @@ void inputSelect(void){
             display.setCursor(0,0);
             display.print("Speed: "); display.print(cursorSpeedLevel); display.println("  ");
             display.display();
-            //cursorSpeedMenu();    //Refresh menu printout
             break;
           case 1:       //Decrease
             cursorSpeedLevel--;
@@ -365,12 +346,23 @@ void inputSelect(void){
             display.setCursor(0,0);
             display.print("Speed: "); display.print(cursorSpeedLevel); display.println("  ");
             display.display();
-            //cursorSpeedMenu();    //Refresh menu printout
             break;
           case 2:       //Back
             currentMenu = MAIN_MENU;
             mainMenu();
             break;
+        }
+        break;
+      case ADVANCED_MENU:
+        if (currentSelection == 0){
+          currentMenu = CENTER_RESET_PAGE;
+          centerResetPage();
+        } else if (currentSelection == 1){
+          currentMenu = FULL_CALIB_PAGE;
+          fullCalibrationPage();
+        } else if (currentSelection == 2){
+          currentMenu = MAIN_MENU;
+          mainMenu();
         }
         break;
       case BLUETOOTH_MENU:
@@ -385,6 +377,18 @@ void inputSelect(void){
             mainMenu();
             break;
         }
+      case SOUND_MENU:
+         switch (currentSelection){
+          case 0:
+            soundOn = !soundOn;
+            //do function for turning sound on/off
+            soundMenu();
+            break;
+          case 1:
+            currentMenu = MAIN_MENU;
+            mainMenu();
+            break;
+        }
     }
   }
 }
@@ -393,16 +397,49 @@ void inputSelect(void){
 
 void mainMenu(void) {
   currentMenu = MAIN_MENU;
+  
   //if new menu selection
-  if (prevMenu != currentMenu) {
+  //if (prevMenu != currentMenu) {
     currentMenuLength = mainMenuLen;
     currentMenuText = mainMenuText;
     cursorStart = 0;
+    currentSelection = 0;
 
     displayMenu();
+  //}
+}
+
+void exitConfirmMenu(){
+  prevMenu = currentMenu;
+  currentMenu = EXIT_MENU;
+  currentMenuText = exitConfirmText;
+  currentMenuLength = 2;
+  cursorStart = 2;
+  currentSelection = 0;
+  displayMenu();
+
+  while (!buttonSelPressed){
+    readButtons();
+    inputNext();
   }
 
+  while (buttonSelPressed){
+    readButtons(); // wait until Sel button is released
+  }
+  
+  if (currentSelection == 1){
+    currentSelection = 0;
+    mainMenu();
+  } else {
+    //some function to exit
+    display.clearDisplay();
+    display.setCursor(0,0);
+    display.println("Exiting");
+    display.display();
+    delay(2000);
 
+    mainMenu();
+  }
 }
 
 void calibMenu(void) {
@@ -420,35 +457,88 @@ void calibMenu(void) {
 
 void modeMenu(void) {
   currentMenu = MODE_MENU;
-  /*
-  if (mode == MODE_MOUSE){
-      modeMenuText[0] = "M: MOUSE";
-      modeMenuText[2] = "GAMEPAD";
-  } else if (mode == MODE_GAMEPAD){
-      modeMenuText[0] = "M: GAMEPAD";
-      modeMenuText[2] = "MOUSE";
-  }
-  */
 
   currentMenuLength = modeMenuLen;
   currentMenuText = modeMenuText;
-  cursorStart = 2;
+  cursorStart = 0;
 
   displayMenu();
 
-  display.setTextColor(SSD1306_BLACK, SSD1306_WHITE); // Draw 'inverse' 
-  if (mode == MODE_MOUSE){
-      display.setCursor(0, 0);
-      display.print(" MOUSE ");
-      
+  display.setTextColor(SSD1306_BLACK, SSD1306_WHITE); // Draw 'inverse' coloured text
+  if (mode == MODE_MOUSE_USB){
+      display.setCursor(12, 0);
+      display.print(modeMenuText[MODE_MOUSE_USB]);
+  } else if (mode == MODE_MOUSE_BT){
+      display.setCursor(12, 16);
+      //display.print(" MOUSE BLUETOOTH ");
+      display.print(modeMenuText[MODE_MOUSE_BT]);
   } else if (mode == MODE_GAMEPAD){
-      display.setCursor(0, 16);
-      display.print(" GAMEPAD ");
+      display.setCursor(12, 16*2);
+      //display.print(" GAMEPAD ");
+      display.print(modeMenuText[MODE_GAMEPAD]);
   }
 
   display.display();
-  display.setTextColor(SSD1306_WHITE, SSD1306_BLACK); // Draw 'inverse' 
+  display.setTextColor(SSD1306_WHITE, SSD1306_BLACK); // Reset text colour to white on black
   
+}
+
+void confirmModeChange() {
+  currentMenuText = modeConfirmText;
+  currentMenuLength = 2;
+  cursorStart = 2;
+  currentSelection = 0;
+  displayMenu();
+
+  while (!buttonSelPressed){
+    readButtons();
+    inputNext();
+  }
+  
+  if (currentSelection == 1){
+    currentSelection = 0;
+    buttonSelPressed=false;
+    modeMenu();
+  } else {
+    changeMode();
+  }
+}
+
+void changeMode(){
+  mode = tempMode;
+  
+  switch (mode){
+    case MODE_MOUSE_USB:
+      digitalWrite(PIN_LED_GAMEPAD, LOW);
+      digitalWrite(PIN_LED_MOUSE, HIGH);
+      break;
+    case MODE_MOUSE_BT:
+      digitalWrite(PIN_LED_GAMEPAD, LOW);
+      digitalWrite(PIN_LED_MOUSE, HIGH);
+      break;
+    case MODE_GAMEPAD:
+      digitalWrite(PIN_LED_MOUSE, LOW);
+      digitalWrite(PIN_LED_GAMEPAD, HIGH);
+      break;
+  }
+
+  display.clearDisplay();
+  display.setCursor(0,0);
+  display.println("Resetting");
+  display.println("device");
+  display.display();
+
+  delay(2000);
+  
+  //conduct mode change
+  //save mode into flash
+
+  //remove this for final code, becuase device will reset
+  readButtons();
+  currentMenu = MAIN_MENU;
+  mainMenu();
+
+  //software reset
 }
 
 void cursorSpeedMenu(void) { 
@@ -484,6 +574,18 @@ void bluetoothMenu(void) {
 
 }
 
+void advancedMenu(){
+  currentMenu = ADVANCED_MENU;
+
+    if (prevMenu != currentMenu) {
+    currentMenuLength = advancedMenuLen;
+    currentMenuText = advancedMenuText;
+    cursorStart = 0;
+
+    displayMenu();
+  }
+}
+
 // ----- CALIBRATION PAGES ----- //
 void centerResetPage(void){
   display.clearDisplay();
@@ -515,7 +617,6 @@ void centerResetPage(void){
 
   delay(2000);
 
-  currentMenu = MAIN_MENU;
   mainMenu();
   
 }
@@ -534,10 +635,29 @@ void fullCalibrationPage(void){
 
   delay(1000);
 
-  currentMenu = MAIN_MENU;
   mainMenu();
 }
 
 void centerReset(void){
   //function to actually perform center reset
+}
+
+// ----- ADVANCED SETTINGS MENUS ----- //
+
+void soundMenu(){
+  currentMenu = SOUND_MENU;
+  
+  if (soundOn) {
+    soundMenuText[1] = "ON";
+    soundMenuText[2] = "Turn off";
+  } else {
+    soundMenuText[1] = "OFF";
+    soundMenuText[2] = "Turn on";
+  }
+
+  currentMenuLength = soundMenuLen;
+  currentMenuText = soundMenuText;
+  cursorStart = 2;
+
+  displayMenu();
 }
