@@ -28,7 +28,7 @@
 
 #define JOY_Z_DIRECTION_THRESHOLD 9     //The threshold used in z axis direction detection 
 
-#define JOY_RAW_XY_MAX 15.0             //The max raw x or y of a calibration point in mT
+#define JOY_RAW_XY_MAX 30.0             //The max raw x or y of a calibration point in mT
 
 #define JOY_INPUT_XY_MAX 1024           //The max range of mapped input from float to int(-1024 to 1024)
 

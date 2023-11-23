@@ -47,7 +47,7 @@
 
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
-#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"CM\":0,\"SS\":5,\"SL\":5,\"PM\":0,\"ST\":0.0,\"PT\":0.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[15.0,15.0],\"CA2\":[-15.0,15.0],\"CA3\":[-15.0,-15.0],\"CA4\":[15.0,-15.0],\"DM\":0}"
+#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"OM\":0,\"CM\":0,\"SS\":5,\"SL\":5,\"PM\":0,\"ST\":0.0,\"PT\":0.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[30.0,30.0],\"CA2\":[-30.0,30.0],\"CA3\":[-30.0,-30.0],\"CA4\":[30.0,-30.0],\"DM\":0}"
 
 //Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 50          //50ms
@@ -79,6 +79,31 @@
 
 #define CONF_DEBUG_MODE_MIN 0
 #define CONF_DEBUG_MODE_MAX 5
+
+//Debug Default settings
+#define CONF_DEBUG_MODE_DEFAULT  0        // Default debug mode state = Off 
+                                          // 0 = Debug mode is Off
+                                          // 1 = Joystick debug mode is On
+                                          // 2 = Pressure debug mode is On
+                                          // 3 = Buttons debug mode is On
+                                          // 4 = Switch debug mode is On
+                                          // 5 = Sip & Puff state debug mode is On
+
+// Operating Mode Values
+#define CONF_OPERATING_MODE_NONE 0
+#define CONF_OPERATING_MODE_MOUSE 1
+#define CONF_OPERATING_MODE_BTMOUSE 2
+#define CONF_OPERATING_MODE_GAMEPAD 3
+
+#define CONF_OPERATING_MODE_MIN 0
+#define CONF_OPERATING_MODE_MAX 3
+
+#define CONF_OPERATING_MODE_DEFAULT 1 // Default mode = USB Mouse
+                                          // 0 = Operating Mode null
+                                          // 1 = Mouse
+                                          // 2 = Bluetooth Mouse
+                                          // 3 = Gamepad                                                         
+
 
 //***CAN BE CHANGED***//
 #define CONF_API_ENABLED true               //Enable or Disable API
@@ -184,11 +209,5 @@
 #define CONF_BT_LED_COLOR LED_CLR_BLUE 
 #define CONF_BT_LED_BRIGHTNESS CONF_LED_BRIGHTNESS
 
-//Debug Default settings
-#define CONF_DEBUG_MODE_DEFAULT  0        // Default debug mode state = Off 
-                                          // 0 = Debug mode is Off
-                                          // 1 = Joystick debug mode is On
-                                          // 2 = Pressure debug mode is On
-                                          // 3 = Buttons debug mode is On
-                                          // 4 = Switch debug mode is On
-                                          // 5 = Sip & Puff state debug mode is On
+
+
