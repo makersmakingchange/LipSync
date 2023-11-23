@@ -3,8 +3,6 @@
   Last edited: November 16, 2023
  *******************/
 
-#include "Adafruit_TinyUSB.h"
-
 #define PIN_BUZZER    6
 
 #define PIN_BUTTON_SEL    3
