@@ -55,8 +55,9 @@ int trialCounter = 0;
 
 void setup() {
 
-
-  //Serial.println("Serial connection established");
+  Serial.begin(115200);
+  while (!Serial) { delay(1); }  // Wait until serial port is opened
+  Serial.println("Serial connection established");
 
   pinMode(CONF_SWITCH1_PIN, INPUT_PULLUP);
   pinMode(CONF_SWITCH2_PIN, INPUT_PULLUP);
@@ -113,8 +114,7 @@ void setup() {
   }
 
  
-  Serial.begin(115200);
-  while (!Serial) { delay(1); }  // Wait until serial port is opened
+
 
 
   // Turn microcontroller LED green
