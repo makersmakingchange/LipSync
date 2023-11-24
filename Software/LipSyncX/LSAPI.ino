@@ -29,6 +29,8 @@ typedef struct {                                  //Type definition for API func
 // Declare individual API functions with command, parameter, and corresponding function
 _functionList getModelNumberFunction =            {"MN", "0", "0", &getModelNumber};
 _functionList getVersionNumberFunction =          {"VN", "0", "0", &getVersionNumber};
+_functionList getOperatingModeFunction =          {"OM", "0", "0", &getOperatingMode};
+_functionList setOperatingModeFunction =          {"OM", "1", "",  &setOperatingMode};
 _functionList getJoystickSpeedFunction =          {"SS", "0", "0", &getJoystickSpeed};
 _functionList setJoystickSpeedFunction =          {"SS", "1", "",  &setJoystickSpeed};
 _functionList getScrollLevelFunction =            {"SL", "0", "0", &getScrollLevel};
@@ -63,9 +65,11 @@ _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSetting
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[29] = {
+_functionList apiFunction[31] = {
   getModelNumberFunction,
   getVersionNumberFunction,
+  getOperatingModeFunction,
+  setOperatingModeFunction,
   getJoystickSpeedFunction,
   setJoystickSpeedFunction,
   getScrollLevelFunction,
@@ -362,6 +366,96 @@ void getVersionNumber(bool responseEnabled, bool apiEnabled, String optionalPara
     getVersionNumber(responseEnabled, apiEnabled);
   }
 }
+
+//***GET OPERATING MODE STATE FUNCTION***//
+// Function   : getOperatingMode
+//
+// Description: This function retrieves the state of operating mode.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : operatingState : intol : The current state of operating mode.
+//*********************************//
+int getOperatingMode(bool responseEnabled, bool apiEnabled) {
+  String commandKey = "OM";
+  int tempOperatingMode;
+  tempOperatingMode = mem.readInt(CONF_SETTINGS_FILE, commandKey);
+
+  if ((tempOperatingMode < CONF_OPERATING_MODE_MIN) || (tempOperatingMode > CONF_OPERATING_MODE_MAX)) {
+    tempOperatingMode = CONF_OPERATING_MODE_DEFAULT;
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempOperatingMode);
+  }
+
+  setDebugState(tempOperatingMode);
+
+  printResponseInt(responseEnabled, apiEnabled, true, 0, "OM,0", true, tempOperatingMode);
+
+  return tempOperatingMode;
+}
+//***GET OPERATING MODE STATE API FUNCTION***//
+// Function   : getOperatingMode
+//
+// Description: This function is redefinition of main getOperatingMode function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void getOperatingMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
+    getOperatingMode(responseEnabled, apiEnabled);
+  }
+}
+
+//***SET OPERATING MODE STATE FUNCTION***//
+// Function   : setOperatingMode
+//
+// Description: This function sets the state of operating mode.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               inputOperatingMode : int : The new operating mode state 
+//
+// Return     : void
+//*********************************//
+void setOperatingMode(bool responseEnabled, bool apiEnabled, int inputOperatingMode) {
+  String commandKey = "OM";
+
+  if ((inputOperatingMode >= CONF_OPERATING_MODE_MIN) && (inputOperatingMode <= CONF_OPERATING_MODE_MAX)) {
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputOperatingMode);
+    printResponseInt(responseEnabled, apiEnabled, true, 0, "OM,1", true, inputOperatingMode);
+    changeOperatingMode(inputOperatingMode);
+  }
+  else {
+    printResponseInt(responseEnabled, apiEnabled, false, 3, "OM,1", true, inputOperatingMode);
+
+  }
+
+}
+//***SET OPERATING MODE STATE API FUNCTION***//
+// Function   : setOperatingMode
+//
+// Description: This function is redefinition of main setOperatingMode function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void setOperatingMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  setOperatingMode(responseEnabled, apiEnabled, optionalParameter.toInt());
+}
+
 
 //***GET JOYSTICK SPEED FUNCTION***//
 // Function   : getJoystickSpeed

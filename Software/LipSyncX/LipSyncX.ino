@@ -36,6 +36,7 @@
 
 //Communication mode and debug mode variables
 int comMode;                                                                                                // 0 = None , 1 = USB , 2 = Wireless  
+int operatingMode;                                                                                          // 0 = None, 1 = Mouse, 2 = Wireless, 3 = Gamepad
 int debugMode;                                                                                              // 0 = Debug mode is Off
                                                                                                             // 1 = Joystick debug mode is On
                                                                                                             // 2 = Pressure debug mode is On
@@ -176,6 +177,7 @@ LSOutput led;                                        //Starts an instance of the
 
 LSUSBMouse usbmouse;                                 //Starts an instance of the USB mouse object
 LSBLEMouse btmouse;                                  //Starts an instance of the BLE mouse object
+LSUSBGamepad gamepad;                                //Create an instance of the USB gamepad object
 
 
 int acceleration = 0;
@@ -194,10 +196,6 @@ int scrollLevel = 0;
 //*********************************//
 void setup()
 {
-  // Begin HID mouse 
-  mouse.begin();
-  btmouse.begin();
-
   Serial.begin(115200);
   //while (!TinyUSBDevice.mounted())
   //while (!Serial) { delay(10); }
@@ -207,6 +205,9 @@ void setup()
   initMemory();                                                 //Initialize Memory 
 
   
+  // Read operating mode from memory
+  initOperatingMode();                                          //Initialize Operating Mode
+
   initLed();                                                    //Initialize LED Feedback 
 
   initSipAndPuff();                                             //Initialize Sip And Puff 
@@ -349,6 +350,60 @@ void initAcceleration()
 void initCommunicationMode()
 {
   comMode = getCommunicationMode(false,false);
+
+}
+
+
+//*********************************//
+// Operating Mode Functions
+//*********************************//
+
+
+
+//***INITIALIZE OPERATING MODE FUNCTION***//
+// Function   : initOperatingMode 
+// 
+// Description: This function initializes the operating mode based on the 
+//              based on stored settings in the flash memory (0 = None , 1 = USB Mouse , 2 = Wireless Mouse, 3 = USB Gamepad)
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void initOperatingMode() {
+
+  operatingMode = getOperatingMode(true,false); // retrieve operating mode from memory 
+
+  if (operatingMode==CONF_OPERATING_MODE_MOUSE) {
+    usbmouse.begin();
+  } 
+  else if (operatingMode==CONF_OPERATING_MODE_GAMEPAD) {
+    gamepad.begin();
+  }
+  else {
+    
+  }
+    btmouse.begin();
+}
+
+
+
+//***CHANGE OPERATING MODE FUNCTION***//
+// Function   : changeOperatingMode
+// 
+// Description: This function configures the state of operation based on the current and desired operating mode
+//
+// Parameters : inputOperatingMode : int : The operating mode to change to
+// 
+// Return     : void 
+//****************************************//
+void changeOperatingMode(int inputOperatingState) {
+  if (inputOperatingState==operatingMode) {
+    //do nothing
+  } 
+  else {
+  }
+  operatingMode = inputOperatingState;
 }
 
 
