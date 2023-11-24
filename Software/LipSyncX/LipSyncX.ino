@@ -208,17 +208,26 @@ void setup()
   // Read operating mode from memory
   initOperatingMode();                                          //Initialize Operating Mode
 
+
+  if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing LEDs");  }
   initLed();                                                    //Initialize LED Feedback 
 
+if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing Sip and Puff");  }
   initSipAndPuff();                                             //Initialize Sip And Puff 
 
+if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing Input");  }
   initInput();                                                  //Initialize input buttons and input switches 
 
+if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing Joystick");  }
   initJoystick();                                               //Initialize Joystick 
 
+if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing Communication Mode");  }
   initCommunicationMode();                                      //Initialize Communication Mode
 
+if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing Acceleration");  }
   initAcceleration();                                           //Initialize Cursor Acceleration
+
+if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing Debug");  }
   initDebug();                                                  //Initialize Debug Mode operation 
 
   startupFeedback();                                            //Startup IBM LED Feedback 

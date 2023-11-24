@@ -17,6 +17,9 @@
 */
 
 
+#define USB_DEBUG  1 //Set this to 0 for best performance
+
+
 //***DO NOT CHANGE***//
 #define CONF_LIPSYNC_MODEL 1                              //Mouse = 1 , Gamepad = 2
 #define CONF_LIPSYNC_VERSION 1.0

@@ -177,6 +177,7 @@ void LSUSBMouse::begin(void)
 {
   this->usb_hid.begin();
   //while( !USBDevice.mounted() ) delay(1);
+  if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing USB HID Mouse");  }
 }
 
 
