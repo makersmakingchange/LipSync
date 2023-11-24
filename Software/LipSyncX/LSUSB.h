@@ -32,9 +32,8 @@
 
 #define GAMEPAD_DESCRIPTOR "LipSync X Gamepad"
 
-//uint8_t const _ascii2keycode[128][2] = {HID_ASCII_TO_KEYCODE};
+// https://github.com/hathach/tinyusb/blob/master/examples/device/hid_generic_inout/src/usb_descriptors.c
 
-uint8_t const
 
 mouse_desc_hid_report[] =
 {
