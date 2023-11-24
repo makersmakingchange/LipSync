@@ -31,7 +31,7 @@ class LSBLEMouse {
     void mouseReport(signed char b, signed char x, signed char y, signed char wheel = 0, signed char pan = 0);
   public:
     inline LSBLEMouse(void);
-    inline void begin(const char* s = "LipSync");
+    inline void begin(const char* s = "LipSync X");
     inline void end(void);
     inline void move(signed char x, signed char y);
     inline void moveAll(signed char x, signed char y, signed char wheel = 0, signed char pan = 0);
@@ -63,7 +63,7 @@ class LSBLEKeyboard : public Print
     uint8_t const _ascii2keycode[128][2] = {HID_ASCII_TO_KEYCODE};
   public:
     inline LSBLEKeyboard(void);
-    inline void begin(const char *s = "LipSync");
+    inline void begin(const char *s = "LipSync X");
     inline void end(void);
     inline size_t write(uint8_t k);
     inline size_t write(const uint8_t *buffer, size_t size);
