@@ -62,6 +62,7 @@ const ledActionStruct ledActionProperty[]{
     {CONF_ACTION_DEC_SPEED,          1,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
     {CONF_ACTION_INC_SPEED,          3,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
     {CONF_ACTION_CHANGE_MODE,        2,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_RESET,              2,LED_CLR_YELLOW, LED_CLR_NONE,   LED_ACTION_NONE},
     {CONF_ACTION_FACTORY_RESET,      4,LED_CLR_YELLOW,LED_CLR_NONE,   LED_ACTION_NONE}
 };
 
@@ -411,6 +412,7 @@ void changeOperatingMode(int inputOperatingState) {
     //do nothing
   } 
   else {
+    softwareReset();
   }
   operatingMode = inputOperatingState;
 }
@@ -723,6 +725,11 @@ void performOutputAction(int action)
     {
       //Change communication mode
       toggleCommunicationMode(true,false);
+      break;
+    }
+    case CONF_ACTION_RESET:
+    {
+      softwareReset();
       break;
     }
     case CONF_ACTION_FACTORY_RESET:
@@ -1475,4 +1482,23 @@ void performLedAction(ledStateStruct* args)
       break;
     }
   }
+}
+
+
+//***SOFTWARE RESET FUNCTION***//
+// Function   : softwareReset
+//
+// Description: This function initiates a software reset.
+//
+// Parameters :  none
+//
+// Return     : none
+//******************************************//
+void softwareReset() {
+  usbmouse.end();
+  gamepad.end();
+  btmouse.end();
+
+  NVIC_SystemReset();
+  delay(10);
 }

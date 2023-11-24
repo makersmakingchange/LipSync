@@ -55,7 +55,9 @@
 #define CONF_ACTION_DEC_SPEED 8                            // Decrease cursor movement speed
 #define CONF_ACTION_INC_SPEED 9                            // Increase cursor movement speed
 #define CONF_ACTION_CHANGE_MODE 10                         // Change communication mode
-#define CONF_ACTION_FACTORY_RESET 11                       // Factory Reset
+#define CONF_ACTION_START_MENU 11                          // Start display
+#define CONF_ACTION_RESET 12                               // Software Reset
+#define CONF_ACTION_FACTORY_RESET 13                       // Factory Reset
 
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
