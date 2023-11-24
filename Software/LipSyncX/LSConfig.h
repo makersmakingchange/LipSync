@@ -66,6 +66,16 @@
 #define CONF_BT_FEEDBACK_POLL_RATE 1000     //1s
 #define CONF_DEBUG_POLL_RATE 100            //100ms
 
+
+// Polling Timer IDs for each module
+#define CONF_TIMER_JOYSTICK 0
+#define CONF_TIMER_PRESSURE 1
+#define CONF_TIMER_INPUT 2
+#define CONF_TIMER_BLUETOOTH 3
+#define CONF_TIMER_DEBUG 4
+#define CONF_TIMER_SCROLL 5
+
+
 //Joystick values 
 #define CONF_JOY_SPEED_LEVEL_MIN 0
 #define CONF_JOY_SPEED_LEVEL_MAX 10

@@ -217,12 +217,12 @@ void setup()
   startupFeedback();                                            //Startup IBM LED Feedback 
 
   //Configure poll timer to perform each feature as a separate loop
-  pollTimerId[0] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, 0, joystickLoop);
-  pollTimerId[1] = pollTimer.setInterval(CONF_PRESSURE_POLL_RATE, 0, pressureLoop);
-  pollTimerId[2] = pollTimer.setInterval(CONF_INPUT_POLL_RATE, 0, inputLoop);
-  pollTimerId[3] = pollTimer.setInterval(CONF_BT_FEEDBACK_POLL_RATE, 0, btFeedbackLoop);
-  pollTimerId[4] = pollTimer.setInterval(CONF_DEBUG_POLL_RATE, 0, debugLoop);
-  pollTimerId[5] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, CONF_SCROLL_POLL_RATE, joystickLoop);
+  pollTimerId[CONF_TIMER_JOYSTICK] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, 0, joystickLoop);
+  pollTimerId[CONF_TIMER_PRESSURE] = pollTimer.setInterval(CONF_PRESSURE_POLL_RATE, 0, pressureLoop);
+  pollTimerId[CONF_TIMER_INPUT] = pollTimer.setInterval(CONF_INPUT_POLL_RATE, 0, inputLoop);
+  pollTimerId[CONF_TIMER_BLUETOOTH] = pollTimer.setInterval(CONF_BT_FEEDBACK_POLL_RATE, 0, btFeedbackLoop);
+  pollTimerId[CONF_TIMER_DEBUG] = pollTimer.setInterval(CONF_DEBUG_POLL_RATE, 0, debugLoop);
+  pollTimerId[CONF_TIMER_SCROLL] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, CONF_SCROLL_POLL_RATE, joystickLoop);
   
   enablePoll(false);                              //Enable it when the led IBM effect is complete 
 
@@ -240,9 +240,9 @@ void setup()
 //*********************************//
 void loop()
 {
-  ledStateTimer.run();
-  calibTimer.run();
-  pollTimer.run();
+  ledStateTimer.run();                                // Timer for lights
+  calibTimer.run();                                   // Timer for calibration measurements
+  pollTimer.run();                                    // Timer for normal joystick functions
   settingsEnabled=serialSettings(settingsEnabled); //Check to see if setting option is enabled in Lipsync
 }
 
@@ -259,16 +259,16 @@ void loop()
 void enablePoll(bool isEnabled){
   if(isEnabled){
     getDebugMode(false,false);
-    pollTimer.enable(1); 
-    pollTimer.enable(2);    
-    pollTimer.enable(3);  
+    pollTimer.enable(CONF_TIMER_PRESSURE); 
+    pollTimer.enable(CONF_TIMER_INPUT);    
+    pollTimer.enable(CONF_TIMER_BLUETOOTH);  
   } else {
-    pollTimer.disable(0);    
-    pollTimer.disable(1);
-    pollTimer.disable(2);
-    pollTimer.disable(3);  
-    pollTimer.disable(4); 
-    pollTimer.disable(5);
+    pollTimer.disable(CONF_TIMER_JOYSTICK);    
+    pollTimer.disable(CONF_TIMER_PRESSURE);
+    pollTimer.disable(CONF_TIMER_INPUT);
+    pollTimer.disable(CONF_TIMER_BLUETOOTH);  
+    pollTimer.disable(CONF_TIMER_DEBUG); 
+    pollTimer.disable(CONF_TIMER_SCROLL);
   }
 }
 
@@ -522,11 +522,11 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       setLedDefault();      
   }
   if(outputAction == CONF_ACTION_SCROLL){
-    pollTimer.enable(5);
-    pollTimer.disable(0);
+    pollTimer.enable(CONF_TIMER_SCROLL);
+    pollTimer.disable(CONF_TIMER_JOYSTICK);
   }else if (outputAction != CONF_ACTION_SCROLL){
-    pollTimer.enable(0);
-    pollTimer.disable(5);
+    pollTimer.enable(CONF_TIMER_JOYSTICK);
+    pollTimer.disable(CONF_TIMER_SCROLL);
   }
   //Loop over all possible outputs
   for (int actionIndex = 0; actionIndex < actionSize && canEvaluateAction && canOutputAction; actionIndex++)
@@ -913,8 +913,8 @@ void performJoystickCalibration(int* args)
     js.setMinimumRadius();                                                                                                      //Update the minimum cursor operating radius 
     setLedDefault();
     canOutputAction = true;
-    pollTimer.enable(0);                                                                                                        //Enable joystick data polling 
-    pollTimer.enable(5);                                                                                                        //Enable joystick data polling 
+    pollTimer.enable(CONF_TIMER_JOYSTICK);                                                                                      //Enable joystick data polling 
+    pollTimer.enable(CONF_TIMER_SCROLL);                                                                                        //Enable joystick data polling 
 
   }
 
@@ -1122,18 +1122,18 @@ void debugLoop(){
 //****************************************//
 void setDebugState(int inputDebugMode) {
   if (inputDebugMode==CONF_DEBUG_MODE_NONE) {
-    pollTimer.enable(0);                      //Enable joystick data polling 
-    pollTimer.disable(4);                     //Disable debug data polling 
-    pollTimer.enable(5);                      //Enable scroll data polling 
+    pollTimer.enable(CONF_TIMER_JOYSTICK);                  //Enable joystick data polling 
+    pollTimer.disable(CONF_TIMER_DEBUG);                    //Disable debug data polling 
+    pollTimer.enable(CONF_TIMER_SCROLL);                    //Enable scroll data polling 
 
   } 
   else if (inputDebugMode==CONF_DEBUG_MODE_JOYSTICK) {
-    pollTimer.disable(0);                     //Disable joystick data polling 
-    pollTimer.disable(5);                     //Disable scroll data polling 
-    pollTimer.enable(4);                      //Enable debug data polling 
+    pollTimer.disable(CONF_TIMER_JOYSTICK);                 //Disable joystick data polling 
+    pollTimer.disable(CONF_TIMER_SCROLL);                   //Disable scroll data polling 
+    pollTimer.enable(CONF_TIMER_DEBUG);                     //Enable debug data polling 
   }
   else {
-    pollTimer.enable(4);                      //Enable debug data polling 
+    pollTimer.enable(CONF_TIMER_DEBUG);                      //Enable debug data polling 
   }
 }
 
