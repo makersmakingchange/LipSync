@@ -174,7 +174,7 @@ LSPressure ps;                                       //Starts an instance of the
 
 LSOutput led;                                        //Starts an instance of the LSOutput LED object
 
-LSUSBMouse mouse;                                    //Starts an instance of the USB mouse object
+LSUSBMouse usbmouse;                                 //Starts an instance of the USB mouse object
 LSBLEMouse btmouse;                                  //Starts an instance of the BLE mouse object
 
 
@@ -475,7 +475,7 @@ void pressureLoop()
 //***RELEASE OUTPUT FUNCTION***//
 // Function   : releaseOutputAction 
 // 
-// Description: This function handles release of mouse hold actions.
+// Description: This function handles release of usbmouse hold actions.
 //
 // Parameters : void
 // 
@@ -484,9 +484,9 @@ void pressureLoop()
 void releaseOutputAction()
 {
   //Release left click if it's in drag mode and left mouse button is pressed.
-  if (outputAction == CONF_ACTION_DRAG && (mouse.isPressed(MOUSE_LEFT) || btmouse.isPressed(MOUSE_LEFT)))
+  if (outputAction == CONF_ACTION_DRAG && (usbmouse.isPressed(MOUSE_LEFT) || btmouse.isPressed(MOUSE_LEFT)))
   {
-    mouse.release(MOUSE_LEFT);
+    usbmouse.release(MOUSE_LEFT);
     btmouse.release(MOUSE_LEFT);
   }
   //Set new state of current output action 
@@ -691,7 +691,7 @@ void cursorLeftClick(void)
   //Serial.println("Left Click");
   if (comMode == CONF_COM_MODE_USB)
   {
-    mouse.click(MOUSE_LEFT);
+    usbmouse.click(MOUSE_LEFT);
   }
   else if (comMode == CONF_COM_MODE_BLE)
   {
@@ -713,7 +713,7 @@ void cursorRightClick(void)
   //Serial.println("Right Click");
   if (comMode == CONF_COM_MODE_USB)
   {
-    mouse.click(MOUSE_RIGHT);
+    usbmouse.click(MOUSE_RIGHT);
   }
   else if (comMode == CONF_COM_MODE_BLE)
   {
@@ -735,7 +735,7 @@ void cursorMiddleClick(void)
   //Serial.println("Middle Click");
   if (comMode == CONF_COM_MODE_USB)
   {
-    mouse.click(MOUSE_MIDDLE);
+    usbmouse.click(MOUSE_MIDDLE);
   }
   else if (comMode == CONF_COM_MODE_BLE)
   {
@@ -757,7 +757,7 @@ void cursorDrag(void)
   //Serial.println("Drag");
   if (comMode == CONF_COM_MODE_USB)
   {
-    mouse.press(MOUSE_LEFT);
+    usbmouse.press(MOUSE_LEFT);
   }
   else if (comMode == CONF_COM_MODE_BLE)
   {
@@ -991,7 +991,7 @@ void performJoystick(pointIntType inputPoint)
   //0 = None , 1 = USB , 2 = Wireless  
   if (comMode == CONF_COM_MODE_USB)
   {
-    (outputAction == CONF_ACTION_SCROLL) ? mouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : mouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration));
+    (outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : usbmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration));
 
   }
   else if (comMode == CONF_COM_MODE_BLE)
