@@ -296,8 +296,8 @@ void LSJoystick::setMagnetDirection(int magnetXDirection,int magnetYDirection) {
   setMagnetZDirection();
   
   //Evaluate joystick x and y final magnet directions
-  _joystickXDirection = _magnetZDirection * _magnetYDirection;
-  _joystickYDirection = _magnetZDirection * _magnetXDirection;
+  _joystickXDirection = _magnetZDirection * _magnetXDirection;
+  _joystickYDirection = -1 * _magnetZDirection * _magnetYDirection; // Flip y- axis due to flipped sensor
 }
 
 
@@ -440,7 +440,7 @@ void LSJoystick::evaluateInputCenter() {
 //*********************************//
 void LSJoystick::updateInputCenterBuffer() {
   Tlv493dSensor.updateData();
-  joystickCenterBuffer.pushElement({Tlv493dSensor.getY(), Tlv493dSensor.getX()});  
+  joystickCenterBuffer.pushElement({Tlv493dSensor.getX(), Tlv493dSensor.getY()});  
 }
 
 
@@ -456,7 +456,7 @@ void LSJoystick::updateInputCenterBuffer() {
 pointFloatType LSJoystick::getInputMax(int quad) {
   Tlv493dSensor.updateData();
   //Get new x and y reading
-  pointFloatType tempCalibrationPoint = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};
+  pointFloatType tempCalibrationPoint = {Tlv493dSensor.getX(), Tlv493dSensor.getY()};
 //  Serial.print("x:");
 //  Serial.print(tempCalibrationPoint.x);
 //  Serial.print("y:");
@@ -516,7 +516,7 @@ void LSJoystick::update() {
 
   Tlv493dSensor.updateData();
   //Get the new readings as a point
-  _rawPoint = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};   
+  _rawPoint = {Tlv493dSensor.getX(), Tlv493dSensor.getY()};   
   _skipInputChange = canSkipInputChange(_rawPoint);
   joystickRawBuffer.pushElement(_rawPoint);                  //Push raw points to joystickRawBuffer : DON'T MOVE THIS
 
@@ -683,7 +683,7 @@ pointIntType LSJoystick::processInputReading(pointFloatType inputPoint) {
   }
 
 
-  float thetaVal = atan2(centeredPoint.y, centeredPoint.x);         // Get the angel of the point
+  float thetaVal = atan2(centeredPoint.y, centeredPoint.x);         // Get the angle of the point
 
   //Find the limiting point on perimeter of circle
   limitPoint.x = sgn(centeredPoint.x) * abs(cos(thetaVal)*_inputRadius);
