@@ -3,7 +3,7 @@
 * Firmware: LipSync X
 * Developed by: MakersMakingChange
 * Version: Beta (23 November 2023) 
-  License: GPL v3.0 or later
+* License: GPL v3.0 or later
 
   Copyright (C) 2023 Neil Squire Society
   This program is free software: you can redistribute it and/or modify it under the terms of
@@ -829,7 +829,7 @@ void getJoystickCalibration(bool responseEnabled, bool apiEnabled) {
     calibrationPointArray[i] = mem.readPoint(CONF_SETTINGS_FILE, commandKey);
     js.setInputMax(i, calibrationPointArray[i]);
   }
-  js.setMinimumRadius();                                                                              ////Update the minimum cursor operating radius 
+  js.setMinimumRadius();                                                                              //Update the minimum cursor operating radius 
   printResponseFloatPointArray(responseEnabled, apiEnabled, true, 0, "CA,0", true, "", 5, ',', calibrationPointArray);
 
 }
