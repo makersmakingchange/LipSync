@@ -1,4 +1,3 @@
-
 /* 
 * File: LSOutput.h
 * Firmware: LipSync X
