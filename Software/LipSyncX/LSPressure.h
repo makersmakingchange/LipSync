@@ -22,6 +22,7 @@
 
 #include <Adafruit_LPS35HW.h>   // Tube pressure sensor
 #include <Adafruit_LPS2X.h>     // Ambient pressure sensor
+#include <Adafruit_Sensor.h>     // Generic sensor
 #define LPS22_I2CADDR 0x5C      // Modified LPS22 address
 
 #define PRESS_BUFF_SIZE 5       //The size of pressureBuffer
@@ -65,8 +66,10 @@ typedef struct {
 class LSPressure {
   private: 
     Adafruit_LPS35HW lps35hw = Adafruit_LPS35HW();        //Create an object of Adafruit_LPS35HW class
-    Adafruit_LPS22 lps22;                                 //Create an object of Adafruit_LPS2X class
-    Adafruit_Sensor *lps22_pressure = lps22.getPressureSensor(); // Retrieve pressure sensor from LPS22
+    Adafruit_LPS22 lps22;                               //Create an object of Adafruit_LPS2X class
+    sensors_event_t lps22_pressure;  
+    sensors_event_t lps22_temperature;                          
+    //Adafruit_Sensor *lps22_pressure = lps22.getPressureSensor(); // Retrieve pressure sensor from LPS22
     LSCircularBuffer <pressureStruct> pressureBuffer;   //Create a buffer of type pressureStruct to push pressure readings 
     LSCircularBuffer <inputStateStruct> sapBuffer;      //Create a buffer of type inputStateStruct to push sap states 
     int filterMode;                                     //Filter Mode : NONE or AVERAGE     
@@ -139,11 +142,18 @@ void LSPressure::begin() {
     Serial.println(F("Couldn't find LPS35HW chip"));
     //todo this should throw an error
   }
+  else{
+    if (USB_DEBUG){Serial.println("USBDEBUG: LPS35HW Found.");}
+  }
+
   //LPS22 Pressure sensor setup
   if (!lps22.begin_I2C(LPS22_I2CADDR)) {
     Serial.println(F("Couldn't find LPS22 chip"));
     //todo this should throw an error
   } 
+   else{
+    if (USB_DEBUG){Serial.println("USBDEBUG: LPS22 Found.");}
+  }
 
 
   setFilterMode(PRESS_FILTER_NONE);         //Set the default filter mode to none
@@ -255,13 +265,15 @@ float LSPressure::getCompPressure() {
   float tempRefVal = 0.00;
   float tempCompVal = 0.00;
 
+  
+
   //If pressure mode is differential  
   if(pressureMode==PRESS_MODE_DIFF){
     //Keep reading until we have a valid main and reference pressure values > 0.0
     do{     
       tempMainVal = lps35hw.readPressure();
-      lps22_pressure->getEvent(&pressure_event);
-      tempRefVal=pressure_event.pressure;
+      lps22.getEvent(&lps22_pressure,&lps22_temperature);
+      tempRefVal=lps22_pressure.pressure;
     } while (tempMainVal <= 0.00 || tempRefVal <= 0.00);
     
     tempCompVal = tempMainVal - tempRefVal;    //Calculate compensation value which is the difference between main and reference pressure 
@@ -276,6 +288,11 @@ float LSPressure::getCompPressure() {
     tempCompVal=0.00;                         //Set compensation value to zero
     refVal=tempMainVal;                       //Set the reference value which is the main pressure reading when no sip or puff is performed 
   }
+   else{
+    
+  }
+  if (USB_DEBUG) {Serial.print("USBDEBUG: tempCompVal: ");
+    Serial.println(tempCompVal);  }
   return tempCompVal;                         //Return compensation value
 }
 
@@ -374,8 +391,8 @@ void LSPressure::updatePressure() {
 
   //If pressure mode is differential  
   if(pressureMode==PRESS_MODE_DIFF) {
-    lps22_pressure->getEvent(&pressure_event); 
-    float tempRefVal = pressure_event.pressure;  //Set a temporary reference value to new reference pressure reading 
+    lps22.getEvent(&lps22_pressure, &lps22_temperature); 
+    float tempRefVal = lps22_pressure.pressure;  //Set a temporary reference value to new reference pressure reading 
     //Update compensation pressure value if reference pressure is changed using tolerance value 
     if(abs(refVal-tempRefVal)>=refTolVal && tempRefVal > 0.00){ 
         //compVal+=refVal-tempRefVal;                //Add the reference pressure change to the compensation value 
