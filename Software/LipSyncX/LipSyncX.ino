@@ -31,6 +31,9 @@
 #include "LSJoystick.h"
 #include "LSMemory.h"
 
+
+
+
 //Communication mode and debug mode variables
 int comMode;                                                                                                // 0 = None , 1 = USB , 2 = Wireless  
 int debugMode;                                                                                              // 0 = Debug mode is Off
@@ -98,6 +101,8 @@ const inputActionStruct buttonActionProperty[]{
     {CONF_ACTION_FACTORY_RESET,      INPUT_MAIN_STATE_S13_PRESSED, 3000,5000}
 };
 
+
+// Cursor acceleration structure
 const accStruct accProperty[]{
     {0, 1.0,  0,0},
     {1, 1.0,  0,0},
@@ -112,12 +117,11 @@ const accStruct accProperty[]{
     
 };
 
-//int inputButtonPinArray[] = { CONF_BUTTON1_PIN, CONF_BUTTON2_PIN, CONF_BUTTON3_PIN };
+
 int inputButtonPinArray[] = { CONF_BUTTON1_PIN, CONF_BUTTON2_PIN};
 int inputSwitchPinArray[] = { CONF_SWITCH1_PIN, CONF_SWITCH2_PIN, CONF_SWITCH3_PIN };
 
 //Pressure module variables
-
 pressureStruct pressureValues = { 0.0, 0.0, 0.0 };
 
 inputStateStruct sapActionState;
@@ -152,8 +156,6 @@ LSTimer<void> pollTimer;
 
 //General
 
-int scrollLevel = 0;
-
 int outputAction;
 bool canOutputAction = true;
 
@@ -164,7 +166,7 @@ bool settingsEnabled = false;                        //Serial input settings com
 LSMemory mem;
 
 LSInput ib(inputButtonPinArray, CONF_BUTTON_NUMBER);
-LSInput is(inputSwitchPinArray, CONF_SWITCH_NUMBER); //Starts an instance of the object
+LSInput is(inputSwitchPinArray, CONF_SWITCH_NUMBER); //Starts an instance of the input switch object
 
 LSJoystick js;                                       //Starts an instance of the LSJoystick object
 
@@ -177,6 +179,10 @@ LSBLEMouse btmouse;                                  //Starts an instance of the
 
 
 int acceleration = 0;
+int scrollLevel = 0;
+
+
+
 //***MICROCONTROLLER AND PERIPHERAL CONFIGURATION***//
 // Function   : setup 
 // 
@@ -200,7 +206,6 @@ void setup()
   
   initMemory();                                                 //Initialize Memory 
 
-  initAcceletaion();
   
   initLed();                                                    //Initialize LED Feedback 
 
@@ -212,6 +217,7 @@ void setup()
 
   initCommunicationMode();                                      //Initialize Communication Mode
 
+  initAcceleration();                                           //Initialize Cursor Acceleration
   initDebug();                                                  //Initialize Debug Mode operation 
 
   startupFeedback();                                            //Startup IBM LED Feedback 
@@ -309,11 +315,11 @@ void resetMemory()
 }
 
 //*********************************//
-// Acceletaion Functions
+// Acceleration Functions
 //*********************************//
 
 //***INITIALIZE ACCELERATION FUNCTION***//
-// Function   : initAcceletaion 
+// Function   : initAcceleration 
 // 
 // Description: This function initializes acceletaion 
 //
@@ -321,7 +327,7 @@ void resetMemory()
 // 
 // Return     : void 
 //****************************************//
-void initAcceletaion()
+void initAcceleration()
 {
 //  acceleration=getJoystickAcceleration(false,false);
 }
