@@ -1,6 +1,6 @@
 /*******************
   This is an exmaple of the OLED screen menu for the LipSyncX
-  Last edited: November 23, 2023
+  Last edited: November 28, 2023
  *******************/
 
 #include <SPI.h>
@@ -26,7 +26,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define CALIB_MENU  2
 #define MODE_MENU   3
 #define CURSOR_SP_MENU   4
-#define ADVANCED_MENU    5
+#define MORE_MENU    5
 #define BLUETOOTH_MENU   6
 
 
@@ -34,7 +34,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define CENTER_RESET_PAGE 11
 #define FULL_CALIB_PAGE   12
 
-//Advanced Menus
+//More Menus
 #define SOUND_MENU        51
 #define SIP_PUFF_MENU     52
 
@@ -67,20 +67,22 @@ bool buttonSelPrevPressed = false;
 bool buttonNextPrevPressed = false;
 
 int cursorStart = 0;
+int countMenuScroll = 0;
 
 int currentMenuLength;
 String *currentMenuText;
 String selectedText;
 
-String mainMenuText[5] = {"Exit Menu", "Calibrate", "Mode", "Cursor speed", "Advanced"};
+String mainMenuText[5] = {"Exit Menu", "Calibrate", "Mode", "Cursor speed", "More"};
 String exitConfirmText[4] = {"Exit", "settings?", "Confirm", "... Back"};
-String calibMenuText[4] = {"Center reset", "Full Calibration", "... Back"};
+String calibMenuText[3] = {"Center reset", "Full Calibration", "... Back"};
 String modeMenuText[4] = {"MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back"};
 String modeConfirmText[4] = {"Change", "mode?", "Confirm", "... Back"};
 String cursorSpMenuText[4] = {"  ", "Increase", "Decrease", "... Back"};
 String bluetoothMenuText[4] = {"Bluetooth:", "<>", "Turn <>", "... Back"};
-String advancedMenuText[2] = {"Sound", "Sip & Puff"};
+String moreMenuText[4] = {"Sound", "Sip & Puff", "... Back", "         "};
 String soundMenuText[4] = {"Sound:", "<>", "Turn <>", "... Back"};
+String sipPuffThreshMenuText[4] = {"Sip Threshold", "Puff Threshold", "... Back"};
 
 // Number of selectable options in each menu
 const int mainMenuLen = 5;
@@ -89,8 +91,9 @@ const int calibMenuLen = 3;
 const int modeMenuLen = 4;
 const int cursorSpMenuLen = 3;
 const int bluetoothMenuLen = 2;
-const int advancedMenuLen = 2;
+const int moreMenuLen = 3;
 const int soundMenuLen = 2;
+const int sipPuffThreshMenuLen = 3;
 
 void setup() {
   pinMode(PIN_BUTTON_SEL, INPUT_PULLUP);
@@ -127,6 +130,7 @@ void setup() {
   }
   
   display.clearDisplay();
+  display.setTextWrap(false);
   display.display();
 
   //Start on main menu
@@ -151,19 +155,22 @@ void loop() {
 
 }
 
-void displayMenu() {
-
+void initDisplay() {
   display.clearDisplay();
 
   display.setTextSize(2);                                   // 2x scale text
   display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
 
-  display.setTextWrap(false);
   display.setCursor(0, 0);
+}
+
+void displayMenu() {
+
+  initDisplay();
 
   for (int i = 0; i < TEXT_ROWS; i++) {
     if (i >= cursorStart){
-      display.print(" "), display.println(currentMenuText[i]);
+      display.print(" "), display.println(currentMenuText[i+countMenuScroll]);
     } else {
       display.println(currentMenuText[i]);
     }
@@ -171,11 +178,17 @@ void displayMenu() {
 
   display.display();
 
-  currentSelection = 0;
+  //currentSelection = 0;
   displayCursor();
 }
 
 void displayCursor(void) {
+  int cursorPos;
+  if (currentSelection + cursorStart > TEXT_ROWS-1){
+    cursorPos = TEXT_ROWS-1;
+  } else {
+    cursorPos = currentSelection;
+  }
 
   display.setTextSize(2);                                   // 2x scale text
   display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
@@ -183,7 +196,7 @@ void displayCursor(void) {
   // Show cursor on text line of selection index, erase previous cursor
   display.setCursor(0, 16 * cursorStart);  
   for (int i = 0; i < currentMenuLength; i++) {    
-    if (i == currentSelection) {
+    if (i == cursorPos) {
       display.println(">");
     } else {
       display.println(" ");
@@ -216,7 +229,13 @@ void nextSelection(void) {
   currentSelection++;
   if (currentSelection >= currentMenuLength) {   
     currentSelection = 0;
-  }
+    countMenuScroll = 0;
+    //cursorPos = currentSelection;
+    displayMenu();
+  } else if (currentSelection + cursorStart > TEXT_ROWS-1){
+    countMenuScroll++;
+    displayMenu();
+  } 
 
   displayCursor();
 
@@ -277,6 +296,7 @@ void inputSelect(void){
   if (buttonSelPressed){
     //some action, long press timer?
   } else if (buttonSelPrevPressed){
+    countMenuScroll = 0;
     switch (currentMenu) {
       case MAIN_MENU:
         currentMenu = currentSelection+1;
@@ -296,8 +316,8 @@ void inputSelect(void){
           case CURSOR_SP_MENU:
             cursorSpeedMenu();
             break;
-          case ADVANCED_MENU:
-            advancedMenu();
+          case MORE_MENU:
+            moreMenu();
             break;
           case BLUETOOTH_MENU:
             bluetoothMenu();
@@ -353,13 +373,13 @@ void inputSelect(void){
             break;
         }
         break;
-      case ADVANCED_MENU:
+      case MORE_MENU:
         if (currentSelection == 0){
-          currentMenu = CENTER_RESET_PAGE;
-          centerResetPage();
+          currentMenu = SOUND_MENU;
+          soundMenu();
         } else if (currentSelection == 1){
-          currentMenu = FULL_CALIB_PAGE;
-          fullCalibrationPage();
+          currentMenu = SIP_PUFF_MENU;
+          sipPuffThreshMenu();
         } else if (currentSelection == 2){
           currentMenu = MAIN_MENU;
           mainMenu();
@@ -388,7 +408,20 @@ void inputSelect(void){
             currentMenu = MAIN_MENU;
             mainMenu();
             break;
-        }
+          }
+        case SIP_PUFF_MENU:
+         switch (currentSelection){
+          case 0:
+            //add action
+            break;
+          case 1:
+            //add action
+            break;
+          case 2:
+            currentMenu = MAIN_MENU;
+            mainMenu();
+            break;
+          }
     }
   }
 }
@@ -432,8 +465,7 @@ void exitConfirmMenu(){
     mainMenu();
   } else {
     //some function to exit
-    display.clearDisplay();
-    display.setCursor(0,0);
+    initDisplay();
     display.println("Exiting");
     display.display();
     delay(2000);
@@ -461,6 +493,7 @@ void modeMenu(void) {
   currentMenuLength = modeMenuLen;
   currentMenuText = modeMenuText;
   cursorStart = 0;
+  currentSelection = 0;
 
   displayMenu();
 
@@ -522,8 +555,7 @@ void changeMode(){
       break;
   }
 
-  display.clearDisplay();
-  display.setCursor(0,0);
+  initDisplay();
   display.println("Resetting");
   display.println("device");
   display.display();
@@ -569,31 +601,27 @@ void bluetoothMenu(void) {
   currentMenuLength = bluetoothMenuLen;
   currentMenuText = bluetoothMenuText;
   cursorStart = 2;
+  currentSelection = 0;
 
   displayMenu();
 
 }
 
-void advancedMenu(){
-  currentMenu = ADVANCED_MENU;
+void moreMenu(){
+  currentMenu = MORE_MENU;
 
-    if (prevMenu != currentMenu) {
-    currentMenuLength = advancedMenuLen;
-    currentMenuText = advancedMenuText;
-    cursorStart = 0;
+  currentMenuLength = moreMenuLen;
+  currentMenuText = moreMenuText;
+  cursorStart = 0;
+  currentSelection = 0;
 
-    displayMenu();
-  }
+  displayMenu();
+
 }
 
 // ----- CALIBRATION PAGES ----- //
 void centerResetPage(void){
-  display.clearDisplay();
-  display.setTextSize(2);                                   // 2x scale text
-  display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
-  //display.setTextWrap(true);
-  display.stopscroll();
-  display.setCursor(0,0);
+  initDisplay();
 
   display.println("Center");
   display.println("reset, do");
@@ -622,11 +650,7 @@ void centerResetPage(void){
 }
 
 void fullCalibrationPage(void){
-  display.clearDisplay();
-  display.setTextSize(2);                                   // 2x scale text
-  display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
-  display.stopscroll();
-  display.setCursor(0,0);
+  initDisplay();
 
   display.println("Full");
   display.println("Calibration");
@@ -642,7 +666,7 @@ void centerReset(void){
   //function to actually perform center reset
 }
 
-// ----- ADVANCED SETTINGS MENUS ----- //
+// ----- MORE SETTINGS MENUS ----- //
 
 void soundMenu(){
   currentMenu = SOUND_MENU;
@@ -658,6 +682,18 @@ void soundMenu(){
   currentMenuLength = soundMenuLen;
   currentMenuText = soundMenuText;
   cursorStart = 2;
+  currentSelection = 0;
+
+  displayMenu();
+}
+
+void sipPuffThreshMenu(){
+  currentMenu = SIP_PUFF_MENU;
+
+  currentMenuLength = sipPuffThreshMenuLen;
+  currentMenuText = sipPuffThreshMenuText;
+  cursorStart = 0;
+  currentSelection = 0;
 
   displayMenu();
 }
