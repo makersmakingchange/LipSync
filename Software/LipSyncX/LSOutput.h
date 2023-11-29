@@ -20,10 +20,11 @@
 #ifndef _LSOUTPUT_H
 #define _LSOUTPUT_H
 
-#include <Adafruit_NeoPixel.h>
+//#include <Adafruit_NeoPixel.h>
 
 //#define OUTPUT_RGB_LED_PIN A1 //Output pin for neopixel
-#define OUTPUT_RGB_LED_NUM 0  //Number of leds
+#define OUTPUT_MONO_LED_NUM 2  // Number of monocolor leds
+#define OUTPUT_RGB_LED_NUM 1   //Number of RGB leds
 
 //Led color code
 #define LED_CLR_NONE 0
@@ -50,55 +51,56 @@
 
 
 struct rgbStruct {
-    int r;    // red value 0 to 255
-    int g;   // green value
-    int b;   // blue value
+  int r;  // red value 0 to 255
+  int g;  // green value
+  int b;  // blue value
 };
 
-//Color structure 
-typedef struct { 
+//Color structure
+typedef struct {
   uint8_t colorNumber;
   String colorName;
   rgbStruct colorCode;
 } colorStruct;
 
-//Color properties 
-const colorStruct colorProperty[] {
-    {LED_CLR_NONE,"None",{0,0,0}},
-    {LED_CLR_BLUE,"Blue",{0,0,60}},
-    {LED_CLR_PURPLE,"Purple",{50,0,128}},
-    {LED_CLR_MAGENTA,"Magenta",{255,0,255}},       
-    {LED_CLR_PINK,"Pink",{60,0,50}},   
-    {LED_CLR_RED,"Red",{60,0,0}},
-    {LED_CLR_ORANGE,"Orange",{60,20,0}},
-    {LED_CLR_YELLOW,"Yellow",{50,60,0}}, 
-    {LED_CLR_GREEN,"Green",{0,60,0}},
-    {LED_CLR_TEAL,"Teal",{0,128,128}},
-    {LED_CLR_WHITE,"White",{255,255,255}}
-};   
+//Color properties
+const colorStruct colorProperty[]{
+  { LED_CLR_NONE, "None", { 0, 0, 0 } },
+  { LED_CLR_BLUE, "Blue", { 0, 0, 60 } },
+  { LED_CLR_PURPLE, "Purple", { 50, 0, 128 } },
+  { LED_CLR_MAGENTA, "Magenta", { 255, 0, 255 } },
+  { LED_CLR_PINK, "Pink", { 60, 0, 50 } },
+  { LED_CLR_RED, "Red", { 60, 0, 0 } },
+  { LED_CLR_ORANGE, "Orange", { 60, 20, 0 } },
+  { LED_CLR_YELLOW, "Yellow", { 50, 60, 0 } },
+  { LED_CLR_GREEN, "Green", { 0, 60, 0 } },
+  { LED_CLR_TEAL, "Teal", { 0, 128, 128 } },
+  { LED_CLR_WHITE, "White", { 255, 255, 255 } }
+};
 
 
 class LSOutput {
-  private:
+private:
   int ledBrightness;
 
-  public:
-    LSOutput();
-    void begin();   
-    void clearLedAll();                                  
-    void clearLed(int ledNumber);
-    uint32_t getLedColor(int ledNumber);
-    uint8_t getLedBrightness();
-    void setLedBrightness(int ledBrightness); 
-    void setLedColor(int ledNumber, int ledColorNumber, int ledBrightness); 
+public:
+  LSOutput();
+  void begin();
+  void clearLedAll();
+  void clearLed(int ledNumber);
+  uint32_t getLedColor(int ledNumber);
+  uint8_t getLedBrightness();
+  void setLedBrightness(int ledBrightness);
+  void setLedColor(int ledNumber, int ledColorNumber, int ledBrightness);
+  void show();
 
-
+private:
+  uint8_t _LedBrightness = 255;
 };
 
-    
+
 
 LSOutput::LSOutput() {
-
 }
 
 void LSOutput::begin() {
@@ -107,26 +109,31 @@ void LSOutput::begin() {
   pinMode(CONF_LED_MOUSE_PIN, OUTPUT);
   pinMode(CONF_LED_GAMEPAD_PIN, OUTPUT);
 
- // Microcontroller LED
+  // Microcontroller LED
   pinMode(LED_RED, OUTPUT);
   pinMode(LED_GREEN, OUTPUT);
-  pinMode(LED_BLUE, OUTPUT); 
+  pinMode(LED_BLUE, OUTPUT);
 
   //ledPixels.begin();
-  //clearLedAll();
+  clearLedAll();
 }
 
 
 //***CLEAR ALL RGB LED FUNCTION***//
 
-void LSOutput::clearLedAll() {
-  //clearLed(OUTPUT_RGB_LED_NUM+1);
+void LSOutput::clearLedAll() { // turn off all LEDs
+  digitalWrite(CONF_LED_MOUSE_PIN, LOW);
+  digitalWrite(CONF_LED_GAMEPAD_PIN, LOW);
+
+  digitalWrite(LED_RED, HIGH);
+  digitalWrite(LED_GREEN, HIGH);
+  digitalWrite(LED_BLUE, HIGH);
 }
 
 //***CLEAR RGB LED FUNCTION***//
 
 void LSOutput::clearLed(int ledNumber) {
-  //setLedColor(ledNumber,LED_CLR_NONE,255);
+  setLedColor(ledNumber, LED_CLR_NONE, 255);
 }
 
 
@@ -135,18 +142,17 @@ void LSOutput::clearLed(int ledNumber) {
 uint32_t LSOutput::getLedColor(int ledNumber) {
 
   //uint32_t colorValue = ledPixels.getPixelColor(ledNumber-1);
-  
+
   return 0;
   //return colorValue;
-
 }
 
 
 //***GET RGB LED BRIGHTNESS FUNCTION***//
 
 uint8_t LSOutput::getLedBrightness() {
-  return 0;
-//  return (ledPixels.getBrightness());
+  return _LedBrightness;
+  //  return (ledPixels.getBrightness());
 }
 
 
@@ -154,6 +160,9 @@ uint8_t LSOutput::getLedBrightness() {
 //***SET RGB LED BRIGHTNESS FUNCTION***//
 
 void LSOutput::setLedBrightness(int ledBrightness) {
+  _LedBrightness = ledBrightness;
+  show();
+
   // ledPixels.setBrightness(ledBrightness);
   // ledPixels.show();
 }
@@ -162,20 +171,66 @@ void LSOutput::setLedBrightness(int ledBrightness) {
 //***SET RGB LED COLOR FUNCTION***//
 
 void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness) {
-  
-    // if(ledNumber>=1 && ledNumber <=OUTPUT_RGB_LED_NUM) {
-    //   ledPixels.setPixelColor(ledNumber-1, ledPixels.Color(colorProperty[ledColorNumber].colorCode.g,colorProperty[ledColorNumber].colorCode.r,colorProperty[ledColorNumber].colorCode.b));
-    // }
-    // else if (ledNumber==OUTPUT_RGB_LED_NUM+1) {
-    //   for (int i = 0; i < OUTPUT_RGB_LED_NUM; i++) {
-    //     ledPixels.setPixelColor(i, ledPixels.Color(colorProperty[ledColorNumber].colorCode.g,colorProperty[ledColorNumber].colorCode.r,colorProperty[ledColorNumber].colorCode.b));            
-    //   }
-    // }
-    // ledPixels.setBrightness(ledBrightness);
-    // ledPixels.show();
+
+  int r = colorProperty[ledColorNumber].colorCode.r;
+  int g = colorProperty[ledColorNumber].colorCode.g;
+  int b = colorProperty[ledColorNumber].colorCode.b;
+
+  switch (ledNumber) {
+    case CONF_LED_LEFT:
+      {
+        if (r > 0 || g > 0 || b > 0) {
+          analogWrite(CONF_LED_MOUSE_PIN, _LedBrightness);
+        } else {
+          digitalWrite(CONF_LED_MOUSE_PIN, LOW);
+        }
+
+
+        break;
+      }
+    case CONF_LED_MIDDLE:
+      {
+        break;
+      }
+    case CONF_LED_RIGHT:
+      {
+        if (r > 0 || g > 0 || b > 0) {
+          analogWrite(CONF_LED_GAMEPAD_PIN, _LedBrightness);
+        } else {
+          digitalWrite(CONF_LED_GAMEPAD_PIN, LOW);
+        }
+        break;
+      }
+    case CONF_LED_MICRO:
+      {
+        analogWrite(LED_RED, 255 - r);
+        analogWrite(LED_GREEN, 255 - g);
+        analogWrite(LED_BLUE, 255 - b);
+      }
+
+      case CONF_LED_ALL:
+       setLedColor(CONF_LED_LEFT,ledColorNumber,ledBrightness);
+       setLedColor(CONF_LED_MIDDLE,ledColorNumber,ledBrightness);
+       setLedColor(CONF_LED_RIGHT,ledColorNumber,ledBrightness);
+       setLedColor(CONF_LED_MICRO,ledColorNumber,ledBrightness);
+       break;
+
+  }  //end switch
+
+
+  // if(ledNumber>=1 && ledNumber <=OUTPUT_RGB_LED_NUM) {
+  //   ledPixels.setPixelColor(ledNumber-1, ledPixels.Color(colorProperty[ledColorNumber].colorCode.g,colorProperty[ledColorNumber].colorCode.r,colorProperty[ledColorNumber].colorCode.b));
+  // }
+  // else if (ledNumber==OUTPUT_RGB_LED_NUM+1) { //if index is more than number of leds, turn all leds the same color
+  //   for (int i = 0; i < OUTPUT_RGB_LED_NUM; i++) {
+  //     ledPixels.setPixelColor(i, ledPixels.Color(colorProperty[ledColorNumber].colorCode.g,colorProperty[ledColorNumber].colorCode.r,colorProperty[ledColorNumber].colorCode.b));
+  //   }
+  // }
+  // ledPixels.setBrightness(ledBrightness);
+  // ledPixels.show();
 }
 
 
 
 
-#endif 
+#endif
