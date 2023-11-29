@@ -32,8 +32,6 @@
 #include "LSMemory.h"
 
 
-
-
 //Communication mode and debug mode variables
 int comMode;                                                                                                // 0 = None , 1 = USB , 2 = Wireless  
 int operatingMode;                                                                                          // 0 = None, 1 = Mouse, 2 = Wireless, 3 = Gamepad
@@ -50,23 +48,40 @@ bool btIsConnected = false;
 bool ledActionEnabled = false;
 
 //LED Action for all available output actions 
+// const ledActionStruct ledActionProperty[]{
+//     {CONF_ACTION_NOTHING,            CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE}, // ledOutputActionNumber, ledNumber, ledStartColor, ledEndColor, ledEndAction
+//     {CONF_ACTION_LEFT_CLICK,         CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_RED,    LED_ACTION_NONE},
+//     {CONF_ACTION_RIGHT_CLICK,        CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_RED,    LED_ACTION_NONE},
+//     {CONF_ACTION_DRAG,               CONF_LED_LEFT,     LED_CLR_RED,    LED_CLR_NONE,   LED_ACTION_ON},
+//     {CONF_ACTION_SCROLL,             CONF_LED_RIGHT,    LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_ON},
+//     {CONF_ACTION_CURSOR_CENTER,      CONF_LED_MICRO,    LED_CLR_PURPLE, LED_CLR_ORANGE,  LED_ACTION_ON},
+//     {CONF_ACTION_CURSOR_CALIBRATION, CONF_LED_MICRO,    LED_CLR_GREEN,  LED_CLR_NONE,   LED_ACTION_ON},
+//     {CONF_ACTION_MIDDLE_CLICK,       CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
+//     {CONF_ACTION_DEC_SPEED,          CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
+//     {CONF_ACTION_INC_SPEED,          CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
+//     {CONF_ACTION_CHANGE_MODE,        CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
+//     {CONF_ACTION_RESET,              CONF_LED_MICRO,    LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_ON},
+//     {CONF_ACTION_FACTORY_RESET,      CONF_LED_MICRO,    LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_BLINK}
+// };
+
+//LED Action for all available output actions. This maps what happens with the lights when different actions are triggered.
 const ledActionStruct ledActionProperty[]{
-    {CONF_ACTION_NOTHING,            1,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_LEFT_CLICK,         1,LED_CLR_NONE,  LED_CLR_MAGENTA,LED_ACTION_BLINK},
-    {CONF_ACTION_RIGHT_CLICK,        3,LED_CLR_NONE,  LED_CLR_MAGENTA,LED_ACTION_BLINK},
-    {CONF_ACTION_DRAG,               1,LED_CLR_YELLOW,LED_CLR_MAGENTA,LED_ACTION_ON},
-    {CONF_ACTION_SCROLL,             3,LED_CLR_YELLOW,LED_CLR_MAGENTA,LED_ACTION_ON},
-    {CONF_ACTION_CURSOR_CENTER,      2,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_CURSOR_CALIBRATION, 4,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_MIDDLE_CLICK,       2,LED_CLR_NONE,  LED_CLR_MAGENTA,LED_ACTION_BLINK},
-    {CONF_ACTION_DEC_SPEED,          1,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_INC_SPEED,          3,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_CHANGE_MODE,        2,LED_CLR_NONE,  LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_RESET,              2,LED_CLR_YELLOW, LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_FACTORY_RESET,      4,LED_CLR_YELLOW,LED_CLR_NONE,   LED_ACTION_NONE}
+    {CONF_ACTION_NOTHING,            CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE}, // ledOutputActionNumber, ledNumber, ledStartColor, ledEndColor, ledEndAction
+    {CONF_ACTION_LEFT_CLICK,         CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_RED,    LED_ACTION_NONE},
+    {CONF_ACTION_RIGHT_CLICK,        CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_RED,    LED_ACTION_NONE},
+    {CONF_ACTION_DRAG,               CONF_LED_LEFT,     LED_CLR_RED,    LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_SCROLL,             CONF_LED_RIGHT,    LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_NONE},
+    {CONF_ACTION_CURSOR_CENTER,      CONF_LED_MICRO,    LED_CLR_PURPLE, LED_CLR_ORANGE,  LED_ACTION_NONE},
+    {CONF_ACTION_CURSOR_CALIBRATION, CONF_LED_MICRO,    LED_CLR_GREEN,  LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_MIDDLE_CLICK,       CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_DEC_SPEED,          CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_INC_SPEED,          CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_CHANGE_MODE,        CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_RESET,              CONF_LED_MICRO,    LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_NONE},
+    {CONF_ACTION_FACTORY_RESET,      CONF_LED_MICRO,    LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_NONE}
 };
 
-ledStateStruct* ledCurrentState = new ledStateStruct;
+ledStateStruct* ledCurrentState = new ledStateStruct; //pointer to LED current state structure
 
 int ledTimerId[3];
 
@@ -167,8 +182,8 @@ bool settingsEnabled = false;                        //Serial input settings com
 
 LSMemory mem;
 
-LSInput ib(inputButtonPinArray, CONF_BUTTON_NUMBER);
-LSInput is(inputSwitchPinArray, CONF_SWITCH_NUMBER); //Starts an instance of the input switch object
+LSInput ib(inputButtonPinArray, CONF_BUTTON_NUMBER); // Instance of input button object (tactile buttons)
+LSInput is(inputSwitchPinArray, CONF_SWITCH_NUMBER); //Starts an instance of the input switch object (external switches)
 
 LSJoystick js;                                       //Starts an instance of the LSJoystick object
 
@@ -179,7 +194,6 @@ LSOutput led;                                        //Starts an instance of the
 LSUSBMouse usbmouse;                                 //Starts an instance of the USB mouse object
 LSBLEMouse btmouse;                                  //Starts an instance of the BLE mouse object
 LSUSBGamepad gamepad;                                //Create an instance of the USB gamepad object
-
 
 int acceleration = 0;
 int scrollLevel = 0;
@@ -198,40 +212,32 @@ int scrollLevel = 0;
 void setup()
 {
   Serial.begin(115200);
-  //while (!TinyUSBDevice.mounted())
-  //while (!Serial) { delay(10); }
 
-  delay(1000);                                                  //TO BE REMOVED 
+  initLed();                                                   //Initialize LED Feedback 
+  ledWaitFeedback();
   
   initMemory();                                                 //Initialize Memory 
-
   
-  // Read operating mode from memory
   initOperatingMode();                                          //Initialize Operating Mode
 
-
-  if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing LEDs");  }
-  initLed();                                                    //Initialize LED Feedback 
-
-if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing Sip and Puff");  }
-  initSipAndPuff();                                             //Initialize Sip And Puff 
-
-if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing Input");  }
-  initInput();                                                  //Initialize input buttons and input switches 
-
-if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing Joystick");  }
-  initJoystick();                                               //Initialize Joystick 
-
-if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing Communication Mode");  }
   initCommunicationMode();                                      //Initialize Communication Mode
 
-if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing Acceleration");  }
+   //while (!TinyUSBDevice.mounted())
+ while (!Serial) { delay(10); }                                // Wait for serial connection to proceed
+
+  initSipAndPuff();                                             //Initialize Sip And Puff 
+
+  initInput();                                                  //Initialize input buttons and input switches 
+
+  initJoystick();                                               //Initialize Joystick 
+
   initAcceleration();                                           //Initialize Cursor Acceleration
 
-if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing Debug");  }
   initDebug();                                                  //Initialize Debug Mode operation 
+ 
+  ledReadyFeedback();
 
-  startupFeedback();                                            //Startup IBM LED Feedback 
+  //startupFeedback();                                            //Startup LED Feedback 
 
   //Configure poll timer to perform each feature as a separate loop
   pollTimerId[CONF_TIMER_JOYSTICK] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, 0, joystickLoop);
@@ -241,8 +247,12 @@ if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing Debug");  }
   pollTimerId[CONF_TIMER_DEBUG] = pollTimer.setInterval(CONF_DEBUG_POLL_RATE, 0, debugLoop);
   pollTimerId[CONF_TIMER_SCROLL] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, CONF_SCROLL_POLL_RATE, joystickLoop);
   
-  enablePoll(false);                              //Enable it when the led IBM effect is complete 
+  enablePoll(true);
+  ledActionEnabled = true;  
 
+  if (USB_DEBUG) { Serial.print("USBDEBUG: comMode: "); Serial.println(comMode);  } 
+  if (USB_DEBUG) { Serial.print("USBDEBUG: operatingMode: "); Serial.println(operatingMode);  } 
+  
 } //end setup
 
 
@@ -258,8 +268,11 @@ if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing Debug");  }
 void loop()
 {
   ledStateTimer.run();                                // Timer for lights
+  
   calibTimer.run();                                   // Timer for calibration measurements
+  
   pollTimer.run();                                    // Timer for normal joystick functions
+
   settingsEnabled=serialSettings(settingsEnabled); //Check to see if setting option is enabled in Lipsync
 }
 
@@ -340,6 +353,7 @@ void resetMemory()
 //****************************************//
 void initAcceleration()
 {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Acceleration");  }
 //  acceleration=getJoystickAcceleration(false,false);
 }
 
@@ -359,6 +373,7 @@ void initAcceleration()
 //****************************************//
 void initCommunicationMode()
 {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Communication Mode"); }
   comMode = getCommunicationMode(false,false);
 
 }
@@ -382,18 +397,23 @@ void initCommunicationMode()
 //****************************************//
 void initOperatingMode() {
 
-  operatingMode = getOperatingMode(true,false); // retrieve operating mode from memory 
+  //operatingMode = getOperatingMode(true,false); // retrieve operating mode from memory 
+  operatingMode = mem.readInt(CONF_SETTINGS_FILE, "OM");
 
-  if (operatingMode==CONF_OPERATING_MODE_MOUSE) {
-    usbmouse.begin();
+   if (operatingMode==CONF_OPERATING_MODE_MOUSE) {
+    usbmouse.begin();    
   } 
   else if (operatingMode==CONF_OPERATING_MODE_GAMEPAD) {
     gamepad.begin();
   }
-  else {
+  else if (operatingMode==CONF_OPERATING_MODE_BTMOUSE) {
+    btmouse.begin();
+  }
+  else
+  {
     
   }
-    btmouse.begin();
+    
 }
 
 
@@ -434,7 +454,7 @@ void changeOperatingMode(int inputOperatingState) {
 //****************************************//
 void initInput()
 {
-
+  //if (USB_DEBUG) {    Serial.println("USBDEBUG: Initializing Input");  }
   ib.begin();                                                                     //Begin input buttons    
   is.begin();                                                                     //Begin input switches  
   buttonActionSize = sizeof(buttonActionProperty) / sizeof(inputActionStruct);    //Size of total available input button actions
@@ -454,6 +474,8 @@ void initInput()
 //****************************************//
 void inputLoop()
 {
+  
+  //if (USB_DEBUG) { Serial.println("USBDEBUG: inputLoop");  } 
   //Request new values
   ib.update();
   is.update(); 
@@ -483,6 +505,7 @@ void inputLoop()
 //****************************************//
 void initSipAndPuff()
 {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Sip and Puff");  }
   ps.begin();                                                                     //Begin sip and puff 
   getPressureMode(true,false);                                                    //Get the pressure mode stored in flash memory ( 1 = Absolute , 2 = Differential )
   getPressureThreshold(true,false);                                               //Get sip and puff pressure thresholds stored in flash memory 
@@ -526,7 +549,7 @@ unsigned long getActionMaxTime(int actionSize,const inputActionStruct actionProp
 //****************************************//
 void pressureLoop()
 {
-
+  //if (USB_DEBUG) { Serial.println("USBDEBUG: pressureLoop()");  } 
   ps.update(); //Request new pressure difference from sensor and push it to array
 
   pressureValues = ps.getAllPressure(); //Read the pressure object (can be last value from array, average or other algorithms)
@@ -616,11 +639,11 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       setLedDefault();
       //Set Led state 
       setLedState(ledActionProperty[tempActionIndex].ledEndAction, 
-      ledActionProperty[tempActionIndex].ledEndColor, 
-      ledActionProperty[tempActionIndex].ledNumber, 
-      CONF_INPUT_LED_BLINK, 
-      CONF_INPUT_LED_DELAY, 
-      CONF_LED_BRIGHTNESS);
+                  ledActionProperty[tempActionIndex].ledEndColor, 
+                  ledActionProperty[tempActionIndex].ledNumber, 
+                  CONF_INPUT_LED_BLINK, 
+                  CONF_INPUT_LED_DELAY, 
+                  CONF_LED_BRIGHTNESS);
       outputAction = tempActionIndex;
 
       //Perform led action 
@@ -642,11 +665,11 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       setLedDefault();
       //Set Led state 
       setLedState(LED_ACTION_ON, 
-      ledActionProperty[tempActionIndex].ledStartColor, 
-      ledActionProperty[tempActionIndex].ledNumber, 
-      0, 
-      0, 
-      CONF_LED_BRIGHTNESS);
+                  ledActionProperty[tempActionIndex].ledStartColor, 
+                  ledActionProperty[tempActionIndex].ledNumber, 
+                  0,  //number of blinks
+                  0,  //blink time
+                  CONF_LED_BRIGHTNESS); //brightness
       //Perform led action 
       performLedAction(ledCurrentState);
 
@@ -866,6 +889,7 @@ void cursorScroll(void)
 //****************************************//
 void initJoystick()
 {
+  if (USB_DEBUG)   {    Serial.println("USBDEBUG: Initializing Joystick");  }
   js.begin();                                                               //Begin joystick 
   js.setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_INVERSE);       //Set x and y magnet direction 
   getJoystickDeadZone(true,false);                                          //Get joystick deadzone stored in flash memory 
@@ -1040,7 +1064,7 @@ void performJoystickCalibrationStep(int* args)
 //****************************************//
 void joystickLoop()
 {
-
+  //if (USB_DEBUG) { Serial.println("USBDEBUG: joystickLoop");  } 
   js.update();                                                        //Request new values
 
   pointIntType joyOutPoint = js.getXYOut();                           //Read the filtered values
@@ -1137,6 +1161,7 @@ int accelerationModifier(const int cursorValue, const int cursorMaxValue, const 
 //****************************************//
 void initDebug()
 {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Debug");  }
   debugMode = getDebugMode(false, false);                                   //Get debug mode number stored in flash memory 
   setDebugState(debugMode);                                                 //Set debug operation state based on the debug mode
 }
@@ -1151,6 +1176,9 @@ void initDebug()
 // Return     : void 
 //****************************************//
 void debugLoop(){
+
+
+  //if (USB_DEBUG) { Serial.println("USBDEBUG: debugLoop");  } 
   //Debug mode is off if the debug mode is #0
   if(debugMode==CONF_DEBUG_MODE_JOYSTICK){                   //Debug #1
     js.update(); //Request new values from joystick class
@@ -1163,9 +1191,9 @@ void debugLoop(){
   else if(debugMode==CONF_DEBUG_MODE_PRESSURE){              //Debug #2
     //ps.update(); //Request new pressure difference from sensor and push it to array
     float debugPressureArray[3];
-    debugPressureArray[0] = ps.getMainPressure();  //Read the main pressure 
-    debugPressureArray[1] = ps.getRefPressure();   //Read the ref pressure
-    debugPressureArray[2] = ps.getDiffPressure();  //Read the diff pressure
+    debugPressureArray[0] = ps.getSapPressureAbs();  //Read the main pressure 
+    debugPressureArray[1] = ps.getAmbientPressure();   //Read the ref pressure
+    debugPressureArray[2] = ps.getSapPressure();  //Read the diff pressure
     printResponseFloatArray(true,true,true,0,"DEBUG,2",true,"", 3, ',', debugPressureArray);    
   }
   else if(debugMode==CONF_DEBUG_MODE_BUTTON){                //Debug #3
@@ -1232,9 +1260,47 @@ void setDebugState(int inputDebugMode) {
 // Return     : void 
 //****************************************//
 void initLed()
-{
+{ 
+  if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing LEDs");  }
   led.begin();
-  *ledCurrentState = { 0, 0, 0, 0, 0, 0 };
+  *ledCurrentState = { 0, 0, 0, 0, 0, 0 }; //Initialize pointer ledAction, ledColorNumber, ledBlinkNumber, ledBlinkTime, ledBrightness
+  turnLedAllOff();
+}
+
+
+//***LED WAIT FEEDBACK FUNCTION***//
+// Function   : ledWaitFeedback 
+// 
+// Description: This function sets the LEDS to cue the user to wait for initialization.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void ledWaitFeedback()
+{
+  if (USB_DEBUG)   {    Serial.println("USBDEBUG: All LEDS on");  }
+  setLedState(LED_ACTION_ON, LED_CLR_RED, CONF_LED_ALL, 0, 0, CONF_LED_BRIGHTNESS); // Turn on all LEDS
+  performLedAction(ledCurrentState); 
+
+}
+
+//***LED WAIT FEEDBACK FUNCTION***//
+// Function   : ledWaitFeedback 
+// 
+// Description: This function sets the LEDS to cue the user to wait for initialization.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void ledReadyFeedback()
+{
+  if (USB_DEBUG)   {    Serial.println("USBDEBUG: ledReadyFeedback");  }
+  setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_LED_ALL, 0, 0, CONF_LED_BRIGHTNESS); // Turn off all LEDS
+  setLedState(LED_ACTION_ON, LED_CLR_GREEN, CONF_LED_MICRO, 0, 0, CONF_LED_BRIGHTNESS); // Turn micro LED green
+  performLedAction(ledCurrentState); 
+
 }
 
 //***STARTUP INITIALIZATION LED FUNCTION***//
@@ -1248,7 +1314,14 @@ void initLed()
 //****************************************//
 void startupFeedback()
 {
-  setLedState(LED_ACTION_BLINK, 1, 4, 4, CONF_STARTUP_LED_STEP_TIME, CONF_LED_BRIGHTNESS);
+  if (USB_DEBUG)   {    Serial.println("USBDEBUG: startupFeedback");  } 
+ // if (USB_DEBUG)   {    Serial.println("USBDEBUG: All LEDS on");  }
+  //setLedState(LED_ACTION_BLINK, LED_CLR_RED, CONF_LED_ALL, 4, CONF_STARTUP_LED_STEP_TIME, CONF_LED_BRIGHTNESS); // Blink all LEDs 4 times
+  //performLedAction(ledCurrentState); 
+  //if (USB_DEBUG)   {    Serial.println("USBDEBUG: All LEDS off");  }
+  //setLedState(LED_ACTION_NONE, LED_CLR_NONE, CONF_LED_ALL, 0, 0, CONF_LED_BRIGHTNESS); // Turn all LEDs off
+  //performLedAction(ledCurrentState); 
+  
   ledTimerId[0] = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
 
 }
@@ -1338,7 +1411,7 @@ void ledBlinkEffect(ledStateStruct* args){
 //****************************************//
 void ledBtScanEffect(){
   if(pollTimer.getNumRuns(5) % 2){
-     led.setLedColor(CONF_BT_LED_NUMBER, 0, CONF_BT_LED_BRIGHTNESS);
+     led.setLedColor(CONF_BT_LED_NUMBER, LED_CLR_NONE, CONF_BT_LED_BRIGHTNESS);
   } 
   else{
     led.setLedColor(CONF_BT_LED_NUMBER, CONF_BT_LED_COLOR, CONF_BT_LED_BRIGHTNESS);
@@ -1418,8 +1491,8 @@ void setLedDefault(){
   //Clear if it's in USB MODE
   led.clearLedAll();
   if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected())
-  { //Set second LED to blue if it's in BLE MODE
-    led.setLedColor(2, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
+  { //Set micro LED to blue if it's in BLE MODE
+    led.setLedColor(CONF_BT_LED_NUMBER, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
   }
 }
 
@@ -1434,6 +1507,9 @@ void setLedDefault(){
 //****************************************//
 void btFeedbackLoop()
 {
+  
+  //if (USB_DEBUG) { Serial.println("USBDEBUG: btFeedbackLoop");  } 
+  
   //Get the current bluetooth connection state
   bool tempIsConnected = btmouse.isConnected();
   //Perform bluetooth LED blinking if bluetooth is not connected and wasn't connected before 

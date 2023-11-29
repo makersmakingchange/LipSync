@@ -45,8 +45,8 @@
 
 //Sip and puff main states 
 #define PRESS_SAP_MAIN_STATE_NONE 0   //No action 
-#define PRESS_SAP_MAIN_STATE_SIP 1    //Sip action 
-#define PRESS_SAP_MAIN_STATE_PUFF 2   //Puff action 
+#define PRESS_SAP_MAIN_STATE_SIP 1    //Sip action sapPressure < -sip threshold
+#define PRESS_SAP_MAIN_STATE_PUFF 2   //Puff action sapPressure > puff threshold
 
 //Sip and puff secondary states 
 #define PRESS_SAP_SEC_STATE_WAITING 0   //Waiting : No sip or puff
@@ -57,9 +57,9 @@
 
 //Pressure structure 
 typedef struct {
-  float mainPressure;     //Stand-alone I2C Sensor reading 
-  float refPressure;      //Onboard Sensor reading in differential mode
-  float diffPressure;     //Pressure difference used in sip and puff processing 
+  float sapPressureAbs;                 //Stand-alone I2C Sensor reading [hPa]
+  float ambientPressure;                //Ambient Pressure [hPa]
+  float sapPressure;                    //Pressure difference used in sip and puff processing [hPa]
 } pressureStruct;
 
 
@@ -103,9 +103,9 @@ class LSPressure {
     void update();                                      //Update the pressure buffer and sip and puff buffer with new readings 
     void updatePressure();                              //Update the pressure buffer with new readings 
     void updateState();                                 //Update the and puff buffer with new states 
-    float getMainPressure();                            //Get last main pressure from pressure buffer
-    float getRefPressure();                             //Get last reference pressure from pressure buffer
-    float getDiffPressure();                            //Get the Pressure Difference sapPressure = (sapPressureAbs- ambientPressure- offsetPressure)
+    float getSapPressureAbs();                            //Get last main pressure from pressure buffer
+    float getAmbientPressure();                             //Get last reference pressure from pressure buffer
+    float getSapPressure();                            //Get the Pressure Difference sapPressure = (sapPressureAbs- ambientPressure- offsetPressure)
     pressureStruct getAllPressure();                    //Get the latest pressure values 
     inputStateStruct getState();                        //Get the latest sip and puff state  
 };
@@ -420,7 +420,8 @@ void LSPressure::updatePressure() {
 void LSPressure::updateState() {
   mainStateTimer.run();                       //Update main state timer
   sapPrevState = sapBuffer.getLastElement();  //Get the previous state
-  float pressureValue = getDiffPressure();    //Get the current pressure difference 
+  
+  float pressureValue = getSapPressure();    //Get the current pressure difference 
   //check for sip and puff conditions
   if (pressureValue > puffThreshold)  { 
     sapMainState = PRESS_SAP_MAIN_STATE_PUFF;
@@ -432,24 +433,24 @@ void LSPressure::updateState() {
 
   //Update the state using logic
   //None:None, Sip:Sip, Puff:Puff
-  if(sapPrevState.mainState == sapMainState){
+  if(sapPrevState.mainState == sapMainState){ // Current state is same as previous
     sapCurrState = {sapMainState, sapPrevState.secondaryState, mainStateTimer.elapsedTime(sapStateTimerId)};
-    //Serial.println("a");
+    //if (USB_DEBUG) { Serial.println("a");}
     sapBuffer.updateLastElement(sapCurrState);
-  } else {  //None:Sip , None:Puff , Sip:None, Puff:None
+  } else {  //None:Sip , None:Puff , Sip:None, Puff:None 
       //State: Sip or puff
       //Previous state: {none, waiting, time} Note: There can't be sip or puff and waiting 
       //New state: {Sip or puff, started, 0}
       if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_WAITING){
         sapCurrState = {sapMainState, PRESS_SAP_SEC_STATE_STARTED, 0};
-        //Serial.println("b");
+        //if (USB_DEBUG) { Serial.println("b");}
       } 
       //State: none
       //Previous state: {Sip or puff, started, time} Note: There can't be none and started 
       //New state: {Sip or puff, released, time}      
       else if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_STARTED){
         sapCurrState = {sapPrevState.mainState, PRESS_SAP_SEC_STATE_RELEASED, sapPrevState.elapsedTime};
-        //Serial.println("c");
+        //if (USB_DEBUG) { Serial.println("c");}
         //Serial.println(ambientPressure);
       }
       //State: None
@@ -457,14 +458,14 @@ void LSPressure::updateState() {
       //New state: {none, waiting, 0}
       else if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_RELEASED && sapMainState==PRESS_SAP_MAIN_STATE_NONE){
         sapCurrState = {sapMainState, PRESS_SAP_SEC_STATE_WAITING, 0};
-        //Serial.println("d");
+        //if (USB_DEBUG) { Serial.println("d");}
       }
       //State: Sip or puff
       //Previous state: {none, released, time}
       //New state: {Sip or puff, started, 0}
       else if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_RELEASED && sapMainState!=PRESS_SAP_MAIN_STATE_NONE){
         sapCurrState = {sapMainState, PRESS_SAP_SEC_STATE_STARTED, 0};
-        //Serial.println("e");
+        //if (USB_DEBUG) { Serial.println("e");}
       }      
       //Push the new state   
       sapBuffer.pushElement(sapCurrState);
@@ -481,39 +482,39 @@ void LSPressure::updateState() {
 }
 
 //*********************************//
-// Function   : getMainPressure 
+// Function   : getSapPressureAbs 
 // 
 // Description: Get the last main pressure reading from the pressure buffer 
 // Arguments :  void
 // 
 // Return     : pressure : float : Last main pressure reading
 //*********************************//
-float LSPressure::getMainPressure() {
-  return pressureBuffer.getLastElement().mainPressure;
+float LSPressure::getSapPressureAbs() {
+  return pressureBuffer.getLastElement().sapPressureAbs;
 }
 
 //*********************************//
-// Function   : getRefPressure 
+// Function   : getAmbientPressure 
 // 
 // Description: Get the last reference pressure reading from the pressure buffer 
 // Arguments :  void
 // 
 // Return     : pressure : float : Last reference pressure reading
 //*********************************//
-float LSPressure::getRefPressure() {
-  return pressureBuffer.getLastElement().refPressure;
+float LSPressure::getAmbientPressure() {
+  return pressureBuffer.getLastElement().ambientPressure;
 }
 
 //*********************************//
-// Function   : getRefPressure 
+// Function   : getAmbientPressure 
 // 
 // Description: Get the last pressure difference from the pressure buffer 
 // Arguments :  void
 // 
 // Return     : pressure : float : Last pressure difference from pressure buffer 
 //*********************************//
-float LSPressure::getDiffPressure() {
-  return pressureBuffer.getLastElement().diffPressure;
+float LSPressure::getSapPressure() {
+  return pressureBuffer.getLastElement().sapPressure;
 }
 
 

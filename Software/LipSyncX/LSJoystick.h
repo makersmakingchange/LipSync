@@ -35,6 +35,9 @@
 #define JOY_DIRECTION_INVERSE -1
 #define JOY_DIRECTION_FAULT 0           //Can be used to notify the end user that there is an issue with hall sensor setup
 
+#define JOY_DIRECTION_X -1              // Coordinate system for joystic axes. Depends on sensor arrangement
+#define JOY_DIRECTION_Y -1              // Coordinate system for joystic axes. Depends on sensor arrangement
+
 #define JOY_Z_DIRECTION_THRESHOLD 9     //The threshold used in z axis direction detection 
 
 #define JOY_RAW_XY_MAX 30.0             //The max raw x or y of a calibration point in mT
@@ -296,7 +299,7 @@ void LSJoystick::setMagnetDirection(int magnetXDirection,int magnetYDirection) {
   setMagnetZDirection();
   
   //Evaluate joystick x and y final magnet directions
-  _joystickXDirection = _magnetZDirection * _magnetXDirection;
+  _joystickXDirection = -1 * _magnetZDirection * _magnetXDirection; // Flip x- axis due to flipped sensor
   _joystickYDirection = -1 * _magnetZDirection * _magnetYDirection; // Flip y- axis due to flipped sensor
 }
 
@@ -440,7 +443,7 @@ void LSJoystick::evaluateInputCenter() {
 //*********************************//
 void LSJoystick::updateInputCenterBuffer() {
   Tlv493dSensor.updateData();
-  joystickCenterBuffer.pushElement({Tlv493dSensor.getX(), Tlv493dSensor.getY()});  
+  joystickCenterBuffer.pushElement({Tlv493dSensor.getY(), Tlv493dSensor.getX()});   //Joystick direction mapping
 }
 
 
@@ -456,7 +459,7 @@ void LSJoystick::updateInputCenterBuffer() {
 pointFloatType LSJoystick::getInputMax(int quad) {
   Tlv493dSensor.updateData();
   //Get new x and y reading
-  pointFloatType tempCalibrationPoint = {Tlv493dSensor.getX(), Tlv493dSensor.getY()};
+  pointFloatType tempCalibrationPoint = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};
 //  Serial.print("x:");
 //  Serial.print(tempCalibrationPoint.x);
 //  Serial.print("y:");
@@ -516,7 +519,7 @@ void LSJoystick::update() {
 
   Tlv493dSensor.updateData();
   //Get the new readings as a point
-  _rawPoint = {Tlv493dSensor.getX(), Tlv493dSensor.getY()};   
+  _rawPoint = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};   
   _skipInputChange = canSkipInputChange(_rawPoint);
   joystickRawBuffer.pushElement(_rawPoint);                  //Push raw points to joystickRawBuffer : DON'T MOVE THIS
 
