@@ -34,8 +34,9 @@
 
 // https://github.com/hathach/tinyusb/blob/master/examples/device/hid_generic_inout/src/usb_descriptors.c
 
+//uint8_t const _ascii2keycode[128][2] = {HID_ASCII_TO_KEYCODE};
 
-mouse_desc_hid_report[] =
+uint8_t const mouse_desc_hid_report[] =
 {
     TUD_HID_REPORT_DESC_KEYBOARD( HID_REPORT_ID(RID_KEYBOARD) ),
     TUD_HID_REPORT_DESC_MOUSE( HID_REPORT_ID(RID_MOUSE) )
@@ -93,8 +94,6 @@ class LSUSBKeyboard : public Print
   protected:
     Adafruit_USBD_HID usb_hid;
 };
-
-#define ATTRIBUTE_PACKED  __attribute__((packed, aligned(1)))
 
 typedef struct ATTRIBUTE_PACKED {
     uint8_t buttons;
@@ -165,18 +164,19 @@ class LSUSBGamepad {
 
 LSUSBMouse::LSUSBMouse(void)
 {
-  _buttons = 0;
-  this->usb_hid.setPollInterval(1);
-  this->usb_hid.setReportDescriptor(mouse_desc_hid_report, sizeof(mouse_desc_hid_report));
-  this->usb_hid.setStringDescriptor(MOUSE_DESCRIPTOR);
+
 
 }
 
 void LSUSBMouse::begin(void)
 {
+  _buttons = 0;
+  this->usb_hid.setPollInterval(1);
+  this->usb_hid.setReportDescriptor(mouse_desc_hid_report, sizeof(mouse_desc_hid_report));
+  this->usb_hid.setStringDescriptor(MOUSE_DESCRIPTOR);
   this->usb_hid.begin();
-  //while( !USBDevice.mounted() ) delay(1);
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing USB HID Mouse");  }
+  while( !USBDevice.mounted() ) delay(1);
 }
 
 
