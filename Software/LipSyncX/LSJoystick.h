@@ -49,7 +49,7 @@
 
 #define JOY_OUTPUT_DEADZONE_FACTOR 0.05 //The default output deadzone factor (%5 of JOY_INPUT_XY_MAX)
 
-#define JOY_OUTPUT_RANGE_LEVEL 5        //The default output range level or output movement upper range 
+#define JOY_OUTPUT_RANGE_LEVEL 5        //The default output mouse cursor range level or output movement upper range 
 
 
 class LSJoystick {
