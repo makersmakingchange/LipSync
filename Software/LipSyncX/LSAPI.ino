@@ -61,11 +61,12 @@ _functionList setCommunicationModeFunction =      {"CM", "1", "",  &setCommunica
 _functionList getDebugModeFunction =              {"DM", "0", "0", &getDebugMode};
 _functionList setDebugModeFunction =              {"DM", "1", "",  &setDebugMode};
 
+_functionList softResetFunction =                 {"SR", "1", "1", &softReset};
 _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSettings};
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[31] = {
+_functionList apiFunction[32] = {
   getModelNumberFunction,
   getVersionNumberFunction,
   getOperatingModeFunction,
@@ -95,6 +96,7 @@ _functionList apiFunction[31] = {
   setCommunicationModeFunction,
   getDebugModeFunction,
   setDebugModeFunction,
+  softResetFunction,
   resetSettingsFunction,
   factoryResetFunction
 };
@@ -1736,6 +1738,61 @@ void setDebugMode(bool responseEnabled, bool apiEnabled, int inputDebugMode) {
 void setDebugMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   setDebugMode(responseEnabled, apiEnabled, optionalParameter.toInt());
 }
+
+//***SOFT RESET FUNCTION***//
+// Function   : softReset
+//
+// Description: This function performs a software reset.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : void
+//***************************//
+void softReset(bool responseEnabled, bool apiEnabled) {
+
+  // //Set all LEDs to red to indicate factory reset process 
+  // setLedState(LED_ACTION_ON, LED_CLR_RED, CONF_LED_ALL, 0, 0, CONF_LED_BRIGHTNESS);                           
+  // performLedAction(ledCurrentState);  
+
+  // //Factory reset process 
+  // resetMemory();
+  // setCommunicationMode(false, false, CONF_COM_MODE_DEFAULT);
+  // setDebugMode(false, false, CONF_DEBUG_MODE_DEFAULT);
+  // setJoystickDeadZone(false, false, CONF_JOY_DEADZONE_DEFAULT);
+  // setSipPressureThreshold(false, false, CONF_SIP_THRESHOLD);
+  // setPuffPressureThreshold(false, false, CONF_PUFF_THRESHOLD);
+  // setJoystickSpeed(false, false, CONF_JOY_SPEED_LEVEL_DEFAULT);  
+  // 
+
+  // //Clear all LEDs to indicate factory reset process is finished 
+  // setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);                           
+  // performLedAction(ledCurrentState);  
+
+  printResponseInt(responseEnabled, apiEnabled, true, 0, "SR,1", true, 1);
+  softwareReset();
+
+}
+//***FACTORY RESET API FUNCTION***//
+// Function   : softReset
+//
+// Description: This function is redefinition of main softRest function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void softReset(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 1) {
+    softReset(responseEnabled, apiEnabled);
+  }
+}
+
 
 //***RESET SETTINGS FUNCTION***//
 // Function   : resetSettings
