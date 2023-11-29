@@ -14,6 +14,7 @@
   See the GNU General Public License for more details.
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <http://www.gnu.org/licenses/>
+
 */
 
 
@@ -37,8 +38,23 @@
 #define CONF_SWITCH_NUMBER 3
 
 //Output LEDS
-#define CONF_LED_MOUSE_PIN 9
-#define CONF_LED_GAMEPAD_PIN 7
+#define CONF_LED_MOUSE_PIN 9 //(left)
+#define CONF_LED_GAMEPAD_PIN 7 //(right)
+
+//Onboard LEDs
+#define CONF_LED_MICRO_RED LED_RED        // Xiao NRF52840 User LED Red
+#define CONF_LED_MICRO_GREEN LED_GREEN    // Xiao NRF52840 User LED Green
+#define CONF_LED_MICRO_BLUE LED_BLUE      // Xiao NRF52840 User LED Blue
+
+
+#define CONF_LED_NONE 0
+#define CONF_LED_LEFT 1
+#define CONF_LED_MIDDLE 2
+#define CONF_LED_RIGHT 3
+#define CONF_LED_MICRO 4
+#define CONF_LED_ALL 5
+
+#define CONF_LED_BRIGHTNESS 150
 
 //Output Buzzer
 #define CONF_BUZZER_PIN 6
@@ -61,7 +77,7 @@
 
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
-#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"OM\":0,\"CM\":0,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":0.0,\"PT\":0.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[30.0,30.0],\"CA2\":[-30.0,30.0],\"CA3\":[-30.0,-30.0],\"CA4\":[30.0,-30.0],\"DM\":0}"
+#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":0.0,\"PT\":0.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[30.0,30.0],\"CA2\":[-30.0,30.0],\"CA3\":[-30.0,-30.0],\"CA4\":[30.0,-30.0],\"DM\":0}"
 
 //Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 50          //50ms
@@ -90,8 +106,10 @@
 #define CONF_COM_MODE_USB  1
 #define CONF_COM_MODE_BLE  2
 
-#define CONF_COM_MODE_MIN 1
+#define CONF_COM_MODE_MIN 0
 #define CONF_COM_MODE_MAX 2
+
+#define CONF_COM_MODE_DEFAULT CONF_COM_MODE_USB
 
 //Debug mode values 
 #define CONF_DEBUG_MODE_NONE      0 
@@ -132,12 +150,6 @@
 //***CAN BE CHANGED***//
 #define CONF_API_ENABLED true               //Enable or Disable API
 
-//Communication Method Default settings
-#define CONF_COM_MODE_DEFAULT 1             //0 = None , 1 = USB , 2 = Wireless  
-
-//Led Default settings
-#define CONF_LED_BRIGHTNESS 150
-
 //Startup Default settings
 #define CONF_STARTUP_LED_STEP_TIME 500      //Time for each color
 
@@ -160,7 +172,7 @@
 
 //Joystick center initialization and related LED feedback settings 
 #define CONF_JOY_INIT_START_DELAY 1000
-#define CONF_JOY_INIT_LED_NUMBER 2
+#define CONF_JOY_INIT_LED_NUMBER CONF_LED_LEFT
 #define CONF_JOY_INIT_LED_COLOR LED_CLR_RED                                                     //Center initialization actual step color 
 #define CONF_JOY_INIT_STEP_BLINK 1
 #define CONF_JOY_INIT_STEP_BLINK_DELAY 150
@@ -205,7 +217,6 @@
 #define CONF_SCROLL_MOVE_MAX  10
 #define CONF_SCROLL_MOVE_BASE 1
 
-
 //Sip and Puff Default settings
 #define CONF_SIP_THRESHOLD 3.0                    //hPa
 #define CONF_PUFF_THRESHOLD 3.0                   //hPa
@@ -229,7 +240,7 @@
 //Bluetooth connection and related LED feedback settings 
 #define CONF_BT_SCAN_BLINK_DELAY 500
 #define CONF_BT_SCAN_BLINK_NUMBER 1
-#define CONF_BT_LED_NUMBER 2
+#define CONF_BT_LED_NUMBER CONF_LED_MICRO
 #define CONF_BT_LED_COLOR LED_CLR_BLUE 
 #define CONF_BT_LED_BRIGHTNESS CONF_LED_BRIGHTNESS
 
