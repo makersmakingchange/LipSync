@@ -1008,7 +1008,7 @@ void getJoystickValue(bool responseEnabled, bool apiEnabled) {
 //***GET JOYSTICK VALUE API FUNCTION***//
 // Function   : getJoystickValue
 //
-// Description: This function is redefinition of main getPressureValue function to match the types of API function arguments.
+// Description: This function is redefinition of main getJoystickValue function to match the types of API function arguments.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
@@ -1039,9 +1039,22 @@ void getJoystickValue(bool responseEnabled, bool apiEnabled, String optionalPara
 //*********************************//
 void getPressureValue(bool responseEnabled, bool apiEnabled) {
 
-  float tempPressureValue = (float) ps.getDiffPressure();
+  ps.update();      //Request new values from pressure class
+  
+  int outputArraySize = 3; 
+  float tempPressureArray[outputArraySize];
+  
+  float tempSapPressure[3];
+    tempSapPressure[0] = ps.getSapPressureAbs();  //Read the main pressure 
+    tempSapPressure[1] = ps.getAmbientPressure();   //Read the ref pressure
+    tempSapPressure[2] = ps.getSapPressure();  //Read the diff pressure
 
-  printResponseFloat(responseEnabled, apiEnabled, true, 0, "PV,0", true, tempPressureValue);
+  
+  printResponseFloatArray(responseEnabled, apiEnabled, true, 0, "PV,0", true, "", outputArraySize, ',', tempPressureArray);
+
+
+  //float tempPressureValue = (float) ps.getSapPressure();
+  //printResponseFloat(responseEnabled, apiEnabled, true, 0, "PV,0", true, tempPressureValue);
 
 }
 //***GET PRESSURE VALUE API FUNCTION***//
