@@ -65,19 +65,18 @@ typedef struct {
 
 class LSPressure {
   private: 
-    Adafruit_LPS35HW lps35hw = Adafruit_LPS35HW();        //Create an object of Adafruit_LPS35HW class
-    Adafruit_LPS22 lps22;                               //Create an object of Adafruit_LPS2X class
-    sensors_event_t lps22_pressure;  
-    sensors_event_t lps22_temperature;                          
-    //Adafruit_Sensor *lps22_pressure = lps22.getPressureSensor(); // Retrieve pressure sensor from LPS22
+    Adafruit_LPS35HW lps35hw = Adafruit_LPS35HW();      //Create an object of Adafruit_LPS35HW class for Sip and Puff pressure
+    Adafruit_LPS22 lps22;                               //Create an object of Adafruit_LPS2X class for ambient pressure
+    sensors_event_t lps22_pressure;                     //Ambient temperature event object 
+    sensors_event_t lps22_temperature;                  //Ambient pressure event object                           
     LSCircularBuffer <pressureStruct> pressureBuffer;   //Create a buffer of type pressureStruct to push pressure readings 
     LSCircularBuffer <inputStateStruct> sapBuffer;      //Create a buffer of type inputStateStruct to push sap states 
     int filterMode;                                     //Filter Mode : NONE or AVERAGE     
     int pressureMode;                                   //Pressure Mode: DIFF or ABS pressure 
-    float mainVal;                                      //Main Pressure reading
-    float refVal;                                       //Reference Pressure reading
-    float compVal;                                      //Compensation Pressure
-    float diffVal;                                      //Calculated Pressure Difference diffVal = (mainVal- refVal- compVal)
+    float sapPressureAbs;                               //Main Pressure reading (Sip and Puff Absolute) [hPa]
+    float ambientPressure;                              //Reference Pressure reading (Ambient Absolute) [hPa]
+    float offsetPressure;                               //Offset Pressure [hPa] (Difference between two sensors)
+    float sapPressure;                                  //Calculated Pressure Difference sapPressure = (sapPressureAbs- ambientPressure- offsetPressure)
     sensors_event_t pressure_event;                     //Onboard pressure event object 
     float refTolVal;                                    //The tolerance value in hPa used to check and update reference pressure 
     LSTimer <void> mainStateTimer;                      //Timer used to measure time for each sip and puff action. 
@@ -95,9 +94,9 @@ class LSPressure {
     int getPressureMode();                              //Get Sip and Puff Pressure Mode : ABS or DIFF pressure
     void setPressureMode(int mode);                     //Set Sip and Puff Pressure Mode : ABS or DIFF pressure
     void setRefTolerance(float value);                  //Set reference pressure change tolerance value that is used to update the reference pressure 
-    float getCompPressure();                            //Get Compensation pressure (mainVal- refVal)
-    void setCompPressure();                             //Set Compensation pressure compVal = (mainVal- refVal)
-    void setZeroPressure();                             //Zero the base reference pressure and update Compensation pressure value 
+    float getOffsetPressure();                            //Get Offset pressure (sapPressureAbs- ambientPressure)
+    void setOffsetPressure();                             //Set Offset pressure offsetPressure = (sapPressureAbs- ambientPressure)
+    void setZeroPressure();                             //Zero the base reference pressure and update Offset pressure value 
     void setThreshold(float s, float p);                //Set sip and puff thresholds
     void setSipThreshold(float s);                      //Set sip threshold
     void setPuffThreshold(float p);                     //Set puff threshold
@@ -106,7 +105,7 @@ class LSPressure {
     void updateState();                                 //Update the and puff buffer with new states 
     float getMainPressure();                            //Get last main pressure from pressure buffer
     float getRefPressure();                             //Get last reference pressure from pressure buffer
-    float getDiffPressure();                            //Get the Pressure Difference diffVal = (mainVal- refVal- compVal)
+    float getDiffPressure();                            //Get the Pressure Difference sapPressure = (sapPressureAbs- ambientPressure- offsetPressure)
     pressureStruct getAllPressure();                    //Get the latest pressure values 
     inputStateStruct getState();                        //Get the latest sip and puff state  
 };
@@ -250,20 +249,20 @@ void LSPressure::setRefTolerance(float value) {
 }
 
 //*********************************//
-// Function   : getCompPressure 
+// Function   : getOffsetPressure 
 // 
-// Description: Get the compensation pressure value (hPa)
-//              It doesn't set compVal
+// Description: Get the offset pressure value (hPa)
+//              It doesn't set offsetPressure
 // Arguments :  void
 // 
-// Return     : tempCompVal : float : The compensation pressure value in hPa
+// Return     : tempOffsetPressure : float : The offset pressure value in hPa
 //*********************************//
-float LSPressure::getCompPressure() {
+float LSPressure::getOffsetPressure() {
 
-  //Initialize variables used to calculate compensation value  
-  float tempMainVal = 0.00;
-  float tempRefVal = 0.00;
-  float tempCompVal = 0.00;
+  //Initialize variables used to calculate offset value  
+  float tempSapPressureAbs = 0.00;
+  float tempAmbientPressure = 0.00;
+  float tempOffsetPressure = 0.00;
 
   
 
@@ -271,58 +270,58 @@ float LSPressure::getCompPressure() {
   if(pressureMode==PRESS_MODE_DIFF){
     //Keep reading until we have a valid main and reference pressure values > 0.0
     do{     
-      tempMainVal = lps35hw.readPressure();
+      tempSapPressureAbs = lps35hw.readPressure();
       lps22.getEvent(&lps22_pressure,&lps22_temperature);
-      tempRefVal=lps22_pressure.pressure;
-    } while (tempMainVal <= 0.00 || tempRefVal <= 0.00);
+      tempAmbientPressure=lps22_pressure.pressure;
+    } while (tempSapPressureAbs <= 0.00 || tempAmbientPressure <= 0.00);
     
-    tempCompVal = tempMainVal - tempRefVal;    //Calculate compensation value which is the difference between main and reference pressure 
-    refVal=tempRefVal;                         //Set the reference value 
+    tempOffsetPressure = tempSapPressureAbs - tempAmbientPressure;    //Calculate offset value which is the difference between main and reference pressure 
+    ambientPressure=tempAmbientPressure;                         //Set the reference value 
   }  //If pressure mode is absolute  
   else if(pressureMode==PRESS_MODE_ABS){
     //Keep reading until we have a valid main pressure > 0.00
     do{
-      tempMainVal = lps35hw.readPressure();
-    } while (tempMainVal <= 0.00);
+      tempSapPressureAbs = lps35hw.readPressure();
+    } while (tempSapPressureAbs <= 0.00);
 
-    tempCompVal=0.00;                         //Set compensation value to zero
-    refVal=tempMainVal;                       //Set the reference value which is the main pressure reading when no sip or puff is performed 
+    tempOffsetPressure=0.00;                         //Set offset value to zero
+    ambientPressure=tempSapPressureAbs;                       //Set the reference value which is the main pressure reading when no sip or puff is performed 
   }
    else{
     
   }
-  if (USB_DEBUG) {Serial.print("USBDEBUG: tempCompVal: ");
-    Serial.println(tempCompVal);  }
-  return tempCompVal;                         //Return compensation value
+  if (USB_DEBUG) {Serial.print("USBDEBUG: tempOffsetPresssure: ");
+    Serial.println(tempOffsetPressure);  }
+  return tempOffsetPressure;                         //Return offset value
 }
 
 //*********************************//
-// Function   : setCompPressure 
+// Function   : setOffsetPressure 
 // 
-// Description: Set the compensation pressure value (hPa)
-//              It's same as getCompPressure, but it sets compVal as well
+// Description: Set the offset pressure value (hPa)
+//              It's same as getOffsetPressure, but it sets offsetPressure as well
 // Arguments :  void
 // 
 // Return     : void
 //*********************************//
-void LSPressure::setCompPressure() {
-  compVal = getCompPressure();
+void LSPressure::setOffsetPressure() {
+  offsetPressure = getOffsetPressure();
 }
 
 //*********************************//
 // Function   : setZeroPressure 
 // 
-// Description: Set the compensation pressure value (hPa) and the reference pressure 
+// Description: Set the offset pressure value (hPa) and the reference pressure 
 // Arguments :  void
 // 
 // Return     : void
 //*********************************//
 void LSPressure::setZeroPressure() {
-  compVal = 0.00;
-  for (int i = 0 ; i < PRESS_BUFF_SIZE ; i++){        //Set the compVal equal to average compensation values in pressure buffer  
-    compVal += getCompPressure();
+  offsetPressure = 0.00;
+  for (int i = 0 ; i < PRESS_BUFF_SIZE ; i++){        //Set the offsetPressure equal to average offset values in pressure buffer  
+    offsetPressure += getOffsetPressure();
   }
-  compVal = (compVal / PRESS_BUFF_SIZE);
+  offsetPressure = (offsetPressure / PRESS_BUFF_SIZE);
 }
 
 
@@ -387,25 +386,25 @@ void LSPressure::update() {
 //*********************************//
 void LSPressure::updatePressure() {
   
-  mainVal = lps35hw.readPressure();        //Update main pressure value 
+  sapPressureAbs = lps35hw.readPressure();        //Update main pressure value 
 
   //If pressure mode is differential  
   if(pressureMode==PRESS_MODE_DIFF) {
     lps22.getEvent(&lps22_pressure, &lps22_temperature); 
-    float tempRefVal = lps22_pressure.pressure;  //Set a temporary reference value to new reference pressure reading 
-    //Update compensation pressure value if reference pressure is changed using tolerance value 
-    if(abs(refVal-tempRefVal)>=refTolVal && tempRefVal > 0.00){ 
-        //compVal+=refVal-tempRefVal;                //Add the reference pressure change to the compensation value 
-        compVal=mainVal-tempRefVal;               //Update the compensation value 
+    float tempAmbientPressure = lps22_pressure.pressure;  //Set a temporary reference value to new reference pressure reading 
+    //Update offset pressure value if reference pressure is changed using tolerance value 
+    if(abs(ambientPressure-tempAmbientPressure)>=refTolVal && tempAmbientPressure > 0.00){ 
+        //offsetPressure+=ambientPressure-tempAmbientPressure;                //Add the reference pressure change to the offset value 
+        offsetPressure=sapPressureAbs-tempAmbientPressure;               //Update the offset value 
       }    
-      if(tempRefVal > 0.00) { refVal=tempRefVal; } // Update the reference pressure value 
+      if(tempAmbientPressure > 0.00) { ambientPressure=tempAmbientPressure; } // Update the reference pressure value 
    };
 
   
   //Make sure pressure readings are valid 
-  if(mainVal > 0.00 && refVal > 0.00){
-    diffVal = mainVal - refVal - compVal;                    //Calculate the pressure difference 
-    pressureBuffer.pushElement({mainVal, refVal, diffVal});  //Push new pressure values to pressure buffer 
+  if(sapPressureAbs > 0.00 && ambientPressure > 0.00){
+    sapPressure = sapPressureAbs - ambientPressure - offsetPressure;                    //Calculate the pressure difference 
+    pressureBuffer.pushElement({sapPressureAbs, ambientPressure, sapPressure});  //Push new pressure values to pressure buffer 
   }
  
 }
@@ -451,7 +450,7 @@ void LSPressure::updateState() {
       else if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_STARTED){
         sapCurrState = {sapPrevState.mainState, PRESS_SAP_SEC_STATE_RELEASED, sapPrevState.elapsedTime};
         //Serial.println("c");
-        //Serial.println(refVal);
+        //Serial.println(ambientPressure);
       }
       //State: None
       //Previous state: {Sip or puff, released, time}
@@ -475,7 +474,7 @@ void LSPressure::updateState() {
 
   //No action in 1 minute : reset timer
   if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_WAITING && mainStateTimer.elapsedTime(sapStateTimerId)>PRESS_SAP_ACTION_TIMEOUT){
-      setZeroPressure();                                   //Update pressure compensation value 
+      setZeroPressure();                                   //Update pressure offset value 
       //Reset and start the timer    
       mainStateTimer.restartTimer(sapStateTimerId);   
   }
