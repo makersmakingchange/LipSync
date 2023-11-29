@@ -221,7 +221,7 @@ bool isValidCommandFormat(String inputCommandString) {
        inputCommandString.length() == (7) || //XX,d:dd
        inputCommandString.length() == (8) || //XX,d:ddd
        inputCommandString.length() == (9) || //XX,d:dddd
-       inputCommandString.length() == (11)) && inputCommandString.charAt(2) == ',' && inputCommandString.charAt(4) == ':') {
+       inputCommandString.length() == (11)) && inputCommandString.charAt(2) == ',' && inputCommandString.charAt(4) == ':') { //XX,d:dddddd
     isValidFormat = true;
   }
   return isValidFormat;
@@ -238,8 +238,8 @@ bool isValidCommandFormat(String inputCommandString) {
 //
 // Return     : boolean
 //*************************************************//
-bool isValidCommandParameter(String inputParamterString) {
-  if (isStrNumber(inputParamterString)) {
+bool isValidCommandParameter(String inputParameterString) {
+  if (isStrNumber(inputParameterString)) {
     return true;
   }
   return false;
@@ -1832,7 +1832,7 @@ void resetSettings(bool responseEnabled, bool apiEnabled, String optionalParamet
 //***FACTORY RESET FUNCTION***//
 // Function   : factoryReset
 //
-// Description: This function performs factory reset. It can perform a soft or hard reset.
+// Description: This function performs factory reset.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
@@ -1844,7 +1844,7 @@ void resetSettings(bool responseEnabled, bool apiEnabled, String optionalParamet
 void factoryReset(bool responseEnabled, bool apiEnabled) {
 
   //Set all LEDs to red to indicate factory reset process 
-  setLedState(LED_ACTION_ON, LED_CLR_RED, 4, 0, 0,CONF_LED_BRIGHTNESS);                           
+  setLedState(LED_ACTION_ON, LED_CLR_RED, CONF_LED_ALL, 0, 0, CONF_LED_BRIGHTNESS);                           
   performLedAction(ledCurrentState);  
 
   //Factory reset process 
@@ -1879,6 +1879,10 @@ void factoryReset(bool responseEnabled, bool apiEnabled, String optionalParamete
     factoryReset(responseEnabled, apiEnabled);
   }
 }
+
+
+
+
 
 //***SERIAL PRINT OUT COMMAND RESPONSE WITH STRING PARAMETER FUNCTION***//
 // Function   : printResponseString
