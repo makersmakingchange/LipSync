@@ -1,8 +1,8 @@
 /* 
 * File: LipSyncX_DataCapture.ino
-* Firmware: LipSync X
+* Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: 2023-Nov-20
+* Version: 2023-Dec-11
 * Copyright Neil Squire Society 2023. 
 * License: GPL v3
 
@@ -28,7 +28,8 @@
 #define CONF_SWITCH2_PIN 1  // 3.5mm jack SW2
 #define CONF_SWITCH3_PIN 2  // 3.5mm jack SW3
 
-#define CONF_BUTTON_NEXT_PIN 9  // S1 MI Tactile next button
+
+#define CONF_BUTTON_NEXT_PIN 9  // S1 MO Tactile next button
 #define CONF_BUTTON_SEL_PIN 3    // S2 A3 Tactile select button
 
 #define CONF_LED_MOUSE_PIN 8    // SCK
