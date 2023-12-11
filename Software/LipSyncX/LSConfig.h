@@ -1,27 +1,32 @@
 /* 
 * File: LipSyncX.ino
-* Firmware: LipSync X
+* Firmware: LipSync Hub
 * Developed by: MakersMakingChange
-* Version: Beta (09 November 2023) 
+* Version: Beta (11 December 2023) 
 * Copyright Neil Squire Society 2022. 
 * License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
 */
-
 
 //***DO NOT CHANGE***//
 #define CONF_LIPSYNC_MODEL 1                              //Mouse = 1 , Gamepad = 2
 #define CONF_LIPSYNC_VERSION 1.0
 
+//Output pins
+#define CONF_LED1_PIN 7                                 // Pushbutton S1
+#define CONF_LED2_PIN 8                                 // Pushbutton S2
+#define CONF_LED3_PIN 6                                 // Pushbutton S3
+
 //Input pins
-#define CONF_BUTTON1_PIN 5                                 // Pushbutton S1
-#define CONF_BUTTON2_PIN 6                                 // Pushbutton S2
-#define CONF_BUTTON3_PIN 9                                 // Pushbutton S3
-#define CONF_SWITCH1_PIN A2                                // 3.5mm jack SW1
-#define CONF_SWITCH2_PIN 11                                // 3.5mm jack SW2
-#define CONF_SWITCH3_PIN 10                                // 3.5mm jack SW3
+#define CONF_BUTTON1_PIN 9                                 // Pushbutton S1
+#define CONF_BUTTON2_PIN 3                                 // Pushbutton S2
+
+#define CONF_SWITCH1_PIN A0                                // 3.5mm jack SW1
+#define CONF_SWITCH2_PIN A1                                // 3.5mm jack SW2
+#define CONF_SWITCH3_PIN A2                                // 3.5mm jack SW3
+
 
 //Input buttons and switch values 
-#define CONF_BUTTON_NUMBER 3
+#define CONF_BUTTON_NUMBER 2
 #define CONF_SWITCH_NUMBER 3
 
 //Output action numbers

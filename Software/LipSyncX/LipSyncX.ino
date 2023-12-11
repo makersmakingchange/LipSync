@@ -1,8 +1,8 @@
 /* 
 * File: LipSyncX.ino
-* Firmware: LipSync X
+* Firmware: LipSync Hub
 * Developed by: MakersMakingChange
-* Version: Beta (09 November 2023) 
+* Version: Beta (11 December 2023) 
 * Copyright Neil Squire Society 2022. 
 * License: This work is licensed under the CC BY SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0 .
 */
