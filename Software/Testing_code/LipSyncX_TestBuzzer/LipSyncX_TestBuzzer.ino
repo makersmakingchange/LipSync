@@ -3,10 +3,10 @@
   Last edited: November 16, 2023
  *******************/
 
-#define PIN_BUZZER    6
+#define PIN_BUZZER    10
 
 #define PIN_BUTTON_SEL    3
-#define PIN_BUTTON_NEXT   10
+#define PIN_BUTTON_NEXT   9
 
 bool buttonSelPressed = false;
 bool buttonNextPressed = false;

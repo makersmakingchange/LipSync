@@ -16,10 +16,11 @@
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 #define PIN_BUTTON_SEL    3
-#define PIN_BUTTON_NEXT   10
+#define PIN_BUTTON_NEXT   9
 
-#define PIN_LED_MOUSE   7
-#define PIN_LED_GAMEPAD 9
+#define PIN_LED_MOUSE   8
+#define PIN_LED_GAMEPAD 7
+#define PIN_LED_MOUSE_WIRELESS  6
 
 #define MAIN_MENU   0
 #define EXIT_MENU   1

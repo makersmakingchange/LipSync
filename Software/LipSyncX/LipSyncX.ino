@@ -223,7 +223,7 @@ void setup()
   initCommunicationMode();                                      //Initialize Communication Mode
 
    //while (!TinyUSBDevice.mounted())
- while (!Serial) { delay(10); }                                // Wait for serial connection to proceed
+ //while (!Serial) { delay(10); }                                // Wait for serial connection to proceed
 
   initSipAndPuff();                                             //Initialize Sip And Puff 
 

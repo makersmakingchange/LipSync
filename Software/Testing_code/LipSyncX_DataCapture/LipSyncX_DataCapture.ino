@@ -29,13 +29,14 @@
 #define CONF_SWITCH2_PIN 1  // 3.5mm jack SW2
 #define CONF_SWITCH3_PIN 2  // 3.5mm jack SW3
 
-#define CONF_BUTTON_NEXT_PIN 10  // S1 MO Tactile next button
+#define CONF_BUTTON_NEXT_PIN 9  // S1 MO Tactile next button
 #define CONF_BUTTON_SEL_PIN 3    // S2 A3 Tactile select button
 
-#define CONF_LED_MOUSE_PIN 9    // MI
+#define CONF_LED_MOUSE_PIN 8    // MI
 #define CONF_LED_GAMEPAD_PIN 7  // RX
+#define CONF_LED_MOUSE_WIRELESS_PIN 6
 
-#define CONF_BUZZER_PIN 6  // Buzzer
+#define CONF_BUZZER_PIN 10  // Buzzer
 
 #define CONF_LED_MICRO_RED LED_RED        // Xiao NRF52840 User LED Red
 #define CONF_LED_MICRO_GREEN LED_GREEN    // Xiao NRF52840 User LED Green
