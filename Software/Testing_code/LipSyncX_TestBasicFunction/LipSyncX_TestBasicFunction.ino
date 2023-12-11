@@ -28,13 +28,14 @@
 #define CONF_SWITCH2_PIN 1  // 3.5mm jack SW2
 #define CONF_SWITCH3_PIN 2  // 3.5mm jack SW3
 
-#define CONF_BUTTON_NEXT_PIN 10  // S1 MO Tactile next button
+#define CONF_BUTTON_NEXT_PIN 9  // S1 MI Tactile next button
 #define CONF_BUTTON_SEL_PIN 3    // S2 A3 Tactile select button
 
-#define CONF_LED_MOUSE_PIN 9    // MI
+#define CONF_LED_MOUSE_PIN 8    // SCK
 #define CONF_LED_GAMEPAD_PIN 7  // RX
+#define CONF_LED_MOUSE_WIRELESS_PIN   6   //TX
 
-#define CONF_BUZZER_PIN 6     // Buzzer 
+#define CONF_BUZZER_PIN 10     // Buzzer 
 
 
 
@@ -98,15 +99,25 @@ Tlv493dSensor.begin();
   pinMode(CONF_BUTTON_SEL_PIN, INPUT_PULLUP);
 
   pinMode(CONF_LED_MOUSE_PIN, OUTPUT);
+  pinMode(CONF_LED_MOUSE_WIRELESS_PIN, OUTPUT);
   pinMode(CONF_LED_GAMEPAD_PIN, OUTPUT);
 
+  digitalWrite(CONF_LED_GAMEPAD_PIN, LOW);
+  digitalWrite(CONF_LED_MOUSE_PIN, LOW);
+  digitalWrite(CONF_LED_MOUSE_WIRELESS_PIN, LOW);
+  
+  digitalWrite(CONF_LED_GAMEPAD_PIN, HIGH);
+  delay(1000);
+  digitalWrite(CONF_LED_GAMEPAD_PIN, LOW);
+  delay(1000);
   digitalWrite(CONF_LED_MOUSE_PIN, HIGH);
   delay(1000);
   digitalWrite(CONF_LED_MOUSE_PIN, LOW);
   delay(1000);
-  digitalWrite(CONF_LED_GAMEPAD_PIN, HIGH);
+  digitalWrite(CONF_LED_MOUSE_WIRELESS_PIN, HIGH);
   delay(1000);
-  digitalWrite(CONF_LED_GAMEPAD_PIN, LOW);
+  digitalWrite(CONF_LED_MOUSE_WIRELESS_PIN, LOW);
+
 
 
 
