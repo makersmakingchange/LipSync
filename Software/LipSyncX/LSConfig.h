@@ -41,8 +41,9 @@
 #define CONF_SWITCH_NUMBER 3
 
 //Output LEDS
-#define CONF_LED_MOUSE_PIN 8 //(left)
-#define CONF_LED_GAMEPAD_PIN 7 //(right)
+#define CONF_LED_MOUSE_PIN 8                              //(left)
+#define CONF_LED_GAMEPAD_PIN 7                            //(right)
+#define CONF_LED_BTMOUSE_PIN 6                            //
 
 //Onboard LEDs
 #define CONF_LED_MICRO_RED LED_RED        // Xiao NRF52840 User LED Red
