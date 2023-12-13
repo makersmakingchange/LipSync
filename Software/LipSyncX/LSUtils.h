@@ -53,8 +53,8 @@ typedef struct
 //Input(sip and puff, switches ,buttons) actions relation with output actions structure
 typedef struct
 {
-  uint8_t inputActionNumber;
   uint8_t inputActionState;
+  uint8_t outputActionNumber;
   unsigned long inputActionStartTime;
   unsigned long inputActionEndTime;
 } inputActionStruct;
