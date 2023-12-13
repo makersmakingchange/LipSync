@@ -1,8 +1,8 @@
 /* 
 * File: LSCircularBuffer.h
-* Firmware: LipSync X
-* Edited by: MakersMakingChange
-* Version: Beta (23 November 2023) 
+* Firmware: LipSync
+* Developed by: MakersMakingChange
+* Version: Beta (11 December 2023) 
   License: GPL v3.0 or later
 
   Copyright (C) 2023 Neil Squire Society
