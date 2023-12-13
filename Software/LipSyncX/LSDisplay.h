@@ -38,7 +38,6 @@
 #define MODE_MENU   3
 #define CURSOR_SP_MENU   4
 #define MORE_MENU    5
-#define BLUETOOTH_MENU   6
 
 //Calibration pages
 #define CENTER_RESET_PAGE 11
@@ -60,7 +59,6 @@ const String calibMenuText[3] = {"Center reset", "Full Calibration", "... Back"}
 const String modeMenuText[4] = {"MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back"};
 const String modeConfirmText[4] = {"Change", "mode?", "Confirm", "... Back"};
 const String cursorSpMenuText[4] = {"  ", "Increase", "Decrease", "... Back"};
-const String bluetoothMenuText[4] = {"Bluetooth:", "<>", "Turn <>", "... Back"};
 const String moreMenuText[4] = {"Sound", "Sip & Puff", "... Back", "         "};
 const String soundMenuText[4] = {"Sound:", "<>", "Turn <>", "... Back"};
 const String sipPuffThreshMenuText[4] = {"Sip Threshold", "Puff Threshold", "... Back"};
@@ -71,7 +69,6 @@ const int exitConfirmLen = 2;
 const int calibMenuLen = 3;
 const int modeMenuLen = 4;
 const int cursorSpMenuLen = 3;
-const int bluetoothMenuLen = 2;
 const int moreMenuLen = 3;
 const int soundMenuLen = 2;
 const int sipPuffThreshMenuLen = 3;
@@ -90,26 +87,26 @@ private:
   int selectedLine; 
 
   int mode = MODE_MOUSE_USB;
-int tempMode = MODE_MOUSE_USB;
-int cursorSpeedLevel = 5;
-bool bluetoothOn = false;
-bool soundOn = true;
-
-bool scrollOn = false;
-long scrollDelayTimer = millis();
-int scrollPos = 12;
-
-bool buttonSelPressed = false;
-bool buttonNextPressed = false;
-bool buttonSelPrevPressed = false;
-bool buttonNextPrevPressed = false;
-
-int cursorStart = 0;
-int countMenuScroll = 0;
-
-int currentMenuLength;
-String *currentMenuText;
-String selectedText;
+  int tempMode = MODE_MOUSE_USB;
+  int cursorSpeedLevel = 5;
+  bool bluetoothOn = false;
+  bool soundOn = true;
+  
+  bool scrollOn = false;
+  long scrollDelayTimer = millis();
+  int scrollPos = 12;
+  
+  bool buttonSelPressed = false;
+  bool buttonNextPressed = false;
+  bool buttonSelPrevPressed = false;
+  bool buttonNextPrevPressed = false;
+  
+  int cursorStart = 0;
+  int countMenuScroll = 0;
+  
+  int currentMenuLength;
+  String *currentMenuText;
+  String selectedText;
 
 
 public:
