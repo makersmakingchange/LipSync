@@ -31,7 +31,6 @@
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3D ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 
-
 #define MAIN_MENU   0
 #define EXIT_MENU   1
 #define CALIB_MENU  2
@@ -53,6 +52,8 @@
 
 #define SCROLL_DELAY_MILLIS   100
 
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
 const String mainMenuText[5] = {"Exit Menu", "Calibrate", "Mode", "Cursor speed", "More"};
 const String exitConfirmText[4] = {"Exit", "settings?", "Confirm", "... Back"};
 const String calibMenuText[3] = {"Center reset", "Full Calibration", "... Back"};
@@ -73,11 +74,11 @@ const int moreMenuLen = 3;
 const int soundMenuLen = 2;
 const int sipPuffThreshMenuLen = 3;
 
-const int TEXT_ROWS = 4; //Probably a better way to do this with calculations based on text size and screen size
+const int TEXT_ROWS = 4; 
 
 class LSDisplay {
 private:
-  Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+  //Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
   bool is_active = false;
   LSTimer <void> displayStateTimer;                      //Timer used to measure time for each sip and puff action. 
   int displayStateTimerId;                                //The id for the sap state timer
@@ -108,6 +109,10 @@ private:
   String *currentMenuText;
   String selectedText;
 
+  void setupDisplay();
+  void displayMenu();
+  void displayCursor();
+
 
 public:
   LSDisplay();
@@ -115,7 +120,8 @@ public:
   void clear();
   void show();
 
-
+  void startupScreen();
+      
 };
 
 
@@ -123,20 +129,101 @@ public:
 LSDisplay::LSDisplay() {
 }
 
-LSDisplay::begin() {
+void LSDisplay::begin() {
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
     Serial.println(F("SSD1306 allocation failed"));
     for (;;); // Don't proceed, loop forever
   }
+
+  setupDisplay();
+  display.setTextWrap(false);
+  display.display();
+
+  //startupScreen();
+
 }
 
-LSDisplay::clear() {
+void LSDisplay::clear() {
   
 }
 
+void LSDisplay::setupDisplay() {
+  display.clearDisplay();
 
+  display.setTextSize(2);                                   // 2x scale text
+  display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
 
+  display.setCursor(0, 0);
+}
+
+void LSDisplay::startupScreen(){
+  
+  setupDisplay();
+
+  display.println("LipSync4.0");
+
+  display.setTextSize(1);
+  display.println("Makers Making Change");
+  display.display();
+  
+  display.setTextSize(2);
+}
+
+void LSDisplay::displayMenu() {
+
+  initDisplay();
+
+  for (int i = 0; i < TEXT_ROWS; i++) {
+    if (i >= cursorStart){
+      display.print(" "), display.println(currentMenuText[i+countMenuScroll]);
+    } else {
+      display.println(currentMenuText[i]);
+    }
+  }
+
+  display.display();
+
+  //currentSelection = 0;
+  displayCursor();
+}
+
+void LSDisplay::displayCursor() {
+  int cursorPos;
+  if (currentSelection + cursorStart > TEXT_ROWS-1){
+    cursorPos = TEXT_ROWS-1;
+  } else {
+    cursorPos = currentSelection;
+  }
+
+  // These settings are likely already implemented and these lines can likely be removed, this is mostly here just to make sure 
+  display.setTextSize(2);                                   // 2x scale text
+  display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
+
+  // Show cursor on text line of selection index, erase previous cursor
+  display.setCursor(0, 16 * cursorStart);  
+  for (int i = 0; i < currentMenuLength; i++) {    
+    if (i == cursorPos) {
+      display.println(">");
+    } else {
+      display.println(" ");
+    }
+  }
+
+  display.display();
+
+  selectedLine = cursorStart + currentSelection;
+  selectedText = currentMenuText[selectedLine];
+  
+  if (selectedText.length() > 9){
+    scrollOn = true;
+    scrollPos = 12;
+    //delay(200);                           // may need to remove this
+    //scrollLongText();
+  } else {
+    scrollOn = false;
+  }
+}
 
 
 #endif
