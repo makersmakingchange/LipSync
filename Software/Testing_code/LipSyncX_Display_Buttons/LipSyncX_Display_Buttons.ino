@@ -15,8 +15,8 @@
 #define SCREEN_ADDRESS 0x3D ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-#define PIN_BUTTON_SEL    3
-#define PIN_BUTTON_NEXT   9
+#define CONF_BUTTON2_PIN    3
+#define CONF_BUTTON1_PIN   9
 
 #define PIN_LED_MOUSE   8
 #define PIN_LED_GAMEPAD 7
@@ -97,8 +97,8 @@ const int soundMenuLen = 2;
 const int sipPuffThreshMenuLen = 3;
 
 void setup() {
-  pinMode(PIN_BUTTON_SEL, INPUT_PULLUP);
-  pinMode(PIN_BUTTON_NEXT, INPUT_PULLUP);
+  pinMode(CONF_BUTTON2_PIN, INPUT_PULLUP);
+  pinMode(CONF_BUTTON1_PIN, INPUT_PULLUP);
 
   pinMode(PIN_LED_MOUSE, OUTPUT);
   pinMode(PIN_LED_GAMEPAD, OUTPUT);
@@ -275,8 +275,8 @@ void readButtons(void){
   buttonSelPrevPressed = buttonSelPressed;
   buttonNextPrevPressed = buttonNextPressed;
 
-  buttonSelPressed = !digitalRead(PIN_BUTTON_SEL);
-  buttonNextPressed = !digitalRead(PIN_BUTTON_NEXT);
+  buttonSelPressed = !digitalRead(CONF_BUTTON2_PIN);
+  buttonNextPressed = !digitalRead(CONF_BUTTON1_PIN);
 }
 
 void buttonActions(void){

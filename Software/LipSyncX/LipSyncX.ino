@@ -30,6 +30,7 @@
 #include "LSPressure.h"
 #include "LSJoystick.h"
 #include "LSMemory.h"
+#include "LSDisplay.h"
 
 
 //Communication mode and debug mode variables
@@ -193,6 +194,8 @@ LSPressure ps;                                       //Starts an instance of the
 
 LSOutput led;                                        //Starts an instance of the LSOutput LED object
 
+LSDisplay ds;                                        //Starts an instance of the LSDisplay object
+
 LSUSBMouse usbmouse;                                 //Starts an instance of the USB mouse object
 LSBLEMouse btmouse;                                  //Starts an instance of the BLE mouse object
 LSUSBGamepad gamepad;                                //Create an instance of the USB gamepad object
@@ -234,6 +237,8 @@ void setup()
   initJoystick();                                               //Initialize Joystick 
 
   initAcceleration();                                           //Initialize Cursor Acceleration
+
+  initDisplay();                                                //Initialize Display
 
   initDebug();                                                  //Initialize Debug Mode operation 
  
@@ -1582,4 +1587,24 @@ void softwareReset() {
 
   NVIC_SystemReset();
   delay(10);
+}
+  
+//*********************************//
+// Display Functions
+//*********************************//
+
+//***INITIALIZE DISPLAY FUNCTION***//
+// Function   : initDisplay
+// 
+// Description: This function initializes the OLED display as feedback method.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void initDisplay()
+{ 
+  if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing OLED Display");  }
+  ds.begin();
+  ds.startupScreen();
 }
