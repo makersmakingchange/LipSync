@@ -31,9 +31,9 @@
 #define INPUT_MAIN_STATE_S23_PRESSED    6
 #define INPUT_MAIN_STATE_S123_PRESSED   7
 
-#define INPUT_SEC_STATE_WAITING 0
-#define INPUT_SEC_STATE_STARTED 1
-#define INPUT_SEC_STATE_RELEASED 2
+#define INPUT_SEC_STATE_WAITING 0             // OFF->OFF (and ON->ON?)
+#define INPUT_SEC_STATE_STARTED 1             // OFF->ON
+#define INPUT_SEC_STATE_RELEASED 2            // ON ->OFF
 
 #define INPUT_REACTION_TIME 120
 
@@ -66,6 +66,7 @@ LSInput::LSInput(int* inputPinArray, int inputNumber)
 
   _inputNumber = inputNumber;
   
+  // Set the input mode for each of the pins to an INPUT_PULLUP
   for (int i = 0; i < inputNumber; i++){
     pinMode(inputPinArray[i], INPUT_PULLUP);
     _inputPinArray[i] = inputPinArray[i];
@@ -99,9 +100,11 @@ void LSInput::update() {
 
   inputAllState = 0;
 
+
+  // for each input pin, do a digital read and create a single number to represent the collective states
   for (int i = 0; i < _inputNumber; i++){
     inputState[i] = !digitalRead(_inputPinArray[i]);
-    inputAllState+= pow(2,i) * inputState[i];
+    inputAllState+= pow(2,i) * inputState[i];  // create single integer to represent combination of button presses
   }  
   
   inputPrevState = inputBuffer.getLastElement();
@@ -111,32 +114,50 @@ void LSInput::update() {
  
   // prev: none,waiting  current : none 
   // prev: press x,started  current : press x 
-  if((inputAllState == inputPrevState.mainState && inputPrevState.secondaryState != INPUT_SEC_STATE_RELEASED)){
-    inputCurrState = {inputAllState, inputPrevState.secondaryState, inputStateTimer.elapsedTime(inputStateTimerId)};
-    inputBuffer.updateLastElement(inputCurrState);  
-    //Serial.println("a");
-  } // prev: press x,started  current : press y and elapsed time<reaction time ms
-  else if(inputAllState != INPUT_MAIN_STATE_NONE && inputPrevState.secondaryState == INPUT_SEC_STATE_STARTED && inputPrevState.elapsedTime<INPUT_REACTION_TIME){
+  if((inputAllState == inputPrevState.mainState // current button states are the same as previous
+      && inputPrevState.secondaryState != INPUT_SEC_STATE_RELEASED)){ // and last state was not a release
+    
     inputCurrState = {inputAllState, inputPrevState.secondaryState, inputStateTimer.elapsedTime(inputStateTimerId)};
 
-    inputBuffer.updateLastElement(inputCurrState);  
+    inputBuffer.updateLastElement(inputCurrState);  //add state to buffer
+    //Serial.println("a");
+
+  } // prev: press x,started  current : press y and elapsed time < reaction time in ms   (120 ms debounce?)
+  else if(inputAllState != INPUT_MAIN_STATE_NONE                      // Something is currently pressed
+          && inputPrevState.secondaryState == INPUT_SEC_STATE_STARTED // AND previous state was input start
+          && inputPrevState.elapsedTime < INPUT_REACTION_TIME){       // AND time elapsed is less than (debounce?) threshold
+
+    inputCurrState = {inputAllState, inputPrevState.secondaryState, inputStateTimer.elapsedTime(inputStateTimerId)};
+
+    inputBuffer.updateLastElement(inputCurrState);  // add state to buffer
     //Serial.println("b");
   } 
+
+  // (current button states are different than previous OR last state was released) OR (current button states are different AND current button state is all off)
   else { 
       // prev: none,waiting  current : press x 
-      if(inputPrevState.secondaryState==INPUT_SEC_STATE_WAITING){
+      if(inputPrevState.secondaryState == INPUT_SEC_STATE_WAITING){
+        
         inputCurrState = {inputAllState, INPUT_SEC_STATE_STARTED, 0};
+        
         //Serial.println("c");
-      } // prev: press x,started  current : none  OR prev: press x,started  current : press y and elapsed time>=150
-      else if(inputPrevState.secondaryState==INPUT_SEC_STATE_STARTED && inputPrevState.elapsedTime>=INPUT_REACTION_TIME){
+      } // prev: press x,started  current : none  OR prev: press x,started  current : press y and elapsed time >= 150
+      else if(inputPrevState.secondaryState == INPUT_SEC_STATE_STARTED 
+           && inputPrevState.elapsedTime >= INPUT_REACTION_TIME){
+        
         inputCurrState = {inputPrevState.mainState, INPUT_SEC_STATE_RELEASED, inputPrevState.elapsedTime};
+        
         //Serial.println("d");
       } // prev: press x,released  current : none 
-      else if(inputPrevState.secondaryState==INPUT_SEC_STATE_RELEASED && inputAllState==INPUT_MAIN_STATE_NONE){
+      else if(inputPrevState.secondaryState == INPUT_SEC_STATE_RELEASED && inputAllState == INPUT_MAIN_STATE_NONE){
+        
         inputCurrState = {inputAllState, INPUT_SEC_STATE_WAITING, 0};
+        
         //Serial.println("e");
       } // prev: press x,released  current : press y 
-      else if(inputPrevState.secondaryState==INPUT_SEC_STATE_RELEASED && inputAllState!=INPUT_MAIN_STATE_NONE){
+      else if(inputPrevState.secondaryState == INPUT_SEC_STATE_RELEASED 
+              && inputAllState != INPUT_MAIN_STATE_NONE){
+
         inputCurrState = {inputAllState, INPUT_SEC_STATE_STARTED, 0};
         //Serial.println("f");
       }     
@@ -149,7 +170,8 @@ void LSInput::update() {
   }
   
   //No action in 1 minute : reset timer
-  if(inputPrevState.secondaryState==INPUT_SEC_STATE_WAITING && inputStateTimer.elapsedTime(inputStateTimerId)>INPUT_ACTION_TIMEOUT){
+  if(inputPrevState.secondaryState == INPUT_SEC_STATE_WAITING
+    && inputStateTimer.elapsedTime(inputStateTimerId) > INPUT_ACTION_TIMEOUT){
       //Reset and start the timer         
       inputStateTimer.restartTimer(inputStateTimerId);
   }
