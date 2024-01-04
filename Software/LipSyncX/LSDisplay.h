@@ -2,7 +2,7 @@
 * File: LSDisplay.h
 * Firmware: LipSync X
 * Developed by: MakersMakingChange
-* Version: Beta (01 December 2023)
+* Version: Beta (03 January 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2023 Neil Squire Society
@@ -121,6 +121,8 @@ public:
   void show();
 
   void startupScreen();
+  void nextSelection();
+  void scrollLongText();
       
 };
 
@@ -218,11 +220,61 @@ void LSDisplay::displayCursor() {
   if (selectedText.length() > 9){
     scrollOn = true;
     scrollPos = 12;
-    //delay(200);                           // may need to remove this
-    //scrollLongText();
+    delay(200);                           // may need to remove this
+    scrollLongText();
   } else {
     scrollOn = false;
   }
+}
+
+void LSDisplay::nextSelection() {
+  if (scrollOn){
+    display.setCursor(0, selectedLine *16);
+    display.print("                                   ");
+    display.setCursor(12, selectedLine *16);
+    display.print(selectedText);
+  }
+
+  currentSelection++;
+  if (currentSelection >= currentMenuLength) {   
+    currentSelection = 0;
+    countMenuScroll = 0;
+    displayMenu();
+  } else if (currentSelection + cursorStart > TEXT_ROWS-1){
+    countMenuScroll++;
+    displayMenu();
+  } 
+
+  displayCursor();
+
+}
+
+void LSDisplay::scrollLongText() {
+  int minPos = -12 * selectedText.length();
+  
+  display.setTextSize(2);                                   // 2x scale text
+  display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
+  display.setTextWrap(false);
+  
+  if (millis() - scrollDelayTimer >= SCROLL_DELAY_MILLIS){
+    scrollDelayTimer = millis();
+    
+    //Clear previous text by writing over it with blank text
+    display.setCursor(0, selectedLine *16);
+    display.print("                                   ");
+
+    //Display text in new position to simulate scrolling
+    display.setCursor(scrollPos, selectedLine *16);
+    display.print(selectedText);
+
+    display.setCursor(0, selectedLine *16);
+    display.print(">");
+    display.display();
+    //displayCursor();
+    scrollPos = scrollPos-4;
+    if (scrollPos < minPos) scrollPos = display.width();
+  }
+  
 }
 
 

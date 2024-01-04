@@ -2,7 +2,7 @@
 * File: LipSync_Firmware.ino
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: Beta (11 December 2023) 
+* Version: Beta (03 January 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2023 Neil Squire Society
@@ -94,6 +94,7 @@ int buttonActionSize, switchActionSize;
 unsigned long buttonActionMaxTime, switchActionMaxTime;
 inputStateStruct buttonState, switchState;
 
+/*
 const inputActionStruct switchActionProperty[]{
     {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_NONE,       0,0},
     {CONF_ACTION_LEFT_CLICK,         INPUT_MAIN_STATE_S1_PRESSED, 0,3000},
@@ -118,7 +119,30 @@ const inputActionStruct buttonActionProperty[]{
     {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S13_PRESSED, 0,3000},
     {CONF_ACTION_FACTORY_RESET,      INPUT_MAIN_STATE_S13_PRESSED, 3000,5000}
 };
+*/
 
+const inputActionStruct switchActionProperty[]{
+    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_NONE,       0,0},
+    {CONF_ACTION_LEFT_CLICK,         INPUT_MAIN_STATE_S1_PRESSED, 0,3000},
+    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S2_PRESSED, 0,3000},
+    {CONF_ACTION_RIGHT_CLICK,        INPUT_MAIN_STATE_S3_PRESSED, 0,3000},
+    {CONF_ACTION_DRAG,               INPUT_MAIN_STATE_S1_PRESSED, 3000,5000},
+    {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED, 3000,5000},
+    {CONF_ACTION_SCROLL,             INPUT_MAIN_STATE_S3_PRESSED, 3000,5000},
+    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S1_PRESSED, 5000,10000}, //Enter settings menu
+    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S2_PRESSED, 5000,10000},
+    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S3_PRESSED, 5000,10000},
+};
+
+const inputActionStruct buttonActionProperty[]{
+    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_NONE,        0,0},
+    {CONF_ACTION_LEFT_CLICK,         INPUT_MAIN_STATE_S1_PRESSED,  0,3000},
+    {CONF_ACTION_RIGHT_CLICK,        INPUT_MAIN_STATE_S2_PRESSED,  0,3000},
+    {CONF_ACTION_DRAG,               INPUT_MAIN_STATE_S1_PRESSED,  3000,5000},
+    {CONF_ACTION_SCROLL,             INPUT_MAIN_STATE_S2_PRESSED,  3000,5000},
+    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S1_PRESSED,  5000,10000},   //Enter settings mode
+    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S2_PRESSED,  5000,10000},
+};
 
 // Cursor acceleration structure
 const accStruct accProperty[]{
