@@ -54,16 +54,6 @@
 
 //Adafruit_SSD1306 _display(CONF_SCREEN_WIDTH, CONF_SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-const String mainMenuText[5] = {"Exit Menu", "Calibrate", "Mode", "Cursor speed", "More"};
-const String exitConfirmText[4] = {"Exit", "settings?", "Confirm", "... Back"};
-const String calibMenuText[3] = {"Center reset", "Full Calibration", "... Back"};
-const String modeMenuText[4] = {"MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back"};
-const String modeConfirmText[4] = {"Change", "mode?", "Confirm", "... Back"};
-const String cursorSpMenuText[4] = {"  ", "Increase", "Decrease", "... Back"};
-const String moreMenuText[4] = {"Sound", "Sip & Puff", "... Back", "         "};
-const String soundMenuText[4] = {"Sound:", "<>", "Turn <>", "... Back"};
-const String sipPuffThreshMenuText[4] = {"Sip Threshold", "Puff Threshold", "... Back"};
-
 // Number of selectable options in each menu
 const int mainMenuLen = 5;
 const int exitConfirmLen = 2;
@@ -113,6 +103,30 @@ private:
   //void displayMenu();
   //void displayCursor();
 
+  void mainMenu();
+  void exitConfirmMenu();
+  void calibMenu();
+  void modeMenu();
+  void confirmModeChange();
+  void changeMode();
+  void cursorSpeedMenu();
+  void bluetoothMenu();
+  void moreMenu();
+  void centerResetPage();
+  void fullCalibrationPage();
+  void centerReset();
+  void soundMenu();
+  void sipPuffThreshMenu();
+
+  String mainMenuText[5] = {"Exit Menu", "Calibrate", "Mode", "Cursor speed", "More"};
+  String exitConfirmText[4] = {"Exit", "settings?", "Confirm", "... Back"};
+  String calibMenuText[3] = {"Center reset", "Full Calibration", "... Back"};
+  String modeMenuText[4] = {"MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back"};
+  String modeConfirmText[4] = {"Change", "mode?", "Confirm", "... Back"};
+  String cursorSpMenuText[4] = {"  ", "Increase", "Decrease", "... Back"};
+  String moreMenuText[4] = {"Sound", "Sip & Puff", "... Back", "         "};
+  String soundMenuText[4] = {"Sound:", "<>", "Turn <>", "... Back"};
+  String sipPuffThreshMenuText[4] = {"Sip Threshold", "Puff Threshold", "... Back"};
 
 
 public:
@@ -122,7 +136,7 @@ public:
   void clear();
   void show();
   //void startupScreen();
-  void nextSelection();
+  //void nextSelection();
   void scrollLongText();
 
   void setupDisplay();
@@ -168,6 +182,32 @@ void LSScreen::update() {
   
 }
 
+void LSScreen::activateMenu() {
+  is_active = true;
+  //change inputs to menu inputs (Next and Select)
+  mainMenu();
+}
+
+void LSScreen::deactivateMenu() {
+  is_active = false;
+  
+}
+
+bool LSScreen::isActive() {
+
+return is_active;
+ 
+}
+
+//*********************************//
+// Function   : splashScreen
+// 
+// Description: Displays a screen with the device name and version. To be used when the device starts up.
+//              
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::splashScreen() {
   setupDisplay();
   
@@ -183,23 +223,150 @@ void LSScreen::splashScreen() {
   
 }
 
+//------------------------------------------//
+// Functions called from inputs
+//------------------------------------------//
+
 void LSScreen::nextMenuItem() {
-  
+  if (scrollOn){
+    _display.setCursor(0, selectedLine *16);
+    _display.print("                                   ");
+    _display.setCursor(12, selectedLine *16);
+    _display.print(selectedText);
+  }
+
+  currentSelection++;
+  if (currentSelection >= currentMenuLength) {   
+    currentSelection = 0;
+    countMenuScroll = 0;
+    displayMenu();
+  } else if (currentSelection + cursorStart > TEXT_ROWS-1){
+    countMenuScroll++;
+    displayMenu();
+  } 
+
+  displayCursor();
 }
 
 void LSScreen::selectMenuItem() {
-  
+  countMenuScroll = 0;
+  switch (currentMenu) {
+    case MAIN_MENU:
+      currentMenu = currentSelection+1;
+      switch (currentMenu) {
+        case MAIN_MENU:
+          mainMenu();
+          break;
+        case EXIT_MENU:
+          exitConfirmMenu();
+          break;
+        case CALIB_MENU:
+          calibMenu();
+          break;
+        case MODE_MENU:
+          modeMenu();
+          break;
+        case CURSOR_SP_MENU:
+          cursorSpeedMenu();
+          break;
+        case MORE_MENU:
+          moreMenu();
+          break;
+      }
+      break;
+    case CALIB_MENU:
+      if (currentSelection == 0){
+        currentMenu = CENTER_RESET_PAGE;
+        centerResetPage();
+      } else if (currentSelection == 1){
+        currentMenu = FULL_CALIB_PAGE;
+        fullCalibrationPage();
+      } else if (currentSelection == 2){
+        currentMenu = MAIN_MENU;
+        mainMenu();
+      }
+      break;
+    case MODE_MENU:
+      if (currentSelection < (modeMenuLen - 1)){
+        // Confirm mode change
+        tempMode = currentSelection;
+        if (tempMode != mode){
+          confirmModeChange();
+        }
+      } else if (currentSelection == (modeMenuLen-1)){
+        mainMenu();
+      }
+      break;
+    case CURSOR_SP_MENU:
+      switch (currentSelection){
+        case 0:       //Increase
+          cursorSpeedLevel++;
+          if (cursorSpeedLevel>10){
+            cursorSpeedLevel=10;
+          }
+          _display.setCursor(0,0);
+          _display.print("Speed: "); _display.print(cursorSpeedLevel); _display.println("  ");
+          _display.display();
+          break;
+        case 1:       //Decrease
+          cursorSpeedLevel--;
+          if (cursorSpeedLevel<1){
+            cursorSpeedLevel=1;
+          }
+          _display.setCursor(0,0);
+          _display.print("Speed: "); _display.print(cursorSpeedLevel); _display.println("  ");
+          _display.display();
+          break;
+        case 2:       //Back
+          currentMenu = MAIN_MENU;
+          mainMenu();
+          break;
+      }
+      break;
+    case MORE_MENU:
+      if (currentSelection == 0){
+        currentMenu = SOUND_MENU;
+        soundMenu();
+      } else if (currentSelection == 1){
+        currentMenu = SIP_PUFF_MENU;
+        sipPuffThreshMenu();
+      } else if (currentSelection == 2){
+        currentMenu = MAIN_MENU;
+        mainMenu();
+      }
+      break;
+    case SOUND_MENU:
+       switch (currentSelection){
+        case 0:
+          soundOn = !soundOn;
+          //do function for turning sound on/off
+          soundMenu();
+          break;
+        case 1:
+          currentMenu = MAIN_MENU;
+          mainMenu();
+          break;
+        }
+      case SIP_PUFF_MENU:
+       switch (currentSelection){
+        case 0:
+          //add action
+          break;
+        case 1:
+          //add action
+          break;
+        case 2:
+          currentMenu = MAIN_MENU;
+          mainMenu();
+          break;
+        }
+  }
 }
 
-void LSScreen::activateMenu() {
-  is_active = true;
-  
-}
 
-void LSScreen::deactivateMenu() {
-  is_active = false;
-  
-}
+//------------------------------------------//
+// Menu displaying functions
+//------------------------------------------//
 
 void LSScreen::setupDisplay() {
   _display.clearDisplay();
@@ -209,22 +376,6 @@ void LSScreen::setupDisplay() {
 
   _display.setCursor(0, 0);
 }
-
-/*
-void LSScreen::startupScreen(){
-  
-  setupDisplay();
-
-  _display.println("LipSync");
-  _display.println("v4.0.1");
-
-  _display.setTextSize(1);
-  _display.println("Makers Making Change");
-  _display.display();
-  
-  _display.setTextSize(2);
-}
-*/
 
 void LSScreen::displayMenu() {
 
@@ -281,6 +432,7 @@ void LSScreen::displayCursor() {
   }
 }
 
+/*
 void LSScreen::nextSelection() {
   if (scrollOn){
     _display.setCursor(0, selectedLine *16);
@@ -302,6 +454,7 @@ void LSScreen::nextSelection() {
   displayCursor();
 
 }
+*/
 
 void LSScreen::scrollLongText() {
   int minPos = -12 * selectedText.length();
@@ -331,12 +484,258 @@ void LSScreen::scrollLongText() {
   
 }
 
+//********** MENUS **********//
 
+void LSScreen::mainMenu(void) {
+  currentMenu = MAIN_MENU;
+  
+  //if new menu selection
+  //if (prevMenu != currentMenu) {
+    currentMenuLength = mainMenuLen;
+    currentMenuText = mainMenuText;
+    cursorStart = 0;
+    currentSelection = 0;
 
-bool LSScreen::isActive() {
-
-return is_active;
- 
+    displayMenu();
+  //}
 }
+
+void LSScreen::exitConfirmMenu(){
+  prevMenu = currentMenu;
+  currentMenu = EXIT_MENU;
+  currentMenuText = exitConfirmText;
+  currentMenuLength = 2;
+  cursorStart = 2;
+  currentSelection = 0;
+  displayMenu();
+
+  while (!buttonSelPressed){
+    //readButtons(); // ************************************************************** CHANGE THIS <>
+    nextMenuItem();
+  }
+
+  while (buttonSelPressed){
+    //readButtons(); // wait until Sel button is released // ************************************************************** CHANGE THIS <>
+  }
+  
+  if (currentSelection == 1){
+    currentSelection = 0;
+    mainMenu();
+  } else {
+    //some function to exit
+    setupDisplay();
+    _display.println("Exiting");
+    _display.display();
+    delay(2000);
+
+    mainMenu();
+  }
+}
+
+void LSScreen::calibMenu(void) {
+  currentMenu = CALIB_MENU;
+  if (prevMenu != currentMenu) {
+    currentMenuLength = calibMenuLen;
+    currentMenuText = calibMenuText;
+    cursorStart = 0;
+    currentSelection = 0;
+  
+    displayMenu();
+  }
+
+}
+
+void LSScreen::modeMenu(void) {
+  currentMenu = MODE_MENU;
+
+  currentMenuLength = modeMenuLen;
+  currentMenuText = modeMenuText;
+  cursorStart = 0;
+  currentSelection = 0;
+
+  displayMenu();
+
+  _display.setTextColor(SSD1306_BLACK, SSD1306_WHITE); // Draw 'inverse' coloured text
+  if (mode == MODE_MOUSE_USB){
+      _display.setCursor(12, 0);
+      _display.print(modeMenuText[MODE_MOUSE_USB]);
+  } else if (mode == MODE_MOUSE_BT){
+      _display.setCursor(12, 16);
+      //display.print(" MOUSE BLUETOOTH ");
+      _display.print(modeMenuText[MODE_MOUSE_BT]);
+  } else if (mode == MODE_GAMEPAD){
+      _display.setCursor(12, 16*2);
+      //display.print(" GAMEPAD ");
+      _display.print(modeMenuText[MODE_GAMEPAD]);
+  }
+
+  _display.display();
+  _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK); // Reset text colour to white on black
+  
+}
+//
+void LSScreen::confirmModeChange() {
+  currentMenuText = modeConfirmText;
+  currentMenuLength = 2;
+  cursorStart = 2;
+  currentSelection = 0;
+  displayMenu();
+
+  while (!buttonSelPressed){
+    //readButtons();      // ************************************************************** CHANGE THIS <>
+    nextMenuItem();
+  }
+  
+  if (currentSelection == 1){
+    currentSelection = 0;
+    buttonSelPressed=false;
+    modeMenu();
+  } else {
+    changeMode();
+  }
+}
+
+void LSScreen::changeMode(){
+  mode = tempMode;
+
+  /*                  // ************************************************************** CHANGE THIS <>
+  switch (mode){
+    case MODE_MOUSE_USB:
+      digitalWrite(PIN_LED_GAMEPAD, LOW);
+      digitalWrite(PIN_LED_MOUSE, HIGH);
+      break;
+    case MODE_MOUSE_BT:
+      digitalWrite(PIN_LED_GAMEPAD, LOW);
+      digitalWrite(PIN_LED_MOUSE, HIGH);
+      break;
+    case MODE_GAMEPAD:
+      digitalWrite(PIN_LED_MOUSE, LOW);
+      digitalWrite(PIN_LED_GAMEPAD, HIGH);
+      break;
+  }
+  */                  // ************************************************************** CHANGE THIS ^
+
+  setupDisplay();
+  _display.println("Resetting");
+  _display.println("device");
+  _display.display();
+
+  delay(2000);
+  
+  //conduct mode change
+  //save mode into flash
+
+  //remove this for final code, becuase device will reset
+  //readButtons();                            // ************************************************************** CHANGE THIS <>
+  currentMenu = MAIN_MENU;
+  mainMenu();
+
+  //software reset
+}
+
+void LSScreen::cursorSpeedMenu(void) { 
+  currentMenu = CURSOR_SP_MENU;
+  
+  cursorSpMenuText[0] = "Speed: " + String(cursorSpeedLevel);
+  
+  currentMenuLength = cursorSpMenuLen;
+  currentMenuText = cursorSpMenuText;
+  cursorStart = 1;
+  currentSelection = 0;
+
+  displayMenu();
+
+}
+
+void LSScreen::moreMenu(){
+  currentMenu = MORE_MENU;
+
+  currentMenuLength = moreMenuLen;
+  currentMenuText = moreMenuText;
+  cursorStart = 0;
+  currentSelection = 0;
+
+  displayMenu();
+
+}
+
+// ----- CALIBRATION PAGES ----- //
+void LSScreen::centerResetPage(void){
+  setupDisplay();
+
+  _display.println("Center");
+  _display.println("reset, do");
+  _display.println("not move");
+  _display.println("joystick");
+
+  _display.display();
+
+  //function to actually do center reset
+  centerReset();
+
+  delay(4000);
+
+  _display.clearDisplay();
+  _display.setCursor(0,0);
+  _display.println("Center");
+  _display.println("reset");
+  _display.println("complete");
+
+  _display.display();
+
+  delay(2000);
+
+  mainMenu();
+  
+}
+
+void LSScreen::fullCalibrationPage(void){
+
+  _display.println("Full");
+  _display.println("Calibration");
+
+  _display.display();
+
+  delay(1000);
+
+  mainMenu();
+}
+
+void LSScreen::centerReset(void){
+  //function to actually perform center reset
+}
+
+// ----- MORE SETTINGS MENUS ----- //
+
+void LSScreen::soundMenu(){
+  currentMenu = SOUND_MENU;
+  
+  if (soundOn) {
+    soundMenuText[1] = "ON";
+    soundMenuText[2] = "Turn off";
+  } else {
+    soundMenuText[1] = "OFF";
+    soundMenuText[2] = "Turn on";
+  }
+
+  currentMenuLength = soundMenuLen;
+  currentMenuText = soundMenuText;
+  cursorStart = 2;
+  currentSelection = 0;
+
+  displayMenu();
+}
+
+void LSScreen::sipPuffThreshMenu(){
+  currentMenu = SIP_PUFF_MENU;
+
+  currentMenuLength = sipPuffThreshMenuLen;
+  currentMenuText = sipPuffThreshMenuText;
+  cursorStart = 0;
+  currentSelection = 0;
+
+  displayMenu();
+}
+
 
 #endif
