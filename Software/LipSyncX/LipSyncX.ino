@@ -30,7 +30,7 @@
 #include "LSPressure.h"
 #include "LSJoystick.h"
 #include "LSMemory.h"
-#include "LSDisplay.h"
+#include "LSScreen.h"
 
 
 //Communication mode and debug mode variables
@@ -48,23 +48,6 @@ bool btIsConnected = false;
 //LED module variables
 bool ledActionEnabled = false;
 
-//LED Action for all available output actions 
-// const ledActionStruct ledActionProperty[]{
-//     {CONF_ACTION_NOTHING,            CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE}, // ledOutputActionNumber, ledNumber, ledStartColor, ledEndColor, ledEndAction
-//     {CONF_ACTION_LEFT_CLICK,         CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_RED,    LED_ACTION_NONE},
-//     {CONF_ACTION_RIGHT_CLICK,        CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_RED,    LED_ACTION_NONE},
-//     {CONF_ACTION_DRAG,               CONF_LED_LEFT,     LED_CLR_RED,    LED_CLR_NONE,   LED_ACTION_ON},
-//     {CONF_ACTION_SCROLL,             CONF_LED_RIGHT,    LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_ON},
-//     {CONF_ACTION_CURSOR_CENTER,      CONF_LED_MICRO,    LED_CLR_PURPLE, LED_CLR_ORANGE,  LED_ACTION_ON},
-//     {CONF_ACTION_CURSOR_CALIBRATION, CONF_LED_MICRO,    LED_CLR_GREEN,  LED_CLR_NONE,   LED_ACTION_ON},
-//     {CONF_ACTION_MIDDLE_CLICK,       CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
-//     {CONF_ACTION_DEC_SPEED,          CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
-//     {CONF_ACTION_INC_SPEED,          CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
-//     {CONF_ACTION_CHANGE_MODE,        CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
-//     {CONF_ACTION_RESET,              CONF_LED_MICRO,    LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_ON},
-//     {CONF_ACTION_FACTORY_RESET,      CONF_LED_MICRO,    LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_BLINK}
-// };
-
 //LED Action for all available output actions. This maps what happens with the lights when different actions are triggered.
 const ledActionStruct ledActionProperty[]{
     {CONF_ACTION_NOTHING,            CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE}, // ledOutputActionNumber, ledNumber, ledStartColor, ledEndColor, ledEndAction
@@ -72,7 +55,7 @@ const ledActionStruct ledActionProperty[]{
     {CONF_ACTION_RIGHT_CLICK,        CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_RED,    LED_ACTION_NONE},
     {CONF_ACTION_DRAG,               CONF_LED_LEFT,     LED_CLR_RED,    LED_CLR_NONE,   LED_ACTION_NONE},
     {CONF_ACTION_SCROLL,             CONF_LED_RIGHT,    LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_NONE},
-    {CONF_ACTION_CURSOR_CENTER,      CONF_LED_MICRO,    LED_CLR_PURPLE, LED_CLR_ORANGE,  LED_ACTION_NONE},
+    {CONF_ACTION_CURSOR_CENTER,      CONF_LED_MICRO,    LED_CLR_PURPLE, LED_CLR_ORANGE, LED_ACTION_NONE},
     {CONF_ACTION_CURSOR_CALIBRATION, CONF_LED_MICRO,    LED_CLR_GREEN,  LED_CLR_NONE,   LED_ACTION_NONE},
     {CONF_ACTION_MIDDLE_CLICK,       CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
     {CONF_ACTION_DEC_SPEED,          CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
@@ -94,54 +77,31 @@ int buttonActionSize, switchActionSize;
 unsigned long buttonActionMaxTime, switchActionMaxTime;
 inputStateStruct buttonState, switchState;
 
-/*
+
+// External Assistive Switch Jacks
 const inputActionStruct switchActionProperty[]{
-    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_NONE,       0,0},
-    {CONF_ACTION_LEFT_CLICK,         INPUT_MAIN_STATE_S1_PRESSED, 0,3000},
-    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S2_PRESSED, 0,3000},
-    {CONF_ACTION_RIGHT_CLICK,        INPUT_MAIN_STATE_S3_PRESSED, 0,3000},
-    {CONF_ACTION_DRAG,               INPUT_MAIN_STATE_S1_PRESSED, 3000,5000},
-    {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED, 3000,5000},
-    {CONF_ACTION_SCROLL,             INPUT_MAIN_STATE_S3_PRESSED, 3000,5000},
-    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S1_PRESSED, 5000,10000},
-    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S2_PRESSED, 5000,10000},
-    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S3_PRESSED, 5000,10000},
+    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,             0,0},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,          0,3000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,        0,3000},
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_RIGHT_CLICK,         0,3000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,                3000,5000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CHANGE_MODE,         3000,5000},
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_SCROLL,              3000,5000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_CURSOR_CALIBRATION,  5000,10000},   //Enter settings menu
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_NOTHING,             5000,10000},
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_MIDDLE_CLICK,        5000,10000},
 };
 
+
+// Buttons built in to hub
 const inputActionStruct buttonActionProperty[]{
-    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_NONE,        0,0},
-    {CONF_ACTION_DEC_SPEED,          INPUT_MAIN_STATE_S1_PRESSED,  0,3000},
-    {CONF_ACTION_CURSOR_CENTER,      INPUT_MAIN_STATE_S2_PRESSED,  0,3000},
-    {CONF_ACTION_INC_SPEED,          INPUT_MAIN_STATE_S3_PRESSED,  0,3000},
-    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S1_PRESSED,  3000,5000},
-    {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED,  3000,5000},
-    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S3_PRESSED,  3000,5000},
-    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S13_PRESSED, 0,3000},
-    {CONF_ACTION_FACTORY_RESET,      INPUT_MAIN_STATE_S13_PRESSED, 3000,5000}
-};
-*/
-
-const inputActionStruct switchActionProperty[]{
-    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_NONE,       0,0},
-    {CONF_ACTION_LEFT_CLICK,         INPUT_MAIN_STATE_S1_PRESSED, 0,3000},
-    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S2_PRESSED, 0,3000},
-    {CONF_ACTION_RIGHT_CLICK,        INPUT_MAIN_STATE_S3_PRESSED, 0,3000},
-    {CONF_ACTION_DRAG,               INPUT_MAIN_STATE_S1_PRESSED, 3000,5000},
-    {CONF_ACTION_CHANGE_MODE,        INPUT_MAIN_STATE_S2_PRESSED, 3000,5000},
-    {CONF_ACTION_SCROLL,             INPUT_MAIN_STATE_S3_PRESSED, 3000,5000},
-    {CONF_ACTION_CURSOR_CALIBRATION, INPUT_MAIN_STATE_S1_PRESSED, 5000,10000}, //Enter settings menu
-    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S2_PRESSED, 5000,10000},
-    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S3_PRESSED, 5000,10000},
-};
-
-const inputActionStruct buttonActionProperty[]{
-    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_NONE,        0,0},
-    {CONF_ACTION_LEFT_CLICK,         INPUT_MAIN_STATE_S1_PRESSED,  0,3000},
-    {CONF_ACTION_RIGHT_CLICK,        INPUT_MAIN_STATE_S2_PRESSED,  0,3000},
-    {CONF_ACTION_DRAG,               INPUT_MAIN_STATE_S1_PRESSED,  3000,5000},
-    {CONF_ACTION_SCROLL,             INPUT_MAIN_STATE_S2_PRESSED,  3000,5000},
-    {CONF_ACTION_NOTHING,            INPUT_MAIN_STATE_S1_PRESSED,  5000,10000},   //Enter settings mode
-    {CONF_ACTION_MIDDLE_CLICK,       INPUT_MAIN_STATE_S2_PRESSED,  5000,10000},
+    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,              0,0},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,           0,3000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_RIGHT_CLICK,          0,3000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,                 3000,5000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CCONF_ACTION_SCROLL,              3000,5000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_NOTHING,              5000,10000},  //Enter settings menu
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,         5000,10000},
 };
 
 // Cursor acceleration structure
@@ -171,14 +131,16 @@ inputStateStruct sapActionState;
 int sapActionSize;
 unsigned long sapActionMaxTime = 0;
 
+//Sip and Puff Action Mapping
+// {INPUT ACTION, OUTPUT, ACTION, minTime, maxTime}
 const inputActionStruct sapActionProperty[]{
-    {CONF_ACTION_NOTHING,            PRESS_SAP_MAIN_STATE_NONE,  0,0},
-    {CONF_ACTION_LEFT_CLICK,         PRESS_SAP_MAIN_STATE_PUFF,  0,3000},
-    {CONF_ACTION_RIGHT_CLICK,        PRESS_SAP_MAIN_STATE_SIP,   0,3000},
-    {CONF_ACTION_DRAG,               PRESS_SAP_MAIN_STATE_PUFF,  3000,5000},
-    {CONF_ACTION_SCROLL,             PRESS_SAP_MAIN_STATE_SIP,   3000,5000},
-    {CONF_ACTION_CURSOR_CENTER,      PRESS_SAP_MAIN_STATE_PUFF,  5000,10000},
-    {CONF_ACTION_MIDDLE_CLICK,       PRESS_SAP_MAIN_STATE_SIP,   5000,10000}
+    {PRESS_SAP_MAIN_STATE_NONE,       CONF_ACTION_NOTHING,                0,0},
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_LEFT_CLICK,             0,3000},
+    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_RIGHT_CLICK,            0,3000},
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_DRAG,                   3000,5000},
+    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_SCROLL,                 3000,5000},
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_CURSOR_CENTER,          5000,10000},
+    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_MIDDLE_CLICK,           5000,10000}
 };
 
 //Joystick module variables and structures
@@ -192,7 +154,7 @@ LSTimer<int> calibTimer;
 
 //Timer related variables
 
-int pollTimerId[7];
+int pollTimerId[8];
 
 LSTimer<void> pollTimer;
 
@@ -208,7 +170,7 @@ bool settingsEnabled = false;                        //Serial input settings com
 LSMemory mem;
 
 LSInput ib(inputButtonPinArray, CONF_BUTTON_NUMBER); // Instance of input button object (tactile buttons)
-LSInput is(inputSwitchPinArray, CONF_SWITCH_NUMBER); //Starts an instance of the input switch object (external switches)
+LSInput is(inputSwitchPinArray, CONF_SWITCH_NUMBER); // Create an instance of the input switch object (external switches)
 
 LSJoystick js;                                       //Starts an instance of the LSJoystick object
 
@@ -216,7 +178,7 @@ LSPressure ps;                                       //Starts an instance of the
 
 LSOutput led;                                        //Starts an instance of the LSOutput LED object
 
-LSDisplay ds;                                        //Starts an instance of the LSDisplay object
+LSScreen screen;                                    //Create an instance of the LSDisplay Object for OLED Screen
 
 LSUSBMouse usbmouse;                                 //Starts an instance of the USB mouse object
 LSBLEMouse btmouse;                                  //Starts an instance of the BLE mouse object
@@ -239,6 +201,8 @@ int scrollLevel = 0;
 void setup()
 {
   Serial.begin(115200);
+
+  initScreen();                                                 //Initialize screen
 
   initLed();                                                   //Initialize LED Feedback 
   ledWaitFeedback();
@@ -269,12 +233,13 @@ void setup()
   //startupFeedback();                                            //Startup LED Feedback 
 
   //Configure poll timer to perform each feature as a separate loop
-  pollTimerId[CONF_TIMER_JOYSTICK] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, 0, joystickLoop);
-  pollTimerId[CONF_TIMER_PRESSURE] = pollTimer.setInterval(CONF_PRESSURE_POLL_RATE, 0, pressureLoop);
-  pollTimerId[CONF_TIMER_INPUT] = pollTimer.setInterval(CONF_INPUT_POLL_RATE, 0, inputLoop);
+  pollTimerId[CONF_TIMER_JOYSTICK]  = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, 0, joystickLoop);
+  pollTimerId[CONF_TIMER_PRESSURE]  = pollTimer.setInterval(CONF_PRESSURE_POLL_RATE, 0, pressureLoop);
+  pollTimerId[CONF_TIMER_INPUT]     = pollTimer.setInterval(CONF_INPUT_POLL_RATE, 0, inputLoop);
   pollTimerId[CONF_TIMER_BLUETOOTH] = pollTimer.setInterval(CONF_BT_FEEDBACK_POLL_RATE, 0, btFeedbackLoop);
-  pollTimerId[CONF_TIMER_DEBUG] = pollTimer.setInterval(CONF_DEBUG_POLL_RATE, 0, debugLoop);
-  pollTimerId[CONF_TIMER_SCROLL] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, CONF_SCROLL_POLL_RATE, joystickLoop);
+  pollTimerId[CONF_TIMER_DEBUG]     = pollTimer.setInterval(CONF_DEBUG_POLL_RATE, 0, debugLoop);
+  pollTimerId[CONF_TIMER_SCROLL]    = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, CONF_SCROLL_POLL_RATE, joystickLoop);
+  pollTimerId[CONF_TIMER_SCREEN]    = pollTimer.setInterval(CONF_SCREEN_POLL_RATE, 0, screenLoop);
   
   enablePoll(true);
   ledActionEnabled = true;  
@@ -365,6 +330,44 @@ void resetMemory()
 {
   mem.format();                                                    //Format and remove existing text files in flash memory 
   mem.initialize(CONF_SETTINGS_FILE, CONF_SETTINGS_JSON);          //Initialize flash memory to store settings 
+}
+
+//*********************************//
+// Screen Function
+//*********************************//
+
+//***INITIALIZE SCREEN FUNCTION***//
+// Function   : initScreen 
+// 
+// Description: This function initializes the screen 
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void initScreen()
+{
+  screen.begin();                                                   //Begin screen 
+  screen.splashScreen();                                            //Show splash screen
+}
+
+
+//***SCREEN LOOP FUNCTION***//
+// Function   : screenLoop 
+// 
+// Description: This function handles updates to the screen.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void screenLoop()
+{
+  
+  //if (USB_DEBUG) { Serial.println("USBDEBUG: screenLoop");  } 
+  //Request update
+  screen.update();
+  
 }
 
 //*********************************//
@@ -505,9 +508,9 @@ void inputLoop()
 {
   
   //if (USB_DEBUG) { Serial.println("USBDEBUG: inputLoop");  } 
-  //Request new values
-  ib.update();
-  is.update(); 
+  //Read new values
+  ib.update(); // update buttons 
+  is.update();  //update external assistive switch inputs
 
   //Get the last state change
   buttonState = ib.getInputState();
@@ -627,11 +630,12 @@ void releaseOutputAction()
 void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxEndTime, int actionSize, const inputActionStruct actionProperty[])
 {
   bool canEvaluateAction = true;
+  
   //Output action logic
   int tempActionIndex = 0;
+  
   //Handle input action when it's in hold state
-  if ((
-    actionState.secondaryState == INPUT_SEC_STATE_RELEASED) &&
+  if ( (actionState.secondaryState == INPUT_SEC_STATE_RELEASED) &&
     (outputAction == CONF_ACTION_SCROLL ||
       outputAction == CONF_ACTION_DRAG))
   {
@@ -645,13 +649,20 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       //Set Led color to default 
       setLedDefault();      
   }
+
+
+
+  // Code to switch between joystick controlled scroll and joystick controlled cursor movement
   if(outputAction == CONF_ACTION_SCROLL){
     pollTimer.enable(CONF_TIMER_SCROLL);
     pollTimer.disable(CONF_TIMER_JOYSTICK);
-  }else if (outputAction != CONF_ACTION_SCROLL){
+  }
+  else if (outputAction != CONF_ACTION_SCROLL){
     pollTimer.enable(CONF_TIMER_JOYSTICK);
     pollTimer.disable(CONF_TIMER_SCROLL);
   }
+
+
   //Loop over all possible outputs
   for (int actionIndex = 0; actionIndex < actionSize && canEvaluateAction && canOutputAction; actionIndex++)
   {
@@ -677,6 +688,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
 
       //Perform led action 
       performLedAction(ledCurrentState);
+
       //Perform output action 
       performOutputAction(tempActionIndex);
 
@@ -777,6 +789,13 @@ void performOutputAction(int action)
     {
       //Change communication mode
       toggleCommunicationMode(true,false);
+      break;
+    }
+    case CONF_ACTION_START_MENU:
+    {
+      // Activate Menu
+      // todo 
+      screen.activateMenu();
       break;
     }
     case CONF_ACTION_RESET:

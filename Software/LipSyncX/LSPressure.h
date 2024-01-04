@@ -50,8 +50,8 @@
 
 //Sip and puff secondary states 
 #define PRESS_SAP_SEC_STATE_WAITING 0   //Waiting : No sip or puff
-#define PRESS_SAP_SEC_STATE_STARTED 1   //Started : Sip or puff being performed 
-#define PRESS_SAP_SEC_STATE_RELEASED 2  //Released : Sip or puff was just released 
+#define PRESS_SAP_SEC_STATE_STARTED 1   //Started : Sip or puff being performed  (Off->On)
+#define PRESS_SAP_SEC_STATE_RELEASED 2  //Released : Sip or puff was just released (On->Off)
 
 #define PRESS_SAP_ACTION_TIMEOUT 60000  //Rest timer
 
