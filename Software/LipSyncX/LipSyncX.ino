@@ -99,7 +99,7 @@ const inputActionStruct buttonActionProperty[]{
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,           0,3000},
     {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_RIGHT_CLICK,          0,3000},
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,                 3000,5000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CCONF_ACTION_SCROLL,              3000,5000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_SCROLL,               3000,5000},
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_NOTHING,              5000,10000},  //Enter settings menu
     {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,         5000,10000},
 };
@@ -178,7 +178,7 @@ LSPressure ps;                                       //Starts an instance of the
 
 LSOutput led;                                        //Starts an instance of the LSOutput LED object
 
-LSScreen screen;                                    //Create an instance of the LSDisplay Object for OLED Screen
+LSScreen screen;                                    //Create an instance of the LSScreen Object for OLED Screen
 
 LSUSBMouse usbmouse;                                 //Starts an instance of the USB mouse object
 LSBLEMouse btmouse;                                  //Starts an instance of the BLE mouse object
@@ -673,7 +673,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
       //Get action index 
-      tempActionIndex = actionProperty[actionIndex].inputActionNumber;
+      tempActionIndex = actionProperty[actionIndex].outputActionNumber;
 
       //Set Led color to default 
       setLedDefault();
@@ -700,7 +700,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
       //Get action index 
-      tempActionIndex = actionProperty[actionIndex].inputActionNumber; 
+      tempActionIndex = actionProperty[actionIndex].outputActionNumber; 
 
       //Set Led color to default 
       setLedDefault();
@@ -1646,6 +1646,6 @@ void softwareReset() {
 void initDisplay()
 { 
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing OLED Display");  }
-  ds.begin();
-  ds.startupScreen();
+  screen.begin();
+  screen.splashScreen();
 }

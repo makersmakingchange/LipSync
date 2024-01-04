@@ -14,7 +14,6 @@
   See the GNU General Public License for more details.
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <http://www.gnu.org/licenses/>
-
 */
 
 //Header definition
@@ -47,13 +46,13 @@
 #define SOUND_MENU        51
 #define SIP_PUFF_MENU     52
 
-//#define MODE_MOUSE_USB  0
-//#define MODE_MOUSE_BT   1
-//#define MODE_GAMEPAD    2
+#define MODE_MOUSE_USB  0
+#define MODE_MOUSE_BT   1
+#define MODE_GAMEPAD    2
 
 #define SCROLL_DELAY_MILLIS   100
 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+//Adafruit_SSD1306 _display(CONF_SCREEN_WIDTH, CONF_SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 const String mainMenuText[5] = {"Exit Menu", "Calibrate", "Mode", "Cursor speed", "More"};
 const String exitConfirmText[4] = {"Exit", "settings?", "Confirm", "... Back"};
@@ -110,31 +109,10 @@ private:
   String *currentMenuText;
   String selectedText;
 
-  void setupDisplay();
-  void displayMenu();
-  void displayCursor();
+  //void setupDisplay();
+  //void displayMenu();
+  //void displayCursor();
 
-  int mode = 0; //CONF_MODE_MOUSE_USB;
-  int tempMode =0; //= CONF_MODE_MOUSE_USB;
-  int cursorSpeedLevel = 5;
-  bool bluetoothOn = false;
-  bool soundOn = true;
-
-  bool scrollOn = false;
-  long scrollDelayTimer = millis();
-  int scrollPos = 12;
-
-  bool buttonSelPressed = false;
-  bool buttonNextPressed = false;
-  bool buttonSelPrevPressed = false;
-  bool buttonNextPrevPressed = false;
-
-  int cursorStart = 0;
-  int countMenuScroll = 0;
-
-  int currentMenuLength;
-  String *currentMenuText;
-  String selectedText;
 
 
 public:
@@ -143,15 +121,17 @@ public:
   void update();
   void clear();
   void show();
-  void startupScreen();
+  //void startupScreen();
   void nextSelection();
   void scrollLongText();
-      
 
-  void initDisplay();
+  void setupDisplay();
+  void displayMenu();
+  void displayCursor();
+      
   void splashScreen();
-  void nextItem();
-  void selectItem();
+  void nextMenuItem();
+  void selectMenuItem();
   bool isActive();
   void activateMenu();
   void deactivateMenu();
@@ -172,30 +152,16 @@ void LSScreen::begin() {
 
 
   setupDisplay();
-  display.setTextWrap(false);
-  display.display();
+  _display.setTextWrap(false);
+  _display.display();
 
   //startupScreen();
 
 }
 
-void LSDisplay::clear() {
-initDisplay();
-  
-}
-
-
-// Prepare screen for new update
-void LSScreen::initDisplay(){
-  _display.clearDisplay();
-  _display.setTextSize(2);
-  _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);
-
-  _display.setCursor(0,0);
-}
-
 void LSScreen::clear() {
-  _display.clearDisplay();
+  //_display.clearDisplay();
+  setupDisplay();
 }
 
 void LSScreen::update() {
@@ -203,20 +169,25 @@ void LSScreen::update() {
 }
 
 void LSScreen::splashScreen() {
+  setupDisplay();
   
-  
-  _display.println("");
   _display.println("");
   _display.println("LipSync");
   _display.println("v4.0.1");
+
+  _display.setTextSize(1);
+  _display.println("Makers Making Change");
+  _display.display();
+  
+  _display.setTextSize(2);
   
 }
 
-void LSScreen::nextItem() {
+void LSScreen::nextMenuItem() {
   
 }
 
-void LSScreen::selectItem() {
+void LSScreen::selectMenuItem() {
   
 }
 
@@ -230,47 +201,50 @@ void LSScreen::deactivateMenu() {
   
 }
 
-void LSDisplay::setupDisplay() {
-  display.clearDisplay();
+void LSScreen::setupDisplay() {
+  _display.clearDisplay();
 
-  display.setTextSize(2);                                   // 2x scale text
-  display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
+  _display.setTextSize(2);                                   // 2x scale text
+  _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
 
-  display.setCursor(0, 0);
+  _display.setCursor(0, 0);
 }
 
-void LSDisplay::startupScreen(){
+/*
+void LSScreen::startupScreen(){
   
   setupDisplay();
 
-  display.println("LipSync4.0");
+  _display.println("LipSync");
+  _display.println("v4.0.1");
 
-  display.setTextSize(1);
-  display.println("Makers Making Change");
-  display.display();
+  _display.setTextSize(1);
+  _display.println("Makers Making Change");
+  _display.display();
   
-  display.setTextSize(2);
+  _display.setTextSize(2);
 }
+*/
 
-void LSDisplay::displayMenu() {
+void LSScreen::displayMenu() {
 
-  initDisplay();
+  setupDisplay();
 
   for (int i = 0; i < TEXT_ROWS; i++) {
     if (i >= cursorStart){
-      display.print(" "), display.println(currentMenuText[i+countMenuScroll]);
+      _display.print(" "), _display.println(currentMenuText[i+countMenuScroll]);
     } else {
-      display.println(currentMenuText[i]);
+      _display.println(currentMenuText[i]);
     }
   }
 
-  display.display();
+  _display.display();
 
   //currentSelection = 0;
   displayCursor();
 }
 
-void LSDisplay::displayCursor() {
+void LSScreen::displayCursor() {
   int cursorPos;
   if (currentSelection + cursorStart > TEXT_ROWS-1){
     cursorPos = TEXT_ROWS-1;
@@ -279,20 +253,20 @@ void LSDisplay::displayCursor() {
   }
 
   // These settings are likely already implemented and these lines can likely be removed, this is mostly here just to make sure 
-  display.setTextSize(2);                                   // 2x scale text
-  display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
+  _display.setTextSize(2);                                   // 2x scale text
+  _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
 
   // Show cursor on text line of selection index, erase previous cursor
-  display.setCursor(0, 16 * cursorStart);  
+  _display.setCursor(0, 16 * cursorStart);  
   for (int i = 0; i < currentMenuLength; i++) {    
     if (i == cursorPos) {
-      display.println(">");
+      _display.println(">");
     } else {
-      display.println(" ");
+      _display.println(" ");
     }
   }
 
-  display.display();
+  _display.display();
 
   selectedLine = cursorStart + currentSelection;
   selectedText = currentMenuText[selectedLine];
@@ -307,12 +281,12 @@ void LSDisplay::displayCursor() {
   }
 }
 
-void LSDisplay::nextSelection() {
+void LSScreen::nextSelection() {
   if (scrollOn){
-    display.setCursor(0, selectedLine *16);
-    display.print("                                   ");
-    display.setCursor(12, selectedLine *16);
-    display.print(selectedText);
+    _display.setCursor(0, selectedLine *16);
+    _display.print("                                   ");
+    _display.setCursor(12, selectedLine *16);
+    _display.print(selectedText);
   }
 
   currentSelection++;
@@ -329,30 +303,30 @@ void LSDisplay::nextSelection() {
 
 }
 
-void LSDisplay::scrollLongText() {
+void LSScreen::scrollLongText() {
   int minPos = -12 * selectedText.length();
   
-  display.setTextSize(2);                                   // 2x scale text
-  display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
-  display.setTextWrap(false);
+  _display.setTextSize(2);                                   // 2x scale text
+  _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
+  _display.setTextWrap(false);
   
   if (millis() - scrollDelayTimer >= SCROLL_DELAY_MILLIS){
     scrollDelayTimer = millis();
     
     //Clear previous text by writing over it with blank text
-    display.setCursor(0, selectedLine *16);
-    display.print("                                   ");
+    _display.setCursor(0, selectedLine *16);
+    _display.print("                                   ");
 
     //Display text in new position to simulate scrolling
-    display.setCursor(scrollPos, selectedLine *16);
-    display.print(selectedText);
+    _display.setCursor(scrollPos, selectedLine *16);
+    _display.print(selectedText);
 
-    display.setCursor(0, selectedLine *16);
-    display.print(">");
-    display.display();
+    _display.setCursor(0, selectedLine *16);
+    _display.print(">");
+    _display.display();
     //displayCursor();
     scrollPos = scrollPos-4;
-    if (scrollPos < minPos) scrollPos = display.width();
+    if (scrollPos < minPos) scrollPos = _display.width();
   }
   
 }
