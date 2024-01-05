@@ -84,20 +84,34 @@ const inputActionStruct switchActionProperty[]{
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,          0,3000},
     {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,        0,3000},
     {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_RIGHT_CLICK,         0,3000},
+    {INPUT_MAIN_STATE_S13_PRESSED,  CONF_ACTION_START_MENU,          0,3000},
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,                3000,5000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CHANGE_MODE,         3000,5000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CHANGE_MODE,         3000,5000}, //Might change
     {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_SCROLL,              3000,5000},
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,          5000,10000},   
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_NOTHING,             5000,10000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CURSOR_CENTER,       5000,10000},
     {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_MIDDLE_CLICK,        5000,10000},
 };
 
-
+/*
 // Buttons built in to hub
 const inputActionStruct buttonActionProperty[]{
     {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,              0,0},
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,           0,3000},
     {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_RIGHT_CLICK,          0,3000},
+    {INPUT_MAIN_STATE_S12_PRESSED,  CONF_ACTION_START_MENU,           0,3000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,                 3000,5000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_SCROLL,               3000,5000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,           5000,10000},  
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,         5000,10000},
+};
+*/
+
+// Buttons built in to hub
+const inputActionStruct buttonActionProperty[]{
+    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,              0,0},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_NEXT_MENU_ITEM,       0,3000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_SELECT_MENU_ITEM,     0,3000},
     {INPUT_MAIN_STATE_S12_PRESSED,  CONF_ACTION_START_MENU,           0,3000},
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,                 3000,5000},
     {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_SCROLL,               3000,5000},
@@ -652,7 +666,6 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
   }
 
 
-
   // Code to switch between joystick controlled scroll and joystick controlled cursor movement
   if(outputAction == CONF_ACTION_SCROLL){
     pollTimer.enable(CONF_TIMER_SCROLL);
@@ -796,6 +809,18 @@ void performOutputAction(int action)
     {
       // Activate Menu
       screen.activateMenu();
+      break;
+    }
+    case CONF_ACTION_NEXT_MENU_ITEM:
+    {
+      // Move to next menu item
+      screen.nextMenuItem();
+      break;
+    }
+    case CONF_ACTION_SELECT_MENU_ITEM:
+    {
+      // Move to next menu item
+      screen.selectMenuItem();
       break;
     }
     case CONF_ACTION_RESET:

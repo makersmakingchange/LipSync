@@ -79,7 +79,7 @@ private:
 
   int mode = MODE_MOUSE_USB;
   int tempMode = MODE_MOUSE_USB;
-  int cursorSpeedLevel = 5;
+  int cursorSpeedLevel;
   bool bluetoothOn = false;
   bool soundOn = true;
   
@@ -120,7 +120,7 @@ private:
 
   String mainMenuText[5] = {"Exit Menu", "Calibrate", "Mode", "Cursor speed", "More"};
   String exitConfirmText[4] = {"Exit", "settings?", "Confirm", "... Back"};
-  String calibMenuText[3] = {"Center reset", "Full Calibration", "... Back"};
+  String calibMenuText[4] = {"Center reset", "Full Calibration", "... Back", " "};
   String modeMenuText[4] = {"MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back"};
   String modeConfirmText[4] = {"Change", "mode?", "Confirm", "... Back"};
   String cursorSpMenuText[4] = {"  ", "Increase", "Decrease", "... Back"};
@@ -179,7 +179,9 @@ void LSScreen::clear() {
 }
 
 void LSScreen::update() {
-  
+  if (scrollOn){
+    scrollLongText();
+  }
 }
 
 void LSScreen::activateMenu() {
@@ -299,21 +301,19 @@ void LSScreen::selectMenuItem() {
     case CURSOR_SP_MENU:
       switch (currentSelection){
         case 0:       //Increase
-          cursorSpeedLevel++;
-          if (cursorSpeedLevel>10){
-            cursorSpeedLevel=10;
-          }
+          increaseJoystickSpeed(true,false);                      // ********************************** HAS NOT BEEN TESTED <>
+          cursorSpeedLevel = getJoystickSpeed(true,false);  
+          cursorSpMenuText[0] = "Speed: " + String(cursorSpeedLevel) + " ";
           _display.setCursor(0,0);
-          _display.print("Speed: "); _display.print(cursorSpeedLevel); _display.println("  ");
+          _display.print(cursorSpMenuText[0]);
           _display.display();
           break;
         case 1:       //Decrease
-          cursorSpeedLevel--;
-          if (cursorSpeedLevel<1){
-            cursorSpeedLevel=1;
-          }
+          decreaseJoystickSpeed(true,false);                      // ********************************** HAS NOT BEEN TESTED <>
+          cursorSpeedLevel = getJoystickSpeed(true,false);  
+          cursorSpMenuText[0] = "Speed: " + String(cursorSpeedLevel) + " ";
           _display.setCursor(0,0);
-          _display.print("Speed: "); _display.print(cursorSpeedLevel); _display.println("  ");
+          _display.print(cursorSpMenuText[0]);
           _display.display();
           break;
         case 2:       //Back
@@ -422,6 +422,7 @@ void LSScreen::displayCursor() {
   selectedText = currentMenuText[selectedLine];
   
   if (selectedText.length() > 9){
+    Serial.println("Long text");
     scrollOn = true;
     scrollPos = 12;
     delay(200);                           // may need to remove this
@@ -456,6 +457,7 @@ void LSScreen::nextSelection() {
 */
 
 void LSScreen::scrollLongText() {
+  Serial.println("scroll function");
   int minPos = -12 * selectedText.length();
   
   _display.setTextSize(2);                                   // 2x scale text
@@ -463,6 +465,7 @@ void LSScreen::scrollLongText() {
   _display.setTextWrap(false);
   
   if (millis() - scrollDelayTimer >= SCROLL_DELAY_MILLIS){
+    Serial.println("Timer good");
     scrollDelayTimer = millis();
     
     //Clear previous text by writing over it with blank text
@@ -527,7 +530,8 @@ void LSScreen::exitConfirmMenu(){
     _display.display();
     delay(2000);
 
-    mainMenu();
+    mainMenu(); // ************************************************************** CHANGE THIS <>
+    //deactivateMenu();
   }
 }
 
@@ -623,8 +627,11 @@ void LSScreen::changeMode(){
   
   //conduct mode change
   //save mode into flash
+  //user feedback showing current mode    // ************************************************************** CHANGE THIS <>
+  
+  //software reset
 
-  //remove this for final code, becuase device will reset
+  //remove this for final code, because device will reset
   //readButtons();                            // ************************************************************** CHANGE THIS <>
   currentMenu = MAIN_MENU;
   mainMenu();
@@ -634,6 +641,7 @@ void LSScreen::changeMode(){
 
 void LSScreen::cursorSpeedMenu(void) { 
   currentMenu = CURSOR_SP_MENU;
+  cursorSpeedLevel = getJoystickSpeed(true,false); 
   
   cursorSpMenuText[0] = "Speed: " + String(cursorSpeedLevel);
   
@@ -669,10 +677,10 @@ void LSScreen::centerResetPage(void){
 
   _display.display();
 
-  //function to actually do center reset
-  centerReset();
+  //Perform cursor center
+  setJoystickInitialization(true,false);
 
-  delay(4000);
+  delay(100);
 
   _display.clearDisplay();
   _display.setCursor(0,0);
@@ -695,13 +703,12 @@ void LSScreen::fullCalibrationPage(void){
 
   _display.display();
 
+  //TO DO
+  //Add prompts and add function for calibration // ************************************************************** CHANGE THIS <>
+
   delay(1000);
 
   mainMenu();
-}
-
-void LSScreen::centerReset(void){
-  //function to actually perform center reset
 }
 
 // ----- MORE SETTINGS MENUS ----- //
@@ -732,6 +739,8 @@ void LSScreen::sipPuffThreshMenu(){
   currentMenuText = sipPuffThreshMenuText;
   cursorStart = 0;
   currentSelection = 0;
+
+  //Add sip/puff  thresh adjustment function // ************************************************************** CHANGE THIS <>
 
   displayMenu();
 }
