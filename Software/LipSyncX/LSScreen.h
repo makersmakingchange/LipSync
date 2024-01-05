@@ -211,7 +211,6 @@ return is_active;
 void LSScreen::splashScreen() {
   setupDisplay();
   
-  _display.println("");
   _display.println("LipSync");
   _display.println("v4.0.1");
 
