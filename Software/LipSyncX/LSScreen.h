@@ -42,6 +42,9 @@
 #define CENTER_RESET_PAGE 11
 #define FULL_CALIB_PAGE   12
 
+//Mode pages
+#define CONFIRM_MODE_CHANGE 31
+
 //More Menus
 #define SOUND_MENU        51
 #define SIP_PUFF_MENU     52
@@ -179,6 +182,7 @@ void LSScreen::clear() {
 }
 
 void LSScreen::update() {
+  //Loop for screen functions 
   if (scrollOn){
     scrollLongText();
   }
@@ -192,6 +196,8 @@ void LSScreen::activateMenu() {
 
 void LSScreen::deactivateMenu() {
   is_active = false;
+  clear();
+  _display.display();
   
 }
 
@@ -275,6 +281,21 @@ void LSScreen::selectMenuItem() {
           break;
       }
       break;
+    case EXIT_MENU:
+        if (currentSelection == 1){
+          currentSelection = 0;
+          mainMenu();
+        } else {
+          //some function to exit
+          setupDisplay();
+          _display.println("Exiting");
+          _display.display();
+          delay(2000);
+      
+          //mainMenu(); // ************************************************************** CHANGE THIS <>
+          deactivateMenu();
+        }
+        break;
     case CALIB_MENU:
       if (currentSelection == 0){
         currentMenu = CENTER_RESET_PAGE;
@@ -296,6 +317,14 @@ void LSScreen::selectMenuItem() {
         }
       } else if (currentSelection == (modeMenuLen-1)){
         mainMenu();
+      }
+      break;
+    case CONFIRM_MODE_CHANGE:
+      if (currentSelection == 1){
+        currentSelection = 0;
+        modeMenu();
+      } else {
+        changeMode();
       }
       break;
     case CURSOR_SP_MENU:
@@ -511,6 +540,7 @@ void LSScreen::exitConfirmMenu(){
   currentSelection = 0;
   displayMenu();
 
+/*
   while (!buttonSelPressed){
     //readButtons(); // ************************************************************** CHANGE THIS <>
     nextMenuItem();
@@ -530,9 +560,10 @@ void LSScreen::exitConfirmMenu(){
     _display.display();
     delay(2000);
 
-    mainMenu(); // ************************************************************** CHANGE THIS <>
-    //deactivateMenu();
+    //mainMenu(); // ************************************************************** CHANGE THIS <>
+    deactivateMenu();
   }
+  */
 }
 
 void LSScreen::calibMenu(void) {
@@ -578,12 +609,13 @@ void LSScreen::modeMenu(void) {
 }
 //
 void LSScreen::confirmModeChange() {
+  currentMenu = CONFIRM_MODE_CHANGE;
   currentMenuText = modeConfirmText;
   currentMenuLength = 2;
   cursorStart = 2;
   currentSelection = 0;
   displayMenu();
-
+/*
   while (!buttonSelPressed){
     //readButtons();      // ************************************************************** CHANGE THIS <>
     nextMenuItem();
@@ -596,6 +628,7 @@ void LSScreen::confirmModeChange() {
   } else {
     changeMode();
   }
+  */
 }
 
 void LSScreen::changeMode(){
