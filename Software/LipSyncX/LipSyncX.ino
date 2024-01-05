@@ -35,7 +35,7 @@
 
 //Communication mode and debug mode variables
 int comMode;                                                                                                // 0 = None , 1 = USB , 2 = Wireless  
-int operatingMode;                                                                                          // 0 = None, 1 = Mouse, 2 = Wireless, 3 = Gamepad
+int operatingMode;                                                                                          // 0 = None, 1 = Mouse, 2 = Wireless, 3 = Gamepad, 4=Menu
 int debugMode;                                                                                              // 0 = Debug mode is Off
                                                                                                             // 1 = Joystick debug mode is On
                                                                                                             // 2 = Pressure debug mode is On
@@ -79,6 +79,7 @@ inputStateStruct buttonState, switchState;
 
 
 // External Assistive Switch Jacks
+/*
 const inputActionStruct switchActionProperty[]{
     {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,             0,0},
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,          0,3000},
@@ -91,6 +92,21 @@ const inputActionStruct switchActionProperty[]{
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,          5000,10000},   
     {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CURSOR_CENTER,       5000,10000},
     {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_MIDDLE_CLICK,        5000,10000},
+};
+*/
+
+const inputActionStruct switchActionProperty[]{
+    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,            0,0},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,     CONF_ACTION_NEXT_MENU_ITEM,     0,3000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,            0,3000},
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_SELECT_MENU_ITEM,    0,3000},
+    {INPUT_MAIN_STATE_S13_PRESSED,  CONF_ACTION_START_MENU,     CONF_ACTION_NOTHING,            0,3000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,           CONF_ACTION_NOTHING,            3000,5000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CHANGE_MODE,    CONF_ACTION_NOTHING,            3000,5000}, //Might change
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_SCROLL,         CONF_ACTION_NOTHING,            3000,5000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,     CONF_ACTION_NOTHING,            5000,10000},   
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CURSOR_CENTER,  CONF_ACTION_NOTHING,            5000,10000},
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,            5000,10000},
 };
 
 /*
@@ -109,14 +125,14 @@ const inputActionStruct buttonActionProperty[]{
 
 // Buttons built in to hub
 const inputActionStruct buttonActionProperty[]{
-    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,              0,0},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_NEXT_MENU_ITEM,       0,3000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_SELECT_MENU_ITEM,     0,3000},
-    {INPUT_MAIN_STATE_S12_PRESSED,  CONF_ACTION_START_MENU,           0,3000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,                 3000,5000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_SCROLL,               3000,5000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,           5000,10000},  
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,         5000,10000},
+    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,              0,0},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,     CONF_ACTION_NEXT_MENU_ITEM,       0,3000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_SELECT_MENU_ITEM,     0,3000},
+    {INPUT_MAIN_STATE_S12_PRESSED,  CONF_ACTION_START_MENU,     CONF_ACTION_NOTHING,              0,3000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,           CONF_ACTION_NOTHING,              3000,5000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_SCROLL,         CONF_ACTION_NOTHING,              3000,5000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,     CONF_ACTION_NOTHING,              5000,10000},  
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,              5000,10000},
 };
 
 // Cursor acceleration structure
@@ -148,6 +164,7 @@ unsigned long sapActionMaxTime = 0;
 
 //Sip and Puff Action Mapping
 // {INPUT ACTION, OUTPUT, ACTION, minTime, maxTime}
+/*
 const inputActionStruct sapActionProperty[]{
     {PRESS_SAP_MAIN_STATE_NONE,       CONF_ACTION_NOTHING,                0,0},
     {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_LEFT_CLICK,             0,3000},
@@ -157,6 +174,18 @@ const inputActionStruct sapActionProperty[]{
     {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_START_MENU,             5000,10000},
     {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_MIDDLE_CLICK,           5000,10000}
 };
+*/
+
+const inputActionStruct sapActionProperty[]{
+    {PRESS_SAP_MAIN_STATE_NONE,       CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,              0,0},
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_LEFT_CLICK,     CONF_ACTION_NEXT_MENU_ITEM,       0,3000},
+    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_SELECT_MENU_ITEM,     0,3000},
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_DRAG,           CONF_ACTION_NOTHING,              3000,5000},
+    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_SCROLL,         CONF_ACTION_NOTHING,              3000,5000},
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_START_MENU,     CONF_ACTION_NOTHING,              5000,10000},
+    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,              5000,10000}
+};
+
 
 //Joystick module variables and structures
 
@@ -686,8 +715,21 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       actionState.elapsedTime >= actionProperty[actionIndex].inputActionStartTime &&
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
-      //Get action index 
-      tempActionIndex = actionProperty[actionIndex].outputActionNumber;
+      //Get action index                                                                        //********************************** TESTING
+      /*
+      switch (operatingMode){
+        case CONF_OPERATING_MODE_MOUSE:
+          tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
+          break;
+        case CONF_OPERATING_MODE_BTMOUSE:
+          tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
+          break;
+        case CONF_OPERATING_MODE_MENU:
+          tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
+          break;
+      }
+      */
+      tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
 
       //Set Led color to default 
       setLedDefault();
@@ -714,7 +756,21 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
       //Get action index 
-      tempActionIndex = actionProperty[actionIndex].outputActionNumber; 
+      //if (operatingMode == CONF_OPERATING_MODE_MOUSE || operatingMode == CONF_OPERATING_MODE_BTMOUSE){    //********************************** TESTING
+      /*
+      switch (operatingMode){
+        case CONF_OPERATING_MODE_MOUSE:
+          tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
+          break;
+        case CONF_OPERATING_MODE_BTMOUSE:
+          tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
+          break;
+        case CONF_OPERATING_MODE_MENU:
+          tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
+          break;
+      }
+      */
+      tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
 
       //Set Led color to default 
       setLedDefault();

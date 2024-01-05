@@ -85,6 +85,8 @@ private:
   int cursorSpeedLevel;
   bool bluetoothOn = false;
   bool soundOn = true;
+
+  int tempOperatingMode;
   
   bool scrollOn = false;
   long scrollDelayTimer = millis();
@@ -190,12 +192,15 @@ void LSScreen::update() {
 
 void LSScreen::activateMenu() {
   is_active = true;
+  //tempOperatingMode = getOperatingMode(true, false);
+  //setOperatingMode(true, false, CONF_OPERATING_MODE_MENU);
   //change inputs to menu inputs (Next and Select)
   mainMenu();
 }
 
 void LSScreen::deactivateMenu() {
   is_active = false;
+  //setOperatingMode(true, false, tempOperatingMode);
   clear();
   _display.display();
   
