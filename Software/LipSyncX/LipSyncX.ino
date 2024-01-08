@@ -715,21 +715,12 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       actionState.elapsedTime >= actionProperty[actionIndex].inputActionStartTime &&
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
-      //Get action index                                                                        //********************************** TESTING
-      /*
-      switch (operatingMode){
-        case CONF_OPERATING_MODE_MOUSE:
-          tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
-          break;
-        case CONF_OPERATING_MODE_BTMOUSE:
-          tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
-          break;
-        case CONF_OPERATING_MODE_MENU:
-          tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
-          break;
+      //Get action index                                                                       
+      if (screen.isActive()){                                                             //********************************** NEED TO CHANGE LATER TO ADD OTHER OUTPUTS
+        tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
+      } else {
+        tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
       }
-      */
-      tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
 
       //Set Led color to default 
       setLedDefault();
@@ -756,21 +747,11 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
       //Get action index 
-      //if (operatingMode == CONF_OPERATING_MODE_MOUSE || operatingMode == CONF_OPERATING_MODE_BTMOUSE){    //********************************** TESTING
-      /*
-      switch (operatingMode){
-        case CONF_OPERATING_MODE_MOUSE:
-          tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
-          break;
-        case CONF_OPERATING_MODE_BTMOUSE:
-          tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
-          break;
-        case CONF_OPERATING_MODE_MENU:
-          tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
-          break;
+      if (screen.isActive()){                                                             //********************************** NEED TO CHANGE LATER TO ADD OTHER OUTPUTS
+        tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
+      } else {
+        tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
       }
-      */
-      tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
 
       //Set Led color to default 
       setLedDefault();

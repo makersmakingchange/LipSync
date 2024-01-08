@@ -192,15 +192,11 @@ void LSScreen::update() {
 
 void LSScreen::activateMenu() {
   is_active = true;
-  //tempOperatingMode = getOperatingMode(true, false);
-  //setOperatingMode(true, false, CONF_OPERATING_MODE_MENU);
-  //change inputs to menu inputs (Next and Select)
   mainMenu();
 }
 
 void LSScreen::deactivateMenu() {
   is_active = false;
-  //setOperatingMode(true, false, tempOperatingMode);
   clear();
   _display.display();
   
@@ -296,8 +292,7 @@ void LSScreen::selectMenuItem() {
           _display.println("Exiting");
           _display.display();
           delay(2000);
-      
-          //mainMenu(); // ************************************************************** CHANGE THIS <>
+
           deactivateMenu();
         }
         break;
@@ -335,7 +330,7 @@ void LSScreen::selectMenuItem() {
     case CURSOR_SP_MENU:
       switch (currentSelection){
         case 0:       //Increase
-          increaseJoystickSpeed(true,false);                      // ********************************** HAS NOT BEEN TESTED <>
+          increaseJoystickSpeed(true,false);
           cursorSpeedLevel = getJoystickSpeed(true,false);  
           cursorSpMenuText[0] = "Speed: " + String(cursorSpeedLevel) + " ";
           _display.setCursor(0,0);
@@ -343,7 +338,7 @@ void LSScreen::selectMenuItem() {
           _display.display();
           break;
         case 1:       //Decrease
-          decreaseJoystickSpeed(true,false);                      // ********************************** HAS NOT BEEN TESTED <>
+          decreaseJoystickSpeed(true,false);
           cursorSpeedLevel = getJoystickSpeed(true,false);  
           cursorSpMenuText[0] = "Speed: " + String(cursorSpeedLevel) + " ";
           _display.setCursor(0,0);
@@ -545,30 +540,6 @@ void LSScreen::exitConfirmMenu(){
   currentSelection = 0;
   displayMenu();
 
-/*
-  while (!buttonSelPressed){
-    //readButtons(); // ************************************************************** CHANGE THIS <>
-    nextMenuItem();
-  }
-
-  while (buttonSelPressed){
-    //readButtons(); // wait until Sel button is released // ************************************************************** CHANGE THIS <>
-  }
-  
-  if (currentSelection == 1){
-    currentSelection = 0;
-    mainMenu();
-  } else {
-    //some function to exit
-    setupDisplay();
-    _display.println("Exiting");
-    _display.display();
-    delay(2000);
-
-    //mainMenu(); // ************************************************************** CHANGE THIS <>
-    deactivateMenu();
-  }
-  */
 }
 
 void LSScreen::calibMenu(void) {
@@ -620,20 +591,7 @@ void LSScreen::confirmModeChange() {
   cursorStart = 2;
   currentSelection = 0;
   displayMenu();
-/*
-  while (!buttonSelPressed){
-    //readButtons();      // ************************************************************** CHANGE THIS <>
-    nextMenuItem();
-  }
-  
-  if (currentSelection == 1){
-    currentSelection = 0;
-    buttonSelPressed=false;
-    modeMenu();
-  } else {
-    changeMode();
-  }
-  */
+
 }
 
 void LSScreen::changeMode(){
