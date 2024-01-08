@@ -35,7 +35,7 @@
 
 //Communication mode and debug mode variables
 int comMode;                                                                                                // 0 = None , 1 = USB , 2 = Wireless  
-int operatingMode;                                                                                          // 0 = None, 1 = Mouse, 2 = Wireless, 3 = Gamepad
+int operatingMode;                                                                                          // 0 = None, 1 = Mouse, 2 = Wireless, 3 = Gamepad, 4=Menu
 int debugMode;                                                                                              // 0 = Debug mode is Off
                                                                                                             // 1 = Joystick debug mode is On
                                                                                                             // 2 = Pressure debug mode is On
@@ -79,29 +79,60 @@ inputStateStruct buttonState, switchState;
 
 
 // External Assistive Switch Jacks
+/*
 const inputActionStruct switchActionProperty[]{
     {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,             0,0},
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,          0,3000},
     {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,        0,3000},
     {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_RIGHT_CLICK,         0,3000},
+    {INPUT_MAIN_STATE_S13_PRESSED,  CONF_ACTION_START_MENU,          0,3000},
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,                3000,5000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CHANGE_MODE,         3000,5000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CHANGE_MODE,         3000,5000}, //Might change
     {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_SCROLL,              3000,5000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_CURSOR_CALIBRATION,  5000,10000},   //Enter settings menu
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_NOTHING,             5000,10000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,          5000,10000},   
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CURSOR_CENTER,       5000,10000},
     {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_MIDDLE_CLICK,        5000,10000},
 };
+*/
 
+const inputActionStruct switchActionProperty[]{
+    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,            0,0},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,     CONF_ACTION_NEXT_MENU_ITEM,     0,3000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,            0,3000},
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_SELECT_MENU_ITEM,   0,3000},
+    {INPUT_MAIN_STATE_S13_PRESSED,  CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,          0,3000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,           CONF_ACTION_NOTHING,            3000,5000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CHANGE_MODE,    CONF_ACTION_NOTHING,            3000,5000}, //Might change
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_SCROLL,         CONF_ACTION_NOTHING,            3000,5000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,          5000,10000},   
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CURSOR_CENTER,  CONF_ACTION_NOTHING,            5000,10000},
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,            5000,10000},
+};
 
+/*
 // Buttons built in to hub
 const inputActionStruct buttonActionProperty[]{
     {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,              0,0},
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,           0,3000},
     {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_RIGHT_CLICK,          0,3000},
+    {INPUT_MAIN_STATE_S12_PRESSED,  CONF_ACTION_START_MENU,           0,3000},
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,                 3000,5000},
     {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_SCROLL,               3000,5000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_NOTHING,              5000,10000},  //Enter settings menu
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,           5000,10000},  
     {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,         5000,10000},
+};
+*/
+
+// Buttons built in to hub
+const inputActionStruct buttonActionProperty[]{
+    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,              0,0},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,     CONF_ACTION_NEXT_MENU_ITEM,       0,3000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_SELECT_MENU_ITEM,     0,3000},
+    {INPUT_MAIN_STATE_S12_PRESSED,  CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,            0,3000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,           CONF_ACTION_NOTHING,              3000,5000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_SCROLL,         CONF_ACTION_NOTHING,              3000,5000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,            5000,10000},  
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,              5000,10000},
 };
 
 // Cursor acceleration structure
@@ -133,15 +164,28 @@ unsigned long sapActionMaxTime = 0;
 
 //Sip and Puff Action Mapping
 // {INPUT ACTION, OUTPUT, ACTION, minTime, maxTime}
+/*
 const inputActionStruct sapActionProperty[]{
     {PRESS_SAP_MAIN_STATE_NONE,       CONF_ACTION_NOTHING,                0,0},
     {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_LEFT_CLICK,             0,3000},
     {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_RIGHT_CLICK,            0,3000},
     {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_DRAG,                   3000,5000},
     {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_SCROLL,                 3000,5000},
-    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_CURSOR_CENTER,          5000,10000},
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_START_MENU,             5000,10000},
     {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_MIDDLE_CLICK,           5000,10000}
 };
+*/
+
+const inputActionStruct sapActionProperty[]{
+    {PRESS_SAP_MAIN_STATE_NONE,       CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,              0,0},
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_LEFT_CLICK,     CONF_ACTION_NEXT_MENU_ITEM,       0,3000},
+    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_SELECT_MENU_ITEM,     0,3000},
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_DRAG,           CONF_ACTION_NOTHING,              3000,5000},
+    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_SCROLL,         CONF_ACTION_NOTHING,              3000,5000},
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,            5000,10000},
+    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,              5000,10000}
+};
+
 
 //Joystick module variables and structures
 
@@ -651,7 +695,6 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
   }
 
 
-
   // Code to switch between joystick controlled scroll and joystick controlled cursor movement
   if(outputAction == CONF_ACTION_SCROLL){
     pollTimer.enable(CONF_TIMER_SCROLL);
@@ -672,8 +715,12 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       actionState.elapsedTime >= actionProperty[actionIndex].inputActionStartTime &&
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
-      //Get action index 
-      tempActionIndex = actionProperty[actionIndex].outputActionNumber;
+      //Get action index                                                                       
+      if (screen.isActive()){                                                             //********************************** NEED TO CHANGE LATER TO ADD OTHER OUTPUTS
+        tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
+      } else {
+        tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
+      }
 
       //Set Led color to default 
       setLedDefault();
@@ -700,7 +747,11 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
       //Get action index 
-      tempActionIndex = actionProperty[actionIndex].outputActionNumber; 
+      if (screen.isActive()){                                                             //********************************** NEED TO CHANGE LATER TO ADD OTHER OUTPUTS
+        tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
+      } else {
+        tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
+      }
 
       //Set Led color to default 
       setLedDefault();
@@ -794,8 +845,25 @@ void performOutputAction(int action)
     case CONF_ACTION_START_MENU:
     {
       // Activate Menu
-      // todo 
       screen.activateMenu();
+      break;
+    }
+    case CONF_ACTION_STOP_MENU:
+    {
+      // Deactivate Menu
+      screen.deactivateMenu();
+      break;
+    }
+    case CONF_ACTION_NEXT_MENU_ITEM:
+    {
+      // Move to next menu item
+      screen.nextMenuItem();
+      break;
+    }
+    case CONF_ACTION_SELECT_MENU_ITEM:
+    {
+      // Move to next menu item
+      screen.selectMenuItem();
       break;
     }
     case CONF_ACTION_RESET:

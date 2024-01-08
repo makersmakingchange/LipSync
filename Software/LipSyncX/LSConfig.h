@@ -31,7 +31,6 @@
 //Input pins
 #define CONF_BUTTON1_PIN 9                                // Pushbutton S1
 #define CONF_BUTTON2_PIN 3                                 // Pushbutton S2
-//#define CONF_BUTTON3_PIN 9                                 // Pushbutton S3
 #define CONF_SWITCH1_PIN A0                                // 3.5mm jack SW1
 #define CONF_SWITCH2_PIN A1                                // 3.5mm jack SW2
 #define CONF_SWITCH3_PIN A2                                // 3.5mm jack SW3
@@ -75,9 +74,13 @@
 #define CONF_ACTION_DEC_SPEED 8                            // Decrease cursor movement speed
 #define CONF_ACTION_INC_SPEED 9                            // Increase cursor movement speed
 #define CONF_ACTION_CHANGE_MODE 10                         // Change communication mode
-#define CONF_ACTION_START_MENU 11                          // Start display
-#define CONF_ACTION_RESET 12                               // Software Reset
-#define CONF_ACTION_FACTORY_RESET 13                       // Factory Reset
+#define CONF_ACTION_START_MENU 11                          // Start menu on display
+#define CONF_ACTION_STOP_MENU 12                           // Close menu on display
+#define CONF_ACTION_RESET 13                               // Software Reset
+#define CONF_ACTION_FACTORY_RESET 14                       // Factory Reset
+
+#define CONF_ACTION_NEXT_MENU_ITEM 15                      // Move to next item in menu
+#define CONF_ACTION_SELECT_MENU_ITEM 16                    // Select current item in menu 
 
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
@@ -142,9 +145,10 @@
 #define CONF_OPERATING_MODE_MOUSE 1
 #define CONF_OPERATING_MODE_BTMOUSE 2
 #define CONF_OPERATING_MODE_GAMEPAD 3
+#define CONF_OPERATING_MODE_MENU    4
 
 #define CONF_OPERATING_MODE_MIN 0
-#define CONF_OPERATING_MODE_MAX 3
+#define CONF_OPERATING_MODE_MAX 4
 
 #define CONF_OPERATING_MODE_DEFAULT 1 // Default mode = USB Mouse
                                           // 0 = Operating Mode null
