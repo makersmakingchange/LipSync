@@ -57,52 +57,34 @@
 
 //Adafruit_SSD1306 _display(CONF_SCREEN_WIDTH, CONF_SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-// Number of selectable options in each menu
-const int mainMenuLen = 5;
-const int exitConfirmLen = 2;
-const int calibMenuLen = 3;
-const int modeMenuLen = 4;
-const int cursorSpMenuLen = 3;
-const int moreMenuLen = 3;
-const int soundMenuLen = 2;
-const int sipPuffThreshMenuLen = 3;
-
 const int TEXT_ROWS = 4; 
 
 class LSScreen {
 private:
   Adafruit_SSD1306 _display = Adafruit_SSD1306(CONF_SCREEN_WIDTH, CONF_SCREEN_HEIGHT, &Wire, OLED_RESET);
   bool is_active = false;
-  LSTimer <void> screenStateTimer;                      //Timer used to measure time for each sip and puff action. 
+  LSTimer <void> screenStateTimer;                      //Timer 
   int screenStateTimerId;                                //The id for the sap state timer
-  int currentMenu = 0;
-  int prevMenu = -1;
-  int currentSelection = 0;
-  int selectedLine; 
+  int _currentMenu = 0;
+  int _prevMenu = -1;
+  int _currentSelection = 0;
+  int _selectedLine; 
 
-  int mode = MODE_MOUSE_USB;
-  int tempMode = MODE_MOUSE_USB;
-  int cursorSpeedLevel;
-  bool bluetoothOn = false;
-  bool soundOn = true;
-
-  int tempOperatingMode;
+  int _mode = MODE_MOUSE_USB;
+  int _tempMode = MODE_MOUSE_USB;
+  int _cursorSpeedLevel;
+  bool _soundOn = true;
   
-  bool scrollOn = false;
-  long scrollDelayTimer = millis();
-  int scrollPos = 12;
+  bool _scrollOn = false;
+  long _scrollDelayTimer = millis();
+  int _scrollPos = 12;
   
-  bool buttonSelPressed = false;
-  bool buttonNextPressed = false;
-  bool buttonSelPrevPressed = false;
-  bool buttonNextPrevPressed = false;
+  int _cursorStart = 0;
+  int _countMenuScroll = 0;
   
-  int cursorStart = 0;
-  int countMenuScroll = 0;
-  
-  int currentMenuLength;
-  String *currentMenuText;
-  String selectedText;
+  int _currentMenuLength;
+  String *_currentMenuText;
+  String _selectedText;
 
   //void setupDisplay();
   //void displayMenu();
@@ -123,15 +105,25 @@ private:
   void soundMenu();
   void sipPuffThreshMenu();
 
-  String mainMenuText[5] = {"Exit Menu", "Calibrate", "Mode", "Cursor speed", "More"};
-  String exitConfirmText[4] = {"Exit", "settings?", "Confirm", "... Back"};
-  String calibMenuText[4] = {"Center reset", "Full Calibration", "... Back", " "};
-  String modeMenuText[4] = {"MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back"};
-  String modeConfirmText[4] = {"Change", "mode?", "Confirm", "... Back"};
-  String cursorSpMenuText[4] = {"  ", "Increase", "Decrease", "... Back"};
-  String moreMenuText[4] = {"Sound", "Sip & Puff", "... Back", "         "};
-  String soundMenuText[4] = {"Sound:", "<>", "Turn <>", "... Back"};
-  String sipPuffThreshMenuText[4] = {"Sip Threshold", "Puff Threshold", "... Back"};
+  String _mainMenuText[5] = {"Exit Menu", "Calibrate", "Mode", "Cursor speed", "More"};
+  String _exitConfirmText[4] = {"Exit", "settings?", "Confirm", "... Back"};
+  String _calibMenuText[4] = {"Center reset", "Full Calibration", "... Back", " "};
+  String _modeMenuText[4] = {"MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back"};
+  String _modeConfirmText[4] = {"Change", "mode?", "Confirm", "... Back"};
+  String _cursorSpMenuText[4] = {"  ", "Increase", "Decrease", "... Back"};
+  String _moreMenuText[4] = {"Sound", "Sip & Puff", "... Back", "         "};
+  String _soundMenuText[4] = {"Sound:", "<>", "Turn <>", "... Back"};
+  String _sipPuffThreshMenuText[4] = {"Sip Threshold", "Puff Threshold", "... Back"};
+
+  // Number of selectable options in each menu
+  const int mainMenuLen = 5;
+  const int exitConfirmLen = 2;
+  const int calibMenuLen = 3;
+  const int modeMenuLen = 4;
+  const int cursorSpMenuLen = 3;
+  const int moreMenuLen = 3;
+  const int soundMenuLen = 2;
+  const int sipPuffThreshMenuLen = 3;
 
 
 public:
@@ -185,7 +177,7 @@ void LSScreen::clear() {
 
 void LSScreen::update() {
   //Loop for screen functions 
-  if (scrollOn){
+  if (_scrollOn){
     scrollLongText();
   }
 }
@@ -236,20 +228,20 @@ void LSScreen::splashScreen() {
 //------------------------------------------//
 
 void LSScreen::nextMenuItem() {
-  if (scrollOn){
-    _display.setCursor(0, selectedLine *16);
+  if (_scrollOn){
+    _display.setCursor(0, _selectedLine *16);
     _display.print("                                   ");
-    _display.setCursor(12, selectedLine *16);
-    _display.print(selectedText);
+    _display.setCursor(12, _selectedLine *16);
+    _display.print(_selectedText);
   }
 
-  currentSelection++;
-  if (currentSelection >= currentMenuLength) {   
-    currentSelection = 0;
-    countMenuScroll = 0;
+  _currentSelection++;
+  if (_currentSelection >= _currentMenuLength) {   
+    _currentSelection = 0;
+    _countMenuScroll = 0;
     displayMenu();
-  } else if (currentSelection + cursorStart > TEXT_ROWS-1){
-    countMenuScroll++;
+  } else if (_currentSelection + _cursorStart > TEXT_ROWS-1){
+    _countMenuScroll++;
     displayMenu();
   } 
 
@@ -257,11 +249,11 @@ void LSScreen::nextMenuItem() {
 }
 
 void LSScreen::selectMenuItem() {
-  countMenuScroll = 0;
-  switch (currentMenu) {
+  _countMenuScroll = 0;
+  switch (_currentMenu) {
     case MAIN_MENU:
-      currentMenu = currentSelection+1;
-      switch (currentMenu) {
+      _currentMenu = _currentSelection+1;
+      switch (_currentMenu) {
         case MAIN_MENU:
           mainMenu();
           break;
@@ -283,8 +275,8 @@ void LSScreen::selectMenuItem() {
       }
       break;
     case EXIT_MENU:
-        if (currentSelection == 1){
-          currentSelection = 0;
+        if (_currentSelection == 1){
+          _currentSelection = 0;
           mainMenu();
         } else {
           //some function to exit
@@ -297,86 +289,86 @@ void LSScreen::selectMenuItem() {
         }
         break;
     case CALIB_MENU:
-      if (currentSelection == 0){
-        currentMenu = CENTER_RESET_PAGE;
+      if (_currentSelection == 0){
+        _currentMenu = CENTER_RESET_PAGE;
         centerResetPage();
-      } else if (currentSelection == 1){
-        currentMenu = FULL_CALIB_PAGE;
+      } else if (_currentSelection == 1){
+        _currentMenu = FULL_CALIB_PAGE;
         fullCalibrationPage();
-      } else if (currentSelection == 2){
-        currentMenu = MAIN_MENU;
+      } else if (_currentSelection == 2){
+        _currentMenu = MAIN_MENU;
         mainMenu();
       }
       break;
     case MODE_MENU:
-      if (currentSelection < (modeMenuLen - 1)){
+      if (_currentSelection < (modeMenuLen - 1)){
         // Confirm mode change
-        tempMode = currentSelection;
-        if (tempMode != mode){
+        _tempMode = _currentSelection;
+        if (_tempMode != _mode){
           confirmModeChange();
         }
-      } else if (currentSelection == (modeMenuLen-1)){
+      } else if (_currentSelection == (modeMenuLen-1)){
         mainMenu();
       }
       break;
     case CONFIRM_MODE_CHANGE:
-      if (currentSelection == 1){
-        currentSelection = 0;
+      if (_currentSelection == 1){
+        _currentSelection = 0;
         modeMenu();
       } else {
         changeMode();
       }
       break;
     case CURSOR_SP_MENU:
-      switch (currentSelection){
+      switch (_currentSelection){
         case 0:       //Increase
           increaseJoystickSpeed(true,false);
-          cursorSpeedLevel = getJoystickSpeed(true,false);  
-          cursorSpMenuText[0] = "Speed: " + String(cursorSpeedLevel) + " ";
+          _cursorSpeedLevel = getJoystickSpeed(true,false);  
+          _cursorSpMenuText[0] = "Speed: " + String(_cursorSpeedLevel) + " ";
           _display.setCursor(0,0);
-          _display.print(cursorSpMenuText[0]);
+          _display.print(_cursorSpMenuText[0]);
           _display.display();
           break;
         case 1:       //Decrease
           decreaseJoystickSpeed(true,false);
-          cursorSpeedLevel = getJoystickSpeed(true,false);  
-          cursorSpMenuText[0] = "Speed: " + String(cursorSpeedLevel) + " ";
+          _cursorSpeedLevel = getJoystickSpeed(true,false);  
+          _cursorSpMenuText[0] = "Speed: " + String(_cursorSpeedLevel) + " ";
           _display.setCursor(0,0);
-          _display.print(cursorSpMenuText[0]);
+          _display.print(_cursorSpMenuText[0]);
           _display.display();
           break;
         case 2:       //Back
-          currentMenu = MAIN_MENU;
+          _currentMenu = MAIN_MENU;
           mainMenu();
           break;
       }
       break;
     case MORE_MENU:
-      if (currentSelection == 0){
-        currentMenu = SOUND_MENU;
+      if (_currentSelection == 0){
+        _currentMenu = SOUND_MENU;
         soundMenu();
-      } else if (currentSelection == 1){
-        currentMenu = SIP_PUFF_MENU;
+      } else if (_currentSelection == 1){
+        _currentMenu = SIP_PUFF_MENU;
         sipPuffThreshMenu();
-      } else if (currentSelection == 2){
-        currentMenu = MAIN_MENU;
+      } else if (_currentSelection == 2){
+        _currentMenu = MAIN_MENU;
         mainMenu();
       }
       break;
     case SOUND_MENU:
-       switch (currentSelection){
+       switch (_currentSelection){
         case 0:
-          soundOn = !soundOn;
+          _soundOn = !_soundOn;
           //do function for turning sound on/off
           soundMenu();
           break;
         case 1:
-          currentMenu = MAIN_MENU;
+          _currentMenu = MAIN_MENU;
           mainMenu();
           break;
         }
       case SIP_PUFF_MENU:
-       switch (currentSelection){
+       switch (_currentSelection){
         case 0:
           //add action
           break;
@@ -384,7 +376,7 @@ void LSScreen::selectMenuItem() {
           //add action
           break;
         case 2:
-          currentMenu = MAIN_MENU;
+          _currentMenu = MAIN_MENU;
           mainMenu();
           break;
         }
@@ -410,25 +402,25 @@ void LSScreen::displayMenu() {
   setupDisplay();
 
   for (int i = 0; i < TEXT_ROWS; i++) {
-    if (i >= cursorStart){
-      _display.print(" "), _display.println(currentMenuText[i+countMenuScroll]);
+    if (i >= _cursorStart){
+      _display.print(" "), _display.println(_currentMenuText[i+_countMenuScroll]);
     } else {
-      _display.println(currentMenuText[i]);
+      _display.println(_currentMenuText[i]);
     }
   }
 
   _display.display();
 
-  //currentSelection = 0;
+  //_currentSelection = 0;
   displayCursor();
 }
 
 void LSScreen::displayCursor() {
   int cursorPos;
-  if (currentSelection + cursorStart > TEXT_ROWS-1){
+  if (_currentSelection + _cursorStart > TEXT_ROWS-1){
     cursorPos = TEXT_ROWS-1;
   } else {
-    cursorPos = currentSelection;
+    cursorPos = _currentSelection;
   }
 
   // These settings are likely already implemented and these lines can likely be removed, this is mostly here just to make sure 
@@ -436,8 +428,8 @@ void LSScreen::displayCursor() {
   _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
 
   // Show cursor on text line of selection index, erase previous cursor
-  _display.setCursor(0, 16 * cursorStart);  
-  for (int i = 0; i < currentMenuLength; i++) {    
+  _display.setCursor(0, 16 * _cursorStart);  
+  for (int i = 0; i < _currentMenuLength; i++) {    
     if (i == cursorPos) {
       _display.println(">");
     } else {
@@ -447,36 +439,36 @@ void LSScreen::displayCursor() {
 
   _display.display();
 
-  selectedLine = cursorStart + currentSelection;
-  selectedText = currentMenuText[selectedLine];
+  _selectedLine = _cursorStart + _currentSelection;
+  _selectedText = _currentMenuText[_selectedLine];
   
-  if (selectedText.length() > 9){
+  if (_selectedText.length() > 9){
     Serial.println("Long text");
-    scrollOn = true;
-    scrollPos = 12;
+    _scrollOn = true;
+    _scrollPos = 12;
     delay(200);                           // may need to remove this
     scrollLongText();
   } else {
-    scrollOn = false;
+    _scrollOn = false;
   }
 }
 
 /*
 void LSScreen::nextSelection() {
-  if (scrollOn){
-    _display.setCursor(0, selectedLine *16);
+  if (_scrollOn){
+    _display.setCursor(0, _selectedLine *16);
     _display.print("                                   ");
-    _display.setCursor(12, selectedLine *16);
-    _display.print(selectedText);
+    _display.setCursor(12, _selectedLine *16);
+    _display.print(_selectedText);
   }
 
-  currentSelection++;
-  if (currentSelection >= currentMenuLength) {   
-    currentSelection = 0;
-    countMenuScroll = 0;
+  _currentSelection++;
+  if (_currentSelection >= _currentMenuLength) {   
+    _currentSelection = 0;
+    _countMenuScroll = 0;
     displayMenu();
-  } else if (currentSelection + cursorStart > TEXT_ROWS-1){
-    countMenuScroll++;
+  } else if (_currentSelection + _cursorStart > TEXT_ROWS-1){
+    _countMenuScroll++;
     displayMenu();
   } 
 
@@ -487,30 +479,30 @@ void LSScreen::nextSelection() {
 
 void LSScreen::scrollLongText() {
   Serial.println("scroll function");
-  int minPos = -12 * selectedText.length();
+  int minPos = -12 * _selectedText.length();
   
   _display.setTextSize(2);                                   // 2x scale text
   _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
   _display.setTextWrap(false);
   
-  if (millis() - scrollDelayTimer >= SCROLL_DELAY_MILLIS){
+  if (millis() - _scrollDelayTimer >= SCROLL_DELAY_MILLIS){
     Serial.println("Timer good");
-    scrollDelayTimer = millis();
+    _scrollDelayTimer = millis();
     
     //Clear previous text by writing over it with blank text
-    _display.setCursor(0, selectedLine *16);
+    _display.setCursor(0, _selectedLine *16);
     _display.print("                                   ");
 
     //Display text in new position to simulate scrolling
-    _display.setCursor(scrollPos, selectedLine *16);
-    _display.print(selectedText);
+    _display.setCursor(_scrollPos, _selectedLine *16);
+    _display.print(_selectedText);
 
-    _display.setCursor(0, selectedLine *16);
+    _display.setCursor(0, _selectedLine *16);
     _display.print(">");
     _display.display();
     //displayCursor();
-    scrollPos = scrollPos-4;
-    if (scrollPos < minPos) scrollPos = _display.width();
+    _scrollPos = _scrollPos-4;
+    if (_scrollPos < minPos) _scrollPos = _display.width();
   }
   
 }
@@ -518,37 +510,37 @@ void LSScreen::scrollLongText() {
 //********** MENUS **********//
 
 void LSScreen::mainMenu(void) {
-  currentMenu = MAIN_MENU;
+  _currentMenu = MAIN_MENU;
   
   //if new menu selection
-  //if (prevMenu != currentMenu) {
-    currentMenuLength = mainMenuLen;
-    currentMenuText = mainMenuText;
-    cursorStart = 0;
-    currentSelection = 0;
+  //if (_prevMenu != _currentMenu) {
+    _currentMenuLength = mainMenuLen;
+    _currentMenuText = _mainMenuText;
+    _cursorStart = 0;
+    _currentSelection = 0;
 
     displayMenu();
   //}
 }
 
 void LSScreen::exitConfirmMenu(){
-  prevMenu = currentMenu;
-  currentMenu = EXIT_MENU;
-  currentMenuText = exitConfirmText;
-  currentMenuLength = 2;
-  cursorStart = 2;
-  currentSelection = 0;
+  _prevMenu = _currentMenu;
+  _currentMenu = EXIT_MENU;
+  _currentMenuText = _exitConfirmText;
+  _currentMenuLength = 2;
+  _cursorStart = 2;
+  _currentSelection = 0;
   displayMenu();
 
 }
 
 void LSScreen::calibMenu(void) {
-  currentMenu = CALIB_MENU;
-  if (prevMenu != currentMenu) {
-    currentMenuLength = calibMenuLen;
-    currentMenuText = calibMenuText;
-    cursorStart = 0;
-    currentSelection = 0;
+  _currentMenu = CALIB_MENU;
+  if (_prevMenu != _currentMenu) {
+    _currentMenuLength = calibMenuLen;
+    _currentMenuText = _calibMenuText;
+    _cursorStart = 0;
+    _currentSelection = 0;
   
     displayMenu();
   }
@@ -556,27 +548,27 @@ void LSScreen::calibMenu(void) {
 }
 
 void LSScreen::modeMenu(void) {
-  currentMenu = MODE_MENU;
+  _currentMenu = MODE_MENU;
 
-  currentMenuLength = modeMenuLen;
-  currentMenuText = modeMenuText;
-  cursorStart = 0;
-  currentSelection = 0;
+  _currentMenuLength = modeMenuLen;
+  _currentMenuText = _modeMenuText;
+  _cursorStart = 0;
+  _currentSelection = 0;
 
   displayMenu();
 
   _display.setTextColor(SSD1306_BLACK, SSD1306_WHITE); // Draw 'inverse' coloured text
-  if (mode == MODE_MOUSE_USB){
+  if (_mode == MODE_MOUSE_USB){
       _display.setCursor(12, 0);
-      _display.print(modeMenuText[MODE_MOUSE_USB]);
-  } else if (mode == MODE_MOUSE_BT){
+      _display.print(_modeMenuText[MODE_MOUSE_USB]);
+  } else if (_mode == MODE_MOUSE_BT){
       _display.setCursor(12, 16);
       //display.print(" MOUSE BLUETOOTH ");
-      _display.print(modeMenuText[MODE_MOUSE_BT]);
-  } else if (mode == MODE_GAMEPAD){
+      _display.print(_modeMenuText[MODE_MOUSE_BT]);
+  } else if (_mode == MODE_GAMEPAD){
       _display.setCursor(12, 16*2);
       //display.print(" GAMEPAD ");
-      _display.print(modeMenuText[MODE_GAMEPAD]);
+      _display.print(_modeMenuText[MODE_GAMEPAD]);
   }
 
   _display.display();
@@ -585,20 +577,20 @@ void LSScreen::modeMenu(void) {
 }
 //
 void LSScreen::confirmModeChange() {
-  currentMenu = CONFIRM_MODE_CHANGE;
-  currentMenuText = modeConfirmText;
-  currentMenuLength = 2;
-  cursorStart = 2;
-  currentSelection = 0;
+  _currentMenu = CONFIRM_MODE_CHANGE;
+  _currentMenuText = _modeConfirmText;
+  _currentMenuLength = 2;
+  _cursorStart = 2;
+  _currentSelection = 0;
   displayMenu();
 
 }
 
 void LSScreen::changeMode(){
-  mode = tempMode;
+  _mode = _tempMode;
 
   /*                  // ************************************************************** CHANGE THIS <>
-  switch (mode){
+  switch (_mode){
     case MODE_MOUSE_USB:
       digitalWrite(PIN_LED_GAMEPAD, LOW);
       digitalWrite(PIN_LED_MOUSE, HIGH);
@@ -629,34 +621,34 @@ void LSScreen::changeMode(){
 
   //remove this for final code, because device will reset
   //readButtons();                            // ************************************************************** CHANGE THIS <>
-  currentMenu = MAIN_MENU;
+  _currentMenu = MAIN_MENU;
   mainMenu();
 
   //software reset
 }
 
 void LSScreen::cursorSpeedMenu(void) { 
-  currentMenu = CURSOR_SP_MENU;
-  cursorSpeedLevel = getJoystickSpeed(true,false); 
+  _currentMenu = CURSOR_SP_MENU;
+  _cursorSpeedLevel = getJoystickSpeed(true,false); 
   
-  cursorSpMenuText[0] = "Speed: " + String(cursorSpeedLevel);
+  _cursorSpMenuText[0] = "Speed: " + String(_cursorSpeedLevel);
   
-  currentMenuLength = cursorSpMenuLen;
-  currentMenuText = cursorSpMenuText;
-  cursorStart = 1;
-  currentSelection = 0;
+  _currentMenuLength = cursorSpMenuLen;
+  _currentMenuText = _cursorSpMenuText;
+  _cursorStart = 1;
+  _currentSelection = 0;
 
   displayMenu();
 
 }
 
 void LSScreen::moreMenu(){
-  currentMenu = MORE_MENU;
+  _currentMenu = MORE_MENU;
 
-  currentMenuLength = moreMenuLen;
-  currentMenuText = moreMenuText;
-  cursorStart = 0;
-  currentSelection = 0;
+  _currentMenuLength = moreMenuLen;
+  _currentMenuText = _moreMenuText;
+  _cursorStart = 0;
+  _currentSelection = 0;
 
   displayMenu();
 
@@ -710,31 +702,31 @@ void LSScreen::fullCalibrationPage(void){
 // ----- MORE SETTINGS MENUS ----- //
 
 void LSScreen::soundMenu(){
-  currentMenu = SOUND_MENU;
+  _currentMenu = SOUND_MENU;
   
-  if (soundOn) {
-    soundMenuText[1] = "ON";
-    soundMenuText[2] = "Turn off";
+  if (_soundOn) {
+    _soundMenuText[1] = "ON";
+    _soundMenuText[2] = "Turn off";
   } else {
-    soundMenuText[1] = "OFF";
-    soundMenuText[2] = "Turn on";
+    _soundMenuText[1] = "OFF";
+    _soundMenuText[2] = "Turn on";
   }
 
-  currentMenuLength = soundMenuLen;
-  currentMenuText = soundMenuText;
-  cursorStart = 2;
-  currentSelection = 0;
+  _currentMenuLength = soundMenuLen;
+  _currentMenuText = _soundMenuText;
+  _cursorStart = 2;
+  _currentSelection = 0;
 
   displayMenu();
 }
 
 void LSScreen::sipPuffThreshMenu(){
-  currentMenu = SIP_PUFF_MENU;
+  _currentMenu = SIP_PUFF_MENU;
 
-  currentMenuLength = sipPuffThreshMenuLen;
-  currentMenuText = sipPuffThreshMenuText;
-  cursorStart = 0;
-  currentSelection = 0;
+  _currentMenuLength = sipPuffThreshMenuLen;
+  _currentMenuText = _sipPuffThreshMenuText;
+  _cursorStart = 0;
+  _currentSelection = 0;
 
   //Add sip/puff  thresh adjustment function // ************************************************************** CHANGE THIS <>
 
