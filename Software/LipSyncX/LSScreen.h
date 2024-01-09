@@ -48,6 +48,8 @@
 //More Menus
 #define SOUND_MENU        51
 #define SIP_PUFF_MENU     52
+#define SIP_THRESH_MENU   521
+#define PUFF_THRESH_MENU  522
 
 #define MODE_MOUSE_USB  0
 #define MODE_MOUSE_BT   1
@@ -86,6 +88,9 @@ private:
   String *_currentMenuText;
   String _selectedText;
 
+  float _sipPressThresh;
+  float _puffPressThresh;
+
   //void setupDisplay();
   //void displayMenu();
   //void displayCursor();
@@ -104,16 +109,20 @@ private:
   void centerReset();
   void soundMenu();
   void sipPuffThreshMenu();
+  void adjustSipThreshMenu();
+  void adjustPuffThreshMenu();
 
   String _mainMenuText[5] = {"Exit Menu", "Calibrate", "Mode", "Cursor speed", "More"};
   String _exitConfirmText[4] = {"Exit", "settings?", "Confirm", "... Back"};
   String _calibMenuText[4] = {"Center reset", "Full Calibration", "... Back", " "};
   String _modeMenuText[4] = {"MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back"};
   String _modeConfirmText[4] = {"Change", "mode?", "Confirm", "... Back"};
-  String _cursorSpMenuText[4] = {"  ", "Increase", "Decrease", "... Back"};
+  String _cursorSpMenuText[4] = {"Speed: ", "Increase", "Decrease", "... Back"};
   String _moreMenuText[4] = {"Sound", "Sip & Puff", "... Back", "         "};
   String _soundMenuText[4] = {"Sound:", "<>", "Turn <>", "... Back"};
   String _sipPuffThreshMenuText[4] = {"Sip Threshold", "Puff Threshold", "... Back"};
+  String _adjustSipThreshMenuText[4] = {"Sip: ", "Increase", "Decrease", "... Back"};
+  String _adjustPuffThreshMenuText[4] = {"Puff: ", "Increase", "Decrease", "... Back"};
 
   // Number of selectable options in each menu
   const int mainMenuLen = 5;
@@ -124,6 +133,8 @@ private:
   const int moreMenuLen = 3;
   const int soundMenuLen = 2;
   const int sipPuffThreshMenuLen = 3;
+  const int adjustSipThreshMenuLen = 3;
+  const int adjustPuffThreshMenuLen = 3;
 
 
 public:
@@ -369,16 +380,66 @@ void LSScreen::selectMenuItem() {
         }
       case SIP_PUFF_MENU:
        switch (_currentSelection){
-        case 0:
-          //add action
+        case 0:     // Sip
+          adjustSipThreshMenu();
           break;
-        case 1:
-          //add action
+        case 1:     // Puff
+          adjustPuffThreshMenu();
           break;
         case 2:
           _currentMenu = MAIN_MENU;
           mainMenu();
           break;
+        }
+      case SIP_THRESH_MENU:
+        switch (_currentSelection){
+          case 0:       //Increase
+            _sipPressThresh = getSipPressureThreshold(false,false);
+            _sipPressThresh++;                                                                                    // ** CHANGE THIS, What values are we expecting? By how much to increase?
+            setSipPressureThreshold(false, false, _sipPressThresh);
+            _adjustSipThreshMenuText[0] = "Sip: " + String(_sipPressThresh) + " ";
+            _display.setCursor(0,0);
+            _display.print(_adjustSipThreshMenuText[0]);
+            _display.display();
+            break;
+          case 1:       //Decrease
+            _sipPressThresh = getSipPressureThreshold(false,false);
+            _sipPressThresh--;                                                                                    // ** CHANGE THIS, What values are we expecting? By how much to increase?
+            setSipPressureThreshold(false, false, _sipPressThresh);
+            _adjustSipThreshMenuText[0] = "Sip: " + String(_sipPressThresh) + " ";
+            _display.setCursor(0,0);
+            _display.print(_adjustSipThreshMenuText[0]);
+            _display.display();
+            break;
+          case 2:       //Back
+            _currentMenu = MAIN_MENU;
+            mainMenu();
+            break;
+        }
+      case PUFF_THRESH_MENU:
+        switch (_currentSelection){
+          case 0:       //Increase
+            _puffPressThresh = getPuffPressureThreshold(false,false);
+            _puffPressThresh++;                                                                                    // ** CHANGE THIS, What values are we expecting? By how much to increase?
+            setPuffPressureThreshold(false, false, _puffPressThresh);
+            _adjustPuffThreshMenuText[0] = "Puff: " + String(_puffPressThresh) + " ";
+            _display.setCursor(0,0);
+            _display.print(_adjustPuffThreshMenuText[0]);
+            _display.display();
+            break;
+          case 1:       //Decrease
+            _puffPressThresh = getPuffPressureThreshold(false,false);
+            _puffPressThresh--;                                                                                    // ** CHANGE THIS, What values are we expecting? By how much to increase?
+            setPuffPressureThreshold(false, false, _puffPressThresh);
+            _adjustPuffThreshMenuText[0] = "Puff: " + String(_puffPressThresh) + " ";
+            _display.setCursor(0,0);
+            _display.print(_adjustPuffThreshMenuText[0]);
+            _display.display();
+            break;
+          case 2:       //Back
+            _currentMenu = MAIN_MENU;
+            mainMenu();
+            break;
         }
   }
 }
@@ -733,5 +794,34 @@ void LSScreen::sipPuffThreshMenu(){
   displayMenu();
 }
 
+void LSScreen::adjustSipThreshMenu(void) { 
+  _currentMenu = SIP_THRESH_MENU;
+  _sipPressThresh = getSipPressureThreshold(false,false);
+  
+  _adjustSipThreshMenuText[0] = "Sip: " + String(_sipPressThresh) + " ";
+  
+  _currentMenuLength = adjustSipThreshMenuLen;
+  _currentMenuText = _adjustSipThreshMenuText;
+  _cursorStart = 1;
+  _currentSelection = 0;
+
+  displayMenu();
+
+}
+
+void LSScreen::adjustPuffThreshMenu(void) { 
+  _currentMenu = PUFF_THRESH_MENU;
+  _sipPressThresh = getPuffPressureThreshold(false,false);
+  
+  _adjustPuffThreshMenuText[0] = "Puff: " + String(_puffPressThresh) + " ";
+  
+  _currentMenuLength = adjustPuffThreshMenuLen;
+  _currentMenuText = _adjustPuffThreshMenuText;
+  _cursorStart = 1;
+  _currentSelection = 0;
+
+  displayMenu();
+
+}
 
 #endif
