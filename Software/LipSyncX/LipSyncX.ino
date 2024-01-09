@@ -2,7 +2,7 @@
 * File: LipSync_Firmware.ino
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: Beta (03 January 2024)
+* Version: Beta (09 January 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2023 Neil Squire Society
@@ -31,6 +31,7 @@
 #include "LSJoystick.h"
 #include "LSMemory.h"
 #include "LSScreen.h"
+#include "LSBuzzer.h"
 
 
 //Communication mode and debug mode variables
@@ -224,6 +225,8 @@ LSOutput led;                                        //Starts an instance of the
 
 LSScreen screen;                                    //Create an instance of the LSScreen Object for OLED Screen
 
+LSBuzzer buzzer;                                    //Create an instance of the LSBuzzer Object
+
 LSUSBMouse usbmouse;                                 //Starts an instance of the USB mouse object
 LSBLEMouse btmouse;                                  //Starts an instance of the BLE mouse object
 LSUSBGamepad gamepad;                                //Create an instance of the USB gamepad object
@@ -267,6 +270,8 @@ void setup()
   initJoystick();                                               //Initialize Joystick 
 
   initAcceleration();                                           //Initialize Cursor Acceleration
+
+  initBuzzer();                                                 //Initialize Buzzer
 
   initDisplay();                                                //Initialize Display
 
@@ -413,6 +418,25 @@ void screenLoop()
   screen.update();
   
 }
+
+//***BUZZER LOOP FUNCTION***//
+// Function   : buzzerLoop 
+// 
+// Description: This function handles updates to the buzzer.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void buzzerLoop()
+{
+  
+  //if (USB_DEBUG) { Serial.println("USBDEBUG: buzzerLoop");  } 
+  //Request update
+  buzzer.update();
+  
+}
+
 
 //*********************************//
 // Acceleration Functions
@@ -1716,4 +1740,24 @@ void initDisplay()
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing OLED Display");  }
   screen.begin();
   screen.splashScreen();
+}
+
+//*********************************//
+// Buzzer Functions
+//*********************************//
+
+//***INITIALIZE BUZZER FUNCTION***//
+// Function   : initDisplay
+// 
+// Description: This function initializes the Buzzer as feedback method.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void initBuzzer()
+{ 
+  if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Buzzer");  }
+  buzzer.begin();
+  buzzer.startup();
 }

@@ -2,7 +2,7 @@
 * File: LSScreen.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: Beta (03 January 2024)
+* Version: Beta (09 January 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2023 Neil Squire Society

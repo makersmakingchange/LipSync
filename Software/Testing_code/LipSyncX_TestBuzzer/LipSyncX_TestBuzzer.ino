@@ -1,5 +1,5 @@
 /*******************
-  This code is used to test the LEDs on the LipSyncX Hub.
+  This code is used to test the Buzzer on the LipSyncX Hub.
   Last edited: November 16, 2023
  *******************/
 
