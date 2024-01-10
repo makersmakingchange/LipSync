@@ -113,7 +113,7 @@
 
 class LSBuzzer {
   private:
-
+    boolean _buzzerOn = true;     // TODO: make this something that is saved in memory and not saved just here, then load from memory instead of setting to true;
 
   public: 
     LSBuzzer();
@@ -121,6 +121,8 @@ class LSBuzzer {
     void update();
     void clear();
     void startup();
+    void enable();
+    void disable();
 
 };
 
@@ -139,10 +141,20 @@ void LSBuzzer::clear(){
   
 }
 
+void LSBuzzer::enable(){
+  _buzzerOn = true;
+}
+
+void LSBuzzer::disable(){
+  _buzzerOn = false;
+}
+
 void LSBuzzer::startup(){
-  tone(CONF_BUZZER_PIN, NOTE_F5, 500);
-  delay(500);
-  tone(CONF_BUZZER_PIN, NOTE_C6, 500);
+  if (_buzzerOn){
+    tone(CONF_BUZZER_PIN, NOTE_F5, 500);
+    delay(500);                             // TODO: add timer instead of delay
+    tone(CONF_BUZZER_PIN, NOTE_C6, 500);
+  }
 }
 
 #endif

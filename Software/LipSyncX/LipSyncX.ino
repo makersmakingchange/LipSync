@@ -740,7 +740,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
       //Get action index                                                                       
-      if (screen.isActive()){                                                             //********************************** NEED TO CHANGE LATER TO ADD OTHER OUTPUTS
+      if (screen.isActive()){                                                             //********************************** TODO: Change later to add other outputs
         tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
       } else {
         tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
@@ -1760,4 +1760,12 @@ void initBuzzer()
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Buzzer");  }
   buzzer.begin();
   buzzer.startup();
+}
+
+void buzzerSoundOn(){
+  buzzer.enable();
+}
+
+void buzzerSoundOff(){
+  buzzer.disable();
 }

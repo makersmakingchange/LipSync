@@ -290,11 +290,10 @@ void LSScreen::selectMenuItem() {
           _currentSelection = 0;
           mainMenu();
         } else {
-          //some function to exit
           setupDisplay();
           _display.println("Exiting");
           _display.display();
-          delay(2000);
+          delay(2000);                  // TODO: remove delay
 
           deactivateMenu();
         }
@@ -371,13 +370,18 @@ void LSScreen::selectMenuItem() {
         case 0:
           _soundOn = !_soundOn;
           //do function for turning sound on/off
+          if (_soundOn){
+            buzzerSoundOn();
+          } else {
+            buzzerSoundOff();
+          }
           soundMenu();
           break;
         case 1:
           _currentMenu = MAIN_MENU;
-          mainMenu();
-          break;
+          mainMenu(); 
         }
+        break;
       case SIP_PUFF_MENU:
        switch (_currentSelection){
         case 0:     // Sip
@@ -391,11 +395,12 @@ void LSScreen::selectMenuItem() {
           mainMenu();
           break;
         }
+        break;
       case SIP_THRESH_MENU:
         switch (_currentSelection){
           case 0:       //Increase
             _sipPressThresh = getSipPressureThreshold(false,false);
-            _sipPressThresh++;                                                                                    // ** CHANGE THIS, What values are we expecting? By how much to increase?
+            _sipPressThresh++;                                                                                    // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
             setSipPressureThreshold(false, false, _sipPressThresh);
             _adjustSipThreshMenuText[0] = "Sip: " + String(_sipPressThresh) + " ";
             _display.setCursor(0,0);
@@ -404,7 +409,7 @@ void LSScreen::selectMenuItem() {
             break;
           case 1:       //Decrease
             _sipPressThresh = getSipPressureThreshold(false,false);
-            _sipPressThresh--;                                                                                    // ** CHANGE THIS, What values are we expecting? By how much to increase?
+            _sipPressThresh--;                                                                                    // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
             setSipPressureThreshold(false, false, _sipPressThresh);
             _adjustSipThreshMenuText[0] = "Sip: " + String(_sipPressThresh) + " ";
             _display.setCursor(0,0);
@@ -416,11 +421,12 @@ void LSScreen::selectMenuItem() {
             mainMenu();
             break;
         }
+        break;
       case PUFF_THRESH_MENU:
         switch (_currentSelection){
           case 0:       //Increase
             _puffPressThresh = getPuffPressureThreshold(false,false);
-            _puffPressThresh++;                                                                                    // ** CHANGE THIS, What values are we expecting? By how much to increase?
+            _puffPressThresh++;                                                                                    // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
             setPuffPressureThreshold(false, false, _puffPressThresh);
             _adjustPuffThreshMenuText[0] = "Puff: " + String(_puffPressThresh) + " ";
             _display.setCursor(0,0);
@@ -429,7 +435,7 @@ void LSScreen::selectMenuItem() {
             break;
           case 1:       //Decrease
             _puffPressThresh = getPuffPressureThreshold(false,false);
-            _puffPressThresh--;                                                                                    // ** CHANGE THIS, What values are we expecting? By how much to increase?
+            _puffPressThresh--;                                                                                    // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
             setPuffPressureThreshold(false, false, _puffPressThresh);
             _adjustPuffThreshMenuText[0] = "Puff: " + String(_puffPressThresh) + " ";
             _display.setCursor(0,0);
@@ -441,6 +447,7 @@ void LSScreen::selectMenuItem() {
             mainMenu();
             break;
         }
+        break;
   }
 }
 
@@ -507,7 +514,7 @@ void LSScreen::displayCursor() {
     Serial.println("Long text");
     _scrollOn = true;
     _scrollPos = 12;
-    delay(200);                           // may need to remove this
+    delay(200);                           // TODO: remove delay
     scrollLongText();
   } else {
     _scrollOn = false;
@@ -650,7 +657,7 @@ void LSScreen::confirmModeChange() {
 void LSScreen::changeMode(){
   _mode = _tempMode;
 
-  /*                  // ************************************************************** CHANGE THIS <>
+  /*                  // ************************************************************** TODO: CHANGE THIS <>
   switch (_mode){
     case MODE_MOUSE_USB:
       digitalWrite(PIN_LED_GAMEPAD, LOW);
@@ -665,7 +672,7 @@ void LSScreen::changeMode(){
       digitalWrite(PIN_LED_GAMEPAD, HIGH);
       break;
   }
-  */                  // ************************************************************** CHANGE THIS ^
+  */                  // ************************************************************** TODO: CHANGE THIS ^
 
   setupDisplay();
   _display.println("Resetting");
@@ -676,12 +683,12 @@ void LSScreen::changeMode(){
   
   //conduct mode change
   //save mode into flash
-  //user feedback showing current mode    // ************************************************************** CHANGE THIS <>
+  //user feedback showing current mode    // ************************************************************** TODO: CHANGE THIS <>
   
   //software reset
 
   //remove this for final code, because device will reset
-  //readButtons();                            // ************************************************************** CHANGE THIS <>
+  //readButtons();                            // ************************************************************** TODO: CHANGE THIS <>
   _currentMenu = MAIN_MENU;
   mainMenu();
 
@@ -753,7 +760,7 @@ void LSScreen::fullCalibrationPage(void){
   _display.display();
 
   //TO DO
-  //Add prompts and add function for calibration // ************************************************************** CHANGE THIS <>
+  //Add prompts and add function for calibration // ************************************************************** TODO: CHANGE THIS <>
 
   delay(1000);
 
@@ -789,7 +796,7 @@ void LSScreen::sipPuffThreshMenu(){
   _cursorStart = 0;
   _currentSelection = 0;
 
-  //Add sip/puff  thresh adjustment function // ************************************************************** CHANGE THIS <>
+  //Add sip/puff  thresh adjustment function // ************************************************************** TODO: CHANGE THIS <>
 
   displayMenu();
 }
