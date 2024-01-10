@@ -55,6 +55,7 @@ typedef struct
 {
   uint8_t inputActionState;
   uint8_t mouseOutputActionNumber;
+  uint8_t gamepadOutputActionNumber;
   uint8_t menuOutputActionNumber;
   unsigned long inputActionStartTime;
   unsigned long inputActionEndTime;

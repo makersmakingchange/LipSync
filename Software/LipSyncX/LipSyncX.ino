@@ -97,17 +97,17 @@ const inputActionStruct switchActionProperty[]{
 */
 
 const inputActionStruct switchActionProperty[]{
-    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,            0,0},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,     CONF_ACTION_NEXT_MENU_ITEM,     0,3000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,            0,3000},
-    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_SELECT_MENU_ITEM,   0,3000},
-    {INPUT_MAIN_STATE_S13_PRESSED,  CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,          0,3000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,           CONF_ACTION_NOTHING,            3000,5000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CHANGE_MODE,    CONF_ACTION_NOTHING,            3000,5000}, //Might change
-    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_SCROLL,         CONF_ACTION_NOTHING,            3000,5000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,          5000,10000},   
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CURSOR_CENTER,  CONF_ACTION_NOTHING,            5000,10000},
-    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,            5000,10000},
+    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,    CONF_ACTION_NOTHING,            0,0},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,     CONF_ACTION_B1_PRESS,   CONF_ACTION_NEXT_MENU_ITEM,     0,3000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_B2_PRESS,   CONF_ACTION_NOTHING,            0,3000},
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_B3_PRESS,   CONF_ACTION_SELECT_MENU_ITEM,   0,3000},
+    {INPUT_MAIN_STATE_S13_PRESSED,  CONF_ACTION_START_MENU,     CONF_ACTION_NOTHING,    CONF_ACTION_STOP_MENU,          0,3000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,           CONF_ACTION_B4_PRESS,   CONF_ACTION_NOTHING,            3000,5000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CHANGE_MODE,    CONF_ACTION_B5_PRESS,   CONF_ACTION_NOTHING,            3000,5000}, //Might change
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_SCROLL,         CONF_ACTION_B6_PRESS,   CONF_ACTION_NOTHING,            3000,5000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,     CONF_ACTION_B7_PRESS,   CONF_ACTION_STOP_MENU,          5000,10000},   
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CURSOR_CENTER,  CONF_ACTION_B8_PRESS,   CONF_ACTION_NOTHING,            5000,10000},
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,    CONF_ACTION_NOTHING,            5000,10000},
 };
 
 /*
@@ -126,14 +126,14 @@ const inputActionStruct buttonActionProperty[]{
 
 // Buttons built in to hub
 const inputActionStruct buttonActionProperty[]{
-    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,              0,0},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,     CONF_ACTION_NEXT_MENU_ITEM,       0,3000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_SELECT_MENU_ITEM,     0,3000},
-    {INPUT_MAIN_STATE_S12_PRESSED,  CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,            0,3000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,           CONF_ACTION_NOTHING,              3000,5000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_SCROLL,         CONF_ACTION_NOTHING,              3000,5000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,            5000,10000},  
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,              5000,10000},
+    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,    CONF_ACTION_NOTHING,              0,0},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,     CONF_ACTION_B1_PRESS,   CONF_ACTION_NEXT_MENU_ITEM,       0,3000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_B2_PRESS,   CONF_ACTION_SELECT_MENU_ITEM,     0,3000},
+    {INPUT_MAIN_STATE_S12_PRESSED,  CONF_ACTION_START_MENU,     CONF_ACTION_B3_PRESS,   CONF_ACTION_STOP_MENU,            0,3000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,           CONF_ACTION_B4_PRESS,   CONF_ACTION_NOTHING,              3000,5000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_SCROLL,         CONF_ACTION_B5_PRESS,   CONF_ACTION_NOTHING,              3000,5000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,     CONF_ACTION_B6_PRESS,   CONF_ACTION_STOP_MENU,            5000,10000},  
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_B7_PRESS,   CONF_ACTION_NOTHING,              5000,10000},
 };
 
 // Cursor acceleration structure
@@ -178,13 +178,13 @@ const inputActionStruct sapActionProperty[]{
 */
 
 const inputActionStruct sapActionProperty[]{
-    {PRESS_SAP_MAIN_STATE_NONE,       CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,              0,0},
-    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_LEFT_CLICK,     CONF_ACTION_NEXT_MENU_ITEM,       0,3000},
-    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_SELECT_MENU_ITEM,     0,3000},
-    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_DRAG,           CONF_ACTION_NOTHING,              3000,5000},
-    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_SCROLL,         CONF_ACTION_NOTHING,              3000,5000},
-    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,            5000,10000},
-    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,              5000,10000}
+    {PRESS_SAP_MAIN_STATE_NONE,       CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,    CONF_ACTION_NOTHING,              0,0},
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_LEFT_CLICK,     CONF_ACTION_B1_PRESS,   CONF_ACTION_NEXT_MENU_ITEM,       0,3000},
+    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_B2_PRESS,   CONF_ACTION_SELECT_MENU_ITEM,     0,3000},
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_DRAG,           CONF_ACTION_B3_PRESS,   CONF_ACTION_NOTHING,              3000,5000},
+    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_SCROLL,         CONF_ACTION_B4_PRESS,   CONF_ACTION_NOTHING,              3000,5000},
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_START_MENU,     CONF_ACTION_B5_PRESS,   CONF_ACTION_STOP_MENU,            5000,10000},
+    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_B6_PRESS,   CONF_ACTION_NOTHING,              5000,10000}
 };
 
 
@@ -878,6 +878,46 @@ void performOutputAction(int action)
       screen.deactivateMenu();
       break;
     }
+    case CONF_ACTION_B1_PRESS:
+    {
+      gamepadButtonPress(1);
+      break;
+    }
+    case CONF_ACTION_B2_PRESS:
+    {
+      gamepadButtonPress(2);
+      break;
+    }
+    case CONF_ACTION_B3_PRESS:
+    {
+      gamepadButtonPress(3);
+      break;
+    }
+    case CONF_ACTION_B4_PRESS:
+    {
+      gamepadButtonPress(4);
+      break;
+    }
+    case CONF_ACTION_B5_PRESS:
+    {
+      gamepadButtonPress(5);
+      break;
+    }
+    case CONF_ACTION_B6_PRESS:
+    {
+      gamepadButtonPress(6);
+      break;
+    }
+    case CONF_ACTION_B7_PRESS:
+    {
+      gamepadButtonPress(7);
+      break;
+    }
+    case CONF_ACTION_B8_PRESS:
+    {
+      gamepadButtonPress(8);
+      break;
+    }
     case CONF_ACTION_NEXT_MENU_ITEM:
     {
       // Move to next menu item
@@ -910,6 +950,11 @@ void performOutputAction(int action)
     canOutputAction = true;
   }
 }
+
+
+//*********************************//
+// Mouse Functions
+//*********************************//
 
 //***CURSOR LEFT CLICK FUNCTION***//
 // Function   : cursorLeftClick 
@@ -1012,6 +1057,89 @@ void cursorScroll(void)
   //Serial.println("Scroll");
   outputAction=CONF_ACTION_SCROLL;
 }
+
+
+//*********************************//
+// Gamepad Functions
+//*********************************//
+
+//***GAMEPAD BUTTON PRESS FUNCTION***//
+// Function   : gamepadButtonPress 
+// 
+// Description: This function performs button press action.
+//
+// Parameters : int : buttonNumber
+// 
+// Return     : void 
+//****************************************//
+void gamepadButtonPress(int buttonNumber)
+{
+  //Serial.println("Button Press");
+  if (buttonNumber >0 && buttonNumber <=8 )
+  {
+    gamepad.press(buttonNumber-1);
+    gamepad.send();
+  }
+}
+
+//***GAMEPAD BUTTON CLICK FUNCTION***//
+// Function   : gamepadButtonClick
+// 
+// Description: This function performs button click action.
+//
+// Parameters : int : buttonNumber
+// 
+// Return     : void 
+//****************************************//
+void gamepadButtonClick(int buttonNumber)
+{
+  //Serial.println("Button click");
+  if (buttonNumber >0 && buttonNumber <=8 )
+  {
+    gamepad.press(buttonNumber-1);
+    gamepad.send();
+    //actionTimerId[0] = actionTimer.setTimeout(CONF_BUTTON_PRESS_DELAY, gamepadButtonRelease, (int *)buttonNumber);        // TODO: fix this
+  }
+
+}
+
+//***GAMEPAD BUTTON RELEASE FUNCTION***//
+// Function   : gamepadButtonRelease 
+// 
+// Description: This function performs button release action.
+//
+// Parameters : int* : args
+// 
+// Return     : void 
+//****************************************//
+void gamepadButtonRelease(int* args)
+{
+  int buttonNumber = (int)args;
+  //Serial.println("Button Release");
+  if (buttonNumber >0 && buttonNumber <=8){
+    gamepad.release(buttonNumber-1);
+    gamepad.send();
+  }
+
+}
+
+
+//***GAMEPAD BUTTON RELEASE ALL FUNCTION***//
+// Function   : gamepadButtonReleaseAll 
+// 
+// Description: This function performs button release action.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void gamepadButtonReleaseAll()
+{
+  //Serial.println("Button Release");
+  gamepad.releaseAll();
+  gamepad.send();
+}
+
 
 
 //*********************************//
@@ -1759,7 +1887,7 @@ void initBuzzer()
 { 
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Buzzer");  }
   buzzer.begin();
-  buzzer.startup();
+  buzzer.startup();         // TODO: make sure the startup sound happens after calibration is complete
 }
 
 void buzzerSoundOn(){
