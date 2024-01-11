@@ -154,7 +154,7 @@ public:
   void splashScreen();
   void nextMenuItem();
   void selectMenuItem();
-  bool isActive();
+  bool isMenuActive();
   void activateMenu();
   void deactivateMenu();
 };
@@ -205,7 +205,7 @@ void LSScreen::deactivateMenu() {
   
 }
 
-bool LSScreen::isActive() {
+bool LSScreen::isMenuActive() {
 
 return is_active;
  
@@ -231,7 +231,8 @@ void LSScreen::splashScreen() {
   _display.display();
   
   _display.setTextSize(2);
-  
+
+  //TODO: Add operation mode here
 }
 
 //------------------------------------------//

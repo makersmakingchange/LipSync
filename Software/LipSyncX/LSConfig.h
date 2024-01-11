@@ -152,10 +152,9 @@
 #define CONF_OPERATING_MODE_MOUSE 1
 #define CONF_OPERATING_MODE_BTMOUSE 2
 #define CONF_OPERATING_MODE_GAMEPAD 3
-#define CONF_OPERATING_MODE_MENU    4
 
 #define CONF_OPERATING_MODE_MIN 0
-#define CONF_OPERATING_MODE_MAX 4
+#define CONF_OPERATING_MODE_MAX 3
 
 #define CONF_OPERATING_MODE_DEFAULT 1 // Default mode = USB Mouse
                                           // 0 = Operating Mode null
