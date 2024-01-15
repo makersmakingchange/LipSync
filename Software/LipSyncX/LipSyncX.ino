@@ -101,11 +101,11 @@ const inputActionStruct buttonActionProperty[]{
     {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,    CONF_ACTION_NOTHING,              0,0},
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,     CONF_ACTION_B1_PRESS,   CONF_ACTION_NEXT_MENU_ITEM,       0,3000},
     {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_B2_PRESS,   CONF_ACTION_SELECT_MENU_ITEM,     0,3000},
-    {INPUT_MAIN_STATE_S12_PRESSED,  CONF_ACTION_START_MENU,     CONF_ACTION_B3_PRESS,   CONF_ACTION_STOP_MENU,            0,3000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,           CONF_ACTION_B4_PRESS,   CONF_ACTION_NOTHING,              3000,5000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_SCROLL,         CONF_ACTION_B5_PRESS,   CONF_ACTION_NOTHING,              3000,5000},
+    {INPUT_MAIN_STATE_S12_PRESSED,  CONF_ACTION_START_MENU,     CONF_ACTION_START_MENU, CONF_ACTION_STOP_MENU,            0,3000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,           CONF_ACTION_B3_PRESS,   CONF_ACTION_NOTHING,              3000,5000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_SCROLL,         CONF_ACTION_B4_PRESS,   CONF_ACTION_NOTHING,              3000,5000},
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,     CONF_ACTION_START_MENU, CONF_ACTION_STOP_MENU,            5000,10000},  
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_B7_PRESS,   CONF_ACTION_NOTHING,              5000,10000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_B5_PRESS,   CONF_ACTION_NOTHING,              5000,10000},
 };
 
 // Cursor acceleration structure
@@ -503,7 +503,7 @@ void initCommunicationMode()
 //****************************************//
 void initOperatingMode() {
 
-  //operatingMode = getOperatingMode(true,false); // retrieve operating mode from memory 
+  //operatingMode = getOperatingMode(false,false); // retrieve operating mode from memory 
   operatingMode = mem.readInt(CONF_SETTINGS_FILE, "OM");
 
    if (operatingMode==CONF_OPERATING_MODE_MOUSE) {
@@ -749,7 +749,14 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       if (screen.isMenuActive()){                                                             //********************************** TODO: Change later to add other outputs
         tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
       } else {
-        tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
+        switch (operatingMode){
+          case CONF_OPERATING_MODE_MOUSE:
+            tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
+            break;
+          case CONF_OPERATING_MODE_GAMEPAD:
+            tempActionIndex = actionProperty[actionIndex].gamepadOutputActionNumber;
+            break;
+        }        
       }
 
       //Set Led color to default 
@@ -776,11 +783,18 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       actionState.elapsedTime >= actionProperty[actionIndex].inputActionStartTime &&
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
-      //Get action index 
-      if (screen.isMenuActive()){                                                             //********************************** NEED TO CHANGE LATER TO ADD OTHER OUTPUTS
+      //Get action index                                                                       
+      if (screen.isMenuActive()){                                                             //********************************** TODO: Change later to add other outputs
         tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
       } else {
-        tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
+        switch (operatingMode){
+          case CONF_OPERATING_MODE_MOUSE:
+            tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
+            break;
+          case CONF_OPERATING_MODE_GAMEPAD:
+            tempActionIndex = actionProperty[actionIndex].gamepadOutputActionNumber;
+            break;
+        }        
       }
 
       //Set Led color to default 
@@ -815,6 +829,10 @@ void performOutputAction(int action)
   {
     case CONF_ACTION_NOTHING:
     {
+      //if (operatingMode == CONF_OPERATING_MODE_GAMEPAD){
+        gamepadButtonReleaseAll();
+        Serial.println("Released all");
+      //}
       break;
     }
     case CONF_ACTION_LEFT_CLICK:
@@ -886,6 +904,7 @@ void performOutputAction(int action)
     }
     case CONF_ACTION_B1_PRESS:
     {
+      Serial.println("Button 1 press");
       gamepadButtonPress(1);
       break;
     }
@@ -1357,19 +1376,25 @@ void joystickLoop()
 //****************************************//
 void performJoystick(pointIntType inputPoint)
 {
-  //0 = None , 1 = USB , 2 = Wireless  
-  if (comMode == CONF_COM_MODE_USB)
-  {
-    //(outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : usbmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration));
-    (outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : usbmouse.move(inputPoint.x, inputPoint.y);
-
+  if (operatingMode == CONF_OPERATING_MODE_MOUSE) {
+    //0 = None , 1 = USB , 2 = Wireless  
+    if (comMode == CONF_COM_MODE_USB)
+    {
+      //(outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : usbmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration));
+      (outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : usbmouse.move(inputPoint.x, inputPoint.y);
+  
+    }
+    else if (comMode == CONF_COM_MODE_BLE)
+    {
+      //(outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : btmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration));
+          (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : btmouse.move(inputPoint.x, inputPoint.y);
+  
+    }
+  } else if (comMode == CONF_OPERATING_MODE_GAMEPAD){
+    //Gamepad is USB only, if wireless gamepad functionality is added, add that here
+    gamepad.move(inputPoint.x, inputPoint.y);
   }
-  else if (comMode == CONF_COM_MODE_BLE)
-  {
-    //(outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : btmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration));
-        (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : btmouse.move(inputPoint.x, inputPoint.y);
 
-  }
 }
 
 //***FSR SCROLL MOVEMENT MODIFIER FUNCTION***//

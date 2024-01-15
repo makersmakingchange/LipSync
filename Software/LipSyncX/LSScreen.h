@@ -51,13 +51,11 @@
 #define SIP_THRESH_MENU   521
 #define PUFF_THRESH_MENU  522
 
-#define MODE_MOUSE_USB  0
-#define MODE_MOUSE_BT   1
-#define MODE_GAMEPAD    2
-
 #define SCROLL_DELAY_MILLIS   100
 
-//Adafruit_SSD1306 _display(CONF_SCREEN_WIDTH, CONF_SCREEN_HEIGHT, &Wire, OLED_RESET);
+#define _MODE_MOUSE_USB     1
+#define _MODE_MOUSE_BT      2
+#define _MODE_GAMEPAD_USB   3
 
 const int TEXT_ROWS = 4; 
 
@@ -72,8 +70,12 @@ private:
   int _currentSelection = 0;
   int _selectedLine; 
 
-  int _mode = MODE_MOUSE_USB;
-  int _tempMode = MODE_MOUSE_USB;
+  //int _mode = MODE_MOUSE_USB;
+  //int _tempMode = MODE_MOUSE_USB;
+  int _operatingMode;
+  int _tempOperatingMode;
+  int _communicationMode;
+  int _tempCommunicationMode;
   int _cursorSpeedLevel;
   bool _soundOn = true;
   
@@ -172,12 +174,14 @@ void LSScreen::begin() {
     for (;;); // Don't proceed, loop forever
   }
 
-
   setupDisplay();
   _display.setTextWrap(false);
   _display.display();
 
   //startupScreen();
+
+  _operatingMode = getOperatingMode(false, false);
+  _communicationMode = getCommunicationMode(false, false);
 
 }
 
@@ -224,15 +228,48 @@ void LSScreen::splashScreen() {
   setupDisplay();
   
   _display.println("LipSync");
-  _display.println("v4.0.1");
 
   _display.setTextSize(1);
+  _display.println("v4.0.1");
   _display.println("Makers Making Change");
   _display.display();
-  
+
+/*
+  switch (_operatingMode){
+    case CONF_OPERATING_MODE_MOUSE:
+      _display.println("Mode: USB Mouse");
+      break;
+    case CONF_OPERATING_MODE_BTMOUSE:
+      _display.println("Mode: BT Mouse");  
+      break;
+    case CONF_OPERATING_MODE_GAMEPAD:
+      _display.println("Mode: USB Gamepad");
+      break;
+  }
+  */
+
+  _display.println("Mode: ");
+
   _display.setTextSize(2);
 
-  //TODO: Add operation mode here
+  switch (_operatingMode){
+    case CONF_OPERATING_MODE_MOUSE:
+      switch(_communicationMode){
+        case CONF_COM_MODE_USB:
+          _display.println("USB Mouse");
+          break;
+        case CONF_COM_MODE_BLE:
+          _display.println("BT Mouse");
+          break;
+      }
+      break;
+    case CONF_OPERATING_MODE_GAMEPAD:
+      _display.print("USB"); _display.setTextSize(1); _display.print(" "); _display.setTextSize(2); _display.print("Gamepad"); // text size changed for space so it would all fit on one line
+      break;
+  }
+  
+  _display.display();
+
 }
 
 //------------------------------------------//
@@ -314,8 +351,19 @@ void LSScreen::selectMenuItem() {
     case MODE_MENU:
       if (_currentSelection < (modeMenuLen - 1)){
         // Confirm mode change
-        _tempMode = _currentSelection;
-        if (_tempMode != _mode){
+        switch (_currentSelection){
+          case _MODE_MOUSE_USB: 
+            _tempOperatingMode = CONF_OPERATING_MODE_MOUSE;
+            _tempCommunicationMode = CONF_COM_MODE_USB;
+          case _MODE_MOUSE_BT:
+            _tempOperatingMode = CONF_OPERATING_MODE_MOUSE;
+            _tempCommunicationMode = CONF_COM_MODE_BLE;
+          case _MODE_GAMEPAD_USB:
+            _tempOperatingMode = CONF_OPERATING_MODE_GAMEPAD;
+            _tempCommunicationMode = CONF_COM_MODE_USB;  
+        }
+        //_tempOperatingMode = _currentSelection;
+        if ((_tempOperatingMode != _operatingMode)||(_tempCommunicationMode != _communicationMode)){
           confirmModeChange();
         }
       } else if (_currentSelection == (modeMenuLen-1)){
@@ -627,17 +675,17 @@ void LSScreen::modeMenu(void) {
   displayMenu();
 
   _display.setTextColor(SSD1306_BLACK, SSD1306_WHITE); // Draw 'inverse' coloured text
-  if (_mode == MODE_MOUSE_USB){
+  if (_operatingMode == CONF_OPERATING_MODE_MOUSE){
       _display.setCursor(12, 0);
-      _display.print(_modeMenuText[MODE_MOUSE_USB]);
-  } else if (_mode == MODE_MOUSE_BT){
+      _display.print(_modeMenuText[CONF_OPERATING_MODE_MOUSE-1]);
+  } else if (_operatingMode == CONF_OPERATING_MODE_BTMOUSE){
       _display.setCursor(12, 16);
       //display.print(" MOUSE BLUETOOTH ");
-      _display.print(_modeMenuText[MODE_MOUSE_BT]);
-  } else if (_mode == MODE_GAMEPAD){
+      _display.print(_modeMenuText[CONF_OPERATING_MODE_BTMOUSE-1]);
+  } else if (_operatingMode == CONF_OPERATING_MODE_GAMEPAD){
       _display.setCursor(12, 16*2);
       //display.print(" GAMEPAD ");
-      _display.print(_modeMenuText[MODE_GAMEPAD]);
+      _display.print(_modeMenuText[CONF_OPERATING_MODE_GAMEPAD-1]);
   }
 
   _display.display();
@@ -656,10 +704,20 @@ void LSScreen::confirmModeChange() {
 }
 
 void LSScreen::changeMode(){
-  _mode = _tempMode;
+  if (_operatingMode != _tempOperatingMode){
+    setOperatingMode(false, false, _tempOperatingMode);
+    //softwareReset();        //TODO: maybe add this
+  }
+
+  if (_communicationMode != _tempCommunicationMode){
+    setCommunicationMode(false, false, _tempCommunicationMode);
+  }
+  
+  _operatingMode = _tempOperatingMode;
+  _communicationMode = _tempCommunicationMode;
 
   /*                  // ************************************************************** TODO: CHANGE THIS <>
-  switch (_mode){
+  switch (_operatingMode){
     case MODE_MOUSE_USB:
       digitalWrite(PIN_LED_GAMEPAD, LOW);
       digitalWrite(PIN_LED_MOUSE, HIGH);
