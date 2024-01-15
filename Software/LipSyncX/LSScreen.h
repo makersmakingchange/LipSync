@@ -266,6 +266,8 @@ void LSScreen::splashScreen() {
     case CONF_OPERATING_MODE_GAMEPAD:
       _display.print("USB"); _display.setTextSize(1); _display.print(" "); _display.setTextSize(2); _display.print("Gamepad"); // text size changed for space so it would all fit on one line
       break;
+    default:
+      _display.print("OP:"); _display.print(_operatingMode);
   }
   
   _display.display();
@@ -351,16 +353,19 @@ void LSScreen::selectMenuItem() {
     case MODE_MENU:
       if (_currentSelection < (modeMenuLen - 1)){
         // Confirm mode change
-        switch (_currentSelection){
+        switch (_currentSelection+1){
           case _MODE_MOUSE_USB: 
             _tempOperatingMode = CONF_OPERATING_MODE_MOUSE;
             _tempCommunicationMode = CONF_COM_MODE_USB;
+            break;
           case _MODE_MOUSE_BT:
             _tempOperatingMode = CONF_OPERATING_MODE_MOUSE;
             _tempCommunicationMode = CONF_COM_MODE_BLE;
+            break;
           case _MODE_GAMEPAD_USB:
             _tempOperatingMode = CONF_OPERATING_MODE_GAMEPAD;
             _tempCommunicationMode = CONF_COM_MODE_USB;  
+            break;
         }
         //_tempOperatingMode = _currentSelection;
         if ((_tempOperatingMode != _operatingMode)||(_tempCommunicationMode != _communicationMode)){

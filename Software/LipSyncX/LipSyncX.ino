@@ -829,10 +829,10 @@ void performOutputAction(int action)
   {
     case CONF_ACTION_NOTHING:
     {
-      //if (operatingMode == CONF_OPERATING_MODE_GAMEPAD){
+      if (operatingMode == CONF_OPERATING_MODE_GAMEPAD){
         gamepadButtonReleaseAll();
         Serial.println("Released all");
-      //}
+      }
       break;
     }
     case CONF_ACTION_LEFT_CLICK:
