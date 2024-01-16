@@ -102,6 +102,7 @@
 #define CONF_DEBUG_POLL_RATE 100            //100ms
 #define CONF_SCREEN_POLL_RATE 100           //100ms
 
+#define CONF_BUTTON_PRESS_DELAY 150         //150ms
 
 // Polling Timer IDs for each module
 #define CONF_TIMER_JOYSTICK 0

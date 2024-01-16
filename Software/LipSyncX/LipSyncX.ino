@@ -154,6 +154,10 @@ const inputActionStruct sapActionProperty[]{
 int xVal;
 int yVal;
 
+int actionTimerId[1];
+
+LSTimer<int> actionTimer;
+
 int calibTimerId[2];
 
 LSTimer<int> calibTimer;
@@ -272,6 +276,8 @@ void loop()
   ledStateTimer.run();                                // Timer for lights
   
   calibTimer.run();                                   // Timer for calibration measurements
+
+  actionTimer.run();
   
   pollTimer.run();                                    // Timer for normal joystick functions
 
@@ -967,6 +973,12 @@ void performOutputAction(int action)
       break;
     }
   }
+  if(operatingMode == CONF_OPERATING_MODE_GAMEPAD){
+    //actionTimerId[0] = actionTimer.setTimeout(CONF_BUTTON_PRESS_DELAY, gamepadButtonRelease, (int *)action);    
+    actionTimerId[0] = actionTimer.setTimeout(CONF_BUTTON_PRESS_DELAY, gamepadButtonReleaseAll);    //TODO: Change this to just release one
+    outputAction=CONF_ACTION_NOTHING;   
+  }
+  
   if(action==CONF_ACTION_DRAG || action==CONF_ACTION_SCROLL){
     canOutputAction = false;
   }
@@ -1123,7 +1135,7 @@ void gamepadButtonClick(int buttonNumber)
   {
     gamepad.press(buttonNumber-1);
     gamepad.send();
-    //actionTimerId[0] = actionTimer.setTimeout(CONF_BUTTON_PRESS_DELAY, gamepadButtonRelease, (int *)buttonNumber);        // TODO: fix this
+    actionTimerId[0] = actionTimer.setTimeout(CONF_BUTTON_PRESS_DELAY, gamepadButtonRelease, (int *)buttonNumber);        // TODO: fix this
   }
 
 }
@@ -1140,7 +1152,7 @@ void gamepadButtonClick(int buttonNumber)
 void gamepadButtonRelease(int* args)
 {
   int buttonNumber = (int)args;
-  //Serial.println("Button Release");
+  Serial.println("Button Release");
   if (buttonNumber >0 && buttonNumber <=8){
     gamepad.release(buttonNumber-1);
     gamepad.send();
@@ -1160,7 +1172,7 @@ void gamepadButtonRelease(int* args)
 //****************************************//
 void gamepadButtonReleaseAll()
 {
-  //Serial.println("Button Release");
+  Serial.println("Button Release All");
   gamepad.releaseAll();
   gamepad.send();
 }
