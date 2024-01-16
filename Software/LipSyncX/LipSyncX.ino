@@ -1390,9 +1390,11 @@ void performJoystick(pointIntType inputPoint)
           (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : btmouse.move(inputPoint.x, inputPoint.y);
   
     }
-  } else if (comMode == CONF_OPERATING_MODE_GAMEPAD){
+  } else if (operatingMode == CONF_OPERATING_MODE_GAMEPAD){
     //Gamepad is USB only, if wireless gamepad functionality is added, add that here
+    //Serial.print("X: \t"); Serial.print(inputPoint.x); Serial.print("\t Y: \t"); Serial.println(inputPoint.y);
     gamepad.move(inputPoint.x, inputPoint.y);
+    gamepad.send();
   }
 
 }

@@ -492,4 +492,3 @@ bool LSUSBGamepad::isReady(void)
 	  return true;
 	return false;
 }
-

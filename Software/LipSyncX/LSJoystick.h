@@ -54,6 +54,8 @@
 
 #define JOY_OUTPUT_RANGE_LEVEL 5        //The default output mouse cursor range level or output movement upper range 
 
+#define JOY_OUTPUT_XY_MAX_GAMEPAD  127
+
 
 class LSJoystick {
   private:
@@ -88,6 +90,7 @@ class LSJoystick {
     int _rangeValue;                                                      //The calculated range value based on range level and an equation. This is maximum output value  for each range level.
     float _inputRadius;                                                   //The minimum radius of operating area calculated using calibration points.
     bool _skipInputChange;                                                //The flag to low-pass filter the input changes 
+    int _operatingMode;                                                   //Operating mode, gamepad or mouse
   public:
     LSJoystick();                                                         //Constructor
     void begin();
@@ -148,6 +151,7 @@ void LSJoystick::begin() {
 
   _inputRadius = 0.0;                                                   //Initialize _inputRadius
   _skipInputChange = false;                                            //Initialize _skipInputChange
+  _operatingMode = getOperatingMode(false, false);
 
   Tlv493dSensor.begin();
   setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_DEFAULT);      //Set default magnet direction.
@@ -346,14 +350,17 @@ int LSJoystick::getOutputRange(){
 // Return     : void
 //*********************************//
 void LSJoystick::setOutputRange(int rangeLevel){
-
-  //Calculate the output range value
-  _rangeValue = (int)((0.125 * sq(rangeLevel)) + ( 0.3 * rangeLevel ) + 2);       //Polynomial 
-  // [0:2; 1:2; 2:3; 3:4; 4:5; 5:7; 6:8; 7:10; 8:12; 9:15; 10:18]
-  
-  //_rangeValue = (int)((1.05 * exp(( 0.175 * rangeLevel) + 1.1)) - 1);           //Exponential   
-  //Serial.print("_rangeValue:");
-  //Serial.println(_rangeValue);
+  if (_operatingMode == CONF_OPERATING_MODE_MOUSE){
+    //Calculate the output range value
+    _rangeValue = (int)((0.125 * sq(rangeLevel)) + ( 0.3 * rangeLevel ) + 2);       //Polynomial 
+    // [0:2; 1:2; 2:3; 3:4; 4:5; 5:7; 6:8; 7:10; 8:12; 9:15; 10:18]
+    
+    //_rangeValue = (int)((1.05 * exp(( 0.175 * rangeLevel) + 1.1)) - 1);           //Exponential   
+    //Serial.print("_rangeValue:");
+    //Serial.println(_rangeValue);
+  } else if (_operatingMode == CONF_OPERATING_MODE_GAMEPAD){
+    _rangeValue = JOY_OUTPUT_XY_MAX_GAMEPAD ;
+  }
   _rangeLevel = rangeLevel;
 }
 
@@ -525,7 +532,7 @@ void LSJoystick::update() {
 
   if(!_skipInputChange){
     _inputPoint = processInputReading(_rawPoint);            //Mapped and filtered input readings
-    joystickInputBuffer.pushElement(_inputPoint);            //Push new output point to joystickOutputBuffer
+    joystickInputBuffer.pushElement(_inputPoint);            //Push new input point to joystickInputBuffer
     _outputPoint = processOutputResponse(_inputPoint);       //Process output by applying deadzone, speed control, and linearization
     joystickOutputBuffer.pushElement(_outputPoint);          //Push new output point to joystickOutputBuffer    
   } 
@@ -730,7 +737,6 @@ pointIntType LSJoystick::processOutputResponse(pointIntType inputPoint){
   outputPoint = linearizeOutput(deadzonedPoint);
   return outputPoint;
 }
-
 
 
 //*********************************//
