@@ -76,11 +76,18 @@
 #define CONF_ACTION_CHANGE_MODE 10                         // Change communication mode
 #define CONF_ACTION_START_MENU 11                          // Start menu on display
 #define CONF_ACTION_STOP_MENU 12                           // Close menu on display
-#define CONF_ACTION_RESET 13                               // Software Reset
-#define CONF_ACTION_FACTORY_RESET 14                       // Factory Reset
-
-#define CONF_ACTION_NEXT_MENU_ITEM 15                      // Move to next item in menu
-#define CONF_ACTION_SELECT_MENU_ITEM 16                    // Select current item in menu 
+#define CONF_ACTION_B1_PRESS 13                            // Generates a Button 1 press or button X1(Left USB)/View(Right USB) press in XAC  
+#define CONF_ACTION_B2_PRESS 14                             // Generates a Button 2 press or button X2(Left USB)/Menu(Right USB) press in XAC    
+#define CONF_ACTION_B3_PRESS 15                            // Generates a Button 3 press or button LS(Left USB)/RS(Right USB) press in XAC
+#define CONF_ACTION_B4_PRESS 16                            // Generates a Button 4 press or button LB(Left USB)/RB(Right USB) press in XAC 
+#define CONF_ACTION_B5_PRESS 17                            // Generates a Button 5 press or button A(Left USB)/X(Right USB) press in XAC
+#define CONF_ACTION_B6_PRESS 18                            // Generates a Button 6 press or button B(Left USB)/Y(Right USB) press in XAC
+#define CONF_ACTION_B7_PRESS 19                            // Generates a Button 7 press or button View(Left USB)/X1(Right USB) press in XAC  
+#define CONF_ACTION_B8_PRESS 20                            // Generates a Button 8 press or button Menu(Left USB)/X2(Right USB) press in XAC  
+#define CONF_ACTION_NEXT_MENU_ITEM 21                      // Move to next item in menu
+#define CONF_ACTION_SELECT_MENU_ITEM 22                    // Select current item in menu 
+#define CONF_ACTION_RESET 23                               // Software Reset
+#define CONF_ACTION_FACTORY_RESET 24                       // Factory Reset
 
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
@@ -95,6 +102,7 @@
 #define CONF_DEBUG_POLL_RATE 100            //100ms
 #define CONF_SCREEN_POLL_RATE 100           //100ms
 
+#define CONF_BUTTON_PRESS_DELAY 150         //150ms
 
 // Polling Timer IDs for each module
 #define CONF_TIMER_JOYSTICK 0
@@ -145,10 +153,9 @@
 #define CONF_OPERATING_MODE_MOUSE 1
 #define CONF_OPERATING_MODE_BTMOUSE 2
 #define CONF_OPERATING_MODE_GAMEPAD 3
-#define CONF_OPERATING_MODE_MENU    4
 
 #define CONF_OPERATING_MODE_MIN 0
-#define CONF_OPERATING_MODE_MAX 4
+#define CONF_OPERATING_MODE_MAX 3
 
 #define CONF_OPERATING_MODE_DEFAULT 1 // Default mode = USB Mouse
                                           // 0 = Operating Mode null

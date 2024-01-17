@@ -80,60 +80,32 @@ inputStateStruct buttonState, switchState;
 
 
 // External Assistive Switch Jacks
-/*
-const inputActionStruct switchActionProperty[]{
-    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,             0,0},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,          0,3000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,        0,3000},
-    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_RIGHT_CLICK,         0,3000},
-    {INPUT_MAIN_STATE_S13_PRESSED,  CONF_ACTION_START_MENU,          0,3000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,                3000,5000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CHANGE_MODE,         3000,5000}, //Might change
-    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_SCROLL,              3000,5000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,          5000,10000},   
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CURSOR_CENTER,       5000,10000},
-    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_MIDDLE_CLICK,        5000,10000},
-};
-*/
 
 const inputActionStruct switchActionProperty[]{
-    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,            0,0},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,     CONF_ACTION_NEXT_MENU_ITEM,     0,3000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,            0,3000},
-    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_SELECT_MENU_ITEM,   0,3000},
-    {INPUT_MAIN_STATE_S13_PRESSED,  CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,          0,3000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,           CONF_ACTION_NOTHING,            3000,5000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CHANGE_MODE,    CONF_ACTION_NOTHING,            3000,5000}, //Might change
-    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_SCROLL,         CONF_ACTION_NOTHING,            3000,5000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,          5000,10000},   
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CURSOR_CENTER,  CONF_ACTION_NOTHING,            5000,10000},
-    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,            5000,10000},
+    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,      CONF_ACTION_NOTHING,            0,0},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,     CONF_ACTION_B1_PRESS,     CONF_ACTION_NEXT_MENU_ITEM,     0,3000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_B2_PRESS,     CONF_ACTION_NOTHING,            0,3000},
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_B3_PRESS,     CONF_ACTION_SELECT_MENU_ITEM,   0,3000},
+    {INPUT_MAIN_STATE_S13_PRESSED,  CONF_ACTION_START_MENU,     CONF_ACTION_START_MENU,   CONF_ACTION_STOP_MENU,          0,3000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,           CONF_ACTION_B4_PRESS,     CONF_ACTION_NOTHING,            3000,5000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CHANGE_MODE,    CONF_ACTION_B5_PRESS,     CONF_ACTION_NOTHING,            3000,5000}, //Might change
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_SCROLL,         CONF_ACTION_B6_PRESS,     CONF_ACTION_NOTHING,            3000,5000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,     CONF_ACTION_START_MENU,   CONF_ACTION_STOP_MENU,          5000,10000},   
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CURSOR_CENTER,  CONF_ACTION_CURSOR_CENTER,CONF_ACTION_NOTHING,            5000,10000},
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,      CONF_ACTION_NOTHING,            5000,10000},
 };
 
-/*
-// Buttons built in to hub
-const inputActionStruct buttonActionProperty[]{
-    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,              0,0},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,           0,3000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_RIGHT_CLICK,          0,3000},
-    {INPUT_MAIN_STATE_S12_PRESSED,  CONF_ACTION_START_MENU,           0,3000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,                 3000,5000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_SCROLL,               3000,5000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,           5000,10000},  
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,         5000,10000},
-};
-*/
 
 // Buttons built in to hub
 const inputActionStruct buttonActionProperty[]{
-    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,              0,0},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,     CONF_ACTION_NEXT_MENU_ITEM,       0,3000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_SELECT_MENU_ITEM,     0,3000},
-    {INPUT_MAIN_STATE_S12_PRESSED,  CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,            0,3000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,           CONF_ACTION_NOTHING,              3000,5000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_SCROLL,         CONF_ACTION_NOTHING,              3000,5000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,            5000,10000},  
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,              5000,10000},
+    {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,    CONF_ACTION_NOTHING,              0,0},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,     CONF_ACTION_B1_PRESS,   CONF_ACTION_NEXT_MENU_ITEM,       0,3000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_B2_PRESS,   CONF_ACTION_SELECT_MENU_ITEM,     0,3000},
+    {INPUT_MAIN_STATE_S12_PRESSED,  CONF_ACTION_START_MENU,     CONF_ACTION_START_MENU, CONF_ACTION_STOP_MENU,            0,3000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,           CONF_ACTION_B3_PRESS,   CONF_ACTION_NOTHING,              3000,5000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_SCROLL,         CONF_ACTION_B4_PRESS,   CONF_ACTION_NOTHING,              3000,5000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,     CONF_ACTION_START_MENU, CONF_ACTION_STOP_MENU,            5000,10000},  
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_B5_PRESS,   CONF_ACTION_NOTHING,              5000,10000},
 };
 
 // Cursor acceleration structure
@@ -165,26 +137,15 @@ unsigned long sapActionMaxTime = 0;
 
 //Sip and Puff Action Mapping
 // {INPUT ACTION, OUTPUT, ACTION, minTime, maxTime}
-/*
-const inputActionStruct sapActionProperty[]{
-    {PRESS_SAP_MAIN_STATE_NONE,       CONF_ACTION_NOTHING,                0,0},
-    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_LEFT_CLICK,             0,3000},
-    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_RIGHT_CLICK,            0,3000},
-    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_DRAG,                   3000,5000},
-    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_SCROLL,                 3000,5000},
-    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_START_MENU,             5000,10000},
-    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_MIDDLE_CLICK,           5000,10000}
-};
-*/
 
 const inputActionStruct sapActionProperty[]{
-    {PRESS_SAP_MAIN_STATE_NONE,       CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,              0,0},
-    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_LEFT_CLICK,     CONF_ACTION_NEXT_MENU_ITEM,       0,3000},
-    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_SELECT_MENU_ITEM,     0,3000},
-    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_DRAG,           CONF_ACTION_NOTHING,              3000,5000},
-    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_SCROLL,         CONF_ACTION_NOTHING,              3000,5000},
-    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,            5000,10000},
-    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,              5000,10000}
+    {PRESS_SAP_MAIN_STATE_NONE,       CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,    CONF_ACTION_NOTHING,              0,0},
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_LEFT_CLICK,     CONF_ACTION_B1_PRESS,   CONF_ACTION_NEXT_MENU_ITEM,       0,3000},
+    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_B2_PRESS,   CONF_ACTION_SELECT_MENU_ITEM,     0,3000},
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_DRAG,           CONF_ACTION_B3_PRESS,   CONF_ACTION_NOTHING,              3000,5000},
+    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_SCROLL,         CONF_ACTION_B4_PRESS,   CONF_ACTION_NOTHING,              3000,5000},
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_START_MENU,     CONF_ACTION_B5_PRESS,   CONF_ACTION_STOP_MENU,            5000,10000},
+    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_B6_PRESS,   CONF_ACTION_NOTHING,              5000,10000}
 };
 
 
@@ -192,6 +153,10 @@ const inputActionStruct sapActionProperty[]{
 
 int xVal;
 int yVal;
+
+int actionTimerId[1];
+
+LSTimer<int> actionTimer;
 
 int calibTimerId[2];
 
@@ -249,8 +214,6 @@ void setup()
 {
   Serial.begin(115200);
 
-  initScreen();                                                 //Initialize screen
-
   initLed();                                                   //Initialize LED Feedback 
   ledWaitFeedback();
   
@@ -273,7 +236,7 @@ void setup()
 
   initBuzzer();                                                 //Initialize Buzzer
 
-  initDisplay();                                                //Initialize Display
+  initScreen();                                                 //Initialize screen
 
   initDebug();                                                  //Initialize Debug Mode operation 
  
@@ -313,6 +276,8 @@ void loop()
   ledStateTimer.run();                                // Timer for lights
   
   calibTimer.run();                                   // Timer for calibration measurements
+
+  actionTimer.run();
   
   pollTimer.run();                                    // Timer for normal joystick functions
 
@@ -382,7 +347,7 @@ void resetMemory()
 }
 
 //*********************************//
-// Screen Function
+// Screen Functions
 //*********************************//
 
 //***INITIALIZE SCREEN FUNCTION***//
@@ -419,6 +384,26 @@ void screenLoop()
   
 }
 
+//*********************************//
+// Buzzer Functions
+//*********************************//
+
+//***INITIALIZE BUZZER FUNCTION***//
+// Function   : initBuzzer
+// 
+// Description: This function initializes the Buzzer as feedback method.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void initBuzzer()
+{ 
+  if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Buzzer");  }
+  buzzer.begin();
+  buzzer.startup();         // TODO: make sure the startup sound happens after calibration is complete
+}
+
 //***BUZZER LOOP FUNCTION***//
 // Function   : buzzerLoop 
 // 
@@ -435,6 +420,33 @@ void buzzerLoop()
   //Request update
   buzzer.update();
   
+}
+
+//***BUZZER SOUND ON FUNCTION***//
+// Function   : buzzerSoundOn
+// 
+// Description: This function turns on the sound from the buzzer by calling the buzzer enable function.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void buzzerSoundOn(){
+  buzzer.enable();
+}
+
+
+//***BUZZER SOUND OFF FUNCTION***//
+// Function   : buzzerSoundOff
+// 
+// Description: This function turns off the sound from the buzzer.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void buzzerSoundOff(){
+  buzzer.disable();
 }
 
 
@@ -497,7 +509,7 @@ void initCommunicationMode()
 //****************************************//
 void initOperatingMode() {
 
-  //operatingMode = getOperatingMode(true,false); // retrieve operating mode from memory 
+  //operatingMode = getOperatingMode(false,false); // retrieve operating mode from memory 
   operatingMode = mem.readInt(CONF_SETTINGS_FILE, "OM");
 
    if (operatingMode==CONF_OPERATING_MODE_MOUSE) {
@@ -740,10 +752,17 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
       //Get action index                                                                       
-      if (screen.isActive()){                                                             //********************************** TODO: Change later to add other outputs
+      if (screen.isMenuActive()){                                                             
         tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
       } else {
-        tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
+        switch (operatingMode){
+          case CONF_OPERATING_MODE_MOUSE:
+            tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
+            break;
+          case CONF_OPERATING_MODE_GAMEPAD:
+            tempActionIndex = actionProperty[actionIndex].gamepadOutputActionNumber;
+            break;
+        }        
       }
 
       //Set Led color to default 
@@ -770,11 +789,18 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       actionState.elapsedTime >= actionProperty[actionIndex].inputActionStartTime &&
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
-      //Get action index 
-      if (screen.isActive()){                                                             //********************************** NEED TO CHANGE LATER TO ADD OTHER OUTPUTS
+      //Get action index                                                                       
+      if (screen.isMenuActive()){                                                           
         tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
       } else {
-        tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
+        switch (operatingMode){
+          case CONF_OPERATING_MODE_MOUSE:
+            tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
+            break;
+          case CONF_OPERATING_MODE_GAMEPAD:
+            tempActionIndex = actionProperty[actionIndex].gamepadOutputActionNumber;
+            break;
+        }        
       }
 
       //Set Led color to default 
@@ -809,6 +835,10 @@ void performOutputAction(int action)
   {
     case CONF_ACTION_NOTHING:
     {
+      if (operatingMode == CONF_OPERATING_MODE_GAMEPAD){
+        gamepadButtonReleaseAll();
+        Serial.println("Released all");
+      }
       break;
     }
     case CONF_ACTION_LEFT_CLICK:
@@ -878,6 +908,47 @@ void performOutputAction(int action)
       screen.deactivateMenu();
       break;
     }
+    case CONF_ACTION_B1_PRESS:
+    {
+      Serial.println("Button 1 press");
+      gamepadButtonPress(1);
+      break;
+    }
+    case CONF_ACTION_B2_PRESS:
+    {
+      gamepadButtonPress(2);
+      break;
+    }
+    case CONF_ACTION_B3_PRESS:
+    {
+      gamepadButtonPress(3);
+      break;
+    }
+    case CONF_ACTION_B4_PRESS:
+    {
+      gamepadButtonPress(4);
+      break;
+    }
+    case CONF_ACTION_B5_PRESS:
+    {
+      gamepadButtonPress(5);
+      break;
+    }
+    case CONF_ACTION_B6_PRESS:
+    {
+      gamepadButtonPress(6);
+      break;
+    }
+    case CONF_ACTION_B7_PRESS:
+    {
+      gamepadButtonPress(7);
+      break;
+    }
+    case CONF_ACTION_B8_PRESS:
+    {
+      gamepadButtonPress(8);
+      break;
+    }
     case CONF_ACTION_NEXT_MENU_ITEM:
     {
       // Move to next menu item
@@ -902,6 +973,12 @@ void performOutputAction(int action)
       break;
     }
   }
+  if(operatingMode == CONF_OPERATING_MODE_GAMEPAD){
+    //actionTimerId[0] = actionTimer.setTimeout(CONF_BUTTON_PRESS_DELAY, gamepadButtonRelease, (int *)action);    
+    actionTimerId[0] = actionTimer.setTimeout(CONF_BUTTON_PRESS_DELAY, gamepadButtonReleaseAll);    //TODO: Change this to just release one
+    outputAction=CONF_ACTION_NOTHING;   
+  }
+  
   if(action==CONF_ACTION_DRAG || action==CONF_ACTION_SCROLL){
     canOutputAction = false;
   }
@@ -910,6 +987,11 @@ void performOutputAction(int action)
     canOutputAction = true;
   }
 }
+
+
+//*********************************//
+// Mouse Functions
+//*********************************//
 
 //***CURSOR LEFT CLICK FUNCTION***//
 // Function   : cursorLeftClick 
@@ -1012,6 +1094,89 @@ void cursorScroll(void)
   //Serial.println("Scroll");
   outputAction=CONF_ACTION_SCROLL;
 }
+
+
+//*********************************//
+// Gamepad Functions
+//*********************************//
+
+//***GAMEPAD BUTTON PRESS FUNCTION***//
+// Function   : gamepadButtonPress 
+// 
+// Description: This function performs button press action.
+//
+// Parameters : int : buttonNumber
+// 
+// Return     : void 
+//****************************************//
+void gamepadButtonPress(int buttonNumber)
+{
+  //Serial.println("Button Press");
+  if (buttonNumber >0 && buttonNumber <=8 )
+  {
+    gamepad.press(buttonNumber-1);
+    gamepad.send();
+  }
+}
+
+//***GAMEPAD BUTTON CLICK FUNCTION***//
+// Function   : gamepadButtonClick
+// 
+// Description: This function performs button click action.
+//
+// Parameters : int : buttonNumber
+// 
+// Return     : void 
+//****************************************//
+void gamepadButtonClick(int buttonNumber)
+{
+  //Serial.println("Button click");
+  if (buttonNumber >0 && buttonNumber <=8 )
+  {
+    gamepad.press(buttonNumber-1);
+    gamepad.send();
+    actionTimerId[0] = actionTimer.setTimeout(CONF_BUTTON_PRESS_DELAY, gamepadButtonRelease, (int *)buttonNumber);        
+  }
+
+}
+
+//***GAMEPAD BUTTON RELEASE FUNCTION***//
+// Function   : gamepadButtonRelease 
+// 
+// Description: This function performs button release action.
+//
+// Parameters : int* : args
+// 
+// Return     : void 
+//****************************************//
+void gamepadButtonRelease(int* args)
+{
+  int buttonNumber = (int)args;
+  Serial.println("Button Release");
+  if (buttonNumber >0 && buttonNumber <=8){
+    gamepad.release(buttonNumber-1);
+    gamepad.send();
+  }
+
+}
+
+
+//***GAMEPAD BUTTON RELEASE ALL FUNCTION***//
+// Function   : gamepadButtonReleaseAll 
+// 
+// Description: This function performs button release action.
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void gamepadButtonReleaseAll()
+{
+  Serial.println("Button Release All");
+  gamepad.releaseAll();
+  gamepad.send();
+}
+
 
 
 //*********************************//
@@ -1223,19 +1388,27 @@ void joystickLoop()
 //****************************************//
 void performJoystick(pointIntType inputPoint)
 {
-  //0 = None , 1 = USB , 2 = Wireless  
-  if (comMode == CONF_COM_MODE_USB)
-  {
-    //(outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : usbmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration));
-    (outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : usbmouse.move(inputPoint.x, inputPoint.y);
-
+  if (operatingMode == CONF_OPERATING_MODE_MOUSE) {
+    //0 = None , 1 = USB , 2 = Wireless  
+    if (comMode == CONF_COM_MODE_USB)
+    {
+      //(outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : usbmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration));
+      (outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : usbmouse.move(inputPoint.x, inputPoint.y);
+  
+    }
+    else if (comMode == CONF_COM_MODE_BLE)
+    {
+      //(outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : btmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration));
+          (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : btmouse.move(inputPoint.x, inputPoint.y);
+  
+    }
+  } else if (operatingMode == CONF_OPERATING_MODE_GAMEPAD){
+    //Gamepad is USB only, if wireless gamepad functionality is added, add that here
+    //Serial.print("X: \t"); Serial.print(inputPoint.x); Serial.print("\t Y: \t"); Serial.println(inputPoint.y);
+    gamepad.move(inputPoint.x, inputPoint.y);
+    gamepad.send();
   }
-  else if (comMode == CONF_COM_MODE_BLE)
-  {
-    //(outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : btmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration));
-        (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : btmouse.move(inputPoint.x, inputPoint.y);
 
-  }
 }
 
 //***FSR SCROLL MOVEMENT MODIFIER FUNCTION***//
@@ -1722,50 +1895,3 @@ void softwareReset() {
   delay(10);
 }
   
-//*********************************//
-// Display Functions
-//*********************************//
-
-//***INITIALIZE DISPLAY FUNCTION***//
-// Function   : initDisplay
-// 
-// Description: This function initializes the OLED display as feedback method.
-//
-// Parameters : void
-// 
-// Return     : void 
-//****************************************//
-void initDisplay()
-{ 
-  if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing OLED Display");  }
-  screen.begin();
-  screen.splashScreen();
-}
-
-//*********************************//
-// Buzzer Functions
-//*********************************//
-
-//***INITIALIZE BUZZER FUNCTION***//
-// Function   : initDisplay
-// 
-// Description: This function initializes the Buzzer as feedback method.
-//
-// Parameters : void
-// 
-// Return     : void 
-//****************************************//
-void initBuzzer()
-{ 
-  if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Buzzer");  }
-  buzzer.begin();
-  buzzer.startup();
-}
-
-void buzzerSoundOn(){
-  buzzer.enable();
-}
-
-void buzzerSoundOff(){
-  buzzer.disable();
-}

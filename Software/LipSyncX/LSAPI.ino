@@ -391,8 +391,6 @@ int getOperatingMode(bool responseEnabled, bool apiEnabled) {
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempOperatingMode);
   }
 
-  setDebugState(tempOperatingMode);
-
   printResponseInt(responseEnabled, apiEnabled, true, 0, "OM,0", true, tempOperatingMode);
 
   return tempOperatingMode;
@@ -438,8 +436,9 @@ void setOperatingMode(bool responseEnabled, bool apiEnabled, int inputOperatingM
   }
   else {
     printResponseInt(responseEnabled, apiEnabled, false, 3, "OM,1", true, inputOperatingMode);
-
   }
+
+  //TODO: move softwareReset() here instead of in changeOperatingMode?
 
 }
 //***SET OPERATING MODE STATE API FUNCTION***//
