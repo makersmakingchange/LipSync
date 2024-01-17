@@ -127,16 +127,16 @@ private:
   String _adjustPuffThreshMenuText[4] = {"Puff: ", "Increase", "Decrease", "... Back"};
 
   // Number of selectable options in each menu
-  const int mainMenuLen = 5;
-  const int exitConfirmLen = 2;
-  const int calibMenuLen = 3;
-  const int modeMenuLen = 4;
-  const int cursorSpMenuLen = 3;
-  const int moreMenuLen = 3;
-  const int soundMenuLen = 2;
-  const int sipPuffThreshMenuLen = 3;
-  const int adjustSipThreshMenuLen = 3;
-  const int adjustPuffThreshMenuLen = 3;
+  const int _mainMenuLen = 5;
+  const int _exitConfirmLen = 2;
+  const int _calibMenuLen = 3;
+  const int _modeMenuLen = 4;
+  const int _cursorSpMenuLen = 3;
+  const int _moreMenuLen = 3;
+  const int _soundMenuLen = 2;
+  const int _sipPuffThreshMenuLen = 3;
+  const int _adjustSipThreshMenuLen = 3;
+  const int _adjustPuffThreshMenuLen = 3;
 
 
 public:
@@ -333,7 +333,7 @@ void LSScreen::selectMenuItem() {
           setupDisplay();
           _display.println("Exiting");
           _display.display();
-          delay(2000);                  // TODO: remove delay
+          delay(1000);                  // TODO: remove delay
 
           deactivateMenu();
         }
@@ -351,7 +351,7 @@ void LSScreen::selectMenuItem() {
       }
       break;
     case MODE_MENU:
-      if (_currentSelection < (modeMenuLen - 1)){
+      if (_currentSelection < (_modeMenuLen - 1)){
         // Confirm mode change
         switch (_currentSelection+1){
           case _MODE_MOUSE_USB: 
@@ -371,7 +371,7 @@ void LSScreen::selectMenuItem() {
         if ((_tempOperatingMode != _operatingMode)||(_tempCommunicationMode != _communicationMode)){
           confirmModeChange();
         }
-      } else if (_currentSelection == (modeMenuLen-1)){
+      } else if (_currentSelection == (_modeMenuLen-1)){
         mainMenu();
       }
       break;
@@ -565,7 +565,7 @@ void LSScreen::displayCursor() {
   _selectedText = _currentMenuText[_selectedLine];
   
   if (_selectedText.length() > 9){
-    Serial.println("Long text");
+    //Serial.println("Long text");
     _scrollOn = true;
     _scrollPos = 12;
     delay(200);                           // TODO: remove delay
@@ -636,7 +636,7 @@ void LSScreen::mainMenu(void) {
   
   //if new menu selection
   //if (_prevMenu != _currentMenu) {
-    _currentMenuLength = mainMenuLen;
+    _currentMenuLength = _mainMenuLen;
     _currentMenuText = _mainMenuText;
     _cursorStart = 0;
     _currentSelection = 0;
@@ -659,7 +659,7 @@ void LSScreen::exitConfirmMenu(){
 void LSScreen::calibMenu(void) {
   _currentMenu = CALIB_MENU;
   if (_prevMenu != _currentMenu) {
-    _currentMenuLength = calibMenuLen;
+    _currentMenuLength = _calibMenuLen;
     _currentMenuText = _calibMenuText;
     _cursorStart = 0;
     _currentSelection = 0;
@@ -672,7 +672,7 @@ void LSScreen::calibMenu(void) {
 void LSScreen::modeMenu(void) {
   _currentMenu = MODE_MENU;
 
-  _currentMenuLength = modeMenuLen;
+  _currentMenuLength = _modeMenuLen;
   _currentMenuText = _modeMenuText;
   _cursorStart = 0;
   _currentSelection = 0;
@@ -710,53 +710,22 @@ void LSScreen::confirmModeChange() {
 
 void LSScreen::changeMode(){
   if (_operatingMode != _tempOperatingMode){
-    setOperatingMode(false, false, _tempOperatingMode);
-    //softwareReset();        //TODO: maybe add this
+    setOperatingMode(false, false, _tempOperatingMode);     // Sets new operating mode, saves in memory, and conducts software reset
   }
 
   if (_communicationMode != _tempCommunicationMode){
-    setCommunicationMode(false, false, _tempCommunicationMode);
+    setCommunicationMode(false, false, _tempCommunicationMode); // Sets new communication mode, saves in memory
   }
   
   _operatingMode = _tempOperatingMode;
   _communicationMode = _tempCommunicationMode;
 
-  /*                  // ************************************************************** TODO: CHANGE THIS <>
-  switch (_operatingMode){
-    case MODE_MOUSE_USB:
-      digitalWrite(PIN_LED_GAMEPAD, LOW);
-      digitalWrite(PIN_LED_MOUSE, HIGH);
-      break;
-    case MODE_MOUSE_BT:
-      digitalWrite(PIN_LED_GAMEPAD, LOW);
-      digitalWrite(PIN_LED_MOUSE, HIGH);
-      break;
-    case MODE_GAMEPAD:
-      digitalWrite(PIN_LED_MOUSE, LOW);
-      digitalWrite(PIN_LED_GAMEPAD, HIGH);
-      break;
-  }
-  */                  // ************************************************************** TODO: CHANGE THIS ^
-
   setupDisplay();
-  _display.println("Resetting");
-  _display.println("device");
   _display.display();
 
-  delay(2000);
-  
-  //conduct mode change
-  //save mode into flash
-  //user feedback showing current mode    // ************************************************************** TODO: CHANGE THIS <>
-  
-  //software reset
-
-  //remove this for final code, because device will reset
-  //readButtons();                            // ************************************************************** TODO: CHANGE THIS <>
   _currentMenu = MAIN_MENU;
   mainMenu();
 
-  //software reset
 }
 
 void LSScreen::cursorSpeedMenu(void) { 
@@ -765,7 +734,7 @@ void LSScreen::cursorSpeedMenu(void) {
   
   _cursorSpMenuText[0] = "Speed: " + String(_cursorSpeedLevel);
   
-  _currentMenuLength = cursorSpMenuLen;
+  _currentMenuLength = _cursorSpMenuLen;
   _currentMenuText = _cursorSpMenuText;
   _cursorStart = 1;
   _currentSelection = 0;
@@ -777,7 +746,7 @@ void LSScreen::cursorSpeedMenu(void) {
 void LSScreen::moreMenu(){
   _currentMenu = MORE_MENU;
 
-  _currentMenuLength = moreMenuLen;
+  _currentMenuLength = _moreMenuLen;
   _currentMenuText = _moreMenuText;
   _cursorStart = 0;
   _currentSelection = 0;
@@ -823,8 +792,7 @@ void LSScreen::fullCalibrationPage(void){
 
   _display.display();
 
-  //TO DO
-  //Add prompts and add function for calibration // ************************************************************** TODO: CHANGE THIS <>
+  //TODO: Add prompts and add function for calibration // ************************************************************** 
 
   delay(1000);
 
@@ -844,7 +812,7 @@ void LSScreen::soundMenu(){
     _soundMenuText[2] = "Turn on";
   }
 
-  _currentMenuLength = soundMenuLen;
+  _currentMenuLength = _soundMenuLen;
   _currentMenuText = _soundMenuText;
   _cursorStart = 2;
   _currentSelection = 0;
@@ -855,12 +823,10 @@ void LSScreen::soundMenu(){
 void LSScreen::sipPuffThreshMenu(){
   _currentMenu = SIP_PUFF_MENU;
 
-  _currentMenuLength = sipPuffThreshMenuLen;
+  _currentMenuLength = _sipPuffThreshMenuLen;
   _currentMenuText = _sipPuffThreshMenuText;
   _cursorStart = 0;
   _currentSelection = 0;
-
-  //Add sip/puff  thresh adjustment function // ************************************************************** TODO: CHANGE THIS <>
 
   displayMenu();
 }
@@ -871,7 +837,7 @@ void LSScreen::adjustSipThreshMenu(void) {
   
   _adjustSipThreshMenuText[0] = "Sip: " + String(_sipPressThresh) + " ";
   
-  _currentMenuLength = adjustSipThreshMenuLen;
+  _currentMenuLength = _adjustSipThreshMenuLen;
   _currentMenuText = _adjustSipThreshMenuText;
   _cursorStart = 1;
   _currentSelection = 0;
@@ -886,7 +852,7 @@ void LSScreen::adjustPuffThreshMenu(void) {
   
   _adjustPuffThreshMenuText[0] = "Puff: " + String(_puffPressThresh) + " ";
   
-  _currentMenuLength = adjustPuffThreshMenuLen;
+  _currentMenuLength = _adjustPuffThreshMenuLen;
   _currentMenuText = _adjustPuffThreshMenuText;
   _cursorStart = 1;
   _currentSelection = 0;

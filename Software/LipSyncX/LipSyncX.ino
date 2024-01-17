@@ -752,7 +752,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
       //Get action index                                                                       
-      if (screen.isMenuActive()){                                                             //********************************** TODO: Change later to add other outputs
+      if (screen.isMenuActive()){                                                             
         tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
       } else {
         switch (operatingMode){
@@ -790,7 +790,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
       //Get action index                                                                       
-      if (screen.isMenuActive()){                                                             //********************************** TODO: Change later to add other outputs
+      if (screen.isMenuActive()){                                                           
         tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
       } else {
         switch (operatingMode){
@@ -1135,7 +1135,7 @@ void gamepadButtonClick(int buttonNumber)
   {
     gamepad.press(buttonNumber-1);
     gamepad.send();
-    actionTimerId[0] = actionTimer.setTimeout(CONF_BUTTON_PRESS_DELAY, gamepadButtonRelease, (int *)buttonNumber);        // TODO: fix this
+    actionTimerId[0] = actionTimer.setTimeout(CONF_BUTTON_PRESS_DELAY, gamepadButtonRelease, (int *)buttonNumber);        
   }
 
 }
