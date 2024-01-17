@@ -31,17 +31,23 @@ _functionList getModelNumberFunction =            {"MN", "0", "0", &getModelNumb
 _functionList getVersionNumberFunction =          {"VN", "0", "0", &getVersionNumber};
 _functionList getOperatingModeFunction =          {"OM", "0", "0", &getOperatingMode};
 _functionList setOperatingModeFunction =          {"OM", "1", "",  &setOperatingMode};
-_functionList getJoystickSpeedFunction =          {"SS", "0", "0", &getJoystickSpeed};
-_functionList setJoystickSpeedFunction =          {"SS", "1", "",  &setJoystickSpeed};
-_functionList getScrollLevelFunction =            {"SL", "0", "0", &getScrollLevel};
-_functionList setScrollLevelFunction =            {"SL", "1", "",  &setScrollLevel};
+_functionList getCommunicationModeFunction =      {"CM", "0", "0", &getCommunicationMode};
+_functionList setCommunicationModeFunction =      {"CM", "1", "",  &setCommunicationMode};
+
 _functionList getJoystickInitializationFunction = {"IN", "0", "0", &getJoystickInitialization};
 _functionList setJoystickInitializationFunction = {"IN", "1", "1", &setJoystickInitialization};
 _functionList getJoystickCalibrationFunction =    {"CA", "0", "0", &getJoystickCalibration};
 _functionList setJoystickCalibrationFunction =    {"CA", "1", "1", &setJoystickCalibration};
 _functionList getJoystickDeadZoneFunction =       {"DZ", "0", "0", &getJoystickDeadZone};
 _functionList setJoystickDeadZoneFunction =       {"DZ", "1", "",  &setJoystickDeadZone};
-_functionList getJoystickValueFunction =          {"JV", "0", "0", &getJoystickValue};
+
+
+_functionList getJoystickSpeedFunction =          {"SS", "0", "0", &getJoystickSpeed};
+_functionList setJoystickSpeedFunction =          {"SS", "1", "",  &setJoystickSpeed};
+_functionList getScrollLevelFunction =            {"SL", "0", "0", &getScrollLevel};
+_functionList setScrollLevelFunction =            {"SL", "1", "",  &setScrollLevel};
+_functionList getJoystickAccelerationFunction =   {"AV", "0", "0", &getJoystickAcceleration};
+_functionList setJoystickAccelerationFunction =   {"AV", "1", "0", &setJoystickAcceleration};
 
 _functionList getPressureValueFunction =          {"PV", "0", "0", &getPressureValue};
 _functionList getPressureModeFunction =           {"PM", "0", "0", &getPressureMode};
@@ -52,14 +58,9 @@ _functionList setSipPressureThresholdFunction =   {"ST", "1", "",  &setSipPressu
 _functionList getPuffPressureThresholdFunction =  {"PT", "0", "0", &getPuffPressureThreshold};
 _functionList setPuffPressureThresholdFunction =  {"PT", "1", "",  &setPuffPressureThreshold};
 
-_functionList getJoystickAccelerationFunction =   {"AV", "0", "0", &getJoystickAcceleration};
-_functionList setJoystickAccelerationFunction =   {"AV", "1", "0", &setJoystickAcceleration};
-
-_functionList getCommunicationModeFunction =      {"CM", "0", "0", &getCommunicationMode};
-_functionList setCommunicationModeFunction =      {"CM", "1", "",  &setCommunicationMode};
-
 _functionList getDebugModeFunction =              {"DM", "0", "0", &getDebugMode};
 _functionList setDebugModeFunction =              {"DM", "1", "",  &setDebugMode};
+_functionList getJoystickValueFunction =          {"JV", "0", "0", &getJoystickValue};
 
 _functionList softResetFunction =                 {"SR", "1", "1", &softReset};
 _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSettings};

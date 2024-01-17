@@ -44,9 +44,9 @@ typedef struct
 {
   int ledAction; //none = 0, off = 1, on = 2, blink = 3
   int ledColorNumber;
-  int ledNumber;
-  int ledBlinkNumber;
-  unsigned long ledBlinkTime;
+  int ledNumber; // LED index / which LED
+  int ledBlinkNumber; // number of blinks
+  unsigned long ledBlinkTime; //
   int ledBrightness;
 } ledStateStruct;
 
