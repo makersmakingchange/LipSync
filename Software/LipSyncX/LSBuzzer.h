@@ -131,6 +131,7 @@ LSBuzzer::LSBuzzer() {
 
 void LSBuzzer::begin(){
   pinMode(CONF_BUZZER_PIN, OUTPUT);
+  //TODO: check if sound is emabled by reading from memory 
 }
 
 void LSBuzzer::update(){
