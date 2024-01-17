@@ -104,6 +104,8 @@
 
 #define CONF_BUTTON_PRESS_DELAY 150         //150ms
 
+#define CONF_SPLASH_SCREEN_DURATION 10000    //5000 ms
+
 // Polling Timer IDs for each module
 #define CONF_TIMER_JOYSTICK 0
 #define CONF_TIMER_PRESSURE 1

@@ -365,6 +365,20 @@ void initScreen()
   screen.splashScreen();                                            //Show splash screen
 }
 
+//***CLEAR SCREEN FUNCTION***//
+// Function   : closeMenu
+// 
+// Description: This function closes the menu and clears the screen
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void closeMenu()
+{
+  screen.deactivateMenu();
+}
+
 
 //***SCREEN LOOP FUNCTION***//
 // Function   : screenLoop 
