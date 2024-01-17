@@ -145,8 +145,8 @@ const inputActionStruct sapActionProperty[]{
     {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_B2_PRESS,   CONF_ACTION_SELECT_MENU_ITEM,     0,3000},
     {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_DRAG,           CONF_ACTION_B3_PRESS,   CONF_ACTION_NOTHING,              3000,5000},
     {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_SCROLL,         CONF_ACTION_B4_PRESS,   CONF_ACTION_NOTHING,              3000,5000},
-    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_START_MENU,     CONF_ACTION_B5_PRESS,   CONF_ACTION_STOP_MENU,            5000,10000},
-    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_B6_PRESS,   CONF_ACTION_NOTHING,              5000,10000}
+    {PRESS_SAP_MAIN_STATE_PUFF,       CONF_ACTION_START_MENU,     CONF_ACTION_START_MENU, CONF_ACTION_STOP_MENU,            5000,10000},
+    {PRESS_SAP_MAIN_STATE_SIP,        CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_B5_PRESS,   CONF_ACTION_NOTHING,              5000,10000}
 };
 
 
@@ -361,6 +361,20 @@ void initScreen()
 {
   screen.begin();                                                   //Begin screen 
   screen.splashScreen();                                            //Show splash screen
+}
+
+//***CLEAR SCREEN FUNCTION***//
+// Function   : closeMenu
+// 
+// Description: This function closes the menu and clears the screen
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void closeMenu()
+{
+  screen.deactivateMenu();
 }
 
 

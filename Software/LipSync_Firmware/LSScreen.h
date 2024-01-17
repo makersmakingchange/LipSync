@@ -191,6 +191,8 @@ void LSScreen::clear() {
 }
 
 void LSScreen::update() {
+  screenStateTimer.run();
+  
   //Loop for screen functions 
   if (_scrollOn){
     scrollLongText();
@@ -271,6 +273,8 @@ void LSScreen::splashScreen() {
   }
   
   _display.display();
+
+  screenStateTimerId = screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, closeMenu);
 
 }
 
