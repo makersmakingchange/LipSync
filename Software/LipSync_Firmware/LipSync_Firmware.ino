@@ -211,15 +211,22 @@ int scrollLevel = 0;
 void setup()
 {
   Serial.begin(115200);
+  delay(10000);
+  Serial.print("USBDEBUG: Serial begin"); 
+  delay(2000);
 
   initLed();                                                   //Initialize LED Feedback 
   ledWaitFeedback();
   
   initMemory();                                                 //Initialize Memory 
-  
-  initOperatingMode();                                          //Initialize Operating Mode
 
-  initCommunicationMode();                                      //Initialize Communication Mode
+  beginComOpMode();                                             //Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
+  
+  //initOperatingMode();                                          //Initialize Operating Mode
+
+  //initCommunicationMode();                                      //Initialize Communication Mode
+
+  if (USB_DEBUG) { Serial.print("USBDEBUG: comMode: "); Serial.println(comMode);  } 
 
    //while (!TinyUSBDevice.mounted())
  //while (!Serial) { delay(10); }                                // Wait for serial connection to proceed
@@ -524,6 +531,7 @@ void initOperatingMode() {
   //operatingMode = getOperatingMode(false,false); // retrieve operating mode from memory 
   operatingMode = mem.readInt(CONF_SETTINGS_FILE, "OM");
 
+/*
    if (operatingMode==CONF_OPERATING_MODE_MOUSE) {
     usbmouse.begin();    
   } 
@@ -537,6 +545,7 @@ void initOperatingMode() {
   {
     
   }
+  */
     
 }
 
@@ -561,6 +570,40 @@ void changeOperatingMode(int inputOperatingState) {
   operatingMode = inputOperatingState;
 }
 
+//***INITIALIZE OPERATING MODE FUNCTION***//
+// Function   : beginComOpMode                  //TODO: rename this?
+// 
+// Description: This function calls functions to initialize communication mode and operating mode
+//              and begins instance of either USB mouse, Bluetooth mouse, or USB Gamepad
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void beginComOpMode() {
+
+  initCommunicationMode();
+  initOperatingMode();
+
+  switch (operatingMode){
+    case CONF_OPERATING_MODE_MOUSE:
+      switch(comMode){
+        case CONF_COM_MODE_USB:       // USB Mouse
+          usbmouse.begin();    
+          break;
+        case CONF_COM_MODE_BLE:       // Bluetooth Mouse
+          btmouse.begin();
+          break;
+      }
+      break;
+    case CONF_OPERATING_MODE_GAMEPAD: //USB Gamepad
+      gamepad.begin();
+      break;
+    //default:
+      //TODO: error handling?
+  }
+    
+}
 
 //*********************************//
 // Input Functions
@@ -1023,6 +1066,7 @@ void cursorLeftClick(void)
   }
   else if (comMode == CONF_COM_MODE_BLE)
   {
+    Serial.println("Bluetooth left click");
     btmouse.click(MOUSE_LEFT);
   }
 }
@@ -1164,7 +1208,7 @@ void gamepadButtonClick(int buttonNumber)
 void gamepadButtonRelease(int* args)
 {
   int buttonNumber = (int)args;
-  Serial.println("Button Release");
+  //Serial.println("Button Release");
   if (buttonNumber >0 && buttonNumber <=8){
     gamepad.release(buttonNumber-1);
     gamepad.send();
@@ -1184,7 +1228,7 @@ void gamepadButtonRelease(int* args)
 //****************************************//
 void gamepadButtonReleaseAll()
 {
-  Serial.println("Button Release All");
+  //Serial.println("Button Release All");
   gamepad.releaseAll();
   gamepad.send();
 }
@@ -1834,7 +1878,7 @@ void setLedDefault(){
 void btFeedbackLoop()
 {
   
-  if (USB_DEBUG) { Serial.println("USBDEBUG: btFeedbackLoop");  } 
+  //if (USB_DEBUG) { Serial.println("USBDEBUG: btFeedbackLoop");  } 
   
   //Get the current bluetooth connection state
   bool tempIsConnected = btmouse.isConnected();
