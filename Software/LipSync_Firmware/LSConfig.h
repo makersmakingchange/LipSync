@@ -98,7 +98,7 @@
 #define CONF_SCROLL_POLL_RATE 150           //150ms
 #define CONF_PRESSURE_POLL_RATE 50          //50ms
 #define CONF_INPUT_POLL_RATE 50             //50ms
-#define CONF_BT_FEEDBACK_POLL_RATE 1000     //1s
+#define CONF_BT_FEEDBACK_POLL_RATE 2000     //1s            //TODO: Change this back to 1000
 #define CONF_DEBUG_POLL_RATE 100            //100ms
 #define CONF_SCREEN_POLL_RATE 100           //100ms
 
@@ -114,6 +114,7 @@
 #define CONF_TIMER_DEBUG 4
 #define CONF_TIMER_SCROLL 5
 #define CONF_TIMER_SCREEN 6
+#define CONF_TIMER_SCREEN 7
 
 
 //Joystick values 

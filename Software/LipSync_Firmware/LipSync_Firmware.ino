@@ -211,8 +211,7 @@ int scrollLevel = 0;
 void setup()
 {
   Serial.begin(115200);
-  delay(10000);
-  Serial.print("USBDEBUG: Serial begin"); 
+  while (!Serial) { delay(1); }  // Wait until serial port is opened
   delay(2000);
 
   initLed();                                                   //Initialize LED Feedback 
@@ -221,12 +220,15 @@ void setup()
   initMemory();                                                 //Initialize Memory 
 
   beginComOpMode();                                             //Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
+
+  delay(4000);
   
   //initOperatingMode();                                          //Initialize Operating Mode
 
   //initCommunicationMode();                                      //Initialize Communication Mode
 
   if (USB_DEBUG) { Serial.print("USBDEBUG: comMode: "); Serial.println(comMode);  } 
+  if (USB_DEBUG) { Serial.print("USBDEBUG: operatingMode: "); Serial.println(operatingMode);  } 
 
    //while (!TinyUSBDevice.mounted())
  //while (!Serial) { delay(10); }                                // Wait for serial connection to proceed
@@ -245,9 +247,11 @@ void setup()
 
   initDebug();                                                  //Initialize Debug Mode operation 
  
-  ledReadyFeedback();
+  //ledReadyFeedback();
 
-  //startupFeedback();                                            //Startup LED Feedback 
+  startupFeedback();                                            //Startup LED Feedback 
+
+  delay(500);
 
   //Configure poll timer to perform each feature as a separate loop
   pollTimerId[CONF_TIMER_JOYSTICK]  = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, 0, joystickLoop);
@@ -261,8 +265,7 @@ void setup()
   enablePoll(true);
   ledActionEnabled = true;  
 
-  if (USB_DEBUG) { Serial.print("USBDEBUG: comMode: "); Serial.println(comMode);  } 
-  if (USB_DEBUG) { Serial.print("USBDEBUG: operatingMode: "); Serial.println(operatingMode);  } 
+  if (USB_DEBUG) { Serial.println("End setup");} 
   
 } //end setup
 
@@ -287,6 +290,8 @@ void loop()
   pollTimer.run();                                    // Timer for normal joystick functions
 
   settingsEnabled=serialSettings(settingsEnabled); //Check to see if setting option is enabled in Lipsync
+
+  if (USB_DEBUG) { Serial.println("Loop");} 
 }
 
 //***ENABLE POLL FUNCTION***//
@@ -397,9 +402,11 @@ void closeMenu()
 void screenLoop()
 {
   
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: screenLoop");  } 
+  if (USB_DEBUG) { Serial.println("USBDEBUG: screenLoop");  } 
   //Request update
   screen.update();
+
+  if (USB_DEBUG) { Serial.println("USBDEBUG: end of screenLoop");  } 
   
 }
 
@@ -642,7 +649,7 @@ void initInput()
 void inputLoop()
 {
   
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: inputLoop");  } 
+  if (USB_DEBUG) { Serial.println("USBDEBUG: inputLoop");  } 
   //Read new values
   ib.update(); // update buttons 
   is.update();  //update external assistive switch inputs
@@ -651,9 +658,13 @@ void inputLoop()
   buttonState = ib.getInputState();
   switchState = is.getInputState();
 
+  if (USB_DEBUG) { Serial.println("USBDEBUG: got input states");  } 
+
   //Evaluate Output Actions
   evaluateOutputAction(buttonState, buttonActionMaxTime, buttonActionSize, buttonActionProperty);
   evaluateOutputAction(switchState, switchActionMaxTime, switchActionSize, switchActionProperty);
+
+  if (USB_DEBUG) { Serial.println("USBDEBUG: End of inputLoop");  } 
 }
 
 //*********************************//
@@ -716,7 +727,7 @@ unsigned long getActionMaxTime(int actionSize,const inputActionStruct actionProp
 //****************************************//
 void pressureLoop()
 {
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: pressureLoop()");  } 
+  if (USB_DEBUG) { Serial.println("USBDEBUG: pressureLoop()");  } 
   ps.update(); //Request new pressure difference from sensor and push it to array
 
   pressureValues = ps.getAllPressure(); //Read the pressure object (can be last value from array, average or other algorithms)
@@ -1425,12 +1436,13 @@ void performJoystickCalibrationStep(int* args)
 //****************************************//
 void joystickLoop()
 {
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: joystickLoop");  } 
+  if (USB_DEBUG) { Serial.println("USBDEBUG: joystickLoop");  } 
   js.update();                                                        //Request new values
 
   pointIntType joyOutPoint = js.getXYOut();                           //Read the filtered values
 
   performJoystick(joyOutPoint);                                       //Perform joystick move action
+  if (USB_DEBUG) { Serial.println("USBDEBUG: End of joystickLoop");  } 
 }
 
 //***PERFORM JOYSTICK FUNCTION***//
@@ -1547,7 +1559,7 @@ void initDebug()
 void debugLoop(){
 
 
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: debugLoop");  } 
+  if (USB_DEBUG) { Serial.println("USBDEBUG: debugLoop");  } 
   //Debug mode is off if the debug mode is #0
   if(debugMode==CONF_DEBUG_MODE_JOYSTICK){                   //Debug #1
     js.update(); //Request new values from joystick class
@@ -1878,7 +1890,7 @@ void setLedDefault(){
 void btFeedbackLoop()
 {
   
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: btFeedbackLoop");  } 
+  if (USB_DEBUG) { Serial.println("USBDEBUG: btFeedbackLoop");  } 
   
   //Get the current bluetooth connection state
   bool tempIsConnected = btmouse.isConnected();
@@ -1886,14 +1898,16 @@ void btFeedbackLoop()
   if (comMode == CONF_COM_MODE_BLE && tempIsConnected==false && tempIsConnected == btIsConnected)
   {
     btIsConnected = false;
-    pollTimerId[5] = pollTimer.setTimer(CONF_BT_SCAN_BLINK_DELAY, 0, ((CONF_BT_SCAN_BLINK_NUMBER*2)+1), ledBtScanEffect);
+    //pollTimerId[5] = pollTimer.setTimer(CONF_BT_SCAN_BLINK_DELAY, 0, ((CONF_BT_SCAN_BLINK_NUMBER*2)+1), ledBtScanEffect);     //TODO: uncomment
 
   } //Set the default LED effect if bluetooth connection state is changed 
   else if (comMode == CONF_COM_MODE_BLE && tempIsConnected != btIsConnected)
   {
     btIsConnected = tempIsConnected;
-    setLedDefault();
+    //setLedDefault();                //TODO: uncomment
   }
+
+  if (USB_DEBUG) { Serial.println("USBDEBUG: end of btFeedbackLoop");  } 
 
 }
 
@@ -1950,5 +1964,13 @@ void softwareReset() {
 
   NVIC_SystemReset();
   delay(10);
+}
+
+void printlnToSerial(String toPrint){
+  Serial.println(toPrint);
+}
+
+void printToSerial(String toPrint){
+  Serial.print(toPrint);
 }
   
