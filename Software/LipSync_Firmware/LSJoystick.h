@@ -22,6 +22,8 @@
 
 #include <Tlv493d.h>                    //Infinion TLV493 magnetic sensor
 
+#include <Arduino.h>
+
 #define JOY_RAW_BUFF_SIZE 10            //The size of joystickRawBuffer
 #define JOY_INPUT_BUFF_SIZE 5           //The size of joystickInputBuffer
 #define JOY_OUTPUT_BUFF_SIZE 5          //The size of joystickOutputBuffer
@@ -527,6 +529,7 @@ void LSJoystick::update() {
   Tlv493dSensor.updateData();
   //Get the new readings as a point
   _rawPoint = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};   
+  
   _skipInputChange = canSkipInputChange(_rawPoint);
   joystickRawBuffer.pushElement(_rawPoint);                  //Push raw points to joystickRawBuffer : DON'T MOVE THIS
 

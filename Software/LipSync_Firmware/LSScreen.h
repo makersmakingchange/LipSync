@@ -684,6 +684,7 @@ void LSScreen::modeMenu(void) {
   displayMenu();
 
   _display.setTextColor(SSD1306_BLACK, SSD1306_WHITE); // Draw 'inverse' coloured text
+  /*
   if (_operatingMode == CONF_OPERATING_MODE_MOUSE){
       _display.setCursor(12, 0);
       _display.print(_modeMenuText[CONF_OPERATING_MODE_MOUSE-1]);
@@ -695,6 +696,28 @@ void LSScreen::modeMenu(void) {
       _display.setCursor(12, 16*2);
       //display.print(" GAMEPAD ");
       _display.print(_modeMenuText[CONF_OPERATING_MODE_GAMEPAD-1]);
+  }
+  */
+
+  switch (_operatingMode){
+    case CONF_OPERATING_MODE_MOUSE:
+      switch(_communicationMode){
+        case CONF_COM_MODE_USB:
+          _display.setCursor(12, 0);
+          _display.print(_modeMenuText[_MODE_MOUSE_USB-1]);
+          break;
+        case CONF_COM_MODE_BLE:
+          _display.setCursor(12, 16);
+          //display.print(" MOUSE BLUETOOTH ");
+          _display.print(_modeMenuText[_MODE_MOUSE_BT-1]);
+          break;
+      }
+      break;
+    case CONF_OPERATING_MODE_GAMEPAD:
+      _display.setCursor(12, 16*2);
+      //display.print(" GAMEPAD ");
+      _display.print(_modeMenuText[_MODE_GAMEPAD_USB-1]);
+      break;
   }
 
   _display.display();
@@ -713,19 +736,18 @@ void LSScreen::confirmModeChange() {
 }
 
 void LSScreen::changeMode(){
-  if (_operatingMode != _tempOperatingMode){
-    setOperatingMode(false, false, _tempOperatingMode);     // Sets new operating mode, saves in memory, and conducts software reset
-  }
-
   if (_communicationMode != _tempCommunicationMode){
+    _communicationMode = _tempCommunicationMode;
     setCommunicationMode(false, false, _tempCommunicationMode); // Sets new communication mode, saves in memory
   }
   
-  _operatingMode = _tempOperatingMode;
-  _communicationMode = _tempCommunicationMode;
+  if (_operatingMode != _tempOperatingMode){
+    _operatingMode = _tempOperatingMode;
+    setOperatingMode(false, false, _tempOperatingMode);     // Sets new operating mode, saves in memory, and conducts software reset
+  }
 
-  setupDisplay();
-  _display.display();
+  //setupDisplay();
+  //_display.display();
 
   _currentMenu = MAIN_MENU;
   mainMenu();
