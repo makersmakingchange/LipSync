@@ -23,8 +23,8 @@
 //#include <Adafruit_NeoPixel.h>
 
 //#define OUTPUT_RGB_LED_PIN A1 //Output pin for neopixel
-#define OUTPUT_MONO_LED_NUM 2  // Number of monocolor leds
-#define OUTPUT_RGB_LED_NUM 1   //Number of RGB leds
+#define OUTPUT_LED_NUM 4   // Total number of leds
+
 
 //Led color code
 #define LED_CLR_NONE 0
@@ -106,8 +106,9 @@ LSOutput::LSOutput() {
 void LSOutput::begin() {
 
   // Hub LEDs
-  pinMode(CONF_LED_MOUSE_PIN, OUTPUT);
-  pinMode(CONF_LED_GAMEPAD_PIN, OUTPUT);
+  pinMode(CONF_LED_LEFT_PIN, OUTPUT);
+  pinMode(CONF_LED_MIDDLE_PIN, OUTPUT);
+  pinMode(CONF_LED_RIGHT_PIN, OUTPUT);
 
   // Microcontroller LED
   pinMode(LED_RED, OUTPUT);
@@ -122,8 +123,9 @@ void LSOutput::begin() {
 //***CLEAR ALL RGB LED FUNCTION***//
 
 void LSOutput::clearLedAll() { // turn off all LEDs
-  digitalWrite(CONF_LED_MOUSE_PIN, LOW);
-  digitalWrite(CONF_LED_GAMEPAD_PIN, LOW);
+  digitalWrite(CONF_LED_LEFT_PIN, LOW);
+  digitalWrite(CONF_LED_MIDDLE_PIN, LOW);
+  digitalWrite(CONF_LED_RIGHT_PIN, LOW);
 
   digitalWrite(LED_RED, HIGH);
   digitalWrite(LED_GREEN, HIGH);
@@ -180,9 +182,9 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
     case CONF_LED_LEFT:
       {
         if (r > 0 || g > 0 || b > 0) {
-          analogWrite(CONF_LED_MOUSE_PIN, _LedBrightness);
+          analogWrite(CONF_LED_LEFT_PIN, _LedBrightness);
         } else {
-          digitalWrite(CONF_LED_MOUSE_PIN, LOW);
+          digitalWrite(CONF_LED_LEFT_PIN, LOW);
         }
 
 
@@ -190,14 +192,19 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
       }
     case CONF_LED_MIDDLE:
       {
+        if (r > 0 || g > 0 || b > 0) {
+          analogWrite(CONF_LED_MIDDLE_PIN, _LedBrightness);
+        } else {
+          digitalWrite(CONF_LED_MIDDLE_PIN, LOW);
+        }
         break;
       }
     case CONF_LED_RIGHT:
       {
         if (r > 0 || g > 0 || b > 0) {
-          analogWrite(CONF_LED_GAMEPAD_PIN, _LedBrightness);
+          analogWrite(CONF_LED_RIGHT_PIN, _LedBrightness);
         } else {
-          digitalWrite(CONF_LED_GAMEPAD_PIN, LOW);
+          digitalWrite(CONF_LED_RIGHT_PIN, LOW);
         }
         break;
       }
@@ -218,16 +225,6 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
   }  //end switch
 
 
-  // if(ledNumber>=1 && ledNumber <=OUTPUT_RGB_LED_NUM) {
-  //   ledPixels.setPixelColor(ledNumber-1, ledPixels.Color(colorProperty[ledColorNumber].colorCode.g,colorProperty[ledColorNumber].colorCode.r,colorProperty[ledColorNumber].colorCode.b));
-  // }
-  // else if (ledNumber==OUTPUT_RGB_LED_NUM+1) { //if index is more than number of leds, turn all leds the same color
-  //   for (int i = 0; i < OUTPUT_RGB_LED_NUM; i++) {
-  //     ledPixels.setPixelColor(i, ledPixels.Color(colorProperty[ledColorNumber].colorCode.g,colorProperty[ledColorNumber].colorCode.r,colorProperty[ledColorNumber].colorCode.b));
-  //   }
-  // }
-  // ledPixels.setBrightness(ledBrightness);
-  // ledPixels.show();
 }
 
 

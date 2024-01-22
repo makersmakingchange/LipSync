@@ -18,36 +18,36 @@
 */
 
 
-#define USB_DEBUG  1 //Set this to 0 for best performance
+#define USB_DEBUG  0 //Set this to 0 for best performance
 
 #define CONF_DISPLAY_ENABLED false
 #define CONF_SPEAKER_ENABLED false
 
 
 //***DO NOT CHANGE***//
-#define CONF_LIPSYNC_MODEL 1                              //Mouse = 1 , Gamepad = 2
-#define CONF_LIPSYNC_VERSION 1.0
+#define CONF_LIPSYNC_MODEL 1                // 1: Lipsync w/ Hub
+#define CONF_LIPSYNC_VERSION 4
 
 //Input pins
-#define CONF_BUTTON1_PIN 9                                // Pushbutton S1
-#define CONF_BUTTON2_PIN 3                                 // Pushbutton S2
-#define CONF_SWITCH1_PIN A0                                // 3.5mm jack SW1
-#define CONF_SWITCH2_PIN A1                                // 3.5mm jack SW2
-#define CONF_SWITCH3_PIN A2                                // 3.5mm jack SW3
+#define CONF_BUTTON1_PIN 9                  // Pushbutton S1
+#define CONF_BUTTON2_PIN 3                  // Pushbutton S2
+#define CONF_SWITCH1_PIN A0                 // 3.5 mm jack SW1
+#define CONF_SWITCH2_PIN A1                 // 3.5 mm jack SW2
+#define CONF_SWITCH3_PIN A2                 // 3.5 mm jack SW3
 
 //Input buttons and switch values 
 #define CONF_BUTTON_NUMBER 2
 #define CONF_SWITCH_NUMBER 3
 
 //Output LEDS
-#define CONF_LED_MOUSE_PIN 8                              //(left)
-#define CONF_LED_GAMEPAD_PIN 7                            //(right)
-#define CONF_LED_BTMOUSE_PIN 6                            //
+#define CONF_LED_LEFT_PIN 8                 // left
+#define CONF_LED_MIDDLE_PIN 7               // middle
+#define CONF_LED_RIGHT_PIN 6                // right
 
 //Onboard LEDs
-#define CONF_LED_MICRO_RED LED_RED        // Xiao NRF52840 User LED Red
-#define CONF_LED_MICRO_GREEN LED_GREEN    // Xiao NRF52840 User LED Green
-#define CONF_LED_MICRO_BLUE LED_BLUE      // Xiao NRF52840 User LED Blue
+#define CONF_LED_MICRO_RED LED_RED          // Xiao NRF52840 User LED Red
+#define CONF_LED_MICRO_GREEN LED_GREEN      // Xiao NRF52840 User LED Green
+#define CONF_LED_MICRO_BLUE LED_BLUE        // Xiao NRF52840 User LED Blue
 
 
 #define CONF_LED_NONE 0

@@ -210,19 +210,22 @@ int scrollLevel = 0;
 //*********************************//
 void setup()
 {
+
   Serial.begin(115200);
+
+  initMemory();                                                 //Initialize Memory 
 
   initLed();                                                   //Initialize LED Feedback 
   ledWaitFeedback();
   
-  initMemory();                                                 //Initialize Memory 
-  
+  beginComOpMode();                                             //Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
+
   initOperatingMode();                                          //Initialize Operating Mode
 
   initCommunicationMode();                                      //Initialize Communication Mode
 
    //while (!TinyUSBDevice.mounted())
- //while (!Serial) { delay(10); }                                // Wait for serial connection to proceed
+ //while (!Serial) { delay(10); }                               // Wait for serial connection to proceed
 
   initSipAndPuff();                                             //Initialize Sip And Puff 
 
@@ -1667,7 +1670,7 @@ void startupFeedback()
 //****************************************//
 void setLedState(int ledAction, int ledColorNumber, int ledNumber, int ledBlinkNumber, unsigned long ledBlinkTime, int ledBrightness)
 { //Set led state after output action is performed
-  if (ledNumber <= OUTPUT_RGB_LED_NUM + 1)
+  if (ledNumber <= OUTPUT_LED_NUM + 1)
   {
     
     ledCurrentState->ledAction = ledAction;
@@ -1838,6 +1841,8 @@ void btFeedbackLoop()
   
   //Get the current bluetooth connection state
   bool tempIsConnected = btmouse.isConnected();
+
+  if (USB_DEBUG) { Serial.println(tempIsConnected);  } 
   //Perform bluetooth LED blinking if bluetooth is not connected and wasn't connected before 
   if (comMode == CONF_COM_MODE_BLE && tempIsConnected==false && tempIsConnected == btIsConnected)
   {
@@ -1849,6 +1854,7 @@ void btFeedbackLoop()
   {
     btIsConnected = tempIsConnected;
     setLedDefault();
+
   }
 
 }
