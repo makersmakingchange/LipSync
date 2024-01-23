@@ -491,20 +491,6 @@ void buzzerSoundOff(){
   buzzer.disable();
 }
 
-//***BUZZER SOUND MODE FUNCTION***//
-// Function   : setSoundState 
-// 
-// Description: This function sets the sound mode state.
-//
-// Parameters : void
-// 
-// Return     : void 
-//****************************************//
-void setSoundState(int inputSoundMode){
-  soundMode = inputSoundMode;
-  //buzzer.soundModeLevel = inputSoundMode; //TODO remove this function
-}
-
 
 //*********************************//
 // Acceleration Functions

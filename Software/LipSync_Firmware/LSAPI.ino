@@ -75,16 +75,18 @@ _functionList apiFunction[34] = {
   getVersionNumberFunction,
   getOperatingModeFunction,
   setOperatingModeFunction,
-  getJoystickSpeedFunction,
-  setJoystickSpeedFunction,
-  getScrollLevelFunction,
-  setScrollLevelFunction,
+  getCommunicationModeFunction,
+  setCommunicationModeFunction,
   getJoystickInitializationFunction,
   setJoystickInitializationFunction,
   getJoystickCalibrationFunction,
   setJoystickCalibrationFunction,
   getJoystickDeadZoneFunction,
   setJoystickDeadZoneFunction,
+  getJoystickSpeedFunction,
+  setJoystickSpeedFunction,
+  getScrollLevelFunction,
+  setScrollLevelFunction,
   getJoystickValueFunction,
   getPressureModeFunction,
   setPressureModeFunction,
@@ -96,8 +98,6 @@ _functionList apiFunction[34] = {
   setPuffPressureThresholdFunction,
   getJoystickAccelerationFunction,
   setJoystickAccelerationFunction,
-  getCommunicationModeFunction,
-  setCommunicationModeFunction,
   getSoundModeFunction,
   setSoundModeFunction,
   getDebugModeFunction,
@@ -1702,8 +1702,6 @@ int getSoundMode(bool responseEnabled, bool apiEnabled) {
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempSoundMode);
   }
 
-  //setSoundState(tempSoundMode);   //TODO: add this function and uncomment
-
   printResponseInt(responseEnabled, apiEnabled, true, 0, "SM,0", true, tempSoundMode);
 
   return tempSoundMode;
@@ -1747,7 +1745,6 @@ void setSoundMode(bool responseEnabled, bool apiEnabled, int inputSoundMode) {
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputSoundMode);
     soundMode = inputSoundMode;
     buzzer.setSoundModeLevel(inputSoundMode);
-    //setSoundState(inputSoundMode);      //TODO: add this function and uncomment
     printResponseInt(responseEnabled, apiEnabled, true, 0, "SM,1", true, inputSoundMode);
 
   }
