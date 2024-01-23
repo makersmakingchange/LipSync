@@ -43,6 +43,8 @@ int debugMode;                                                                  
                                                                                                             // 3 = Buttons debug mode is On
                                                                                                             // 4 = Switch debug mode is On
                                                                                                             // 5 = Sip & Puff state debug mode is On
+int soundMode;                                                                                              // 0 = None, 1 = Basic, 2 = Advanced
+
 //Bluetooth connection variables
 bool btIsConnected = false;
 

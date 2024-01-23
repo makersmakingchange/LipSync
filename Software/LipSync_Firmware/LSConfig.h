@@ -21,7 +21,6 @@
 #define USB_DEBUG  0 //Set this to 0 for best performance
 
 #define CONF_DISPLAY_ENABLED false
-#define CONF_SPEAKER_ENABLED false
 
 
 //***DO NOT CHANGE***//
@@ -91,7 +90,7 @@
 
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
-#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":0.0,\"PT\":0.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[30.0,30.0],\"CA2\":[-30.0,30.0],\"CA3\":[-30.0,-30.0],\"CA4\":[30.0,-30.0],\"DM\":0}"
+#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":0.0,\"PT\":0.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[30.0,30.0],\"CA2\":[-30.0,30.0],\"CA3\":[-30.0,-30.0],\"CA4\":[30.0,-30.0],\"SM\":1,\"DM\":0}"
 
 //Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 50          //50ms
@@ -159,12 +158,19 @@
 #define CONF_OPERATING_MODE_MIN 0
 #define CONF_OPERATING_MODE_MAX 2
 
-#define CONF_OPERATING_MODE_DEFAULT 1 // Default mode = USB Mouse
+#define CONF_OPERATING_MODE_DEFAULT 1 // Default mode = Mouse
                                           // 0 = Operating Mode null
                                           // 1 = Mouse
-                                          // 2 = Bluetooth Mouse
-                                          // 3 = Gamepad                                                         
+                                          // 2 = Gamepad     
 
+                                                                                              
+#define CONF_SOUND_MODE_OFF       0   //Sound off
+#define CONF_SOUND_MODE_BASIC     1   //Minimal sounds
+#define CONF_SOUND_MODE_ADVANCED  2   //All sounds
+
+#define CONF_SOUND_MODE_MIN 0
+#define CONF_SOUND_MODE_MAX 2
+#define CONF_SOUND_MODE_DEFAULT CONF_SOUND_MODE_BASIC
 
 //***CAN BE CHANGED***//
 #define CONF_API_ENABLED true               //Enable or Disable API
