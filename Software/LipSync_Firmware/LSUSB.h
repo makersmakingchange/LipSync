@@ -28,9 +28,9 @@
 #define MOUSE_RIGHT 2
 #define MOUSE_MIDDLE 4
 #define MOUSE_ALL (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)
-#define MOUSE_DESCRIPTOR "LipSync X Mouse"
+#define MOUSE_DESCRIPTOR "LipSync Mouse"
 
-#define GAMEPAD_DESCRIPTOR "LipSync X Gamepad"
+#define GAMEPAD_DESCRIPTOR "LipSync Gamepad"
 
 // https://github.com/hathach/tinyusb/blob/master/examples/device/hid_generic_inout/src/usb_descriptors.c
 
