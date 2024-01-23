@@ -1594,6 +1594,7 @@ void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommun
     printResponseInt(responseEnabled, apiEnabled, true, 0, "CM,1", true, inputCommunicationMode);
 
     //TODO: move this?
+    /*
     releaseOutputAction();
     switch(comMode){
       case CONF_COM_MODE_USB:       // USB Mouse
@@ -1605,6 +1606,7 @@ void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommun
         btmouse.begin();
         break;
     }
+    */
 
   }
   else {

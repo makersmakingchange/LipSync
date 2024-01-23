@@ -24,7 +24,7 @@
 
 //#define OUTPUT_RGB_LED_PIN A1 //Output pin for neopixel
 #define OUTPUT_MONO_LED_NUM 2  // Number of monocolor leds
-#define OUTPUT_RGB_LED_NUM 1   //Number of RGB leds
+#define OUTPUT_RGB_LED_NUM 3   //Number of RGB leds
 
 //Led color code
 #define LED_CLR_NONE 0

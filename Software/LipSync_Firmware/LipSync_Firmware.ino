@@ -286,8 +286,6 @@ void loop()
   pollTimer.run();                                    // Timer for normal joystick functions
 
   settingsEnabled=serialSettings(settingsEnabled); //Check to see if setting option is enabled in Lipsync
-  
-  //delay(1000);   //TODO: remove
 
   //if (USB_DEBUG) { Serial.print("Loop"); Serial.println(millis());} 
 }
@@ -1873,7 +1871,7 @@ void setLedDefault(){
   { //Set micro LED to blue if it's in BLE MODE
     led.setLedColor(CONF_BT_LED_NUMBER, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
   }
-        //TODO: uncomment this, troubleshooting
+       
 }
 
 //***BLUETOOTH SCAN AND LED FEEDBACK LOOP FUNCTION***//
@@ -1896,7 +1894,7 @@ void btFeedbackLoop()
   if (comMode == CONF_COM_MODE_BLE && tempIsConnected==false && tempIsConnected == btIsConnected)
   {
     btIsConnected = false;
-    //pollTimerId[5] = pollTimer.setTimer(CONF_BT_SCAN_BLINK_DELAY, 0, ((CONF_BT_SCAN_BLINK_NUMBER*2)+1), ledBtScanEffect);     //TODO: uncomment, should not be timer 5
+    pollTimerId[7] = pollTimer.setTimer(CONF_BT_SCAN_BLINK_DELAY, 0, ((CONF_BT_SCAN_BLINK_NUMBER*2)+1), ledBtScanEffect);     //TODO: troubleshoot blinking when pairing
 
   } //Set the default LED effect if bluetooth connection state is changed 
   else if (comMode == CONF_COM_MODE_BLE && tempIsConnected != btIsConnected)
@@ -1956,6 +1954,7 @@ void performLedAction(ledStateStruct* args)
 // Return     : none
 //******************************************//
 void softwareReset() {
+  releaseOutputAction();
   usbmouse.end();
   gamepad.end();
   btmouse.end();

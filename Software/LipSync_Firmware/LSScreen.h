@@ -746,8 +746,7 @@ void LSScreen::changeMode(){
     setOperatingMode(false, false, _tempOperatingMode);     // Sets new operating mode, saves in memory, and conducts software reset
   }
 
-  //setupDisplay();
-  //_display.display();
+  softwareReset();    //TODO: is there a way to avoid software reset if just changing com mode? 
 
   _currentMenu = MAIN_MENU;
   mainMenu();
@@ -795,7 +794,7 @@ void LSScreen::centerResetPage(void){
   //Perform cursor center
   setJoystickInitialization(true,false);
 
-  delay(100);
+  delay(1000);
 
   _display.clearDisplay();
   _display.setCursor(0,0);
