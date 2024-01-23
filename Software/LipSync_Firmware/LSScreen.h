@@ -236,20 +236,6 @@ void LSScreen::splashScreen() {
   _display.println("Makers Making Change");
   _display.display();
 
-/*
-  switch (_operatingMode){
-    case CONF_OPERATING_MODE_MOUSE:
-      _display.println("Mode: USB Mouse");
-      break;
-    case CONF_OPERATING_MODE_BTMOUSE:
-      _display.println("Mode: BT Mouse");  
-      break;
-    case CONF_OPERATING_MODE_GAMEPAD:
-      _display.println("Mode: USB Gamepad");
-      break;
-  }
-  */
-
   _display.println("Mode: ");
 
   _display.setTextSize(2);
@@ -274,7 +260,7 @@ void LSScreen::splashScreen() {
   
   _display.display();
 
-  screenStateTimerId = screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, closeMenu);
+  screenStateTimerId = screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
 
 }
 

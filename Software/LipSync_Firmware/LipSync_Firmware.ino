@@ -363,7 +363,7 @@ void initScreen()
   screen.splashScreen();                                            //Show splash screen
 }
 
-//***CLEAR SCREEN FUNCTION***//
+//***CLEAR MENU SCREEN FUNCTION***//
 // Function   : closeMenu
 // 
 // Description: This function closes the menu and clears the screen
@@ -375,6 +375,24 @@ void initScreen()
 void closeMenu()
 {
   screen.deactivateMenu();
+}
+
+//***CLEAR SPLASH SCREEN FUNCTION***//
+// Function   : clearSplashScreen
+// 
+// Description: This function clears the splash screen
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void clearSplashScreen()
+{
+  //Check if menu is active, only turn off screen if menu is not open
+  if (!screen.isMenuActive()){
+    screen.deactivateMenu();
+  }
+  
 }
 
 
