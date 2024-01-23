@@ -18,7 +18,7 @@
 */
 
 
-#define USB_DEBUG  1 //Set this to 0 for best performance
+#define USB_DEBUG  0 //Set this to 0 for best performance
 
 #define CONF_DISPLAY_ENABLED false
 #define CONF_SPEAKER_ENABLED false
@@ -98,13 +98,13 @@
 #define CONF_SCROLL_POLL_RATE 150           //150ms
 #define CONF_PRESSURE_POLL_RATE 50          //50ms
 #define CONF_INPUT_POLL_RATE 50             //50ms
-#define CONF_BT_FEEDBACK_POLL_RATE 1000     //1s
+#define CONF_BT_FEEDBACK_POLL_RATE 1000     //1s         
 #define CONF_DEBUG_POLL_RATE 100            //100ms
 #define CONF_SCREEN_POLL_RATE 100           //100ms
 
 #define CONF_BUTTON_PRESS_DELAY 150         //150ms
 
-#define CONF_SPLASH_SCREEN_DURATION 10000    //5000 ms
+#define CONF_SPLASH_SCREEN_DURATION 10000    //10 seconds
 
 // Polling Timer IDs for each module
 #define CONF_TIMER_JOYSTICK 0
@@ -114,6 +114,7 @@
 #define CONF_TIMER_DEBUG 4
 #define CONF_TIMER_SCROLL 5
 #define CONF_TIMER_SCREEN 6
+#define CONF_TIMER_SCREEN 7
 
 
 //Joystick values 
@@ -153,11 +154,10 @@
 // Operating Mode Values
 #define CONF_OPERATING_MODE_NONE 0
 #define CONF_OPERATING_MODE_MOUSE 1
-#define CONF_OPERATING_MODE_BTMOUSE 2
-#define CONF_OPERATING_MODE_GAMEPAD 3
+#define CONF_OPERATING_MODE_GAMEPAD 2
 
 #define CONF_OPERATING_MODE_MIN 0
-#define CONF_OPERATING_MODE_MAX 3
+#define CONF_OPERATING_MODE_MAX 2
 
 #define CONF_OPERATING_MODE_DEFAULT 1 // Default mode = USB Mouse
                                           // 0 = Operating Mode null

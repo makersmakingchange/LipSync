@@ -1593,6 +1593,21 @@ void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommun
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputCommunicationMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "CM,1", true, inputCommunicationMode);
 
+    //TODO: move this?
+    /*
+    releaseOutputAction();
+    switch(comMode){
+      case CONF_COM_MODE_USB:       // USB Mouse
+        btmouse.end();
+        usbmouse.begin();    
+        break;
+      case CONF_COM_MODE_BLE:       // Bluetooth Mouse
+        usbmouse.end();
+        btmouse.begin();
+        break;
+    }
+    */
+
   }
   else {
     printResponseInt(responseEnabled, apiEnabled, false, 3, "CM,1", true, inputCommunicationMode);

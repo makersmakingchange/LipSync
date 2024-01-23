@@ -93,6 +93,8 @@ void initializeBluefruit(const char* s) {
   Bluefruit.Advertising.setInterval(32, 244);    // 20 ms - in unit of 0.625 ms (Interval:  fast mode = 20 ms, slow mode = 152.5 ms)
   Bluefruit.Advertising.setFastTimeout(30);      // number of seconds in fast mode
   Bluefruit.Advertising.start(0);                // 0 = Don't stop advertising after n seconds
+
+  Serial.println("Initializing Bluetooth");
 }
 
 
