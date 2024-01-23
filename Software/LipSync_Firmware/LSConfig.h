@@ -18,10 +18,9 @@
 */
 
 
-#define USB_DEBUG  1 //Set this to 0 for best performance
+#define USB_DEBUG  0 //Set this to 0 for best performance
 
 #define CONF_DISPLAY_ENABLED false
-#define CONF_SPEAKER_ENABLED false
 
 
 //***DO NOT CHANGE***//
@@ -76,25 +75,35 @@
 #define CONF_ACTION_CHANGE_MODE 10                         // Change communication mode
 #define CONF_ACTION_START_MENU 11                          // Start menu on display
 #define CONF_ACTION_STOP_MENU 12                           // Close menu on display
-#define CONF_ACTION_RESET 13                               // Software Reset
-#define CONF_ACTION_FACTORY_RESET 14                       // Factory Reset
-
-#define CONF_ACTION_NEXT_MENU_ITEM 15                      // Move to next item in menu
-#define CONF_ACTION_SELECT_MENU_ITEM 16                    // Select current item in menu 
+#define CONF_ACTION_B1_PRESS 13                            // Generates a Button 1 press or button X1(Left USB)/View(Right USB) press in XAC  
+#define CONF_ACTION_B2_PRESS 14                             // Generates a Button 2 press or button X2(Left USB)/Menu(Right USB) press in XAC    
+#define CONF_ACTION_B3_PRESS 15                            // Generates a Button 3 press or button LS(Left USB)/RS(Right USB) press in XAC
+#define CONF_ACTION_B4_PRESS 16                            // Generates a Button 4 press or button LB(Left USB)/RB(Right USB) press in XAC 
+#define CONF_ACTION_B5_PRESS 17                            // Generates a Button 5 press or button A(Left USB)/X(Right USB) press in XAC
+#define CONF_ACTION_B6_PRESS 18                            // Generates a Button 6 press or button B(Left USB)/Y(Right USB) press in XAC
+#define CONF_ACTION_B7_PRESS 19                            // Generates a Button 7 press or button View(Left USB)/X1(Right USB) press in XAC  
+#define CONF_ACTION_B8_PRESS 20                            // Generates a Button 8 press or button Menu(Left USB)/X2(Right USB) press in XAC  
+#define CONF_ACTION_NEXT_MENU_ITEM 21                      // Move to next item in menu
+#define CONF_ACTION_SELECT_MENU_ITEM 22                    // Select current item in menu 
+#define CONF_ACTION_RESET 23                               // Software Reset
+#define CONF_ACTION_FACTORY_RESET 24                       // Factory Reset
 
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
-#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":0.0,\"PT\":0.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[30.0,30.0],\"CA2\":[-30.0,30.0],\"CA3\":[-30.0,-30.0],\"CA4\":[30.0,-30.0],\"DM\":0}"
+#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":0.0,\"PT\":0.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[30.0,30.0],\"CA2\":[-30.0,30.0],\"CA3\":[-30.0,-30.0],\"CA4\":[30.0,-30.0],\"SM\":1,\"DM\":0}"
 
 //Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 50          //50ms
 #define CONF_SCROLL_POLL_RATE 150           //150ms
 #define CONF_PRESSURE_POLL_RATE 50          //50ms
 #define CONF_INPUT_POLL_RATE 50             //50ms
-#define CONF_BT_FEEDBACK_POLL_RATE 1000     //1s
+#define CONF_BT_FEEDBACK_POLL_RATE 1000     //1s         
 #define CONF_DEBUG_POLL_RATE 100            //100ms
 #define CONF_SCREEN_POLL_RATE 100           //100ms
 
+#define CONF_BUTTON_PRESS_DELAY 150         //150ms
+
+#define CONF_SPLASH_SCREEN_DURATION 10000    //10 seconds
 
 // Polling Timer IDs for each module
 #define CONF_TIMER_JOYSTICK 0
@@ -104,11 +113,12 @@
 #define CONF_TIMER_DEBUG 4
 #define CONF_TIMER_SCROLL 5
 #define CONF_TIMER_SCREEN 6
+#define CONF_TIMER_SCREEN 7
 
 
 //Joystick values 
-#define CONF_JOY_SPEED_LEVEL_MIN 0
-#define CONF_JOY_SPEED_LEVEL_MAX 10
+#define CONF_JOY_CURSOR_SPEED_LEVEL_MIN 0
+#define CONF_JOY_CURSOR_SPEED_LEVEL_MAX 10
 
 //Communication mode values 
 #define CONF_COM_MODE_NONE 0 
@@ -143,19 +153,24 @@
 // Operating Mode Values
 #define CONF_OPERATING_MODE_NONE 0
 #define CONF_OPERATING_MODE_MOUSE 1
-#define CONF_OPERATING_MODE_BTMOUSE 2
-#define CONF_OPERATING_MODE_GAMEPAD 3
-#define CONF_OPERATING_MODE_MENU    4
+#define CONF_OPERATING_MODE_GAMEPAD 2
 
 #define CONF_OPERATING_MODE_MIN 0
-#define CONF_OPERATING_MODE_MAX 4
+#define CONF_OPERATING_MODE_MAX 2
 
-#define CONF_OPERATING_MODE_DEFAULT 1 // Default mode = USB Mouse
+#define CONF_OPERATING_MODE_DEFAULT 1 // Default mode = Mouse
                                           // 0 = Operating Mode null
                                           // 1 = Mouse
-                                          // 2 = Bluetooth Mouse
-                                          // 3 = Gamepad                                                         
+                                          // 2 = Gamepad     
 
+                                                                                              
+#define CONF_SOUND_MODE_OFF       0   //Sound off
+#define CONF_SOUND_MODE_BASIC     1   //Minimal sounds
+#define CONF_SOUND_MODE_ADVANCED  2   //All sounds
+
+#define CONF_SOUND_MODE_MIN 0
+#define CONF_SOUND_MODE_MAX 2
+#define CONF_SOUND_MODE_DEFAULT CONF_SOUND_MODE_BASIC
 
 //***CAN BE CHANGED***//
 #define CONF_API_ENABLED true               //Enable or Disable API
@@ -191,7 +206,7 @@
 #define CONF_JOY_INIT_READING_NUMBER 5
 
 //Joystick cursor speed change and related LED feedback settings 
-#define CONF_JOY_SPEED_LEVEL_DEFAULT 5
+#define CONF_JOY_CURSOR_SPEED_LEVEL_DEFAULT 5
 #define CONF_JOY_SPEED_CHANGE_LED_DELAY 150
 #define CONF_JOY_SPEED_CHANGE_LED_BLINK 1
 #define CONF_JOY_SPEED_DEC_LED_NUMBER 1

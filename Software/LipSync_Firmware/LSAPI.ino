@@ -31,17 +31,23 @@ _functionList getModelNumberFunction =            {"MN", "0", "0", &getModelNumb
 _functionList getVersionNumberFunction =          {"VN", "0", "0", &getVersionNumber};
 _functionList getOperatingModeFunction =          {"OM", "0", "0", &getOperatingMode};
 _functionList setOperatingModeFunction =          {"OM", "1", "",  &setOperatingMode};
-_functionList getJoystickSpeedFunction =          {"SS", "0", "0", &getJoystickSpeed};
-_functionList setJoystickSpeedFunction =          {"SS", "1", "",  &setJoystickSpeed};
-_functionList getScrollLevelFunction =            {"SL", "0", "0", &getScrollLevel};
-_functionList setScrollLevelFunction =            {"SL", "1", "",  &setScrollLevel};
+_functionList getCommunicationModeFunction =      {"CM", "0", "0", &getCommunicationMode};
+_functionList setCommunicationModeFunction =      {"CM", "1", "",  &setCommunicationMode};
+
 _functionList getJoystickInitializationFunction = {"IN", "0", "0", &getJoystickInitialization};
 _functionList setJoystickInitializationFunction = {"IN", "1", "1", &setJoystickInitialization};
 _functionList getJoystickCalibrationFunction =    {"CA", "0", "0", &getJoystickCalibration};
 _functionList setJoystickCalibrationFunction =    {"CA", "1", "1", &setJoystickCalibration};
 _functionList getJoystickDeadZoneFunction =       {"DZ", "0", "0", &getJoystickDeadZone};
 _functionList setJoystickDeadZoneFunction =       {"DZ", "1", "",  &setJoystickDeadZone};
-_functionList getJoystickValueFunction =          {"JV", "0", "0", &getJoystickValue};
+
+
+_functionList getCursorSpeedFunction =          {"SS", "0", "0", &getCursorSpeed};
+_functionList setCursorSpeedFunction =          {"SS", "1", "",  &setCursorSpeed};
+_functionList getScrollLevelFunction =            {"SL", "0", "0", &getScrollLevel};
+_functionList setScrollLevelFunction =            {"SL", "1", "",  &setScrollLevel};
+_functionList getJoystickAccelerationFunction =   {"AV", "0", "0", &getJoystickAcceleration};
+_functionList setJoystickAccelerationFunction =   {"AV", "1", "0", &setJoystickAcceleration};
 
 _functionList getPressureValueFunction =          {"PV", "0", "0", &getPressureValue};
 _functionList getPressureModeFunction =           {"PM", "0", "0", &getPressureMode};
@@ -52,35 +58,35 @@ _functionList setSipPressureThresholdFunction =   {"ST", "1", "",  &setSipPressu
 _functionList getPuffPressureThresholdFunction =  {"PT", "0", "0", &getPuffPressureThreshold};
 _functionList setPuffPressureThresholdFunction =  {"PT", "1", "",  &setPuffPressureThreshold};
 
-_functionList getJoystickAccelerationFunction =   {"AV", "0", "0", &getJoystickAcceleration};
-_functionList setJoystickAccelerationFunction =   {"AV", "1", "0", &setJoystickAcceleration};
-
-_functionList getCommunicationModeFunction =      {"CM", "0", "0", &getCommunicationMode};
-_functionList setCommunicationModeFunction =      {"CM", "1", "",  &setCommunicationMode};
+_functionList getSoundModeFunction =              {"SM", "0", "0", &getSoundMode};
+_functionList setSoundModeFunction =              {"SM", "1", "",  &setSoundMode};
 
 _functionList getDebugModeFunction =              {"DM", "0", "0", &getDebugMode};
 _functionList setDebugModeFunction =              {"DM", "1", "",  &setDebugMode};
+_functionList getJoystickValueFunction =          {"JV", "0", "0", &getJoystickValue};
 
 _functionList softResetFunction =                 {"SR", "1", "1", &softReset};
 _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSettings};
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[32] = {
+_functionList apiFunction[34] = {
   getModelNumberFunction,
   getVersionNumberFunction,
   getOperatingModeFunction,
   setOperatingModeFunction,
-  getJoystickSpeedFunction,
-  setJoystickSpeedFunction,
-  getScrollLevelFunction,
-  setScrollLevelFunction,
+  getCommunicationModeFunction,
+  setCommunicationModeFunction,
   getJoystickInitializationFunction,
   setJoystickInitializationFunction,
   getJoystickCalibrationFunction,
   setJoystickCalibrationFunction,
   getJoystickDeadZoneFunction,
   setJoystickDeadZoneFunction,
+  getCursorSpeedFunction,
+  setCursorSpeedFunction,
+  getScrollLevelFunction,
+  setScrollLevelFunction,
   getJoystickValueFunction,
   getPressureModeFunction,
   setPressureModeFunction,
@@ -92,8 +98,8 @@ _functionList apiFunction[32] = {
   setPuffPressureThresholdFunction,
   getJoystickAccelerationFunction,
   setJoystickAccelerationFunction,
-  getCommunicationModeFunction,
-  setCommunicationModeFunction,
+  getSoundModeFunction,
+  setSoundModeFunction,
   getDebugModeFunction,
   setDebugModeFunction,
   softResetFunction,
@@ -391,8 +397,6 @@ int getOperatingMode(bool responseEnabled, bool apiEnabled) {
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempOperatingMode);
   }
 
-  setDebugState(tempOperatingMode);
-
   printResponseInt(responseEnabled, apiEnabled, true, 0, "OM,0", true, tempOperatingMode);
 
   return tempOperatingMode;
@@ -438,8 +442,9 @@ void setOperatingMode(bool responseEnabled, bool apiEnabled, int inputOperatingM
   }
   else {
     printResponseInt(responseEnabled, apiEnabled, false, 3, "OM,1", true, inputOperatingMode);
-
   }
+
+  //TODO: move softwareReset() here instead of in changeOperatingMode?
 
 }
 //***SET OPERATING MODE STATE API FUNCTION***//
@@ -459,8 +464,8 @@ void setOperatingMode(bool responseEnabled, bool apiEnabled, String optionalPara
 }
 
 
-//***GET JOYSTICK SPEED FUNCTION***//
-// Function   : getJoystickSpeed
+//***GET JOYSTICK CURSOR SPEED FUNCTION***//
+// Function   : getCursorSpeed
 //
 // Description: This function retrieves the current joystick speed level.
 //
@@ -471,26 +476,26 @@ void setOperatingMode(bool responseEnabled, bool apiEnabled, String optionalPara
 //
 // Return     : void
 //*********************************//
-int getJoystickSpeed(bool responseEnabled, bool apiEnabled) {
+int getCursorSpeed(bool responseEnabled, bool apiEnabled) {
   String commandKey = "SS";
-  int tempJoystickSpeedLevel = CONF_JOY_SPEED_LEVEL_DEFAULT;
+  int tempCursorSpeedLevel = CONF_JOY_CURSOR_SPEED_LEVEL_DEFAULT;
   if (CONF_API_ENABLED) {
-    tempJoystickSpeedLevel = mem.readInt(CONF_SETTINGS_FILE, commandKey);
-    if ((tempJoystickSpeedLevel < CONF_JOY_SPEED_LEVEL_MIN) || (tempJoystickSpeedLevel > CONF_JOY_SPEED_LEVEL_MAX)) {
-      tempJoystickSpeedLevel = CONF_JOY_SPEED_LEVEL_DEFAULT;
-      mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempJoystickSpeedLevel);
+    tempCursorSpeedLevel = mem.readInt(CONF_SETTINGS_FILE, commandKey);
+    if ((tempCursorSpeedLevel < CONF_JOY_CURSOR_SPEED_LEVEL_MIN) || (tempCursorSpeedLevel > CONF_JOY_CURSOR_SPEED_LEVEL_MAX)) {
+      tempCursorSpeedLevel = CONF_JOY_CURSOR_SPEED_LEVEL_DEFAULT;
+      mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempCursorSpeedLevel);
     }
     
   }
-  js.setOutputRange(tempJoystickSpeedLevel);
-  printResponseInt(responseEnabled, apiEnabled, true, 0, "SS,0", true, tempJoystickSpeedLevel);
+  js.setOutputRange(tempCursorSpeedLevel);
+  printResponseInt(responseEnabled, apiEnabled, true, 0, "SS,0", true, tempCursorSpeedLevel);
 
-  return tempJoystickSpeedLevel;
+  return tempCursorSpeedLevel;
 }
 //***GET JOYSTICK SPEED API FUNCTION***//
-// Function   : getJoystickSpeed
+// Function   : getCursorSpeed
 //
-// Description: This function is redefinition of main getJoystickSpeed function to match the types of API function arguments.
+// Description: This function is redefinition of main getCursorSpeed function to match the types of API function arguments.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
@@ -499,14 +504,14 @@ int getJoystickSpeed(bool responseEnabled, bool apiEnabled) {
 //               optionalParameter : String : The input parameter string should contain one element with value of zero.
 //
 // Return     : void
-void getJoystickSpeed(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+void getCursorSpeed(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
-    getJoystickSpeed(responseEnabled, apiEnabled);
+    getCursorSpeed(responseEnabled, apiEnabled);
   }
 }
 
 //***SET JOYSTICK SPEED FUNCTION***//
-// Function   : setJoystickSpeed
+// Function   : setCursorSpeed
 //
 // Description: This function sets the current joystick speed level.
 //
@@ -518,37 +523,37 @@ void getJoystickSpeed(bool responseEnabled, bool apiEnabled, String optionalPara
 //
 // Return     : void
 //*********************************//
-void setJoystickSpeed(bool responseEnabled, bool apiEnabled, int inputSpeedLevel) {
+void setCursorSpeed(bool responseEnabled, bool apiEnabled, int inputSpeedLevel) {
   String commandKey = "SS";
   bool isValidSpeed = true;
-  int tempJoystickSpeedLevel = inputSpeedLevel;
+  int tempCursorSpeedLevel = inputSpeedLevel;
   
-  if ((tempJoystickSpeedLevel >= CONF_JOY_SPEED_LEVEL_MIN) && (tempJoystickSpeedLevel <= CONF_JOY_SPEED_LEVEL_MAX)) { //Check if inputSpeedCounter is valid
+  if ((tempCursorSpeedLevel >= CONF_JOY_CURSOR_SPEED_LEVEL_MIN) && (tempCursorSpeedLevel <= CONF_JOY_CURSOR_SPEED_LEVEL_MAX)) { //Check if inputSpeedCounter is valid
     // Valid inputSpeedLevel
-    mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempJoystickSpeedLevel);
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempCursorSpeedLevel);
     if (!CONF_API_ENABLED) {
-      tempJoystickSpeedLevel = CONF_JOY_SPEED_LEVEL_DEFAULT;
+      tempCursorSpeedLevel = CONF_JOY_CURSOR_SPEED_LEVEL_DEFAULT;
     }
     performLedAction(ledCurrentState);
     isValidSpeed = true;
   }
   else {
     //Invalid inputSpeedLevel
-    tempJoystickSpeedLevel = mem.readInt(CONF_SETTINGS_FILE, commandKey);
+    tempCursorSpeedLevel = mem.readInt(CONF_SETTINGS_FILE, commandKey);
     performLedAction(ledCurrentState);
     isValidSpeed = false;
   }
 
-  js.setOutputRange(tempJoystickSpeedLevel);
+  js.setOutputRange(tempCursorSpeedLevel);
 
   int responseCode = 0;
   (isValidSpeed) ? responseCode = 0 : responseCode = 3;
-  printResponseInt(responseEnabled, apiEnabled, isValidSpeed, responseCode, "SS,1", true, tempJoystickSpeedLevel);
+  printResponseInt(responseEnabled, apiEnabled, isValidSpeed, responseCode, "SS,1", true, tempCursorSpeedLevel);
 }
 //***SET JOYSTICK SPEED API FUNCTION***//
-// Function   : setJoystickSpeed
+// Function   : setCursorSpeed
 //
-// Description: This function is redefinition of main setJoystickSpeed function to match the types of API function arguments.
+// Description: This function is redefinition of main setCursorSpeed function to match the types of API function arguments.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
@@ -557,8 +562,8 @@ void setJoystickSpeed(bool responseEnabled, bool apiEnabled, int inputSpeedLevel
 //               optionalParameter : String : The input parameter string should contain one element with value of zero.
 //
 // Return     : void
-void setJoystickSpeed(bool responseEnabled, bool apiEnabled, String optionalParameter) {
-  setJoystickSpeed(responseEnabled, apiEnabled, optionalParameter.toInt());
+void setCursorSpeed(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  setCursorSpeed(responseEnabled, apiEnabled, optionalParameter.toInt());
 }
 
 
@@ -665,10 +670,10 @@ void setScrollLevel(bool responseEnabled, bool apiEnabled, String optionalParame
 }
 
 
-//***INCREASE JOYSTICK SPEED LEVEL FUNCTION***//
-// Function   : increaseJoystickSpeed
+//***INCREASE JOYSTICK CURSOR SPEED LEVEL FUNCTION***//
+// Function   : increaseCursorSpeed
 //
-// Description: This function increases the joystick speed level by one.
+// Description: This function increases the joystick cursor speed level by one.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
@@ -677,11 +682,11 @@ void setScrollLevel(bool responseEnabled, bool apiEnabled, String optionalParame
 //
 // Return     : void
 //*********************************//
-void increaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
-  int tempJoystickSpeedLevel = js.getOutputRange();
+void increaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
+  int tempCursorSpeedLevel = js.getOutputRange();
 
-  tempJoystickSpeedLevel++;
-  if(tempJoystickSpeedLevel <= CONF_JOY_SPEED_LEVEL_MAX){
+  tempCursorSpeedLevel++;
+  if(tempCursorSpeedLevel <= CONF_JOY_CURSOR_SPEED_LEVEL_MAX){
     setLedState(LED_ACTION_BLINK, 
     CONF_JOY_SPEED_INC_LED_COLOR, 
     CONF_JOY_SPEED_INC_LED_NUMBER, 
@@ -698,13 +703,13 @@ void increaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
     CONF_LED_BRIGHTNESS);   //Blink 3 times
   }
 
-  setJoystickSpeed(responseEnabled, apiEnabled, tempJoystickSpeedLevel);
+  setCursorSpeed(responseEnabled, apiEnabled, tempCursorSpeedLevel);
 }
 
-//***DECREASE JOYSTICK SPEED LEVEL FUNCTION***//
-// Function   : decreaseJoystickSpeed
+//***DECREASE JOYSTICK CURSOR SPEED LEVEL FUNCTION***//
+// Function   : decreaseCursorSpeed
 //
-// Description: This function decreases the joystick speed level by one.
+// Description: This function decreases the joystick cursor speed level by one.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
@@ -713,11 +718,11 @@ void increaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
 //
 // Return     : void
 //*********************************//
-void decreaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
-  int tempJoystickSpeedLevel = js.getOutputRange();
+void decreaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
+  int tempCursorSpeedLevel = js.getOutputRange();
 
-  tempJoystickSpeedLevel--;
-  if(tempJoystickSpeedLevel >= CONF_JOY_SPEED_LEVEL_MIN){
+  tempCursorSpeedLevel--;
+  if(tempCursorSpeedLevel >= CONF_JOY_CURSOR_SPEED_LEVEL_MIN){
     setLedState(LED_ACTION_BLINK, 
     CONF_JOY_SPEED_DEC_LED_COLOR, 
     CONF_JOY_SPEED_DEC_LED_NUMBER, 
@@ -735,7 +740,7 @@ void decreaseJoystickSpeed(bool responseEnabled, bool apiEnabled) {
   }
   
     
-  setJoystickSpeed(responseEnabled, apiEnabled, tempJoystickSpeedLevel);
+  setCursorSpeed(responseEnabled, apiEnabled, tempCursorSpeedLevel);
 }
 
 
@@ -1137,7 +1142,7 @@ void setPressureMode(bool responseEnabled, bool apiEnabled, int inputPressureMod
   String commandKey = "PM";
   if ((inputPressureMode >= PRESS_MODE_MIN) && (inputPressureMode <= PRESS_MODE_MAX))
   {
-    comMode = inputPressureMode;
+    //comMode = inputPressureMode;  //TODO: fix
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputPressureMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "PM,1", true, inputPressureMode);
   ps.setPressureMode(inputPressureMode);
@@ -1593,6 +1598,21 @@ void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommun
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputCommunicationMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "CM,1", true, inputCommunicationMode);
 
+    //TODO: move this?
+    /*
+    releaseOutputAction();
+    switch(comMode){
+      case CONF_COM_MODE_USB:       // USB Mouse
+        btmouse.end();
+        usbmouse.begin();    
+        break;
+      case CONF_COM_MODE_BLE:       // Bluetooth Mouse
+        usbmouse.end();
+        btmouse.begin();
+        break;
+    }
+    */
+
   }
   else {
     printResponseInt(responseEnabled, apiEnabled, false, 3, "CM,1", true, inputCommunicationMode);
@@ -1660,6 +1680,97 @@ void toggleCommunicationMode(bool responseEnabled, bool apiEnabled) {
   setCommunicationMode(responseEnabled, apiEnabled, comMode);
 }
 
+//***GET SOUND MODE STATE FUNCTION***//
+// Function   : getSoundMode
+//
+// Description: This function retrieves the state of sound mode.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : debugState : intol : The current state of sound mode.
+//*********************************//
+int getSoundMode(bool responseEnabled, bool apiEnabled) {
+  String commandKey = "SM";
+  int tempSoundMode;
+  tempSoundMode = mem.readInt(CONF_SETTINGS_FILE, commandKey);
+
+  if ((tempSoundMode < CONF_SOUND_MODE_MIN) || (tempSoundMode > CONF_SOUND_MODE_MAX)) {
+    tempSoundMode = CONF_SOUND_MODE_DEFAULT;
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempSoundMode);
+  }
+
+  printResponseInt(responseEnabled, apiEnabled, true, 0, "SM,0", true, tempSoundMode);
+
+  return tempSoundMode;
+}
+
+//***GET SOUND MODE STATE API FUNCTION***//
+// Function   : getSoundMode
+//
+// Description: This function is redefinition of main getSoundMode function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void getSoundMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
+    getSoundMode(responseEnabled, apiEnabled);
+  }
+}
+
+//***SET SOUND MODE STATE FUNCTION***//
+// Function   : setSoundMode
+//
+// Description: This function sets the state of sound mode.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               inputDebugStategMode : int : The new debug mode state ( true = ON , false = OFF )
+//
+// Return     : void
+//*********************************//
+void setSoundMode(bool responseEnabled, bool apiEnabled, int inputSoundMode) {
+  String commandKey = "SM";
+
+  if ((inputSoundMode >= CONF_SOUND_MODE_MIN) && (inputSoundMode <= CONF_SOUND_MODE_MAX)) {
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputSoundMode);
+    soundMode = inputSoundMode;
+    buzzer.setSoundModeLevel(inputSoundMode);
+    printResponseInt(responseEnabled, apiEnabled, true, 0, "SM,1", true, inputSoundMode);
+
+  }
+  else {
+    printResponseInt(responseEnabled, apiEnabled, false, 3, "SM,1", true, inputSoundMode);
+
+  }
+
+}
+//***SET SOUND MODE STATE API FUNCTION***//
+// Function   : setSoundMode
+//
+// Description: This function is redefinition of main setSoundMode function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void setSoundMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  setSoundMode(responseEnabled, apiEnabled, optionalParameter.toInt());
+}
+
+// *********************************************************************************
 
 //***GET DEBUG MODE STATE FUNCTION***//
 // Function   : getDebugMode
@@ -1777,8 +1888,8 @@ void softReset(bool responseEnabled, bool apiEnabled) {
   // setJoystickDeadZone(false, false, CONF_JOY_DEADZONE_DEFAULT);
   // setSipPressureThreshold(false, false, CONF_SIP_THRESHOLD);
   // setPuffPressureThreshold(false, false, CONF_PUFF_THRESHOLD);
-  // setJoystickSpeed(false, false, CONF_JOY_SPEED_LEVEL_DEFAULT);  
-  // 
+  // setCursorSpeed(false, false, CONF_JOY_CURSOR_SPEED_LEVEL_DEFAULT);  
+  // setSoundMode(false, false, CONF_SOUND_MODE_DEFAULT);
 
   // //Clear all LEDs to indicate factory reset process is finished 
   // setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);                           
@@ -1867,7 +1978,7 @@ void factoryReset(bool responseEnabled, bool apiEnabled) {
   setJoystickDeadZone(false, false, CONF_JOY_DEADZONE_DEFAULT);
   setSipPressureThreshold(false, false, CONF_SIP_THRESHOLD);
   setPuffPressureThreshold(false, false, CONF_PUFF_THRESHOLD);
-  setJoystickSpeed(false, false, CONF_JOY_SPEED_LEVEL_DEFAULT);  
+  setCursorSpeed(false, false, CONF_JOY_CURSOR_SPEED_LEVEL_DEFAULT);  
   printResponseInt(responseEnabled, apiEnabled, true, 0, "FR,1", true, 1);
 
   //Clear all LEDs to indicate factory reset process is finished 

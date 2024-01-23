@@ -114,6 +114,7 @@
 class LSBuzzer {
   private:
     boolean _buzzerOn = true;     // TODO: make this something that is saved in memory and not saved just here, then load from memory instead of setting to true;
+    int _soundModeLevel;
 
   public: 
     LSBuzzer();
@@ -123,6 +124,7 @@ class LSBuzzer {
     void startup();
     void enable();
     void disable();
+    void setSoundModeLevel(int inputSoundMode);
 
 };
 
@@ -131,6 +133,8 @@ LSBuzzer::LSBuzzer() {
 
 void LSBuzzer::begin(){
   pinMode(CONF_BUZZER_PIN, OUTPUT);
+  //TODO: check if sound is emabled by reading from memory 
+  _soundModeLevel = getSoundMode(false, false);
 }
 
 void LSBuzzer::update(){
@@ -149,8 +153,12 @@ void LSBuzzer::disable(){
   _buzzerOn = false;
 }
 
+void LSBuzzer::setSoundModeLevel(int inputSoundMode){
+  _soundModeLevel = inputSoundMode;
+}
+
 void LSBuzzer::startup(){
-  if (_buzzerOn){
+  if (_buzzerOn && (_soundModeLevel != CONF_SOUND_MODE_OFF)){
     tone(CONF_BUZZER_PIN, NOTE_F5, 500);
     delay(500);                             // TODO: add timer instead of delay
     tone(CONF_BUZZER_PIN, NOTE_C6, 500);

@@ -51,13 +51,11 @@
 #define SIP_THRESH_MENU   521
 #define PUFF_THRESH_MENU  522
 
-#define MODE_MOUSE_USB  0
-#define MODE_MOUSE_BT   1
-#define MODE_GAMEPAD    2
-
 #define SCROLL_DELAY_MILLIS   100
 
-//Adafruit_SSD1306 _display(CONF_SCREEN_WIDTH, CONF_SCREEN_HEIGHT, &Wire, OLED_RESET);
+#define _MODE_MOUSE_USB     1
+#define _MODE_MOUSE_BT      2
+#define _MODE_GAMEPAD_USB   3
 
 const int TEXT_ROWS = 4; 
 
@@ -72,10 +70,15 @@ private:
   int _currentSelection = 0;
   int _selectedLine; 
 
-  int _mode = MODE_MOUSE_USB;
-  int _tempMode = MODE_MOUSE_USB;
+  //int _mode = MODE_MOUSE_USB;
+  //int _tempMode = MODE_MOUSE_USB;
+  int _operatingMode;
+  int _tempOperatingMode;
+  int _communicationMode;
+  int _tempCommunicationMode;
   int _cursorSpeedLevel;
   bool _soundOn = true;
+  int _soundMode;
   
   bool _scrollOn = false;
   long _scrollDelayTimer = millis();
@@ -125,16 +128,16 @@ private:
   String _adjustPuffThreshMenuText[4] = {"Puff: ", "Increase", "Decrease", "... Back"};
 
   // Number of selectable options in each menu
-  const int mainMenuLen = 5;
-  const int exitConfirmLen = 2;
-  const int calibMenuLen = 3;
-  const int modeMenuLen = 4;
-  const int cursorSpMenuLen = 3;
-  const int moreMenuLen = 3;
-  const int soundMenuLen = 2;
-  const int sipPuffThreshMenuLen = 3;
-  const int adjustSipThreshMenuLen = 3;
-  const int adjustPuffThreshMenuLen = 3;
+  const int _mainMenuLen = 5;
+  const int _exitConfirmLen = 2;
+  const int _calibMenuLen = 3;
+  const int _modeMenuLen = 4;
+  const int _cursorSpMenuLen = 3;
+  const int _moreMenuLen = 3;
+  const int _soundMenuLen = 2;
+  const int _sipPuffThreshMenuLen = 3;
+  const int _adjustSipThreshMenuLen = 3;
+  const int _adjustPuffThreshMenuLen = 3;
 
 
 public:
@@ -154,7 +157,7 @@ public:
   void splashScreen();
   void nextMenuItem();
   void selectMenuItem();
-  bool isActive();
+  bool isMenuActive();
   void activateMenu();
   void deactivateMenu();
 };
@@ -172,12 +175,15 @@ void LSScreen::begin() {
     for (;;); // Don't proceed, loop forever
   }
 
-
   setupDisplay();
   _display.setTextWrap(false);
   _display.display();
 
   //startupScreen();
+
+  _operatingMode = getOperatingMode(false, false);
+  _communicationMode = getCommunicationMode(false, false);
+  _soundMode = getSoundMode(false, false);
 
 }
 
@@ -187,6 +193,8 @@ void LSScreen::clear() {
 }
 
 void LSScreen::update() {
+  screenStateTimer.run();
+  
   //Loop for screen functions 
   if (_scrollOn){
     scrollLongText();
@@ -205,7 +213,7 @@ void LSScreen::deactivateMenu() {
   
 }
 
-bool LSScreen::isActive() {
+bool LSScreen::isMenuActive() {
 
 return is_active;
  
@@ -224,14 +232,38 @@ void LSScreen::splashScreen() {
   setupDisplay();
   
   _display.println("LipSync");
-  _display.println("v4.0.1");
 
   _display.setTextSize(1);
+  _display.println("v4.0.1");
   _display.println("Makers Making Change");
   _display.display();
-  
+
+  _display.println("Mode: ");
+
   _display.setTextSize(2);
+
+  switch (_operatingMode){
+    case CONF_OPERATING_MODE_MOUSE:
+      switch(_communicationMode){
+        case CONF_COM_MODE_USB:
+          _display.println("USB Mouse");
+          break;
+        case CONF_COM_MODE_BLE:
+          _display.println("BT Mouse");
+          break;
+      }
+      break;
+    case CONF_OPERATING_MODE_GAMEPAD:
+      _display.print("USB"); _display.setTextSize(1); _display.print(" "); _display.setTextSize(2); _display.print("Gamepad"); // text size changed for space so it would all fit on one line
+      break;
+    default:
+      _display.print("OP:"); _display.print(_operatingMode);
+  }
   
+  _display.display();
+
+  screenStateTimerId = screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
+
 }
 
 //------------------------------------------//
@@ -293,7 +325,7 @@ void LSScreen::selectMenuItem() {
           setupDisplay();
           _display.println("Exiting");
           _display.display();
-          delay(2000);                  // TODO: remove delay
+          delay(1000);                  // TODO: remove delay
 
           deactivateMenu();
         }
@@ -311,13 +343,27 @@ void LSScreen::selectMenuItem() {
       }
       break;
     case MODE_MENU:
-      if (_currentSelection < (modeMenuLen - 1)){
+      if (_currentSelection < (_modeMenuLen - 1)){
         // Confirm mode change
-        _tempMode = _currentSelection;
-        if (_tempMode != _mode){
+        switch (_currentSelection+1){
+          case _MODE_MOUSE_USB: 
+            _tempOperatingMode = CONF_OPERATING_MODE_MOUSE;
+            _tempCommunicationMode = CONF_COM_MODE_USB;
+            break;
+          case _MODE_MOUSE_BT:
+            _tempOperatingMode = CONF_OPERATING_MODE_MOUSE;
+            _tempCommunicationMode = CONF_COM_MODE_BLE;
+            break;
+          case _MODE_GAMEPAD_USB:
+            _tempOperatingMode = CONF_OPERATING_MODE_GAMEPAD;
+            _tempCommunicationMode = CONF_COM_MODE_USB;  
+            break;
+        }
+        //_tempOperatingMode = _currentSelection;
+        if ((_tempOperatingMode != _operatingMode)||(_tempCommunicationMode != _communicationMode)){
           confirmModeChange();
         }
-      } else if (_currentSelection == (modeMenuLen-1)){
+      } else if (_currentSelection == (_modeMenuLen-1)){
         mainMenu();
       }
       break;
@@ -332,16 +378,16 @@ void LSScreen::selectMenuItem() {
     case CURSOR_SP_MENU:
       switch (_currentSelection){
         case 0:       //Increase
-          increaseJoystickSpeed(true,false);
-          _cursorSpeedLevel = getJoystickSpeed(true,false);  
+          increaseCursorSpeed(true,false);
+          _cursorSpeedLevel = getCursorSpeed(true,false);  
           _cursorSpMenuText[0] = "Speed: " + String(_cursorSpeedLevel) + " ";
           _display.setCursor(0,0);
           _display.print(_cursorSpMenuText[0]);
           _display.display();
           break;
         case 1:       //Decrease
-          decreaseJoystickSpeed(true,false);
-          _cursorSpeedLevel = getJoystickSpeed(true,false);  
+          decreaseCursorSpeed(true,false);
+          _cursorSpeedLevel = getCursorSpeed(true,false);  
           _cursorSpMenuText[0] = "Speed: " + String(_cursorSpeedLevel) + " ";
           _display.setCursor(0,0);
           _display.print(_cursorSpMenuText[0]);
@@ -368,12 +414,15 @@ void LSScreen::selectMenuItem() {
     case SOUND_MENU:
        switch (_currentSelection){
         case 0:
-          _soundOn = !_soundOn;
           //do function for turning sound on/off
-          if (_soundOn){
+          if (_soundMode == CONF_SOUND_MODE_OFF){
             buzzerSoundOn();
+            _soundMode = CONF_SOUND_MODE_BASIC;
+            setSoundMode(false, false, _soundMode); //TODO: change menu to add Advanced Sound to menu
           } else {
             buzzerSoundOff();
+            _soundMode = CONF_SOUND_MODE_OFF;
+            setSoundMode(false, false, _soundMode);
           }
           soundMenu();
           break;
@@ -511,7 +560,7 @@ void LSScreen::displayCursor() {
   _selectedText = _currentMenuText[_selectedLine];
   
   if (_selectedText.length() > 9){
-    Serial.println("Long text");
+    //Serial.println("Long text");
     _scrollOn = true;
     _scrollPos = 12;
     delay(200);                           // TODO: remove delay
@@ -582,7 +631,7 @@ void LSScreen::mainMenu(void) {
   
   //if new menu selection
   //if (_prevMenu != _currentMenu) {
-    _currentMenuLength = mainMenuLen;
+    _currentMenuLength = _mainMenuLen;
     _currentMenuText = _mainMenuText;
     _cursorStart = 0;
     _currentSelection = 0;
@@ -605,7 +654,7 @@ void LSScreen::exitConfirmMenu(){
 void LSScreen::calibMenu(void) {
   _currentMenu = CALIB_MENU;
   if (_prevMenu != _currentMenu) {
-    _currentMenuLength = calibMenuLen;
+    _currentMenuLength = _calibMenuLen;
     _currentMenuText = _calibMenuText;
     _cursorStart = 0;
     _currentSelection = 0;
@@ -618,7 +667,7 @@ void LSScreen::calibMenu(void) {
 void LSScreen::modeMenu(void) {
   _currentMenu = MODE_MENU;
 
-  _currentMenuLength = modeMenuLen;
+  _currentMenuLength = _modeMenuLen;
   _currentMenuText = _modeMenuText;
   _cursorStart = 0;
   _currentSelection = 0;
@@ -626,17 +675,40 @@ void LSScreen::modeMenu(void) {
   displayMenu();
 
   _display.setTextColor(SSD1306_BLACK, SSD1306_WHITE); // Draw 'inverse' coloured text
-  if (_mode == MODE_MOUSE_USB){
+  /*
+  if (_operatingMode == CONF_OPERATING_MODE_MOUSE){
       _display.setCursor(12, 0);
-      _display.print(_modeMenuText[MODE_MOUSE_USB]);
-  } else if (_mode == MODE_MOUSE_BT){
+      _display.print(_modeMenuText[CONF_OPERATING_MODE_MOUSE-1]);
+  } else if (_operatingMode == CONF_OPERATING_MODE_BTMOUSE){
       _display.setCursor(12, 16);
       //display.print(" MOUSE BLUETOOTH ");
-      _display.print(_modeMenuText[MODE_MOUSE_BT]);
-  } else if (_mode == MODE_GAMEPAD){
+      _display.print(_modeMenuText[CONF_OPERATING_MODE_BTMOUSE-1]);
+  } else if (_operatingMode == CONF_OPERATING_MODE_GAMEPAD){
       _display.setCursor(12, 16*2);
       //display.print(" GAMEPAD ");
-      _display.print(_modeMenuText[MODE_GAMEPAD]);
+      _display.print(_modeMenuText[CONF_OPERATING_MODE_GAMEPAD-1]);
+  }
+  */
+
+  switch (_operatingMode){
+    case CONF_OPERATING_MODE_MOUSE:
+      switch(_communicationMode){
+        case CONF_COM_MODE_USB:
+          _display.setCursor(12, 0);
+          _display.print(_modeMenuText[_MODE_MOUSE_USB-1]);
+          break;
+        case CONF_COM_MODE_BLE:
+          _display.setCursor(12, 16);
+          //display.print(" MOUSE BLUETOOTH ");
+          _display.print(_modeMenuText[_MODE_MOUSE_BT-1]);
+          break;
+      }
+      break;
+    case CONF_OPERATING_MODE_GAMEPAD:
+      _display.setCursor(12, 16*2);
+      //display.print(" GAMEPAD ");
+      _display.print(_modeMenuText[_MODE_GAMEPAD_USB-1]);
+      break;
   }
 
   _display.display();
@@ -655,53 +727,30 @@ void LSScreen::confirmModeChange() {
 }
 
 void LSScreen::changeMode(){
-  _mode = _tempMode;
-
-  /*                  // ************************************************************** TODO: CHANGE THIS <>
-  switch (_mode){
-    case MODE_MOUSE_USB:
-      digitalWrite(PIN_LED_GAMEPAD, LOW);
-      digitalWrite(PIN_LED_MOUSE, HIGH);
-      break;
-    case MODE_MOUSE_BT:
-      digitalWrite(PIN_LED_GAMEPAD, LOW);
-      digitalWrite(PIN_LED_MOUSE, HIGH);
-      break;
-    case MODE_GAMEPAD:
-      digitalWrite(PIN_LED_MOUSE, LOW);
-      digitalWrite(PIN_LED_GAMEPAD, HIGH);
-      break;
+  if (_communicationMode != _tempCommunicationMode){
+    _communicationMode = _tempCommunicationMode;
+    setCommunicationMode(false, false, _tempCommunicationMode); // Sets new communication mode, saves in memory
   }
-  */                  // ************************************************************** TODO: CHANGE THIS ^
-
-  setupDisplay();
-  _display.println("Resetting");
-  _display.println("device");
-  _display.display();
-
-  delay(2000);
   
-  //conduct mode change
-  //save mode into flash
-  //user feedback showing current mode    // ************************************************************** TODO: CHANGE THIS <>
-  
-  //software reset
+  if (_operatingMode != _tempOperatingMode){
+    _operatingMode = _tempOperatingMode;
+    setOperatingMode(false, false, _tempOperatingMode);     // Sets new operating mode, saves in memory, and conducts software reset
+  }
 
-  //remove this for final code, because device will reset
-  //readButtons();                            // ************************************************************** TODO: CHANGE THIS <>
+  softwareReset();    //TODO: is there a way to avoid software reset if just changing com mode? 
+
   _currentMenu = MAIN_MENU;
   mainMenu();
 
-  //software reset
 }
 
 void LSScreen::cursorSpeedMenu(void) { 
   _currentMenu = CURSOR_SP_MENU;
-  _cursorSpeedLevel = getJoystickSpeed(true,false); 
+  _cursorSpeedLevel = getCursorSpeed(true,false); 
   
   _cursorSpMenuText[0] = "Speed: " + String(_cursorSpeedLevel);
   
-  _currentMenuLength = cursorSpMenuLen;
+  _currentMenuLength = _cursorSpMenuLen;
   _currentMenuText = _cursorSpMenuText;
   _cursorStart = 1;
   _currentSelection = 0;
@@ -713,7 +762,7 @@ void LSScreen::cursorSpeedMenu(void) {
 void LSScreen::moreMenu(){
   _currentMenu = MORE_MENU;
 
-  _currentMenuLength = moreMenuLen;
+  _currentMenuLength = _moreMenuLen;
   _currentMenuText = _moreMenuText;
   _cursorStart = 0;
   _currentSelection = 0;
@@ -736,7 +785,7 @@ void LSScreen::centerResetPage(void){
   //Perform cursor center
   setJoystickInitialization(true,false);
 
-  delay(100);
+  delay(1000);
 
   _display.clearDisplay();
   _display.setCursor(0,0);
@@ -759,8 +808,7 @@ void LSScreen::fullCalibrationPage(void){
 
   _display.display();
 
-  //TO DO
-  //Add prompts and add function for calibration // ************************************************************** TODO: CHANGE THIS <>
+  //TODO: Add prompts and add function for calibration // ************************************************************** 
 
   delay(1000);
 
@@ -772,7 +820,7 @@ void LSScreen::fullCalibrationPage(void){
 void LSScreen::soundMenu(){
   _currentMenu = SOUND_MENU;
   
-  if (_soundOn) {
+  if (_soundMode != CONF_SOUND_MODE_OFF) {
     _soundMenuText[1] = "ON";
     _soundMenuText[2] = "Turn off";
   } else {
@@ -780,7 +828,7 @@ void LSScreen::soundMenu(){
     _soundMenuText[2] = "Turn on";
   }
 
-  _currentMenuLength = soundMenuLen;
+  _currentMenuLength = _soundMenuLen;
   _currentMenuText = _soundMenuText;
   _cursorStart = 2;
   _currentSelection = 0;
@@ -791,12 +839,10 @@ void LSScreen::soundMenu(){
 void LSScreen::sipPuffThreshMenu(){
   _currentMenu = SIP_PUFF_MENU;
 
-  _currentMenuLength = sipPuffThreshMenuLen;
+  _currentMenuLength = _sipPuffThreshMenuLen;
   _currentMenuText = _sipPuffThreshMenuText;
   _cursorStart = 0;
   _currentSelection = 0;
-
-  //Add sip/puff  thresh adjustment function // ************************************************************** TODO: CHANGE THIS <>
 
   displayMenu();
 }
@@ -807,7 +853,7 @@ void LSScreen::adjustSipThreshMenu(void) {
   
   _adjustSipThreshMenuText[0] = "Sip: " + String(_sipPressThresh) + " ";
   
-  _currentMenuLength = adjustSipThreshMenuLen;
+  _currentMenuLength = _adjustSipThreshMenuLen;
   _currentMenuText = _adjustSipThreshMenuText;
   _cursorStart = 1;
   _currentSelection = 0;
@@ -822,7 +868,7 @@ void LSScreen::adjustPuffThreshMenu(void) {
   
   _adjustPuffThreshMenuText[0] = "Puff: " + String(_puffPressThresh) + " ";
   
-  _currentMenuLength = adjustPuffThreshMenuLen;
+  _currentMenuLength = _adjustPuffThreshMenuLen;
   _currentMenuText = _adjustPuffThreshMenuText;
   _cursorStart = 1;
   _currentSelection = 0;
