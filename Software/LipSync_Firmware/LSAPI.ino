@@ -58,6 +58,9 @@ _functionList setSipPressureThresholdFunction =   {"ST", "1", "",  &setSipPressu
 _functionList getPuffPressureThresholdFunction =  {"PT", "0", "0", &getPuffPressureThreshold};
 _functionList setPuffPressureThresholdFunction =  {"PT", "1", "",  &setPuffPressureThreshold};
 
+_functionList getSoundModeFunction =              {"SM", "0", "0", &getSoundMode};
+_functionList setSoundModeFunction =              {"SM", "1", "",  &setSoundMode};
+
 _functionList getDebugModeFunction =              {"DM", "0", "0", &getDebugMode};
 _functionList setDebugModeFunction =              {"DM", "1", "",  &setDebugMode};
 _functionList getJoystickValueFunction =          {"JV", "0", "0", &getJoystickValue};
@@ -67,7 +70,7 @@ _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSetting
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[32] = {
+_functionList apiFunction[34] = {
   getModelNumberFunction,
   getVersionNumberFunction,
   getOperatingModeFunction,
@@ -95,6 +98,8 @@ _functionList apiFunction[32] = {
   setJoystickAccelerationFunction,
   getCommunicationModeFunction,
   setCommunicationModeFunction,
+  getSoundModeFunction,
+  setSoundModeFunction,
   getDebugModeFunction,
   setDebugModeFunction,
   softResetFunction,
@@ -1137,7 +1142,7 @@ void setPressureMode(bool responseEnabled, bool apiEnabled, int inputPressureMod
   String commandKey = "PM";
   if ((inputPressureMode >= PRESS_MODE_MIN) && (inputPressureMode <= PRESS_MODE_MAX))
   {
-    comMode = inputPressureMode;
+    //comMode = inputPressureMode;  //TODO: fix
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputPressureMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "PM,1", true, inputPressureMode);
   ps.setPressureMode(inputPressureMode);
@@ -1675,6 +1680,100 @@ void toggleCommunicationMode(bool responseEnabled, bool apiEnabled) {
   setCommunicationMode(responseEnabled, apiEnabled, comMode);
 }
 
+//***GET SOUND MODE STATE FUNCTION***//
+// Function   : getSoundMode
+//
+// Description: This function retrieves the state of sound mode.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : debugState : intol : The current state of sound mode.
+//*********************************//
+int getSoundMode(bool responseEnabled, bool apiEnabled) {
+  String commandKey = "SM";
+  int tempSoundMode;
+  tempSoundMode = mem.readInt(CONF_SETTINGS_FILE, commandKey);
+
+  if ((tempSoundMode < CONF_SOUND_MODE_MIN) || (tempSoundMode > CONF_SOUND_MODE_MAX)) {
+    tempSoundMode = CONF_SOUND_MODE_DEFAULT;
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempSoundMode);
+  }
+
+  //setSoundState(tempSoundMode);   //TODO: add this function and uncomment
+
+  printResponseInt(responseEnabled, apiEnabled, true, 0, "SM,0", true, tempSoundMode);
+
+  return tempSoundMode;
+}
+
+//***GET SOUND MODE STATE API FUNCTION***//
+// Function   : getSoundMode
+//
+// Description: This function is redefinition of main getSoundMode function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void getSoundMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
+    getSoundMode(responseEnabled, apiEnabled);
+  }
+}
+
+//***SET SOUND MODE STATE FUNCTION***//
+// Function   : setSoundMode
+//
+// Description: This function sets the state of sound mode.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               inputDebugStategMode : int : The new debug mode state ( true = ON , false = OFF )
+//
+// Return     : void
+//*********************************//
+void setSoundMode(bool responseEnabled, bool apiEnabled, int inputSoundMode) {
+  String commandKey = "SM";
+
+  if ((inputSoundMode >= CONF_SOUND_MODE_MIN) && (inputSoundMode <= CONF_SOUND_MODE_MAX)) {
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputSoundMode);
+    soundMode = inputSoundMode;
+    buzzer.setSoundModeLevel(inputSoundMode);
+    //setSoundState(inputSoundMode);      //TODO: add this function and uncomment
+    printResponseInt(responseEnabled, apiEnabled, true, 0, "SM,1", true, inputSoundMode);
+
+  }
+  else {
+    printResponseInt(responseEnabled, apiEnabled, false, 3, "SM,1", true, inputSoundMode);
+
+  }
+
+}
+//***SET SOUND MODE STATE API FUNCTION***//
+// Function   : setSoundMode
+//
+// Description: This function is redefinition of main setSoundMode function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void setSoundMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  setSoundMode(responseEnabled, apiEnabled, optionalParameter.toInt());
+}
+
+// *********************************************************************************
 
 //***GET DEBUG MODE STATE FUNCTION***//
 // Function   : getDebugMode
@@ -1793,7 +1892,7 @@ void softReset(bool responseEnabled, bool apiEnabled) {
   // setSipPressureThreshold(false, false, CONF_SIP_THRESHOLD);
   // setPuffPressureThreshold(false, false, CONF_PUFF_THRESHOLD);
   // setJoystickSpeed(false, false, CONF_JOY_SPEED_LEVEL_DEFAULT);  
-  // 
+  // setSoundMode(false, false, CONF_SOUND_MODE_DEFAULT);
 
   // //Clear all LEDs to indicate factory reset process is finished 
   // setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);                           

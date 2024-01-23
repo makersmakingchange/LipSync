@@ -31,7 +31,7 @@ class LSBLEMouse {
     void mouseReport(signed char b, signed char x, signed char y, signed char wheel = 0, signed char pan = 0);
   public:
     inline LSBLEMouse(void);
-    inline void begin(const char* s = "LipSync");
+    inline void begin(const char* s = "LipSync Mouse");
     inline void end(void);
     inline void move(signed char x, signed char y);
     inline void moveAll(signed char x, signed char y, signed char wheel = 0, signed char pan = 0);

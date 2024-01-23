@@ -78,6 +78,7 @@ private:
   int _tempCommunicationMode;
   int _cursorSpeedLevel;
   bool _soundOn = true;
+  int _soundMode;
   
   bool _scrollOn = false;
   long _scrollDelayTimer = millis();
@@ -182,6 +183,7 @@ void LSScreen::begin() {
 
   _operatingMode = getOperatingMode(false, false);
   _communicationMode = getCommunicationMode(false, false);
+  _soundMode = getSoundMode(false, false);
 
 }
 
@@ -412,12 +414,15 @@ void LSScreen::selectMenuItem() {
     case SOUND_MENU:
        switch (_currentSelection){
         case 0:
-          _soundOn = !_soundOn;
           //do function for turning sound on/off
-          if (_soundOn){
+          if (_soundMode == CONF_SOUND_MODE_OFF){
             buzzerSoundOn();
+            _soundMode = CONF_SOUND_MODE_BASIC;
+            setSoundMode(false, false, _soundMode); //TODO: change menu to add Advanced Sound to menu
           } else {
             buzzerSoundOff();
+            _soundMode = CONF_SOUND_MODE_OFF;
+            setSoundMode(false, false, _soundMode);
           }
           soundMenu();
           break;
@@ -815,7 +820,7 @@ void LSScreen::fullCalibrationPage(void){
 void LSScreen::soundMenu(){
   _currentMenu = SOUND_MENU;
   
-  if (_soundOn) {
+  if (_soundMode != CONF_SOUND_MODE_OFF) {
     _soundMenuText[1] = "ON";
     _soundMenuText[2] = "Turn off";
   } else {
