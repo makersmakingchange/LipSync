@@ -206,6 +206,7 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
         analogWrite(LED_RED, 255 - r);
         analogWrite(LED_GREEN, 255 - g);
         analogWrite(LED_BLUE, 255 - b);
+        break;
       }
 
       case CONF_LED_ALL:

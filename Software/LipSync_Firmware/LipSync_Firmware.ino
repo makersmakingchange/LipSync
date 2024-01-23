@@ -1871,7 +1871,7 @@ void setLedDefault(){
   led.clearLedAll();
   if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected())       
   { //Set micro LED to blue if it's in BLE MODE
-    //led.setLedColor(CONF_BT_LED_NUMBER, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
+    led.setLedColor(CONF_BT_LED_NUMBER, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
   }
         //TODO: uncomment this, troubleshooting
 }
