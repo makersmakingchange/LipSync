@@ -961,13 +961,13 @@ void performOutputAction(int action)
     case CONF_ACTION_DEC_SPEED:
     {
       //Decrease cursor speed
-      decreaseJoystickSpeed(true,false);
+      decreaseCursorSpeed(true,false);
       break;
     }
     case CONF_ACTION_INC_SPEED:
     {
       //Increase cursor speed
-      increaseJoystickSpeed(true,false);
+      increaseCursorSpeed(true,false);
       break;
     }
     case CONF_ACTION_CHANGE_MODE:
@@ -1279,7 +1279,7 @@ void initJoystick()
   js.begin();                                                               //Begin joystick 
   js.setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_INVERSE);       //Set x and y magnet direction 
   getJoystickDeadZone(true,false);                                          //Get joystick deadzone stored in flash memory 
-  getJoystickSpeed(true,false);                                             //Get joystick cursor speed stored in flash memory 
+  getCursorSpeed(true,false);                                             //Get joystick cursor speed stored in flash memory 
   scrollLevel = getScrollLevel(true,false);                                 //Get scroll level stored in flash memory 
   setJoystickInitialization(true,false);                                    //Perform joystick center initialization
   getJoystickCalibration(true,false);                                       //Get joystick calibration points stored in flash memory 

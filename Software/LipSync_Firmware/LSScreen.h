@@ -378,16 +378,16 @@ void LSScreen::selectMenuItem() {
     case CURSOR_SP_MENU:
       switch (_currentSelection){
         case 0:       //Increase
-          increaseJoystickSpeed(true,false);
-          _cursorSpeedLevel = getJoystickSpeed(true,false);  
+          increaseCursorSpeed(true,false);
+          _cursorSpeedLevel = getCursorSpeed(true,false);  
           _cursorSpMenuText[0] = "Speed: " + String(_cursorSpeedLevel) + " ";
           _display.setCursor(0,0);
           _display.print(_cursorSpMenuText[0]);
           _display.display();
           break;
         case 1:       //Decrease
-          decreaseJoystickSpeed(true,false);
-          _cursorSpeedLevel = getJoystickSpeed(true,false);  
+          decreaseCursorSpeed(true,false);
+          _cursorSpeedLevel = getCursorSpeed(true,false);  
           _cursorSpMenuText[0] = "Speed: " + String(_cursorSpeedLevel) + " ";
           _display.setCursor(0,0);
           _display.print(_cursorSpMenuText[0]);
@@ -746,7 +746,7 @@ void LSScreen::changeMode(){
 
 void LSScreen::cursorSpeedMenu(void) { 
   _currentMenu = CURSOR_SP_MENU;
-  _cursorSpeedLevel = getJoystickSpeed(true,false); 
+  _cursorSpeedLevel = getCursorSpeed(true,false); 
   
   _cursorSpMenuText[0] = "Speed: " + String(_cursorSpeedLevel);
   

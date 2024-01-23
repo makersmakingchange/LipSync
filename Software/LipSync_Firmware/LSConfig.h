@@ -117,8 +117,8 @@
 
 
 //Joystick values 
-#define CONF_JOY_SPEED_LEVEL_MIN 0
-#define CONF_JOY_SPEED_LEVEL_MAX 10
+#define CONF_JOY_CURSOR_SPEED_LEVEL_MIN 0
+#define CONF_JOY_CURSOR_SPEED_LEVEL_MAX 10
 
 //Communication mode values 
 #define CONF_COM_MODE_NONE 0 
@@ -206,7 +206,7 @@
 #define CONF_JOY_INIT_READING_NUMBER 5
 
 //Joystick cursor speed change and related LED feedback settings 
-#define CONF_JOY_SPEED_LEVEL_DEFAULT 5
+#define CONF_JOY_CURSOR_SPEED_LEVEL_DEFAULT 5
 #define CONF_JOY_SPEED_CHANGE_LED_DELAY 150
 #define CONF_JOY_SPEED_CHANGE_LED_BLINK 1
 #define CONF_JOY_SPEED_DEC_LED_NUMBER 1
