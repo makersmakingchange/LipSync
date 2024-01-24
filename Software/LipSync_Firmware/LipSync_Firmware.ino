@@ -405,6 +405,21 @@ void clearSplashScreen()
   
 }
 
+//***SHOW CENTER RESET COMPLETE PAGE SCREEN FUNCTION***//
+// Function   : showCenterResetComplete
+// 
+// Description: This function shows the center reset complete page
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void showCenterResetComplete()
+{
+  //Show center reset complete page once center reset is done
+  screen.centerResetCompletePage();
+}
+
 
 //***SCREEN LOOP FUNCTION***//
 // Function   : screenLoop 
