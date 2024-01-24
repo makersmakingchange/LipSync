@@ -458,7 +458,7 @@ void initBuzzer()
 { 
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Buzzer");  }
   buzzer.begin();
-  buzzer.startup();         // TODO: make sure the startup sound happens after calibration is complete
+  //buzzer.startup();         // moved to be called in center calibration function to ensure it happens after center calibration is complete
 }
 
 //***BUZZER LOOP FUNCTION***//
@@ -1337,6 +1337,8 @@ void performJoystickCenter(int* args)
     calibTimer.deleteTimer(0);                                                     //Delete timer
     setLedDefault();                                                               //Set default led feedback 
     canOutputAction = true;
+    if (buzzer.playStartupSound){buzzer.startup();}                             // Checks variable to only play sound on startup
+    if (screen.showCenterResetComplete){screen.centerResetCompletePage();}      // Checks variable so center reset complete page only shows if accessed from menu, not on startup or during full calibration
   }
 
 }

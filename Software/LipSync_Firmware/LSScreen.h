@@ -162,6 +162,8 @@ public:
   void deactivateMenu();
   void centerResetCompletePage();
   void fullCalibrationPrompt(int stepNum);
+
+  bool showCenterResetComplete = false;
 };
 
 
@@ -786,13 +788,14 @@ void LSScreen::centerResetPage(void){
   _display.display();
 
   //Perform cursor center
+  showCenterResetComplete = true;
   setJoystickInitialization(true,false);
-
-  screenStateTimerId = screenStateTimer.setTimeout(3000, showCenterResetComplete);
   
 }
 
 void LSScreen::centerResetCompletePage(void){
+  showCenterResetComplete = false;
+    
   _display.clearDisplay();
   _display.setCursor(0,0);
   _display.println("Center");
@@ -813,7 +816,7 @@ void LSScreen::fullCalibrationPage(void){
   _display.println("on screen");
   _display.println("prompts");
 
-  //Options:
+  //Options:                          //TODO: confirm above text and remove other options
   //"Get ready to calibrate"
   //"Follow on screen prompts"
   //"Move joystick to described corner"
@@ -823,10 +826,6 @@ void LSScreen::fullCalibrationPage(void){
   _display.display();
 
   setJoystickCalibration(false,false);
-
-  //delay(1000);
-
-  //mainMenu();
 }
 
 void LSScreen::fullCalibrationPrompt(int stepNum){
