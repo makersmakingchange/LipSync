@@ -107,7 +107,6 @@ private:
   void cursorSpeedMenu();
   void bluetoothMenu();
   void moreMenu();
-  void centerResetPage();
   void fullCalibrationPage();
   void centerReset();
   void soundMenu();
@@ -160,6 +159,11 @@ public:
   bool isMenuActive();
   void activateMenu();
   void deactivateMenu();
+  void centerResetPage();
+  void centerResetCompletePage();
+  void fullCalibrationPrompt(int stepNum);
+
+  bool showCenterResetComplete = false;
 };
 
 
@@ -507,6 +511,7 @@ void LSScreen::selectMenuItem() {
 
 void LSScreen::setupDisplay() {
   _display.clearDisplay();
+  _scrollOn = false;
 
   _display.setTextSize(2);                                   // 2x scale text
   _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
@@ -595,7 +600,6 @@ void LSScreen::nextSelection() {
 */
 
 void LSScreen::scrollLongText() {
-  Serial.println("scroll function");
   int minPos = -12 * _selectedText.length();
   
   _display.setTextSize(2);                                   // 2x scale text
@@ -603,7 +607,6 @@ void LSScreen::scrollLongText() {
   _display.setTextWrap(false);
   
   if (millis() - _scrollDelayTimer >= SCROLL_DELAY_MILLIS){
-    Serial.println("Timer good");
     _scrollDelayTimer = millis();
     
     //Clear previous text by writing over it with blank text
@@ -784,10 +787,14 @@ void LSScreen::centerResetPage(void){
   _display.display();
 
   //Perform cursor center
+  showCenterResetComplete = true;
   setJoystickInitialization(true,false);
+  
+}
 
-  delay(1000);
-
+void LSScreen::centerResetCompletePage(void){
+  showCenterResetComplete = false;
+    
   _display.clearDisplay();
   _display.setCursor(0,0);
   _display.println("Center");
@@ -798,22 +805,74 @@ void LSScreen::centerResetPage(void){
 
   delay(2000);
 
-  mainMenu();
-  
+  if (is_active){
+    mainMenu();
+  } else{
+    deactivateMenu();
+  }
 }
 
 void LSScreen::fullCalibrationPage(void){
+  setupDisplay();
 
-  _display.println("Full");
-  _display.println("Calibration");
+  _display.println("Follow");
+  _display.println("on screen");
+  _display.println("prompts");
+
+  //Options:                          //TODO: confirm above text and remove other options
+  //"Get ready to calibrate"
+  //"Follow on screen prompts"
+  //"Move joystick to described corner"
+  //"Follow prompts to move joystick"
+  //"Move joystick as described"
 
   _display.display();
 
-  //TODO: Add prompts and add function for calibration // ************************************************************** 
+  setJoystickCalibration(false,false);
+}
 
-  delay(1000);
+void LSScreen::fullCalibrationPrompt(int stepNum){
+  setupDisplay();
 
-  mainMenu();
+  switch (stepNum){
+    case 1: // Corner 1
+      _display.println("Hold");
+      _display.println("joystick");
+      _display.println("top left");
+      break;
+    case 2: // Corner 2
+      _display.println("Hold");
+      _display.println("joystick");      
+      _display.println("top right");
+      break;
+    case 3: // Corner 3
+      _display.println("Hold");
+      _display.println("joystick"); 
+      _display.println("bottom");
+      _display.println("right");
+      break;
+    case 4: // Corner 4
+      _display.println("Hold");
+      _display.println("joystick"); 
+      _display.println("bottom");
+      _display.println("left");
+      break;
+    case 5: // Center
+      _display.println("Release,");
+      _display.println("do not");
+      _display.println("move");
+      _display.println("joystick");
+      break;
+    case 6: // Complete
+      _display.println("Joystick");
+      _display.println("calibrated");
+      
+      delay(1000);
+      mainMenu();
+      break;
+  }
+
+  _display.display();
 }
 
 // ----- MORE SETTINGS MENUS ----- //
