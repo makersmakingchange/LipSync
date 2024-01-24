@@ -161,6 +161,7 @@ public:
   void activateMenu();
   void deactivateMenu();
   void centerResetCompletePage();
+  void fullCalibrationPrompt(int stepNum);
 };
 
 
@@ -806,17 +807,58 @@ void LSScreen::centerResetCompletePage(void){
 }
 
 void LSScreen::fullCalibrationPage(void){
-
+  setupDisplay();
   _display.println("Full");
   _display.println("Calibration");
 
   _display.display();
 
   //TODO: Add prompts and add function for calibration // ************************************************************** 
+  setJoystickCalibration(false,false);
 
-  delay(1000);
+  //delay(1000);
 
-  mainMenu();
+  //mainMenu();
+}
+
+void LSScreen::fullCalibrationPrompt(int stepNum){
+  setupDisplay();
+
+  switch (stepNum){
+    case 1: // Corner 1
+      _display.println("Hold");
+      _display.println("top left");
+      break;
+    case 2: // Corner 2
+      _display.println("Hold");
+      _display.println("top right");
+      break;
+    case 3: // Corner 3
+      _display.println("Hold");
+      _display.println("bottom");
+      _display.println("right");
+      break;
+    case 4: // Corner 4
+      _display.println("Hold");
+      _display.println("bottom");
+      _display.println("left");
+      break;
+    case 5: // Center
+      _display.println("Release,");
+      _display.println("do not");
+      _display.println("move");
+      _display.println("joystick");
+      break;
+    case 6: // Complete
+      _display.println("Calibration");
+      _display.println("complete");
+      
+      delay(1000);
+      mainMenu();
+      break;
+  }
+
+  _display.display();
 }
 
 // ----- MORE SETTINGS MENUS ----- //
