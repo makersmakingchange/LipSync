@@ -43,6 +43,8 @@ int debugMode;                                                                  
                                                                                                             // 3 = Buttons debug mode is On
                                                                                                             // 4 = Switch debug mode is On
                                                                                                             // 5 = Sip & Puff state debug mode is On
+int soundMode;                                                                                              // 0 = None, 1 = Basic, 2 = Advanced
+
 //Bluetooth connection variables
 bool btIsConnected = false;
 
@@ -85,12 +87,12 @@ inputStateStruct buttonState, switchState;
 const inputActionStruct switchActionProperty[]{
     {INPUT_MAIN_STATE_NONE,         CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,      CONF_ACTION_NOTHING,            0,0},
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_LEFT_CLICK,     CONF_ACTION_B1_PRESS,     CONF_ACTION_NEXT_MENU_ITEM,     0,3000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_B2_PRESS,     CONF_ACTION_NOTHING,            0,3000},
-    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_B3_PRESS,     CONF_ACTION_SELECT_MENU_ITEM,   0,3000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_B5_PRESS,     CONF_ACTION_NOTHING,            0,3000},
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_RIGHT_CLICK,    CONF_ACTION_B2_PRESS,     CONF_ACTION_SELECT_MENU_ITEM,   0,3000},
     {INPUT_MAIN_STATE_S13_PRESSED,  CONF_ACTION_START_MENU,     CONF_ACTION_START_MENU,   CONF_ACTION_STOP_MENU,          0,3000},
-    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,           CONF_ACTION_B4_PRESS,     CONF_ACTION_NOTHING,            3000,5000},
-    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CHANGE_MODE,    CONF_ACTION_B5_PRESS,     CONF_ACTION_NOTHING,            3000,5000}, //Might change
-    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_SCROLL,         CONF_ACTION_B6_PRESS,     CONF_ACTION_NOTHING,            3000,5000},
+    {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_DRAG,           CONF_ACTION_B3_PRESS,     CONF_ACTION_NOTHING,            3000,5000},
+    {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CHANGE_MODE,    CONF_ACTION_B6_PRESS,     CONF_ACTION_NOTHING,            3000,5000}, //Might change
+    {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_SCROLL,         CONF_ACTION_B4_PRESS,     CONF_ACTION_NOTHING,            3000,5000},
     {INPUT_MAIN_STATE_S1_PRESSED,   CONF_ACTION_START_MENU,     CONF_ACTION_START_MENU,   CONF_ACTION_STOP_MENU,          5000,10000},   
     {INPUT_MAIN_STATE_S2_PRESSED,   CONF_ACTION_CURSOR_CENTER,  CONF_ACTION_CURSOR_CENTER,CONF_ACTION_NOTHING,            5000,10000},
     {INPUT_MAIN_STATE_S3_PRESSED,   CONF_ACTION_MIDDLE_CLICK,   CONF_ACTION_NOTHING,      CONF_ACTION_NOTHING,            5000,10000},
@@ -212,10 +214,8 @@ void setup()
 {
 
   Serial.begin(115200);
-  while (!Serial) { delay(1); }  // Wait until serial port is opened
-  delay(2000);
-
-  initMemory();                                                 //Initialize Memory 
+  //while (!Serial) { delay(1); }  // Wait until serial port is opened
+  //delay(2000);
 
   initLed();                                                   //Initialize LED Feedback 
   ledWaitFeedback();
@@ -223,8 +223,6 @@ void setup()
   initMemory();                                                 //Initialize Memory 
 
   beginComOpMode();                                             //Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
-
-  delay(4000);
   
   //initOperatingMode();                                          //Initialize Operating Mode
 
@@ -254,8 +252,6 @@ void setup()
 
   startupFeedback();                                            //Startup LED Feedback 
 
-  delay(500);
-
   //Configure poll timer to perform each feature as a separate loop
   pollTimerId[CONF_TIMER_JOYSTICK]  = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, 0, joystickLoop);
   pollTimerId[CONF_TIMER_PRESSURE]  = pollTimer.setInterval(CONF_PRESSURE_POLL_RATE, 0, pressureLoop);
@@ -268,7 +264,7 @@ void setup()
   enablePoll(true);
   ledActionEnabled = true;  
 
-  if (USB_DEBUG) { Serial.println("End setup");} 
+  //if (USB_DEBUG) { Serial.println("End setup");} 
   
 } //end setup
 
@@ -285,16 +281,16 @@ void setup()
 void loop()
 {
   ledStateTimer.run();                                // Timer for lights
-  
+
   calibTimer.run();                                   // Timer for calibration measurements
 
   actionTimer.run();
-  
+
   pollTimer.run();                                    // Timer for normal joystick functions
 
   settingsEnabled=serialSettings(settingsEnabled); //Check to see if setting option is enabled in Lipsync
 
-  if (USB_DEBUG) { Serial.println("Loop");} 
+  //if (USB_DEBUG) { Serial.print("Loop"); Serial.println(millis());} 
 }
 
 //***ENABLE POLL FUNCTION***//
@@ -378,7 +374,7 @@ void initScreen()
   screen.splashScreen();                                            //Show splash screen
 }
 
-//***CLEAR SCREEN FUNCTION***//
+//***CLEAR MENU SCREEN FUNCTION***//
 // Function   : closeMenu
 // 
 // Description: This function closes the menu and clears the screen
@@ -390,6 +386,24 @@ void initScreen()
 void closeMenu()
 {
   screen.deactivateMenu();
+}
+
+//***CLEAR SPLASH SCREEN FUNCTION***//
+// Function   : clearSplashScreen
+// 
+// Description: This function clears the splash screen
+//
+// Parameters : void
+// 
+// Return     : void 
+//****************************************//
+void clearSplashScreen()
+{
+  //Check if menu is active, only turn off screen if menu is not open
+  if (!screen.isMenuActive()){
+    screen.deactivateMenu();
+  }
+  
 }
 
 
@@ -667,7 +681,9 @@ void inputLoop()
   evaluateOutputAction(buttonState, buttonActionMaxTime, buttonActionSize, buttonActionProperty);
   evaluateOutputAction(switchState, switchActionMaxTime, switchActionSize, switchActionProperty);
 
+
   if (USB_DEBUG) { Serial.println("USBDEBUG: End of inputLoop");  } 
+
 }
 
 //*********************************//
@@ -720,7 +736,7 @@ unsigned long getActionMaxTime(int actionSize,const inputActionStruct actionProp
 }
 
 //***PRESSURE LOOP FUNCTION***//
-// Function   : inputLoop 
+// Function   : pressureLoop 
 // 
 // Description: This function handles pressure polling, sip and puff state evaluation.
 //
@@ -798,8 +814,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       //Set Led color to default 
       setLedDefault();      
   }
-
-
+  
   // Code to switch between joystick controlled scroll and joystick controlled cursor movement
   if(outputAction == CONF_ACTION_SCROLL){
     pollTimer.enable(CONF_TIMER_SCROLL);
@@ -810,7 +825,6 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
     pollTimer.disable(CONF_TIMER_SCROLL);
   }
 
-
   //Loop over all possible outputs
   for (int actionIndex = 0; actionIndex < actionSize && canEvaluateAction && canOutputAction; actionIndex++)
   {
@@ -820,7 +834,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       actionState.elapsedTime >= actionProperty[actionIndex].inputActionStartTime &&
       actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime)
     {
-      //Get action index                                                                       
+      //Get action index                                                                     
       if (screen.isMenuActive()){                                                             
         tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
       } else {
@@ -950,13 +964,13 @@ void performOutputAction(int action)
     case CONF_ACTION_DEC_SPEED:
     {
       //Decrease cursor speed
-      decreaseJoystickSpeed(true,false);
+      decreaseCursorSpeed(true,false);
       break;
     }
     case CONF_ACTION_INC_SPEED:
     {
       //Increase cursor speed
-      increaseJoystickSpeed(true,false);
+      increaseCursorSpeed(true,false);
       break;
     }
     case CONF_ACTION_CHANGE_MODE:
@@ -1268,7 +1282,7 @@ void initJoystick()
   js.begin();                                                               //Begin joystick 
   js.setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_INVERSE);       //Set x and y magnet direction 
   getJoystickDeadZone(true,false);                                          //Get joystick deadzone stored in flash memory 
-  getJoystickSpeed(true,false);                                             //Get joystick cursor speed stored in flash memory 
+  getCursorSpeed(true,false);                                             //Get joystick cursor speed stored in flash memory 
   scrollLevel = getScrollLevel(true,false);                                 //Get scroll level stored in flash memory 
   setJoystickInitialization(true,false);                                    //Perform joystick center initialization
   getJoystickCalibration(true,false);                                       //Get joystick calibration points stored in flash memory 
@@ -1360,7 +1374,7 @@ void performJoystickCalibration(int* args)
 
   if (stepNumber == 0)  //STEP 0: Calibration started
   {
-    pollTimer.disable(0);                                                                                             //Disable joystick data polling 
+    pollTimer.disable(CONF_TIMER_JOYSTICK);                                                                                             //Disable joystick data polling 
     setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_START_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
     performLedAction(ledCurrentState);   
     ++stepNumber;
@@ -1411,9 +1425,9 @@ void performJoystickCalibrationStep(int* args)
   String stepCommand = "CA,"+String(stepNumber);                                                       //Command to output calibration point via serial
   pointFloatType maxPoint;
 
-  //Turn on and set the all leds to orange to indicate start of the process 
+  //Turn on and set all leds to orange to indicate start of the process //TODO Jake update to non-neopixel LEDS
   if(calibTimer.getNumRuns(0)==1){                                                                    //Turn Led's ON when timer is running for first time
-    setLedState(LED_ACTION_ON, CONF_JOY_CALIB_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);
+    setLedState(LED_ACTION_ON, CONF_JOY_CALIB_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, 0, 0, CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);   
   }
   
@@ -1445,7 +1459,9 @@ void joystickLoop()
   pointIntType joyOutPoint = js.getXYOut();                           //Read the filtered values
 
   performJoystick(joyOutPoint);                                       //Perform joystick move action
-  if (USB_DEBUG) { Serial.println("USBDEBUG: End of joystickLoop");  } 
+
+  //if (USB_DEBUG) { Serial.println("USBDEBUG: End of joystickLoop");  } 
+
 }
 
 //***PERFORM JOYSTICK FUNCTION***//
@@ -1874,11 +1890,13 @@ void blinkLed(ledStateStruct* args)
 //****************************************//
 void setLedDefault(){
   //Clear if it's in USB MODE
+  
   led.clearLedAll();
-  if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected())
+  if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected())       
   { //Set micro LED to blue if it's in BLE MODE
     led.setLedColor(CONF_BT_LED_NUMBER, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
   }
+       
 }
 
 //***BLUETOOTH SCAN AND LED FEEDBACK LOOP FUNCTION***//
@@ -1964,6 +1982,7 @@ void performLedAction(ledStateStruct* args)
 // Return     : none
 //******************************************//
 void softwareReset() {
+  releaseOutputAction();
   usbmouse.end();
   gamepad.end();
   btmouse.end();

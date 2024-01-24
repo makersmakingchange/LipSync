@@ -78,6 +78,7 @@ private:
   int _tempCommunicationMode;
   int _cursorSpeedLevel;
   bool _soundOn = true;
+  int _soundMode;
   
   bool _scrollOn = false;
   long _scrollDelayTimer = millis();
@@ -182,6 +183,7 @@ void LSScreen::begin() {
 
   _operatingMode = getOperatingMode(false, false);
   _communicationMode = getCommunicationMode(false, false);
+  _soundMode = getSoundMode(false, false);
 
 }
 
@@ -236,20 +238,6 @@ void LSScreen::splashScreen() {
   _display.println("Makers Making Change");
   _display.display();
 
-/*
-  switch (_operatingMode){
-    case CONF_OPERATING_MODE_MOUSE:
-      _display.println("Mode: USB Mouse");
-      break;
-    case CONF_OPERATING_MODE_BTMOUSE:
-      _display.println("Mode: BT Mouse");  
-      break;
-    case CONF_OPERATING_MODE_GAMEPAD:
-      _display.println("Mode: USB Gamepad");
-      break;
-  }
-  */
-
   _display.println("Mode: ");
 
   _display.setTextSize(2);
@@ -274,7 +262,7 @@ void LSScreen::splashScreen() {
   
   _display.display();
 
-  screenStateTimerId = screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, closeMenu);
+  screenStateTimerId = screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
 
 }
 
@@ -390,16 +378,16 @@ void LSScreen::selectMenuItem() {
     case CURSOR_SP_MENU:
       switch (_currentSelection){
         case 0:       //Increase
-          increaseJoystickSpeed(true,false);
-          _cursorSpeedLevel = getJoystickSpeed(true,false);  
+          increaseCursorSpeed(true,false);
+          _cursorSpeedLevel = getCursorSpeed(true,false);  
           _cursorSpMenuText[0] = "Speed: " + String(_cursorSpeedLevel) + " ";
           _display.setCursor(0,0);
           _display.print(_cursorSpMenuText[0]);
           _display.display();
           break;
         case 1:       //Decrease
-          decreaseJoystickSpeed(true,false);
-          _cursorSpeedLevel = getJoystickSpeed(true,false);  
+          decreaseCursorSpeed(true,false);
+          _cursorSpeedLevel = getCursorSpeed(true,false);  
           _cursorSpMenuText[0] = "Speed: " + String(_cursorSpeedLevel) + " ";
           _display.setCursor(0,0);
           _display.print(_cursorSpMenuText[0]);
@@ -426,12 +414,15 @@ void LSScreen::selectMenuItem() {
     case SOUND_MENU:
        switch (_currentSelection){
         case 0:
-          _soundOn = !_soundOn;
           //do function for turning sound on/off
-          if (_soundOn){
+          if (_soundMode == CONF_SOUND_MODE_OFF){
             buzzerSoundOn();
+            _soundMode = CONF_SOUND_MODE_BASIC;
+            setSoundMode(false, false, _soundMode); //TODO: change menu to add Advanced Sound to menu
           } else {
             buzzerSoundOff();
+            _soundMode = CONF_SOUND_MODE_OFF;
+            setSoundMode(false, false, _soundMode);
           }
           soundMenu();
           break;
@@ -746,8 +737,8 @@ void LSScreen::changeMode(){
     setOperatingMode(false, false, _tempOperatingMode);     // Sets new operating mode, saves in memory, and conducts software reset
   }
 
-  //setupDisplay();
-  //_display.display();
+
+  softwareReset();    //TODO: is there a way to avoid software reset if just changing com mode? 
 
   _currentMenu = MAIN_MENU;
   mainMenu();
@@ -756,7 +747,7 @@ void LSScreen::changeMode(){
 
 void LSScreen::cursorSpeedMenu(void) { 
   _currentMenu = CURSOR_SP_MENU;
-  _cursorSpeedLevel = getJoystickSpeed(true,false); 
+  _cursorSpeedLevel = getCursorSpeed(true,false); 
   
   _cursorSpMenuText[0] = "Speed: " + String(_cursorSpeedLevel);
   
@@ -795,7 +786,7 @@ void LSScreen::centerResetPage(void){
   //Perform cursor center
   setJoystickInitialization(true,false);
 
-  delay(100);
+  delay(1000);
 
   _display.clearDisplay();
   _display.setCursor(0,0);
@@ -830,7 +821,7 @@ void LSScreen::fullCalibrationPage(void){
 void LSScreen::soundMenu(){
   _currentMenu = SOUND_MENU;
   
-  if (_soundOn) {
+  if (_soundMode != CONF_SOUND_MODE_OFF) {
     _soundMenuText[1] = "ON";
     _soundMenuText[2] = "Turn off";
   } else {
