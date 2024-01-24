@@ -959,7 +959,8 @@ void performOutputAction(int action)
     case CONF_ACTION_CURSOR_CENTER:
     {
       //Perform cursor center
-      setJoystickInitialization(true,false);
+      screen.centerResetPage();
+      //setJoystickInitialization(true,false);
       break;
     }
     case CONF_ACTION_CURSOR_CALIBRATION:

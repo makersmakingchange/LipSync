@@ -42,8 +42,8 @@ _functionList getJoystickDeadZoneFunction =       {"DZ", "0", "0", &getJoystickD
 _functionList setJoystickDeadZoneFunction =       {"DZ", "1", "",  &setJoystickDeadZone};
 
 
-_functionList getCursorSpeedFunction =          {"SS", "0", "0", &getCursorSpeed};
-_functionList setCursorSpeedFunction =          {"SS", "1", "",  &setCursorSpeed};
+_functionList getCursorSpeedFunction =            {"SS", "0", "0", &getCursorSpeed};
+_functionList setCursorSpeedFunction =            {"SS", "1", "",  &setCursorSpeed};
 _functionList getScrollLevelFunction =            {"SL", "0", "0", &getScrollLevel};
 _functionList setScrollLevelFunction =            {"SL", "1", "",  &setScrollLevel};
 _functionList getJoystickAccelerationFunction =   {"AV", "0", "0", &getJoystickAcceleration};

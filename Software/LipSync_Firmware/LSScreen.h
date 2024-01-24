@@ -107,7 +107,6 @@ private:
   void cursorSpeedMenu();
   void bluetoothMenu();
   void moreMenu();
-  void centerResetPage();
   void fullCalibrationPage();
   void centerReset();
   void soundMenu();
@@ -160,6 +159,7 @@ public:
   bool isMenuActive();
   void activateMenu();
   void deactivateMenu();
+  void centerResetPage();
   void centerResetCompletePage();
   void fullCalibrationPrompt(int stepNum);
 
@@ -806,7 +806,11 @@ void LSScreen::centerResetCompletePage(void){
 
   delay(2000);
 
-  mainMenu();
+  if (is_active){
+    mainMenu();
+  } else{
+    deactivateMenu();
+  }
 }
 
 void LSScreen::fullCalibrationPage(void){
