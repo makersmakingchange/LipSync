@@ -65,12 +65,13 @@ _functionList getDebugModeFunction =              {"DM", "0", "0", &getDebugMode
 _functionList setDebugModeFunction =              {"DM", "1", "",  &setDebugMode};
 _functionList getJoystickValueFunction =          {"JV", "0", "0", &getJoystickValue};
 
+_functionList runTestFunction =                   {"RT", "1", "",  &runTest};
 _functionList softResetFunction =                 {"SR", "1", "1", &softReset};
 _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSettings};
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[34] = {
+_functionList apiFunction[35] = {
   getModelNumberFunction,
   getVersionNumberFunction,
   getOperatingModeFunction,
@@ -102,6 +103,7 @@ _functionList apiFunction[34] = {
   setSoundModeFunction,
   getDebugModeFunction,
   setDebugModeFunction,
+  runTestFunction,
   softResetFunction,
   resetSettingsFunction,
   factoryResetFunction
@@ -1825,7 +1827,7 @@ void getDebugMode(bool responseEnabled, bool apiEnabled, String optionalParamete
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               inputDebugStategMode : int : The new debug mode state ( true = ON , false = OFF )
+//               inputDebugStateMode : int : The new debug mode state ( true = ON , false = OFF )
 //
 // Return     : void
 //*********************************//
@@ -1859,6 +1861,50 @@ void setDebugMode(bool responseEnabled, bool apiEnabled, int inputDebugMode) {
 // Return     : void
 void setDebugMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   setDebugMode(responseEnabled, apiEnabled, optionalParameter.toInt());
+}
+
+//***RUN TEST FUNCTION***//
+// Function   : runTest
+//
+// Description: This function activates an internal test.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               intputTest : int : The id of test to run.
+//
+// Return     : void
+//*********************************//
+void runTest(bool responseEnabled, bool apiEnabled, int inputTest) {
+  String commandKey = "RT";
+
+  if ((inputTest >= CONF_TEST_MODE_MIN) && (inputTest <= CONF_TEST_MODE_MAX)) {
+    
+    printResponseInt(responseEnabled, apiEnabled, true, 0, "RT,1", true, inputTest);
+    activateTest(inputTest); //run the test
+
+  }
+  else { // error message
+    printResponseInt(responseEnabled, apiEnabled, false, 3, "RT,1", true, inputTest);
+
+  }
+
+}
+//***RUN TEST API FUNCTION***//
+// Function   : runTest
+//
+// Description: This function is redefinition of main runTest function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void runTest(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  runTest(responseEnabled, apiEnabled, optionalParameter.toInt());
 }
 
 //***SOFT RESET FUNCTION***//

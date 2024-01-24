@@ -39,8 +39,8 @@
 #define CONF_SWITCH_NUMBER 3
 
 //Output LEDS
-#define CONF_LED_LEFT_PIN 8                 // left
-#define CONF_LED_MIDDLE_PIN 7               // middle
+#define CONF_LED_LEFT_PIN 7                 // left
+#define CONF_LED_MIDDLE_PIN 8               // middle
 #define CONF_LED_RIGHT_PIN 6                // right
 
 //Onboard LEDs
@@ -150,6 +150,12 @@
                                           // 3 = Buttons debug mode is On
                                           // 4 = Switch debug mode is On
                                           // 5 = Sip & Puff state debug mode is On
+
+
+// Internal Test
+#define CONF_TEST_MODE_MIN 1
+#define CONF_TEST_MODE_MAX 1
+#define CONF_TEST_MODE_LED 1
 
 // Operating Mode Values
 #define CONF_OPERATING_MODE_NONE 0

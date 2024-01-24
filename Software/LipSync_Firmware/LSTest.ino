@@ -17,6 +17,12 @@
 */
 
 
+// To add tests:
+// 1. Create the CONF_TEST_MODE_{name} in LSConfig.h
+// 2. Increment the CONF_TEST_MODE_MAX number
+// 3. Add the switch case to the activateTest function
+// 4. Implement the test below.
+
 //***ACTIVATE TEST FUNCTION***//
 // Function   : activateTest
 // 
@@ -44,34 +50,30 @@ void activateTest(int inputTest) {
 
 void testLED() {
 
-  //setLedColor(int ledNumber, int ledColorNumber, int ledBrightness) {
+  //setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
   
   Serial.println("LED TEST ACTIVATED");
-  Serial.println("TEST LED: All LED OFF");
+  Serial.println("TEST_MODE_LED: All LED OFF");
   led.clearLedAll();
   delay(1000);
   
-  Serial.println("TEST LED: Left LED");
+  Serial.println("TEST_MODE_LED: Left LED ON");
   led.clearLedAll();
   led.setLedColor(CONF_LED_LEFT, LED_CLR_RED, CONF_LED_BRIGHTNESS);
-  //performLedAction(ledStateStruct);
   delay(1000);
 
-  Serial.println("TEST LED: Middle LED");
+  Serial.println("TEST_MODE_LED: Middle LED ON");
   led.clearLedAll();
   led.setLedColor(CONF_LED_MIDDLE, LED_CLR_RED, CONF_LED_BRIGHTNESS);
-  //performLedAction(ledStateStruct);
   delay(1000);
 
 
-  Serial.println("TEST LED: Right LED");
-  led.setLedColor(CONF_LED_MIDDLE, LED_CLR_RED, CONF_LED_BRIGHTNESS);
+  Serial.println("TEST_MODE_LED: Right LED ON");
   led.clearLedAll();
-  //performLedAction(ledStateStruct);
+  led.setLedColor(CONF_LED_RIGHT, LED_CLR_RED, CONF_LED_BRIGHTNESS);
   delay(1000);
 
-  Serial.println("TEST LED: ALL LED OFF"));
+  Serial.println("TEST_MODE_LED: ALL LED OFF");
   led.clearLedAll();
-  //setLedDefault();
-  
+    
 }

@@ -42,12 +42,10 @@
 #define LED_ACTION_OFF 1
 #define LED_ACTION_ON 2
 #define LED_ACTION_BLINK 3
+#define LED_ACTION_BLINKFAST 4
 
 #define LED_STATE_OFF 0
 #define LED_STATE_ON 1
-
-//Adafruit_NeoPixel ledPixels = Adafruit_NeoPixel(OUTPUT_RGB_LED_NUM, OUTPUT_RGB_LED_PIN, NEO_GRB + NEO_KHZ800);
-
 
 struct rgbStruct {
   int r;  // red value 0 to 255
@@ -80,7 +78,7 @@ const colorStruct colorProperty[]{
 
 class LSOutput {
 private:
-  int ledBrightness;
+  int ledBrightness = 255;
 
 public:
   LSOutput();
@@ -126,6 +124,8 @@ void LSOutput::clearLedAll() { // turn off all LEDs
   digitalWrite(CONF_LED_MIDDLE_PIN, LOW);
   digitalWrite(CONF_LED_RIGHT_PIN, LOW);
 
+  
+  // Turn off micro leds
   digitalWrite(LED_RED, HIGH);
   digitalWrite(LED_GREEN, HIGH);
   digitalWrite(LED_BLUE, HIGH);
@@ -162,10 +162,8 @@ uint8_t LSOutput::getLedBrightness() {
 
 void LSOutput::setLedBrightness(int ledBrightness) {
   _LedBrightness = ledBrightness;
-  show();
+  //show();
 
-  // ledPixels.setBrightness(ledBrightness);
-  // ledPixels.show();
 }
 
 
@@ -181,18 +179,18 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
     case CONF_LED_LEFT:
       {
         if (r > 0 || g > 0 || b > 0) {
-          analogWrite(CONF_LED_LEFT_PIN, _LedBrightness);
+          // analogWrite(CONF_LED_LEFT_PIN, ledBrightness);
+          digitalWrite(CONF_LED_LEFT_PIN, HIGH);
         } else {
           digitalWrite(CONF_LED_LEFT_PIN, LOW);
         }
-
-
         break;
       }
     case CONF_LED_MIDDLE:
       {
         if (r > 0 || g > 0 || b > 0) {
-          analogWrite(CONF_LED_MIDDLE_PIN, _LedBrightness);
+          // analogWrite(CONF_LED_MIDDLE_PIN, ledBrightness); //TODO JAKE 2024-Jan-24 Test is analog write is not working properly.
+          digitalWrite(CONF_LED_MIDDLE_PIN, HIGH);
         } else {
           digitalWrite(CONF_LED_MIDDLE_PIN, LOW);
         }
@@ -201,7 +199,8 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
     case CONF_LED_RIGHT:
       {
         if (r > 0 || g > 0 || b > 0) {
-          analogWrite(CONF_LED_RIGHT_PIN, _LedBrightness);
+          // analogWrite(CONF_LED_RIGHT_PIN, ledBrightness);
+          digitalWrite(CONF_LED_RIGHT_PIN, HIGH);
         } else {
           digitalWrite(CONF_LED_RIGHT_PIN, LOW);
         }
@@ -216,11 +215,13 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
       }
 
       case CONF_LED_ALL:
+      {
        setLedColor(CONF_LED_LEFT,ledColorNumber,ledBrightness);
        setLedColor(CONF_LED_MIDDLE,ledColorNumber,ledBrightness);
        setLedColor(CONF_LED_RIGHT,ledColorNumber,ledBrightness);
        setLedColor(CONF_LED_MICRO,ledColorNumber,ledBrightness);
        break;
+      }
 
   }  //end switch
 

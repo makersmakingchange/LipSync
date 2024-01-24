@@ -55,16 +55,26 @@ bool ledActionEnabled = false;
 // ledOutputActionNumber, ledNumber, ledStartColor, ledEndColor, ledEndAction
 const ledActionStruct ledActionProperty[]{
     {CONF_ACTION_NOTHING,            CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE}, 
-    {CONF_ACTION_LEFT_CLICK,         CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_RED,    LED_ACTION_NONE},
-    {CONF_ACTION_RIGHT_CLICK,        CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_RED,    LED_ACTION_NONE},
-    {CONF_ACTION_DRAG,               CONF_LED_LEFT,     LED_CLR_RED,    LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_SCROLL,             CONF_LED_RIGHT,    LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_NONE},
+    {CONF_ACTION_LEFT_CLICK,         CONF_LED_LEFT,     LED_CLR_RED,    LED_CLR_NONE,   LED_ACTION_ON},
+    {CONF_ACTION_RIGHT_CLICK,        CONF_LED_RIGHT,    LED_CLR_RED,    LED_CLR_NONE,   LED_ACTION_ON},
+    {CONF_ACTION_DRAG,               CONF_LED_LEFT,     LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_ON},
+    {CONF_ACTION_SCROLL,             CONF_LED_RIGHT,    LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_ON},
+    {CONF_ACTION_B1_PRESS,           CONF_LED_LEFT,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE}, 
+    {CONF_ACTION_B2_PRESS,           CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE}, 
+    {CONF_ACTION_B3_PRESS,           CONF_LED_RIGHT,    LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE}, 
+    {CONF_ACTION_B4_PRESS,           CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE}, 
+    {CONF_ACTION_B5_PRESS,           CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE}, 
+    {CONF_ACTION_B6_PRESS,           CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE}, 
     {CONF_ACTION_CURSOR_CENTER,      CONF_LED_MICRO,    LED_CLR_PURPLE, LED_CLR_ORANGE, LED_ACTION_NONE},
     {CONF_ACTION_CURSOR_CALIBRATION, CONF_LED_MICRO,    LED_CLR_GREEN,  LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_MIDDLE_CLICK,       CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_DEC_SPEED,          CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
-    {CONF_ACTION_INC_SPEED,          CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_MIDDLE_CLICK,       CONF_LED_MIDDLE,   LED_CLR_RED,    LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_DEC_SPEED,          CONF_LED_LEFT,     LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_BLINK},
+    {CONF_ACTION_INC_SPEED,          CONF_LED_RIGHT,    LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_BLINK},
     {CONF_ACTION_CHANGE_MODE,        CONF_LED_NONE,     LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_NONE},
+    {CONF_ACTION_START_MENU,         CONF_LED_LEFT,     LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_ON},
+    {CONF_ACTION_STOP_MENU,          CONF_LED_ALL,      LED_CLR_NONE,   LED_CLR_NONE,   LED_ACTION_OFF},
+    {CONF_ACTION_NEXT_MENU_ITEM,     CONF_LED_LEFT,     LED_CLR_RED,    LED_CLR_NONE,   LED_ACTION_BLINK},
+    {CONF_ACTION_SELECT_MENU_ITEM,   CONF_LED_RIGHT,    LED_CLR_RED,    LED_CLR_NONE,   LED_ACTION_BLINK},
     {CONF_ACTION_RESET,              CONF_LED_MICRO,    LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_NONE},
     {CONF_ACTION_FACTORY_RESET,      CONF_LED_MICRO,    LED_CLR_RED,    LED_CLR_RED,    LED_ACTION_NONE}
 };
@@ -290,7 +300,7 @@ void loop()
 
   settingsEnabled=serialSettings(settingsEnabled); //Check to see if setting option is enabled in Lipsync
 
-  //if (USB_DEBUG) { Serial.print("Loop"); Serial.println(millis());} 
+  if (USB_DEBUG) { Serial.print("Loop"); Serial.println(millis());} 
 }
 
 //***ENABLE POLL FUNCTION***//
@@ -335,7 +345,7 @@ void enablePoll(bool isEnabled){
 void initMemory()
 {
   mem.begin();                                                      //Begin memory 
-  //mem.format();                                                   //DON'T UNCOMMENT
+  //mem.format();                                                   //DON'T UNCOMMENT - use a factory reset through the serial if need to wipe memory (FR,1:1)
   mem.initialize(CONF_SETTINGS_FILE, CONF_SETTINGS_JSON);           //Initialize flash memory to store settings 
 }
 
@@ -1968,6 +1978,13 @@ void performLedAction(ledStateStruct* args)
       blinkLed(args);
       break;
     }
+    /*
+    case LED_ACTION_BLINKFAST:
+    {
+      blinkLedFast(args);
+      break;
+    }
+    */
   }
 }
 
