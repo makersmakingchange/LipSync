@@ -160,6 +160,7 @@ public:
   bool isMenuActive();
   void activateMenu();
   void deactivateMenu();
+  void centerResetCompletePage();
 };
 
 
@@ -507,6 +508,7 @@ void LSScreen::selectMenuItem() {
 
 void LSScreen::setupDisplay() {
   _display.clearDisplay();
+  _scrollOn = false;
 
   _display.setTextSize(2);                                   // 2x scale text
   _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
@@ -785,8 +787,11 @@ void LSScreen::centerResetPage(void){
   //Perform cursor center
   setJoystickInitialization(true,false);
 
-  delay(1000);
+  screenStateTimerId = screenStateTimer.setTimeout(3000, showCenterResetComplete);
+  
+}
 
+void LSScreen::centerResetCompletePage(void){
   _display.clearDisplay();
   _display.setCursor(0,0);
   _display.println("Center");
@@ -798,7 +803,6 @@ void LSScreen::centerResetPage(void){
   delay(2000);
 
   mainMenu();
-  
 }
 
 void LSScreen::fullCalibrationPage(void){
