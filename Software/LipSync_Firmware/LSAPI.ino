@@ -1599,10 +1599,6 @@ void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommun
     printResponseInt(responseEnabled, apiEnabled, true, 0, "CM,1", true, inputCommunicationMode);
 
     //TODO: move this?
-<<<<<<< HEAD
-=======
-    /*
->>>>>>> v4.0
     releaseOutputAction();
     switch(comMode){
       case CONF_COM_MODE_USB:       // USB Mouse
@@ -1614,10 +1610,6 @@ void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommun
         btmouse.begin();
         break;
     }
-<<<<<<< HEAD
-=======
-    */
->>>>>>> v4.0
 
   }
   else {
@@ -1882,8 +1874,6 @@ void setDebugMode(bool responseEnabled, bool apiEnabled, String optionalParamete
 // Return     : void
 //***************************//
 void softReset(bool responseEnabled, bool apiEnabled) {
-
-  //TODO: Jake 2024-01-24 Add some sort of visual feedback for soft reset.
 
   printResponseInt(responseEnabled, apiEnabled, true, 0, "SR,1", true, 1);
   softwareReset();
