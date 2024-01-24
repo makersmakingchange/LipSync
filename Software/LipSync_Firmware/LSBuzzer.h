@@ -126,6 +126,8 @@ class LSBuzzer {
     void disable();
     void setSoundModeLevel(int inputSoundMode);
 
+    bool playStartupSound = true;
+
 };
 
 LSBuzzer::LSBuzzer() {
@@ -163,6 +165,7 @@ void LSBuzzer::startup(){
     delay(500);                             // TODO: add timer instead of delay
     tone(CONF_BUZZER_PIN, NOTE_C6, 500);
   }
+  playStartupSound = false;
 }
 
 #endif

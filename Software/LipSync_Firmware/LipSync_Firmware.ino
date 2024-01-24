@@ -458,7 +458,7 @@ void initBuzzer()
 { 
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Buzzer");  }
   buzzer.begin();
-  buzzer.startup();         // TODO: make sure the startup sound happens after calibration is complete
+  //buzzer.startup();         // moved to be called in center calibration function to ensure it happens after center calibration is complete
 }
 
 //***BUZZER LOOP FUNCTION***//
@@ -1337,6 +1337,8 @@ void performJoystickCenter(int* args)
     calibTimer.deleteTimer(0);                                                     //Delete timer
     setLedDefault();                                                               //Set default led feedback 
     canOutputAction = true;
+    if (buzzer.playStartupSound){buzzer.startup();}                             // Checks variable to only play sound on startup
+    if (screen.showCenterResetComplete){screen.centerResetCompletePage();}      // Checks variable so center reset complete page only shows if accessed from menu, not on startup or during full calibration
   }
 
 }
@@ -1394,6 +1396,7 @@ void performJoystickCalibration(int* args)
   }
   else if (stepNumber < 5) //STEP 1-4: Joystick Calibration Corner Points 
   {
+    screen.fullCalibrationPrompt(stepNumber);
     setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_STEP_BLINK_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
     performLedAction(ledCurrentState);                                                                  // LED Feedback to show start of performJoystickCalibrationStep
     js.zeroInputMax(stepNumber);                                                                        //Clear the existing calibration value 
@@ -1404,6 +1407,7 @@ void performJoystickCalibration(int* args)
   } 
   else if (stepNumber == 5) //STEP 5 : Joystick center point initialization
   {
+    screen.fullCalibrationPrompt(stepNumber);
     setJoystickInitialization(false, false); 
     ++stepNumber; 
     calibTimerId[0] = calibTimer.setTimeout(nextStepStart, performJoystickCalibration, (int *)stepNumber);                      //Start next step  
@@ -1417,7 +1421,7 @@ void performJoystickCalibration(int* args)
     canOutputAction = true;
     pollTimer.enable(CONF_TIMER_JOYSTICK);                                                                                      //Enable joystick data polling 
     pollTimer.enable(CONF_TIMER_SCROLL);                                                                                        //Enable joystick data polling 
-
+    screen.fullCalibrationPrompt(stepNumber);
   }
 
 }

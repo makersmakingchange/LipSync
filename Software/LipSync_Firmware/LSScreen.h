@@ -161,6 +161,9 @@ public:
   void activateMenu();
   void deactivateMenu();
   void centerResetCompletePage();
+  void fullCalibrationPrompt(int stepNum);
+
+  bool showCenterResetComplete = false;
 };
 
 
@@ -785,13 +788,14 @@ void LSScreen::centerResetPage(void){
   _display.display();
 
   //Perform cursor center
+  showCenterResetComplete = true;
   setJoystickInitialization(true,false);
-
-  screenStateTimerId = screenStateTimer.setTimeout(3000, showCenterResetComplete);
   
 }
 
 void LSScreen::centerResetCompletePage(void){
+  showCenterResetComplete = false;
+    
   _display.clearDisplay();
   _display.setCursor(0,0);
   _display.println("Center");
@@ -806,17 +810,66 @@ void LSScreen::centerResetCompletePage(void){
 }
 
 void LSScreen::fullCalibrationPage(void){
+  setupDisplay();
 
-  _display.println("Full");
-  _display.println("Calibration");
+  _display.println("Follow");
+  _display.println("on screen");
+  _display.println("prompts");
+
+  //Options:                          //TODO: confirm above text and remove other options
+  //"Get ready to calibrate"
+  //"Follow on screen prompts"
+  //"Move joystick to described corner"
+  //"Follow prompts to move joystick"
+  //"Move joystick as described"
 
   _display.display();
 
-  //TODO: Add prompts and add function for calibration // ************************************************************** 
+  setJoystickCalibration(false,false);
+}
 
-  delay(1000);
+void LSScreen::fullCalibrationPrompt(int stepNum){
+  setupDisplay();
 
-  mainMenu();
+  switch (stepNum){
+    case 1: // Corner 1
+      _display.println("Hold");
+      _display.println("joystick");
+      _display.println("top left");
+      break;
+    case 2: // Corner 2
+      _display.println("Hold");
+      _display.println("joystick");      
+      _display.println("top right");
+      break;
+    case 3: // Corner 3
+      _display.println("Hold");
+      _display.println("joystick"); 
+      _display.println("bottom");
+      _display.println("right");
+      break;
+    case 4: // Corner 4
+      _display.println("Hold");
+      _display.println("joystick"); 
+      _display.println("bottom");
+      _display.println("left");
+      break;
+    case 5: // Center
+      _display.println("Release,");
+      _display.println("do not");
+      _display.println("move");
+      _display.println("joystick");
+      break;
+    case 6: // Complete
+      _display.println("Joystick");
+      _display.println("calibrated");
+      
+      delay(1000);
+      mainMenu();
+      break;
+  }
+
+  _display.display();
 }
 
 // ----- MORE SETTINGS MENUS ----- //
