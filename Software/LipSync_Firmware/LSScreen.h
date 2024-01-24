@@ -600,7 +600,6 @@ void LSScreen::nextSelection() {
 */
 
 void LSScreen::scrollLongText() {
-  Serial.println("scroll function");
   int minPos = -12 * _selectedText.length();
   
   _display.setTextSize(2);                                   // 2x scale text
@@ -608,7 +607,6 @@ void LSScreen::scrollLongText() {
   _display.setTextWrap(false);
   
   if (millis() - _scrollDelayTimer >= SCROLL_DELAY_MILLIS){
-    Serial.println("Timer good");
     _scrollDelayTimer = millis();
     
     //Clear previous text by writing over it with blank text
