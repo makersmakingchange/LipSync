@@ -25,23 +25,21 @@
 
 //***ACTIVATE TEST FUNCTION***//
 // Function   : activateTest
-// 
+//
 // Description: This function activates different tests
 //
 // Parameters : inputTest : int : The id of the test to activate
-// 
-// Return     : void 
+//
+// Return     : void
 //****************************************//
 void activateTest(int inputTest) {
 
-  switch(inputTest){
-    case(CONF_TEST_MODE_LED):
+  switch (inputTest) {
+    case (CONF_TEST_MODE_LED):
       testLED();
       break;
-
   }
   Serial.println("Test Complete");
-
 }
 
 
@@ -51,12 +49,12 @@ void activateTest(int inputTest) {
 void testLED() {
 
   //setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
-  
+
   Serial.println("LED TEST ACTIVATED");
   Serial.println("TEST_MODE_LED: All LED OFF");
   led.clearLedAll();
   delay(1000);
-  
+
   Serial.println("TEST_MODE_LED: Left LED ON");
   led.clearLedAll();
   led.setLedColor(CONF_LED_LEFT, LED_CLR_RED, CONF_LED_BRIGHTNESS);
@@ -75,5 +73,34 @@ void testLED() {
 
   Serial.println("TEST_MODE_LED: ALL LED OFF");
   led.clearLedAll();
-    
+
+
+  Serial.println("TEST_MODE_LED: Micro LED Blue");
+  led.clearLedAll();
+  led.setLedColor(CONF_LED_MICRO, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
+  delay(1000);
+
+  Serial.println("TEST_MODE_LED: Micro LED Purple");
+  led.clearLedAll();
+  led.setLedColor(CONF_LED_MICRO, LED_CLR_PURPLE, CONF_LED_BRIGHTNESS);
+  delay(1000);
+
+  Serial.println("TEST_MODE_LED: Micro LED Red");
+  led.clearLedAll();
+  led.setLedColor(CONF_LED_MICRO, LED_CLR_RED, CONF_LED_BRIGHTNESS);
+  delay(1000);
+
+  Serial.println("TEST_MODE_LED: Micro LED Orange");
+  led.clearLedAll();
+  led.setLedColor(CONF_LED_MICRO, LED_CLR_ORANGE, CONF_LED_BRIGHTNESS);
+  delay(1000);
+
+  Serial.println("TEST_MODE_LED: Micro LED Yellow");
+  led.clearLedAll();
+  led.setLedColor(CONF_LED_MICRO, LED_CLR_YELLOW, CONF_LED_BRIGHTNESS);
+  delay(1000);
+
+  Serial.println("TEST_MODE_LED: ALL LED OFF");
+  led.clearLedAll();
+  setLedDefault(); // set LEDs to default
 }
