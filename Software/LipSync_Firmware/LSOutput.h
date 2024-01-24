@@ -61,6 +61,7 @@ typedef struct {
 } colorStruct;
 
 //Color properties
+/*
 const colorStruct colorProperty[]{
   { LED_CLR_NONE, "None", { 0, 0, 0 } },
   { LED_CLR_BLUE, "Blue", { 0, 0, 60 } },
@@ -74,11 +75,23 @@ const colorStruct colorProperty[]{
   { LED_CLR_TEAL, "Teal", { 0, 128, 128 } },
   { LED_CLR_WHITE, "White", { 255, 255, 255 } }
 };
+*/
+
+//Color properties - IBM COLORBLIND FRIENDLY PALETTE
+const colorStruct colorProperty[]{
+  { LED_CLR_NONE,   "None",     {   0,   0,   0 } },
+  { LED_CLR_BLUE,   "Blue",     { 100, 143, 255 } },
+  { LED_CLR_PURPLE, "Purple",   {  50,   0, 128 } },
+  { LED_CLR_RED,    "Red",      { 220,  38, 127 } },
+  { LED_CLR_ORANGE, "Orange",   { 254,  97,   0 } },
+  { LED_CLR_YELLOW, "Yellow",   { 255, 176,   0 } },
+  { LED_CLR_WHITE,  "White",    { 255, 255, 255 } }
+};
 
 
 class LSOutput {
 private:
-  int ledBrightness = 255;
+  int ledBrightness = 255; //TODO Jake 2024-01-24. This currently doesn't do anything without Neopixels
 
 public:
   LSOutput();
