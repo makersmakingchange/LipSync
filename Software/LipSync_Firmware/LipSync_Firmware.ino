@@ -1647,8 +1647,6 @@ void ledBtScanEffect() {
   }
 }
 
-
-
 //***TURN ALL LEDS OFF FUNCTION***//
 // Function   : turnLedAllOff
 //
@@ -1684,10 +1682,10 @@ void turnLedOff(ledStateStruct* args) {
 //
 // Return     : void
 //****************************************//
-//void turnLedOn(ledStateStruct* args)
-//{
-//  led.setLedColor(args->ledNumber, args->ledColorNumber, args->ledBrightness);
-//}
+void turnLedOn(ledStateStruct* args)
+{
+  led.setLedColor(args->ledNumber, args->ledColorNumber, args->ledBrightness);
+}
 
 
 //***BLINK LED FUNCTION***//
@@ -1786,12 +1784,12 @@ void performLedAction(ledStateStruct* args) {
       }
     case LED_ACTION_OFF:
       {
-        //turnLedOff(args);
+        turnLedOff(args);
         break;
       }
     case LED_ACTION_ON:
       {
-        //turnLedOn(args);
+        turnLedOn(args);
         break;
       }
     case LED_ACTION_BLINK:
