@@ -94,9 +94,10 @@ private:
   float _sipPressThresh;
   float _puffPressThresh;
 
-  //void setupDisplay();
-  //void displayMenu();
-  //void displayCursor();
+  void displayMenu();
+  void displayCursor();
+  void scrollLongText();
+  void drawCentreString(const String &buf, int y);
 
   void mainMenu();
   void exitConfirmMenu();
@@ -145,15 +146,11 @@ public:
   void update();
   void clear();
   void show();
-  //void startupScreen();
-  //void nextSelection();
-  void scrollLongText();
 
   void setupDisplay();
-  void displayMenu();
-  void displayCursor();
-      
   void splashScreen();
+  void splashScreen2();
+
   void nextMenuItem();
   void selectMenuItem();
   bool isMenuActive();
@@ -234,15 +231,39 @@ return is_active;
 //*********************************//
 void LSScreen::splashScreen() {
   setupDisplay();
-  
-  _display.println("LipSync");
+
+  _display.setTextSize(2);
+  drawCentreString("LipSync", 12);
 
   _display.setTextSize(1);
-  _display.println("v4.0.1");
-  _display.println("Makers Making Change");
+  drawCentreString("v4.0.1", 32);
+  drawCentreString("Makers Making Change", 54);
+
   _display.display();
 
-  _display.println("Mode: ");
+  //screenStateTimerId = screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
+
+}
+
+//*********************************//
+// Function   : splashScreen2
+// 
+// Description: Displays a screen indicating it is ready to use (center reset complete) and indicating the mode.
+//              
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSScreen::splashScreen2() {
+  setupDisplay();
+
+  _display.setTextSize(2);
+  drawCentreString("Ready to", 0);
+  drawCentreString("use", 16);
+  _display.setTextSize(1);
+  drawCentreString("Mode:", 40);
+  _display.setTextSize(2);
+  
 
   _display.setTextSize(2);
 
@@ -250,22 +271,23 @@ void LSScreen::splashScreen() {
     case CONF_OPERATING_MODE_MOUSE:
       switch(_communicationMode){
         case CONF_COM_MODE_USB:
-          _display.println("USB Mouse");
+          drawCentreString("USB Mouse", 48);
           break;
         case CONF_COM_MODE_BLE:
-          _display.println("BT Mouse");
+          drawCentreString("BT Mouse", 48);
           break;
       }
       break;
     case CONF_OPERATING_MODE_GAMEPAD:
-      _display.print("USB"); _display.setTextSize(1); _display.print(" "); _display.setTextSize(2); _display.print("Gamepad"); // text size changed for space so it would all fit on one line
+      //_display.print("USB"); _display.setTextSize(1); _display.print(" "); _display.setTextSize(2); _display.print("Gamepad"); // text size changed for space so it would all fit on one line
+      drawCentreString("Gamepad", 48);
       break;
     default:
-      _display.print("OP:"); _display.print(_operatingMode);
+      _display.println("Error");
   }
   
   _display.display();
-
+  
   screenStateTimerId = screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
 
 }
@@ -627,6 +649,16 @@ void LSScreen::scrollLongText() {
     if (_scrollPos < minPos) _scrollPos = _display.width();
   }
   
+}
+
+void LSScreen::drawCentreString(const String &buf, int y)
+{
+    int16_t x1, y1;
+    uint16_t w, h;
+    int x = 64;
+    _display.getTextBounds(buf, x, y, &x1, &y1, &w, &h); //calc width of new string
+    _display.setCursor(x - w / 2, y);
+    _display.print(buf);
 }
 
 //********** MENUS **********//
