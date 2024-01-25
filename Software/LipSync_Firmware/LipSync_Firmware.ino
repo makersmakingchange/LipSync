@@ -91,6 +91,7 @@ pressureStruct pressureValues = { 0.0, 0.0, 0.0 };
 
 int outputAction;
 bool canOutputAction = true;
+bool startupCenterReset = true;
 
 bool settingsEnabled = false;  //Serial input settings command mode enabled or disabled
 
@@ -1183,8 +1184,12 @@ void performJoystickCenter(int* args) {
     calibTimer.deleteTimer(0);  //Delete timer
     setLedDefault();            //Set default led feedback
     canOutputAction = true;
-    if (buzzer.playStartupSound){buzzer.startup();}                             // Checks variable to only play sound on startup
+    if (startupCenterReset){    // Checks variable to only play sound and show splash screen on startup
+      buzzer.startup();
+      screen.splashScreen2();
+    }                             
     if (screen.showCenterResetComplete){screen.centerResetCompletePage();}      // Checks variable so center reset complete page only shows if accessed from menu, not on startup or during full calibration
+    startupCenterReset = false;
   }
 }
 
