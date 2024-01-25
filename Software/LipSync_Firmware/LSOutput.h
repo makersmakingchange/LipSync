@@ -69,7 +69,8 @@ const colorStruct colorProperty[]{
 
 class LSOutput {
 private:
-  int ledBrightness = 255; //TODO Jake 2024-01-24. This currently doesn't do anything without Neopixels
+  int _ledBrightness = 255; //TODO Jake 2024-01-24. This currently doesn't do anything without Neopixels
+  int _lightModeLevel = 1;  
 
 public:
   LSOutput();
@@ -81,9 +82,9 @@ public:
   void setLedBrightness(int ledBrightness);
   void setLedColor(int ledNumber, int ledColorNumber, int ledBrightness);
   void show();
+  void setLightModeLevel(int lightModeLevel);
+  int getLightModeLevel();
 
-private:
-  uint8_t _LedBrightness = 255;
 };
 
 
@@ -143,7 +144,7 @@ uint32_t LSOutput::getLedColor(int ledNumber) {
 //***GET RGB LED BRIGHTNESS FUNCTION***//
 
 uint8_t LSOutput::getLedBrightness() {
-  return _LedBrightness;
+  return _ledBrightness;
   //  return (ledPixels.getBrightness());
 }
 
@@ -152,9 +153,29 @@ uint8_t LSOutput::getLedBrightness() {
 //***SET RGB LED BRIGHTNESS FUNCTION***//
 
 void LSOutput::setLedBrightness(int ledBrightness) {
-  _LedBrightness = ledBrightness;
+  _ledBrightness = ledBrightness;
   //show();
 
+}
+
+
+void LSOutput::setLightModeLevel(int lightModeLevel)
+{
+  _lightModeLevel = lightModeLevel;
+}
+
+//*********************************//
+// Function   : getLightModeLevel
+// 
+// Description: Return Light Mode Level
+//              
+// Arguments :  void
+// 
+// Return     : int _lightModeLevel : 
+//*********************************//
+int LSOutput::getLightModeLevel(void)
+{
+  return _lightModeLevel;
 }
 
 
@@ -166,10 +187,13 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
   int g = colorProperty[ledColorNumber].colorCode.g;
   int b = colorProperty[ledColorNumber].colorCode.b;
 
+  bool someLight = (r > 0 || g > 0 || b > 0);
+
   switch (ledNumber) {
     case CONF_LED_LEFT:
       {
-        if (r > 0 || g > 0 || b > 0) {
+        if (someLight && _lightModeLevel > 0) 
+        {
           // analogWrite(CONF_LED_LEFT_PIN, ledBrightness);
           digitalWrite(CONF_LED_LEFT_PIN, HIGH);
         } else {
@@ -179,7 +203,8 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
       }
     case CONF_LED_MIDDLE:
       {
-        if (r > 0 || g > 0 || b > 0) {
+        if (someLight && _lightModeLevel > 0) 
+        {
           // analogWrite(CONF_LED_MIDDLE_PIN, ledBrightness); //TODO JAKE 2024-Jan-24 Test is analog write is not working properly.
           digitalWrite(CONF_LED_MIDDLE_PIN, HIGH);
         } else {
@@ -189,7 +214,8 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
       }
     case CONF_LED_RIGHT:
       {
-        if (r > 0 || g > 0 || b > 0) {
+        if (someLight && _lightModeLevel > 0) 
+        {
           // analogWrite(CONF_LED_RIGHT_PIN, ledBrightness);
           digitalWrite(CONF_LED_RIGHT_PIN, HIGH);
         } else {
