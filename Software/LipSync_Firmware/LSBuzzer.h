@@ -125,7 +125,8 @@ class LSBuzzer {
     void enable();
     void disable();
     void setSoundModeLevel(int inputSoundMode);
-
+    void calibCornerTone();
+    void calibCenterTone();
 };
 
 LSBuzzer::LSBuzzer() {
@@ -162,6 +163,18 @@ void LSBuzzer::startup(){
     tone(CONF_BUZZER_PIN, NOTE_F5, 500);
     delay(500);                             // TODO: add timer instead of delay
     tone(CONF_BUZZER_PIN, NOTE_C6, 500);
+  }
+}
+
+void LSBuzzer::calibCornerTone(){
+  if (_buzzerOn && (_soundModeLevel != CONF_SOUND_MODE_OFF)){
+    tone(CONF_BUZZER_PIN, NOTE_A4, 300);
+  }
+}
+
+void LSBuzzer::calibCenterTone(){
+  if (_buzzerOn && (_soundModeLevel != CONF_SOUND_MODE_OFF)){
+    tone(CONF_BUZZER_PIN, NOTE_A6, 500);
   }
 }
 

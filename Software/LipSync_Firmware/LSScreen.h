@@ -260,6 +260,7 @@ void LSScreen::update() {
 //*********************************//
 void LSScreen::activateMenu() {
   is_active = true;
+  _operatingMode = getOperatingMode(false, false);
   mainMenu();
 }
 
@@ -353,7 +354,7 @@ void LSScreen::splashScreen2() {
       }
       break;
     case CONF_OPERATING_MODE_GAMEPAD:
-      _display.setCursor(0, 48);
+      _display.setCursor(1, 48);
       _display.print("USB"); _display.setTextSize(1); _display.print(" "); _display.setTextSize(2); _display.print("Gamepad"); // text size changed for space so it would all fit on one line
       //_display.print("USB"); _display.setTextSize(1); _display.print(" "); _display.setTextSize(2); _display.print("Gamepad"); // text size changed for space so it would all fit on one line
       //drawCentreString("Gamepad", 48);
