@@ -101,8 +101,6 @@ bool settingsEnabled = false;  //Serial input settings command mode enabled or d
 //Create instances of classes
 LSMemory mem; // Starts an instance of LSMemory for managing flash memory.
 
-
-
 LSJoystick js;  //Starts an instance of the LSJoystick object
 
 LSPressure ps;  //Starts an instance of the LSPressure object
@@ -116,7 +114,6 @@ LSBuzzer buzzer;  //Create an instance of the LSBuzzer Object
 LSUSBMouse usbmouse;   //Starts an instance of the USB mouse object
 LSBLEMouse btmouse;    //Starts an instance of the BLE mouse object
 LSUSBGamepad gamepad;  //Create an instance of the USB gamepad object
-
 
 
 //***MICROCONTROLLER AND PERIPHERAL CONFIGURATION***//
@@ -153,6 +150,8 @@ void setup() {
     Serial.println(operatingMode);
   }
 
+  initScreen();  //Initialize screen
+
   initSipAndPuff();  //Initialize Sip And Puff
 
   initInput();  //Initialize input buttons and input switches
@@ -162,8 +161,6 @@ void setup() {
   initAcceleration();  //Initialize Cursor Acceleration
 
   initBuzzer();  //Initialize Buzzer
-
-  initScreen();  //Initialize screen
 
   initDebug();  //Initialize Debug Mode operation
 
@@ -881,7 +878,7 @@ void performOutputAction(int action) {
       }
     case CONF_ACTION_B1_PRESS:
       {
-        Serial.println("Button 1 press");
+        if (USB_DEBUG) { Serial.println("GAMEPAD: Button 1 Press"); }
         gamepadButtonPress(1);
         break;
       }
@@ -922,14 +919,14 @@ void performOutputAction(int action) {
       }
     case CONF_ACTION_NEXT_MENU_ITEM:
       {
-        // Move to next menu item
-        screen.nextMenuItem();
+        
+        screen.nextMenuItem();// Move to next menu item
         break;
       }
     case CONF_ACTION_SELECT_MENU_ITEM:
       {
-        // Move to next menu item
-        screen.selectMenuItem();
+        
+        screen.selectMenuItem(); // Move to next menu item
         break;
       }
     case CONF_ACTION_RESET:
@@ -1528,8 +1525,8 @@ void ledWaitFeedback() {
   performLedAction(ledCurrentState);
 }
 
-//***LED WAIT FEEDBACK FUNCTION***//
-// Function   : ledWaitFeedback
+//***LED READY FEEDBACK FUNCTION***//
+// Function   : ledReadyFeedback
 //
 // Description: This function sets the LEDS to cue the user to wait for initialization.
 //
@@ -1800,8 +1797,8 @@ void performLedAction(ledStateStruct* args) {
         blinkLed(args);
         break;
       }
-      /*
-    case LED_ACTION_BLINKFAST:
+      
+   /* case LED_ACTION_BLINKFAST:
     {
       blinkLedFast(args);
       break;
