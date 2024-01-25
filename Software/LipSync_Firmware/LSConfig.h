@@ -2,10 +2,10 @@
 * File: LSConfig.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: Beta (11 December 2023) 
+* Version: v4.0pr (26 January 2024)
   License: GPL v3.0 or later
 
-  Copyright (C) 2023 Neil Squire Society
+  Copyright (C) 2024 Neil Squire Society
   This program is free software: you can redistribute it and/or modify it under the terms of
   the GNU General Public License as published by the Free Software Foundation,
   either version 3 of the License, or (at your option) any later version.
@@ -47,6 +47,33 @@
 #define CONF_LED_MICRO_GREEN LED_GREEN      // Xiao NRF52840 User LED Green
 #define CONF_LED_MICRO_BLUE LED_BLUE        // Xiao NRF52840 User LED Blue
 
+//Output Buzzer
+#define CONF_BUZZER_PIN 10
+
+// Operating Mode Values
+#define CONF_OPERATING_MODE_NONE 0
+#define CONF_OPERATING_MODE_MOUSE 1
+#define CONF_OPERATING_MODE_GAMEPAD 2
+
+
+#define CONF_OPERATING_MODE_MIN 0
+#define CONF_OPERATING_MODE_MAX 2
+
+#define CONF_OPERATING_MODE_DEFAULT 1 // Default mode = Mouse
+                                          // 0 = Operating Mode null
+                                          // 1 = Mouse
+                                          // 2 = Gamepad  
+
+//Communication mode values 
+#define CONF_COM_MODE_NONE 0 
+#define CONF_COM_MODE_USB  1
+#define CONF_COM_MODE_BLE  2
+
+#define CONF_COM_MODE_MIN 0
+#define CONF_COM_MODE_MAX 2
+
+#define CONF_COM_MODE_DEFAULT CONF_COM_MODE_USB
+
 
 #define CONF_LED_NONE 0
 #define CONF_LED_LEFT 1
@@ -79,12 +106,10 @@
 #define LED_STATE_OFF 0
 #define LED_STATE_ON 1
 
-//Output Buzzer
-#define CONF_BUZZER_PIN 10
+
 
 // Display
 #define CONF_DISPLAY_ENABLED false
-
 
 // Button Input States
 #define INPUT_MAIN_STATE_NONE           0
@@ -156,15 +181,7 @@
 #define CONF_JOY_CURSOR_SPEED_LEVEL_MIN 0
 #define CONF_JOY_CURSOR_SPEED_LEVEL_MAX 10
 
-//Communication mode values 
-#define CONF_COM_MODE_NONE 0 
-#define CONF_COM_MODE_USB  1
-#define CONF_COM_MODE_BLE  2
 
-#define CONF_COM_MODE_MIN 0
-#define CONF_COM_MODE_MAX 2
-
-#define CONF_COM_MODE_DEFAULT CONF_COM_MODE_USB
 
 //Debug mode values 
 #define CONF_DEBUG_MODE_NONE      0 
@@ -191,20 +208,6 @@
 #define CONF_TEST_MODE_MIN 1
 #define CONF_TEST_MODE_MAX 1
 #define CONF_TEST_MODE_LED 1
-
-// Operating Mode Values
-#define CONF_OPERATING_MODE_NONE 0
-#define CONF_OPERATING_MODE_MOUSE 1
-#define CONF_OPERATING_MODE_GAMEPAD 2
-
-
-#define CONF_OPERATING_MODE_MIN 0
-#define CONF_OPERATING_MODE_MAX 2
-
-#define CONF_OPERATING_MODE_DEFAULT 1 // Default mode = Mouse
-                                          // 0 = Operating Mode null
-                                          // 1 = Mouse
-                                          // 2 = Gamepad     
 
                                                                                               
 #define CONF_SOUND_MODE_OFF       0   //Sound off

@@ -2,10 +2,10 @@
 * File: LSOutput.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: Beta (11 December 2023) 
+* Version: v4.0pr (26 January 2024)
   License: GPL v3.0 or later
 
-  Copyright (C) 2023 Neil Squire Society
+  Copyright (C) 2024 Neil Squire Society
   This program is free software: you can redistribute it and/or modify it under the terms of
   the GNU General Public License as published by the Free Software Foundation,
   either version 3 of the License, or (at your option) any later version.

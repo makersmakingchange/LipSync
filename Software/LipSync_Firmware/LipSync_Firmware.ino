@@ -2,10 +2,10 @@
 * File: LipSync_Firmware.ino
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: Beta (09 January 2024)
+* Version: v4.0pr (26 January 2024)
   License: GPL v3.0 or later
 
-  Copyright (C) 2023 Neil Squire Society
+  Copyright (C) 2024 Neil Squire Society
   This program is free software: you can redistribute it and/or modify it under the terms of
   the GNU General Public License as published by the Free Software Foundation,
   either version 3 of the License, or (at your option) any later version.
@@ -47,21 +47,23 @@ int debugMode;      // 0 = Debug mode is Off
                     // 4 = Switch debug mode is On
                     // 5 = Sip & Puff state debug mode is On
 
-//Bluetooth connection variables
-bool btIsConnected = false;
 
-//LED module variables
-bool ledActionEnabled = false;
+bool btIsConnected = false;  //Bluetooth connection state
+
+bool ledActionEnabled = false;  //LED module variables
 
 ledStateStruct* ledCurrentState = new ledStateStruct;  //pointer to LED current state structure
 
-//Input module variables
+// Input module variables
 int buttonActionSize, switchActionSize;
 unsigned long buttonActionMaxTime, switchActionMaxTime;
 inputStateStruct buttonState, switchState;
 
 int inputButtonPinArray[] = { CONF_BUTTON1_PIN, CONF_BUTTON2_PIN };
 int inputSwitchPinArray[] = { CONF_SWITCH1_PIN, CONF_SWITCH2_PIN, CONF_SWITCH3_PIN };
+
+LSInput ib(inputButtonPinArray, CONF_BUTTON_NUMBER);  // Instance of input button object (tactile buttons)
+LSInput is(inputSwitchPinArray, CONF_SWITCH_NUMBER);  // Create an instance of the input switch object (external switches)
 
 inputStateStruct sapActionState;
 
@@ -97,11 +99,9 @@ bool startupCenterReset = true;
 bool settingsEnabled = false;  //Serial input settings command mode enabled or disabled
 
 //Create instances of classes
+LSMemory mem; // Starts an instance of LSMemory for managing flash memory.
 
-LSMemory mem;
 
-LSInput ib(inputButtonPinArray, CONF_BUTTON_NUMBER);  // Instance of input button object (tactile buttons)
-LSInput is(inputSwitchPinArray, CONF_SWITCH_NUMBER);  // Create an instance of the input switch object (external switches)
 
 LSJoystick js;  //Starts an instance of the LSJoystick object
 
@@ -380,7 +380,7 @@ void initBuzzer() {
 //****************************************//
 void buzzerLoop() {
 
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: buzzerLoop");  }
+  if (USB_DEBUG) { Serial.println("USBDEBUG: buzzerLoop");  }
   //Request update
   buzzer.update();
 }
@@ -977,7 +977,7 @@ void cursorLeftClick(void) {
   if (comMode == CONF_COM_MODE_USB) {
     usbmouse.click(MOUSE_LEFT);
   } else if (comMode == CONF_COM_MODE_BLE) {
-    Serial.println("Bluetooth left click");
+    //Serial.println("Bluetooth left click");
     btmouse.click(MOUSE_LEFT);
   }
 }
