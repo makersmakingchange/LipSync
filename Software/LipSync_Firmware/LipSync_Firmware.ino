@@ -92,6 +92,7 @@ pressureStruct pressureValues = { 0.0, 0.0, 0.0 };
 
 int outputAction;
 bool canOutputAction = true;
+bool startupCenterReset = true;
 
 bool settingsEnabled = false;  //Serial input settings command mode enabled or disabled
 
@@ -1183,8 +1184,12 @@ void performJoystickCenter(int* args) {
     calibTimer.deleteTimer(0);  //Delete timer
     setLedDefault();            //Set default led feedback
     canOutputAction = true;
-    if (buzzer.playStartupSound){buzzer.startup();}                             // Checks variable to only play sound on startup
+    if (startupCenterReset){    // Checks variable to only play sound and show splash screen on startup
+      buzzer.startup();
+      screen.splashScreen2();
+    }                             
     if (screen.showCenterResetComplete){screen.centerResetCompletePage();}      // Checks variable so center reset complete page only shows if accessed from menu, not on startup or during full calibration
+    startupCenterReset = false;
   }
 }
 
@@ -1259,15 +1264,15 @@ void performJoystickCalibration(int* args)
   
   else //STEP 6: Calibration ended
   {
-    setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_START_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY, CONF_LED_BRIGHTNESS);  //Turn off Led's
+    setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_START_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);                          //Turn off Led's
     performLedAction(ledCurrentState);
-    js.setMinimumRadius();  //Update the minimum cursor operating radius
+    js.setMinimumRadius();                                                                                                      //Update the minimum cursor operating radius 
     setLedDefault();
     canOutputAction = true;
-    pollTimer.enable(CONF_TIMER_JOYSTICK);  //Enable joystick data polling
-    pollTimer.enable(CONF_TIMER_SCROLL);    //Enable joystick data polling
+    pollTimer.enable(CONF_TIMER_JOYSTICK);                                                                                      //Enable joystick data polling 
+    pollTimer.enable(CONF_TIMER_SCROLL);                                                                                        //Enable joystick data polling 
     screen.fullCalibrationPrompt(stepNumber);
-  }
+  } 
 }
 //***PERFORM JOYSTICK CALIBRATION STEP FUNCTION***//
 // Function   : performJoystickCalibrationStep

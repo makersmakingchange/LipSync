@@ -150,7 +150,6 @@
 #define CONF_TIMER_DEBUG 4
 #define CONF_TIMER_SCROLL 5
 #define CONF_TIMER_SCREEN 6
-//#define CONF_TIMER_SCREEN 7
 
 
 //Joystick values 
