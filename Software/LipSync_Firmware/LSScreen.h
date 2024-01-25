@@ -46,10 +46,13 @@
 #define CONFIRM_MODE_CHANGE 31
 
 //More Menus
-#define SOUND_MENU        51
-#define SIP_PUFF_MENU     52
-#define SIP_THRESH_MENU   521
-#define PUFF_THRESH_MENU  522
+#define SOUND_MENU          51
+#define SIP_PUFF_MENU       52
+#define SIP_THRESH_MENU     521
+#define PUFF_THRESH_MENU    522
+#define RESTART_PAGE        53
+#define FACTORY_RESET_PAGE  54
+#define FACTORY_RESET_CONFIRM2_PAGE   541
 
 #define SCROLL_DELAY_MILLIS   100
 
@@ -113,6 +116,9 @@ private:
   void sipPuffThreshMenu();
   void adjustSipThreshMenu();
   void adjustPuffThreshMenu();
+  void restartConfirmPage();
+  void factoryResetConfirm1Page();
+  void factoryResetConfirm2Page();
 
   String _mainMenuText[5] = {"Exit Menu", "Calibrate", "Mode", "Cursor speed", "More"};
   String _exitConfirmText[4] = {"Exit", "settings?", "Confirm", "... Back"};
@@ -120,11 +126,14 @@ private:
   String _modeMenuText[4] = {"MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back"};
   String _modeConfirmText[4] = {"Change", "mode?", "Confirm", "... Back"};
   String _cursorSpMenuText[4] = {"Speed: ", "Increase", "Decrease", "... Back"};
-  String _moreMenuText[4] = {"Sound", "Sip & Puff", "... Back", "         "};
+  String _moreMenuText[5] = {"Sound", "Sip & Puff", "Restart device", "Factory reset", "... Back",};
   String _soundMenuText[4] = {"Sound:", "<>", "Turn <>", "... Back"};
   String _sipPuffThreshMenuText[4] = {"Sip Threshold", "Puff Threshold", "... Back"};
   String _adjustSipThreshMenuText[4] = {"Sip: ", "Increase", "Decrease", "... Back"};
   String _adjustPuffThreshMenuText[4] = {"Puff: ", "Increase", "Decrease", "... Back"};
+  String _restartConfirmText[4] = {"Restart", "deivce?", "Confirm", "... Back"};
+  String _factoryResetConfirm1Text[4] = {"Reset to", "defaults?", "Confirm", "... Back"};
+  String _factoryResetConfirm2Text[4] = {"Are you", "sure?", "Confirm", "... Back"};
 
   // Number of selectable options in each menu
   const int _mainMenuLen = 5;
@@ -132,11 +141,14 @@ private:
   const int _calibMenuLen = 3;
   const int _modeMenuLen = 4;
   const int _cursorSpMenuLen = 3;
-  const int _moreMenuLen = 3;
+  const int _moreMenuLen = 5;
   const int _soundMenuLen = 2;
   const int _sipPuffThreshMenuLen = 3;
   const int _adjustSipThreshMenuLen = 3;
   const int _adjustPuffThreshMenuLen = 3;
+  const int _restartConfirmLen = 2;
+  const int _factoryResetConfirm1Len = 2;
+  const int _factoryResetConfirm2Len = 2;
 
 
 public:
@@ -411,6 +423,12 @@ void LSScreen::selectMenuItem() {
         _currentMenu = SIP_PUFF_MENU;
         sipPuffThreshMenu();
       } else if (_currentSelection == 2){
+        _currentMenu = RESTART_PAGE;
+        restartConfirmPage();
+      } else if (_currentSelection == 3){
+        _currentMenu = FACTORY_RESET_PAGE;
+        factoryResetConfirm1Page();
+      } else if (_currentSelection == 4){
         _currentMenu = MAIN_MENU;
         mainMenu();
       }
@@ -496,6 +514,43 @@ void LSScreen::selectMenuItem() {
             _display.display();
             break;
           case 2:       //Back
+            _currentMenu = MAIN_MENU;
+            mainMenu();
+            break;
+        }
+        break;
+      case RESTART_PAGE:
+        switch (_currentSelection){
+          case 0:   //Perform factory reset
+            softwareReset();
+            break;
+          case 1:   //Back
+            _currentMenu = MAIN_MENU;
+            mainMenu();
+            break;
+        }
+        break;
+      case FACTORY_RESET_PAGE:
+        switch (_currentSelection){
+          case 0:   //Perform factory reset
+            _currentMenu = FACTORY_RESET_CONFIRM2_PAGE;
+            factoryResetConfirm2Page();
+            break;
+          case 1:   //Back
+            _currentMenu = MAIN_MENU;
+            mainMenu();
+            break;
+        }
+        break;
+      case FACTORY_RESET_CONFIRM2_PAGE:
+        switch (_currentSelection){
+          case 0:   //Perform factory reset
+            setupDisplay();
+            _display.println("Resetting");
+            _display.display();
+            factoryReset(false, false);
+            break;
+          case 1:   //Back
             _currentMenu = MAIN_MENU;
             mainMenu();
             break;
@@ -934,6 +989,41 @@ void LSScreen::adjustPuffThreshMenu(void) {
 
   displayMenu();
 
+}
+
+void LSScreen::restartConfirmPage(void){
+  _currentMenu = RESTART_PAGE;
+  _currentMenuLength = _restartConfirmLen;
+  _currentMenuText = _restartConfirmText;
+  _cursorStart = 2;
+  _currentSelection = 0;
+
+  displayMenu();
+}
+
+void LSScreen::factoryResetConfirm1Page(void){
+  _currentMenu = FACTORY_RESET_PAGE;
+  _currentMenuLength = _factoryResetConfirm1Len;
+  _currentMenuText = _factoryResetConfirm1Text;
+  _cursorStart = 2;
+  _currentSelection = 0;
+
+  displayMenu();
+}
+
+void LSScreen::factoryResetConfirm2Page(void){
+  setupDisplay();
+  _display.println("This will"); _display.println("erase all"); _display.println("custom"); _display.println("settings"); 
+  _display.display();
+  delay(2000);
+  
+  _currentMenu = FACTORY_RESET_CONFIRM2_PAGE;
+  _currentMenuLength = _factoryResetConfirm2Len;
+  _currentMenuText = _factoryResetConfirm2Text;
+  _cursorStart = 2;
+  _currentSelection = 0;
+
+  displayMenu();
 }
 
 #endif
