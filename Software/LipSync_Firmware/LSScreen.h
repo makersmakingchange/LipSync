@@ -123,18 +123,18 @@ private:
   void factoryResetConfirm1Page();
   void factoryResetConfirm2Page();
 
-  String _mainMenuText[5] = {"Exit Menu", "Calibrate", "Mode", "Cursor speed", "More"};
+  String _mainMenuText[5] = {"Exit Menu", "Calibrate", "Mode", "Cursor Speed", "More"};
   String _exitConfirmText[4] = {"Exit", "settings?", "Confirm", "... Back"};
-  String _calibMenuText[4] = {"Center reset", "Full Calibration", "... Back", " "};
+  String _calibMenuText[4] = {"Center Reset", "Full Calibration", "... Back", " "};
   String _modeMenuText[4] = {"MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back"};
   String _modeConfirmText[4] = {"Change", "mode?", "Confirm", "... Back"};
   String _cursorSpMenuText[4] = {"Speed: ", "Increase", "Decrease", "... Back"};
-  String _moreMenuText[5] = {"Sound", "Sip & Puff", "Restart device", "Factory reset", "... Back",};
+  String _moreMenuText[5] = {"Sound", "Sip & Puff", "Restart LipSync", "Factory Reset", "... Back",};
   String _soundMenuText[4] = {"Sound:", "<>", "Turn <>", "... Back"};
   String _sipPuffThreshMenuText[4] = {"Sip Threshold", "Puff Threshold", "... Back"};
   String _adjustSipThreshMenuText[4] = {"Sip: ", "Increase", "Decrease", "... Back"};
   String _adjustPuffThreshMenuText[4] = {"Puff: ", "Increase", "Decrease", "... Back"};
-  String _restartConfirmText[4] = {"Restart", "deivce?", "Confirm", "... Back"};
+  String _restartConfirmText[4] = {"Restart", "LipSync?", "Confirm", "... Back"};
   String _factoryResetConfirm1Text[4] = {"Reset to", "defaults?", "Confirm", "... Back"};
   String _factoryResetConfirm2Text[4] = {"Are you", "sure?", "Confirm", "... Back"};
 
