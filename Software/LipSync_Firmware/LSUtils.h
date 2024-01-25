@@ -17,6 +17,10 @@
 */
 
 
+//Header definition
+#ifndef _LSUTILS_H
+#define _LSUTILS_H
+
 //Struct of float point
 typedef struct {
   float x;
@@ -76,3 +80,5 @@ typedef struct
   uint8_t accStartSpeed;
   uint8_t accEndSpeed;
 } accStruct;
+
+#endif

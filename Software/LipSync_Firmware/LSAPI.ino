@@ -65,12 +65,13 @@ _functionList getDebugModeFunction =              {"DM", "0", "0", &getDebugMode
 _functionList setDebugModeFunction =              {"DM", "1", "",  &setDebugMode};
 _functionList getJoystickValueFunction =          {"JV", "0", "0", &getJoystickValue};
 
+_functionList runTestFunction =                   {"RT", "1", "",  &runTest};
 _functionList softResetFunction =                 {"SR", "1", "1", &softReset};
 _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSettings};
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[34] = {
+_functionList apiFunction[35] = {
   getModelNumberFunction,
   getVersionNumberFunction,
   getOperatingModeFunction,
@@ -102,6 +103,7 @@ _functionList apiFunction[34] = {
   setSoundModeFunction,
   getDebugModeFunction,
   setDebugModeFunction,
+  runTestFunction,
   softResetFunction,
   resetSettingsFunction,
   factoryResetFunction
@@ -1600,7 +1602,6 @@ void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommun
     printResponseInt(responseEnabled, apiEnabled, true, 0, "CM,1", true, inputCommunicationMode);
 
     //TODO: move this?
-    /*
     releaseOutputAction();
     switch(comMode){
       case CONF_COM_MODE_USB:       // USB Mouse
@@ -1612,7 +1613,6 @@ void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommun
         btmouse.begin();
         break;
     }
-    */
 
   }
   else {
@@ -1828,7 +1828,7 @@ void getDebugMode(bool responseEnabled, bool apiEnabled, String optionalParamete
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               inputDebugStategMode : int : The new debug mode state ( true = ON , false = OFF )
+//               inputDebugStateMode : int : The new debug mode state ( true = ON , false = OFF )
 //
 // Return     : void
 //*********************************//
@@ -1864,6 +1864,50 @@ void setDebugMode(bool responseEnabled, bool apiEnabled, String optionalParamete
   setDebugMode(responseEnabled, apiEnabled, optionalParameter.toInt());
 }
 
+//***RUN TEST FUNCTION***//
+// Function   : runTest
+//
+// Description: This function activates an internal test.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               intputTest : int : The id of test to run.
+//
+// Return     : void
+//*********************************//
+void runTest(bool responseEnabled, bool apiEnabled, int inputTest) {
+  String commandKey = "RT";
+
+  if ((inputTest >= CONF_TEST_MODE_MIN) && (inputTest <= CONF_TEST_MODE_MAX)) {
+    
+    printResponseInt(responseEnabled, apiEnabled, true, 0, "RT,1", true, inputTest);
+    activateTest(inputTest); //run the test
+
+  }
+  else { // error message
+    printResponseInt(responseEnabled, apiEnabled, false, 3, "RT,1", true, inputTest);
+
+  }
+
+}
+//***RUN TEST API FUNCTION***//
+// Function   : runTest
+//
+// Description: This function is redefinition of main runTest function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void runTest(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  runTest(responseEnabled, apiEnabled, optionalParameter.toInt());
+}
+
 //***SOFT RESET FUNCTION***//
 // Function   : softReset
 //
@@ -1877,24 +1921,6 @@ void setDebugMode(bool responseEnabled, bool apiEnabled, String optionalParamete
 // Return     : void
 //***************************//
 void softReset(bool responseEnabled, bool apiEnabled) {
-
-  // //Set all LEDs to red to indicate factory reset process 
-  // setLedState(LED_ACTION_ON, LED_CLR_RED, CONF_LED_ALL, 0, 0, CONF_LED_BRIGHTNESS);                           
-  // performLedAction(ledCurrentState);  
-
-  // //Factory reset process 
-  // resetMemory();
-  // setCommunicationMode(false, false, CONF_COM_MODE_DEFAULT);
-  // setDebugMode(false, false, CONF_DEBUG_MODE_DEFAULT);
-  // setJoystickDeadZone(false, false, CONF_JOY_DEADZONE_DEFAULT);
-  // setSipPressureThreshold(false, false, CONF_SIP_THRESHOLD);
-  // setPuffPressureThreshold(false, false, CONF_PUFF_THRESHOLD);
-  // setCursorSpeed(false, false, CONF_JOY_CURSOR_SPEED_LEVEL_DEFAULT);  
-  // setSoundMode(false, false, CONF_SOUND_MODE_DEFAULT);
-
-  // //Clear all LEDs to indicate factory reset process is finished 
-  // setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);                           
-  // performLedAction(ledCurrentState);  
 
   printResponseInt(responseEnabled, apiEnabled, true, 0, "SR,1", true, 1);
   softwareReset();

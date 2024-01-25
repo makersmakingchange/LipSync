@@ -17,36 +17,37 @@
 
 */
 
+#include "LSUtils.h"
 
 #define USB_DEBUG  0 //Set this to 0 for best performance
 
-#define CONF_DISPLAY_ENABLED false
+
 
 
 //***DO NOT CHANGE***//
-#define CONF_LIPSYNC_MODEL 1                              //Mouse = 1 , Gamepad = 2
-#define CONF_LIPSYNC_VERSION 1.0
+#define CONF_LIPSYNC_MODEL 1                // 1: Lipsync w/ Hub
+#define CONF_LIPSYNC_VERSION 4
 
 //Input pins
-#define CONF_BUTTON1_PIN 9                                // Pushbutton S1
-#define CONF_BUTTON2_PIN 3                                 // Pushbutton S2
-#define CONF_SWITCH1_PIN A0                                // 3.5mm jack SW1
-#define CONF_SWITCH2_PIN A1                                // 3.5mm jack SW2
-#define CONF_SWITCH3_PIN A2                                // 3.5mm jack SW3
+#define CONF_BUTTON1_PIN 9                  // Pushbutton S1
+#define CONF_BUTTON2_PIN 3                  // Pushbutton S2
+#define CONF_SWITCH1_PIN A0                 // 3.5 mm jack SW1
+#define CONF_SWITCH2_PIN A1                 // 3.5 mm jack SW2
+#define CONF_SWITCH3_PIN A2                 // 3.5 mm jack SW3
 
 //Input buttons and switch values 
 #define CONF_BUTTON_NUMBER 2
 #define CONF_SWITCH_NUMBER 3
 
 //Output LEDS
-#define CONF_LED_MOUSE_PIN 8                              //(left)
-#define CONF_LED_GAMEPAD_PIN 7                            //(right)
-#define CONF_LED_BTMOUSE_PIN 6                            //
+#define CONF_LED_LEFT_PIN 7                 // left
+#define CONF_LED_MIDDLE_PIN 8               // middle
+#define CONF_LED_RIGHT_PIN 6                // right
 
 //Onboard LEDs
-#define CONF_LED_MICRO_RED LED_RED        // Xiao NRF52840 User LED Red
-#define CONF_LED_MICRO_GREEN LED_GREEN    // Xiao NRF52840 User LED Green
-#define CONF_LED_MICRO_BLUE LED_BLUE      // Xiao NRF52840 User LED Blue
+#define CONF_LED_MICRO_RED LED_RED          // Xiao NRF52840 User LED Red
+#define CONF_LED_MICRO_GREEN LED_GREEN      // Xiao NRF52840 User LED Green
+#define CONF_LED_MICRO_BLUE LED_BLUE        // Xiao NRF52840 User LED Blue
 
 
 #define CONF_LED_NONE 0
@@ -58,8 +59,46 @@
 
 #define CONF_LED_BRIGHTNESS 150
 
+//Led color code
+#define LED_CLR_NONE 0
+#define LED_CLR_BLUE 1
+#define LED_CLR_PURPLE 2
+#define LED_CLR_MAGENTA 3
+#define LED_CLR_PINK 4
+#define LED_CLR_RED 5
+#define LED_CLR_ORANGE 6
+#define LED_CLR_YELLOW 7
+#define LED_CLR_GREEN 8
+#define LED_CLR_TEAL 9
+#define LED_CLR_WHITE 10
+
+#define LED_ACTION_NONE 0
+#define LED_ACTION_OFF 1
+#define LED_ACTION_ON 2
+#define LED_ACTION_BLINK 3
+#define LED_ACTION_BLINKFAST 4
+
+#define LED_STATE_OFF 0
+#define LED_STATE_ON 1
+
 //Output Buzzer
 #define CONF_BUZZER_PIN 10
+
+// Display
+#define CONF_DISPLAY_ENABLED false
+
+
+// Button Input States
+#define INPUT_MAIN_STATE_NONE           0
+#define INPUT_MAIN_STATE_S1_PRESSED     1
+#define INPUT_MAIN_STATE_S2_PRESSED     2
+#define INPUT_MAIN_STATE_S12_PRESSED    3
+#define INPUT_MAIN_STATE_S3_PRESSED     4
+#define INPUT_MAIN_STATE_S13_PRESSED    5
+#define INPUT_MAIN_STATE_S23_PRESSED    6
+#define INPUT_MAIN_STATE_S123_PRESSED   7
+
+
 
 //Output action numbers
 #define CONF_ACTION_NOTHING 0                              // No action
@@ -93,17 +132,18 @@
 #define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":0.0,\"PT\":0.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[13.0,13.0],\"CA2\":[-13.0,13.0],\"CA3\":[-13.0,-13.0],\"CA4\":[13.0,-13.0],\"SM\":1,\"DM\":0}"
 
 //Polling rates for each module
-#define CONF_JOYSTICK_POLL_RATE 50          //50ms
+#define CONF_JOYSTICK_POLL_RATE 50          //50ms - Measure, 
 #define CONF_SCROLL_POLL_RATE 150           //150ms
 #define CONF_PRESSURE_POLL_RATE 50          //50ms
 #define CONF_INPUT_POLL_RATE 50             //50ms
 #define CONF_BT_FEEDBACK_POLL_RATE 1000     //1s         
+
 #define CONF_DEBUG_POLL_RATE 100            //100ms
 #define CONF_SCREEN_POLL_RATE 100           //100ms
 
-#define CONF_BUTTON_PRESS_DELAY 150         //150ms
+#define CONF_BUTTON_PRESS_DELAY 150         //150ms - 
 
-#define CONF_SPLASH_SCREEN_DURATION 10000    //10 seconds
+#define CONF_SPLASH_SCREEN_DURATION 10000    //10 seconds - how long the splash screen stays on on startup
 
 // Polling Timer IDs for each module
 #define CONF_TIMER_JOYSTICK 0
@@ -150,10 +190,17 @@
                                           // 4 = Switch debug mode is On
                                           // 5 = Sip & Puff state debug mode is On
 
+
+// Internal Test
+#define CONF_TEST_MODE_MIN 1
+#define CONF_TEST_MODE_MAX 1
+#define CONF_TEST_MODE_LED 1
+
 // Operating Mode Values
 #define CONF_OPERATING_MODE_NONE 0
 #define CONF_OPERATING_MODE_MOUSE 1
 #define CONF_OPERATING_MODE_GAMEPAD 2
+
 
 #define CONF_OPERATING_MODE_MIN 0
 #define CONF_OPERATING_MODE_MAX 2
@@ -187,7 +234,7 @@
 #define CONF_JOY_CALIB_START_DELAY 1000
 #define CONF_JOY_CALIB_START_LED_COLOR LED_CLR_PURPLE                                           //Joystick Calibration process start and end color
 #define CONF_JOY_CALIB_STEP_DELAY 1500
-#define CONF_JOY_CALIB_LED_NUMBER 4
+#define CONF_JOY_CALIB_LED_NUMBER 5
 #define CONF_JOY_CALIB_LED_COLOR LED_CLR_RED                                                    //The color indicates the joystick Calibration process 
 #define CONF_JOY_CALIB_STEP_BLINK 1
 #define CONF_JOY_CALIB_STEP_BLINK_DELAY 150
@@ -252,6 +299,13 @@
                                                   // 1 = Absolute or PRESS_MODE_ABS
                                                   // 2 = Differential or PRESS_MODE_DIFF
 
+                                                  
+                                                  
+//Sip and puff main states 
+#define PRESS_SAP_MAIN_STATE_NONE 0   //No action 
+#define PRESS_SAP_MAIN_STATE_SIP 1    //Sip action sapPressure < -sip threshold
+#define PRESS_SAP_MAIN_STATE_PUFF 2   //Puff action sapPressure > puff threshold
+
 //Inputs and related LED feedback settings
 #define CONF_INPUT_LED_DELAY 150          //Led blink time for input actions 
 #define CONF_INPUT_LED_BLINK 1            //Led blink number  for input actions 
@@ -268,3 +322,99 @@
 #define CONF_BT_LED_NUMBER CONF_LED_MICRO
 #define CONF_BT_LED_COLOR LED_CLR_BLUE 
 #define CONF_BT_LED_BRIGHTNESS CONF_LED_BRIGHTNESS
+
+
+//Acceleration
+// Cursor acceleration structure
+const accStruct accProperty[]{
+  { 0, 1.0, 0, 0 },
+  { 1, 1.0, 0, 0 },
+  { 2, 1.0, 0, 0 },
+  { 3, 1.0, 0, 0 },
+  { 4, 1.0, 0, 0 },
+  { 5, 1.0, 0, 0 },
+  { 6, 1.0, 0, 0 },
+  { 7, 1.0, 0, 0 },
+  { 8, 1.0, 0, 0 },
+  { 9, 1.0, 0, 0 }
+
+};
+
+//Sip and Puff Action Mapping
+// {INPUT ACTION, OUTPUT, ACTION, minTime, maxTime}
+const inputActionStruct sapActionProperty[]{
+  { PRESS_SAP_MAIN_STATE_NONE,        CONF_ACTION_NOTHING,      CONF_ACTION_NOTHING,    CONF_ACTION_NOTHING,             0,     0 },
+  
+  // Puff actions
+  { PRESS_SAP_MAIN_STATE_PUFF,        CONF_ACTION_LEFT_CLICK,   CONF_ACTION_B1_PRESS,   CONF_ACTION_NEXT_MENU_ITEM,      0,  3000 },
+  { PRESS_SAP_MAIN_STATE_PUFF,        CONF_ACTION_DRAG,         CONF_ACTION_B3_PRESS,   CONF_ACTION_NOTHING,          3000,  5000 },
+  { PRESS_SAP_MAIN_STATE_PUFF,        CONF_ACTION_START_MENU,   CONF_ACTION_START_MENU, CONF_ACTION_STOP_MENU,        5000, 10000 },
+
+  // Sip Actions
+  { PRESS_SAP_MAIN_STATE_SIP,         CONF_ACTION_RIGHT_CLICK,  CONF_ACTION_B2_PRESS,   CONF_ACTION_SELECT_MENU_ITEM,    0,  3000 },
+  { PRESS_SAP_MAIN_STATE_SIP,         CONF_ACTION_SCROLL,       CONF_ACTION_B4_PRESS,   CONF_ACTION_NOTHING,          3000,  5000 },  
+  { PRESS_SAP_MAIN_STATE_SIP,         CONF_ACTION_MIDDLE_CLICK, CONF_ACTION_B5_PRESS,   CONF_ACTION_NOTHING,          5000, 10000 }
+};
+
+// Buttons built in to hub
+const inputActionStruct buttonActionProperty[]{
+  { INPUT_MAIN_STATE_NONE,            CONF_ACTION_NOTHING,      CONF_ACTION_NOTHING,    CONF_ACTION_NOTHING,              0,     0 },
+
+  { INPUT_MAIN_STATE_S1_PRESSED,      CONF_ACTION_LEFT_CLICK,   CONF_ACTION_B1_PRESS,   CONF_ACTION_NEXT_MENU_ITEM,       0,  3000 },
+  { INPUT_MAIN_STATE_S1_PRESSED,      CONF_ACTION_DRAG,         CONF_ACTION_B3_PRESS,   CONF_ACTION_NOTHING,           3000,  5000 }, 
+  { INPUT_MAIN_STATE_S1_PRESSED,      CONF_ACTION_START_MENU,   CONF_ACTION_START_MENU, CONF_ACTION_STOP_MENU,         5000, 10000 },
+
+  { INPUT_MAIN_STATE_S2_PRESSED,      CONF_ACTION_RIGHT_CLICK,  CONF_ACTION_B2_PRESS,   CONF_ACTION_SELECT_MENU_ITEM,     0,  3000 },
+  { INPUT_MAIN_STATE_S2_PRESSED,      CONF_ACTION_SCROLL,       CONF_ACTION_B4_PRESS,   CONF_ACTION_NOTHING,           3000,  5000 },  
+  { INPUT_MAIN_STATE_S2_PRESSED,      CONF_ACTION_MIDDLE_CLICK, CONF_ACTION_B5_PRESS,   CONF_ACTION_NOTHING,           5000, 10000 },
+
+  { INPUT_MAIN_STATE_S12_PRESSED,     CONF_ACTION_START_MENU,   CONF_ACTION_START_MENU, CONF_ACTION_STOP_MENU,            0,  3000 },
+};
+
+// External Assistive Switch Jacks
+
+const inputActionStruct switchActionProperty[]{
+  { INPUT_MAIN_STATE_NONE,            CONF_ACTION_NOTHING,      CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,           0,    0 },
+  
+  { INPUT_MAIN_STATE_S1_PRESSED,      CONF_ACTION_LEFT_CLICK,   CONF_ACTION_B1_PRESS,       CONF_ACTION_NEXT_MENU_ITEM,    0,  3000 },
+  { INPUT_MAIN_STATE_S1_PRESSED,      CONF_ACTION_DRAG,         CONF_ACTION_B3_PRESS,       CONF_ACTION_NOTHING,        3000,  5000 },
+  { INPUT_MAIN_STATE_S1_PRESSED,      CONF_ACTION_START_MENU,   CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,      5000, 10000 },
+  
+  { INPUT_MAIN_STATE_S2_PRESSED,      CONF_ACTION_MIDDLE_CLICK, CONF_ACTION_B5_PRESS,       CONF_ACTION_NOTHING,           0,  3000 },
+  { INPUT_MAIN_STATE_S2_PRESSED,      CONF_ACTION_CHANGE_MODE,  CONF_ACTION_B6_PRESS,       CONF_ACTION_NOTHING,        3000,  5000 },
+  { INPUT_MAIN_STATE_S2_PRESSED,      CONF_ACTION_CURSOR_CENTER, CONF_ACTION_CURSOR_CENTER, CONF_ACTION_NOTHING,        5000, 10000 },
+  
+  { INPUT_MAIN_STATE_S3_PRESSED,      CONF_ACTION_RIGHT_CLICK,  CONF_ACTION_B2_PRESS,       CONF_ACTION_SELECT_MENU_ITEM,  0,  3000 },
+  { INPUT_MAIN_STATE_S3_PRESSED,      CONF_ACTION_SCROLL,       CONF_ACTION_B4_PRESS,       CONF_ACTION_NOTHING,        3000,  5000 },
+  { INPUT_MAIN_STATE_S3_PRESSED,      CONF_ACTION_MIDDLE_CLICK, CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,        5000, 10000 },
+  
+  { INPUT_MAIN_STATE_S13_PRESSED,      CONF_ACTION_START_MENU,  CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,          0, 3000 },
+};
+
+//LED Action for all available output actions. This maps what happens with the lights when different actions are triggered.
+// ledOutputActionNumber, ledNumber, ledStartColor, ledEndColor, ledEndAction
+const ledActionStruct ledActionProperty[]{
+  { CONF_ACTION_NOTHING,            CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_NONE },
+  { CONF_ACTION_LEFT_CLICK,         CONF_LED_LEFT,    LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
+  { CONF_ACTION_RIGHT_CLICK,        CONF_LED_RIGHT,   LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
+  { CONF_ACTION_DRAG,               CONF_LED_LEFT,    LED_CLR_RED,    LED_CLR_RED,  LED_ACTION_ON },
+  { CONF_ACTION_SCROLL,             CONF_LED_RIGHT,   LED_CLR_RED,    LED_CLR_RED,  LED_ACTION_ON },
+  { CONF_ACTION_B1_PRESS,           CONF_LED_LEFT,    LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
+  { CONF_ACTION_B2_PRESS,           CONF_LED_RIGHT,   LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
+  { CONF_ACTION_B3_PRESS,           CONF_LED_RIGHT,   LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_NONE },
+  { CONF_ACTION_B4_PRESS,           CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_NONE },
+  { CONF_ACTION_B5_PRESS,           CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_NONE },
+  { CONF_ACTION_B6_PRESS,           CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_NONE },
+  { CONF_ACTION_CURSOR_CENTER,      CONF_LED_MICRO,   LED_CLR_PURPLE, LED_CLR_NONE, LED_ACTION_NONE },
+  { CONF_ACTION_CURSOR_CALIBRATION, CONF_LED_MICRO,   LED_CLR_PURPLE, LED_CLR_NONE, LED_ACTION_ON },
+  { CONF_ACTION_MIDDLE_CLICK,       CONF_LED_MIDDLE,  LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
+  { CONF_ACTION_DEC_SPEED,          CONF_LED_LEFT,    LED_CLR_RED,    LED_CLR_RED,  LED_ACTION_BLINK },
+  { CONF_ACTION_INC_SPEED,          CONF_LED_RIGHT,   LED_CLR_RED,    LED_CLR_RED,  LED_ACTION_BLINK },
+  { CONF_ACTION_CHANGE_MODE,        CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_NONE },
+  { CONF_ACTION_START_MENU,         CONF_LED_ALL,     LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
+  { CONF_ACTION_STOP_MENU,          CONF_LED_ALL,     LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_OFF },
+  { CONF_ACTION_NEXT_MENU_ITEM,     CONF_LED_LEFT,    LED_CLR_RED,    LED_CLR_NONE, LED_ACTION_BLINK },
+  { CONF_ACTION_SELECT_MENU_ITEM,   CONF_LED_RIGHT,   LED_CLR_RED,    LED_CLR_NONE, LED_ACTION_BLINK },
+  { CONF_ACTION_RESET,              CONF_LED_MICRO,   LED_CLR_RED,    LED_CLR_RED,  LED_ACTION_NONE },
+  { CONF_ACTION_FACTORY_RESET,      CONF_LED_MICRO,   LED_CLR_RED,    LED_CLR_RED,  LED_ACTION_NONE }
+};

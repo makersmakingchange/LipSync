@@ -67,7 +67,7 @@ private:
   Adafruit_SSD1306 _display = Adafruit_SSD1306(CONF_SCREEN_WIDTH, CONF_SCREEN_HEIGHT, &Wire, OLED_RESET);
   bool is_active = false;
   LSTimer <void> screenStateTimer;                      //Timer 
-  int screenStateTimerId;                                //The id for the sap state timer
+  int screenStateTimerId;                               //The id for the sap state timer
   int _currentMenu = 0;
   int _prevMenu = -1;
   int _currentSelection = 0;
@@ -250,7 +250,7 @@ void LSScreen::splashScreen() {
   _display.println("LipSync");
 
   _display.setTextSize(1);
-  _display.println("v4.0.1");
+  _display.println("v4.0");
   _display.println("Makers Making Change");
   _display.display();
 
@@ -341,7 +341,7 @@ void LSScreen::selectMenuItem() {
           setupDisplay();
           _display.println("Exiting");
           _display.display();
-          delay(1000);                  // TODO: remove delay
+          delay(500);                  // TODO: remove delay
 
           deactivateMenu();
         }
@@ -471,7 +471,7 @@ void LSScreen::selectMenuItem() {
         switch (_currentSelection){
           case 0:       //Increase
             _sipPressThresh = getSipPressureThreshold(false,false);
-            _sipPressThresh++;                                                                                    // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
+            _sipPressThresh++; // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
             setSipPressureThreshold(false, false, _sipPressThresh);
             _adjustSipThreshMenuText[0] = "Sip: " + String(_sipPressThresh) + " ";
             _display.setCursor(0,0);
@@ -480,7 +480,7 @@ void LSScreen::selectMenuItem() {
             break;
           case 1:       //Decrease
             _sipPressThresh = getSipPressureThreshold(false,false);
-            _sipPressThresh--;                                                                                    // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
+            _sipPressThresh--;  // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
             setSipPressureThreshold(false, false, _sipPressThresh);
             _adjustSipThreshMenuText[0] = "Sip: " + String(_sipPressThresh) + " ";
             _display.setCursor(0,0);
@@ -497,7 +497,7 @@ void LSScreen::selectMenuItem() {
         switch (_currentSelection){
           case 0:       //Increase
             _puffPressThresh = getPuffPressureThreshold(false,false);
-            _puffPressThresh++;                                                                                    // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
+            _puffPressThresh++;           // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
             setPuffPressureThreshold(false, false, _puffPressThresh);
             _adjustPuffThreshMenuText[0] = "Puff: " + String(_puffPressThresh) + " ";
             _display.setCursor(0,0);
@@ -506,7 +506,7 @@ void LSScreen::selectMenuItem() {
             break;
           case 1:       //Decrease
             _puffPressThresh = getPuffPressureThreshold(false,false);
-            _puffPressThresh--;                                                                                    // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
+            _puffPressThresh--;              // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
             setPuffPressureThreshold(false, false, _puffPressThresh);
             _adjustPuffThreshMenuText[0] = "Puff: " + String(_puffPressThresh) + " ";
             _display.setCursor(0,0);
@@ -794,6 +794,7 @@ void LSScreen::changeMode(){
     _operatingMode = _tempOperatingMode;
     setOperatingMode(false, false, _tempOperatingMode);     // Sets new operating mode, saves in memory, and conducts software reset
   }
+
 
   softwareReset();    //TODO: is there a way to avoid software reset if just changing com mode? 
 

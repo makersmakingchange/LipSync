@@ -23,6 +23,7 @@
 #include <Adafruit_LPS35HW.h>   // Tube pressure sensor
 #include <Adafruit_LPS2X.h>     // Ambient pressure sensor
 #include <Adafruit_Sensor.h>     // Generic sensor
+
 #define LPS22_I2CADDR 0x5C      // Modified LPS22 address
 
 #define PRESS_BUFF_SIZE 5       //The size of pressureBuffer
@@ -42,11 +43,6 @@
 
 #define PRESS_MODE_MIN 1              //Minimum and maximum mode numbers 
 #define PRESS_MODE_MAX 2              //Used for switching pressure mode
-
-//Sip and puff main states 
-#define PRESS_SAP_MAIN_STATE_NONE 0   //No action 
-#define PRESS_SAP_MAIN_STATE_SIP 1    //Sip action sapPressure < -sip threshold
-#define PRESS_SAP_MAIN_STATE_PUFF 2   //Puff action sapPressure > puff threshold
 
 //Sip and puff secondary states 
 #define PRESS_SAP_SEC_STATE_WAITING 0   //Waiting : No sip or puff
