@@ -17,10 +17,11 @@
 
 */
 
+#include "LSUtils.h"
 
 #define USB_DEBUG  0 //Set this to 0 for best performance
 
-#define CONF_DISPLAY_ENABLED false
+
 
 
 //***DO NOT CHANGE***//
@@ -58,8 +59,46 @@
 
 #define CONF_LED_BRIGHTNESS 150
 
+//Led color code
+#define LED_CLR_NONE 0
+#define LED_CLR_BLUE 1
+#define LED_CLR_PURPLE 2
+#define LED_CLR_MAGENTA 3
+#define LED_CLR_PINK 4
+#define LED_CLR_RED 5
+#define LED_CLR_ORANGE 6
+#define LED_CLR_YELLOW 7
+#define LED_CLR_GREEN 8
+#define LED_CLR_TEAL 9
+#define LED_CLR_WHITE 10
+
+#define LED_ACTION_NONE 0
+#define LED_ACTION_OFF 1
+#define LED_ACTION_ON 2
+#define LED_ACTION_BLINK 3
+#define LED_ACTION_BLINKFAST 4
+
+#define LED_STATE_OFF 0
+#define LED_STATE_ON 1
+
 //Output Buzzer
 #define CONF_BUZZER_PIN 10
+
+// Display
+#define CONF_DISPLAY_ENABLED false
+
+
+// Button Input States
+#define INPUT_MAIN_STATE_NONE           0
+#define INPUT_MAIN_STATE_S1_PRESSED     1
+#define INPUT_MAIN_STATE_S2_PRESSED     2
+#define INPUT_MAIN_STATE_S12_PRESSED    3
+#define INPUT_MAIN_STATE_S3_PRESSED     4
+#define INPUT_MAIN_STATE_S13_PRESSED    5
+#define INPUT_MAIN_STATE_S23_PRESSED    6
+#define INPUT_MAIN_STATE_S123_PRESSED   7
+
+
 
 //Output action numbers
 #define CONF_ACTION_NOTHING 0                              // No action
@@ -259,6 +298,13 @@
                                                   // 0 = None or PRESS_MODE_NONE
                                                   // 1 = Absolute or PRESS_MODE_ABS
                                                   // 2 = Differential or PRESS_MODE_DIFF
+
+                                                  
+                                                  
+//Sip and puff main states 
+#define PRESS_SAP_MAIN_STATE_NONE 0   //No action 
+#define PRESS_SAP_MAIN_STATE_SIP 1    //Sip action sapPressure < -sip threshold
+#define PRESS_SAP_MAIN_STATE_PUFF 2   //Puff action sapPressure > puff threshold
 
 //Inputs and related LED feedback settings
 #define CONF_INPUT_LED_DELAY 150          //Led blink time for input actions 

@@ -18,9 +18,9 @@
 
 
 #include <Wire.h>
+#include "LSUtils.h"
 #include "LSConfig.h"
 #include "LSTimer.h"
-#include "LSUtils.h"
 #include <ArduinoJson.h>
 #include "LSOutput.h"
 #include "LSUSB.h"

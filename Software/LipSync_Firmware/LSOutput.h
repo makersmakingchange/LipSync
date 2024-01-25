@@ -25,28 +25,6 @@
 #define OUTPUT_RGB_LED_NUM 1   //Number of RGB leds
 
 
-//Led color code
-#define LED_CLR_NONE 0
-#define LED_CLR_BLUE 1
-#define LED_CLR_PURPLE 2
-#define LED_CLR_MAGENTA 3
-#define LED_CLR_PINK 4
-#define LED_CLR_RED 5
-#define LED_CLR_ORANGE 6
-#define LED_CLR_YELLOW 7
-#define LED_CLR_GREEN 8
-#define LED_CLR_TEAL 9
-#define LED_CLR_WHITE 10
-
-#define LED_ACTION_NONE 0
-#define LED_ACTION_OFF 1
-#define LED_ACTION_ON 2
-#define LED_ACTION_BLINK 3
-#define LED_ACTION_BLINKFAST 4
-
-#define LED_STATE_OFF 0
-#define LED_STATE_ON 1
-
 struct rgbStruct {
   int r;  // red value 0 to 255
   int g;  // green value
