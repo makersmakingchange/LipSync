@@ -435,10 +435,11 @@ void getOperatingMode(bool responseEnabled, bool apiEnabled, String optionalPara
 void setOperatingMode(bool responseEnabled, bool apiEnabled, int inputOperatingMode) {
   String commandKey = "OM";
 
-  if ((inputOperatingMode >= CONF_OPERATING_MODE_MIN) && (inputOperatingMode <= CONF_OPERATING_MODE_MAX)) {
+  if ((inputOperatingMode >= CONF_OPERATING_MODE_MIN) && (inputOperatingMode <= CONF_OPERATING_MODE_MAX)) {   
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputOperatingMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "OM,1", true, inputOperatingMode);
-    changeOperatingMode(inputOperatingMode);
+    operatingMode = inputOperatingMode;
+    //changeOperatingMode(inputOperatingMode);
   }
   else {
     printResponseInt(responseEnabled, apiEnabled, false, 3, "OM,1", true, inputOperatingMode);
@@ -1974,16 +1975,21 @@ void factoryReset(bool responseEnabled, bool apiEnabled) {
   //Factory reset process 
   resetMemory();
   setCommunicationMode(false, false, CONF_COM_MODE_DEFAULT);
+  setOperatingMode(false, false, CONF_COM_MODE_DEFAULT);
   setDebugMode(false, false, CONF_DEBUG_MODE_DEFAULT);
   setJoystickDeadZone(false, false, CONF_JOY_DEADZONE_DEFAULT);
   setSipPressureThreshold(false, false, CONF_SIP_THRESHOLD);
   setPuffPressureThreshold(false, false, CONF_PUFF_THRESHOLD);
   setCursorSpeed(false, false, CONF_JOY_CURSOR_SPEED_LEVEL_DEFAULT);  
+  setScrollLevel(false, false, CONF_SCROLL_LEVEL_DEFAULT);
+  setJoystickAcceleration(false, false, CONF_JOY_ACCELERATION_LEVEL_DEFAULT);
   printResponseInt(responseEnabled, apiEnabled, true, 0, "FR,1", true, 1);
 
   //Clear all LEDs to indicate factory reset process is finished 
   setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);                           
   performLedAction(ledCurrentState);  
+
+  softwareReset();
 
 }
 //***FACTORY RESET API FUNCTION***//
