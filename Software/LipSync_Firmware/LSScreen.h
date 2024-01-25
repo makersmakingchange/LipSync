@@ -31,28 +31,28 @@
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3D ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 
-#define MAIN_MENU   0
-#define EXIT_MENU   1
-#define CALIB_MENU  2
-#define MODE_MENU   3
-#define CURSOR_SP_MENU   4
-#define MORE_MENU    5
+#define MAIN_MENU                   0
+#define EXIT_MENU                   1
+#define CALIB_MENU                  2
+#define MODE_MENU                   3
+#define CURSOR_SP_MENU              4
+#define MORE_MENU                   5
 
 //Calibration pages
-#define CENTER_RESET_PAGE 11
-#define FULL_CALIB_PAGE   12
+#define CENTER_RESET_PAGE           11
+#define FULL_CALIB_PAGE             12
 
 //Mode pages
-#define CONFIRM_MODE_CHANGE 31
+#define CONFIRM_MODE_CHANGE         31
 
 //More Menus
-#define SOUND_MENU          51
-#define SIP_PUFF_MENU       52
-#define SIP_THRESH_MENU     521
-#define PUFF_THRESH_MENU    522
-#define RESTART_PAGE        53
-#define FACTORY_RESET_PAGE  54
-#define FACTORY_RESET_CONFIRM2_PAGE   541
+#define SOUND_MENU                  51
+#define SIP_PUFF_MENU               52
+#define SIP_THRESH_MENU             521
+#define PUFF_THRESH_MENU            522
+#define RESTART_PAGE                53
+#define FACTORY_RESET_PAGE          54
+#define FACTORY_RESET_CONFIRM2_PAGE 541
 
 #define SCROLL_DELAY_MILLIS   100
 
@@ -97,11 +97,7 @@ private:
   float _sipPressThresh;
   float _puffPressThresh;
 
-  //void setupDisplay();
-  //void displayMenu();
-  //void displayCursor();
-
-  void mainMenu();
+  void mainMenu();  //TODO Jake - 2024-Jan-25 Do these need to be private?
   void exitConfirmMenu();
   void calibMenu();
   void modeMenu();
@@ -157,7 +153,6 @@ public:
   void update();
   void clear();
   void show();
-  //void startupScreen();
   //void nextSelection();
   void scrollLongText();
 
@@ -179,23 +174,37 @@ public:
 };
 
 
-
+//*********************************//
+// Function   : LSScreen
+// 
+// Description: Class for display object
+//              
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 LSScreen::LSScreen() {
 }
 
-
+//*********************************//
+// Function   : begin
+// 
+// Description: Activates and clears display
+//              
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::begin() {
-  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  if (!_display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+  
+  if (!_display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) { // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
     Serial.println(F("SSD1306 allocation failed"));
-    for (;;); // Don't proceed, loop forever
+    for (;;); // Don't proceed, loop forever  //TODO Implement watchdog to throw error instead of infinite loop
   }
 
-  setupDisplay();
+  setupDisplay(); //Clear screen
   _display.setTextWrap(false);
   _display.display();
-
-  //startupScreen();
 
   _operatingMode = getOperatingMode(false, false);
   _communicationMode = getCommunicationMode(false, false);
@@ -203,11 +212,30 @@ void LSScreen::begin() {
 
 }
 
+//*********************************//
+// Function   : clear
+// 
+// Description: Clears the display.
+//              
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::clear() {
   //_display.clearDisplay();
   setupDisplay();
 }
 
+
+//*********************************//
+// Function   : update
+// 
+// Description: Refreshes the display and scrolls text if necessary
+//              
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::update() {
   screenStateTimer.run();
   
@@ -217,11 +245,29 @@ void LSScreen::update() {
   }
 }
 
+//*********************************//
+// Function   : activateMenu
+// 
+// Description: Changes display mode to active and loads main menu
+//              
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::activateMenu() {
   is_active = true;
   mainMenu();
 }
 
+//*********************************//
+// Function   : deactivateMenu
+// 
+// Description: Changes display mode to inactive and clears display.
+//              
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::deactivateMenu() {
   is_active = false;
   clear();
@@ -229,6 +275,15 @@ void LSScreen::deactivateMenu() {
   
 }
 
+//*********************************//
+// Function   : isMenuActive
+// 
+// Description: Returns a boolean representing state of menu
+//              
+// Arguments :  void
+// 
+// Return     : bool : is_active : true = menu activated
+//*********************************//
 bool LSScreen::isMenuActive() {
 
 return is_active;
@@ -250,7 +305,7 @@ void LSScreen::splashScreen() {
   _display.println("LipSync");
 
   _display.setTextSize(1);
-  _display.println("v4.0");
+  _display.println("v4.0");   //TODO this should not be static - should pull from version in memory and format appropriately
   _display.println("Makers Making Change");
   _display.display();
 
@@ -286,6 +341,15 @@ void LSScreen::splashScreen() {
 // Functions called from inputs
 //------------------------------------------//
 
+//*********************************//
+// Function   : nextMenuItem 
+// 
+// Description: Cycles to the next item based on current selection and menu.
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::nextMenuItem() {
   if (_scrollOn){
     _display.setCursor(0, _selectedLine *16);
@@ -307,6 +371,17 @@ void LSScreen::nextMenuItem() {
   displayCursor();
 }
 
+
+
+//*********************************//
+// Function   : selectMenuItem 
+// 
+// Description: Activates the appropriate action when the current selection is selected.
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::selectMenuItem() {
   _countMenuScroll = 0;
   switch (_currentMenu) {
@@ -564,6 +639,16 @@ void LSScreen::selectMenuItem() {
 // Menu displaying functions
 //------------------------------------------//
 
+
+//*********************************//
+// Function   : setupDisplay 
+// 
+// Description: Clears the display, sets text size and color
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::setupDisplay() {
   _display.clearDisplay();
   _scrollOn = false;
@@ -574,6 +659,16 @@ void LSScreen::setupDisplay() {
   _display.setCursor(0, 0);
 }
 
+
+//*********************************//
+// Function   : displayMenu 
+// 
+// Description: Prints each item in current menu
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::displayMenu() {
 
   setupDisplay();
@@ -592,6 +687,16 @@ void LSScreen::displayMenu() {
   displayCursor();
 }
 
+
+//*********************************//
+// Function   : displayCursor 
+// 
+// Description: TODO description
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::displayCursor() {
   int cursorPos;
   if (_currentSelection + _cursorStart > TEXT_ROWS-1){
@@ -600,7 +705,7 @@ void LSScreen::displayCursor() {
     cursorPos = _currentSelection;
   }
 
-  // These settings are likely already implemented and these lines can likely be removed, this is mostly here just to make sure 
+  // TODO These settings are likely already implemented and these lines can likely be removed, this is mostly here just to make sure 
   _display.setTextSize(2);                                   // 2x scale text
   _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
 
@@ -619,7 +724,7 @@ void LSScreen::displayCursor() {
   _selectedLine = _cursorStart + _currentSelection;
   _selectedText = _currentMenuText[_selectedLine];
   
-  if (_selectedText.length() > 9){
+  if (_selectedText.length() > 9){        // TODO Change magic number to constant 
     //Serial.println("Long text");
     _scrollOn = true;
     _scrollPos = 12;
@@ -654,6 +759,16 @@ void LSScreen::nextSelection() {
 }
 */
 
+
+//*********************************//
+// Function   : scrollLongText 
+// 
+// Description: Format and Display Long Menu Items by scrolling
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::scrollLongText() {
   int minPos = -12 * _selectedText.length();
   
@@ -684,6 +799,15 @@ void LSScreen::scrollLongText() {
 
 //********** MENUS **********//
 
+//*********************************//
+// Function   : mainMenu 
+// 
+// Description: Format and Display Main Menu
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::mainMenu(void) {
   _currentMenu = MAIN_MENU;
   
@@ -698,6 +822,15 @@ void LSScreen::mainMenu(void) {
   //}
 }
 
+//*********************************//
+// Function   : exitConfirmMenu 
+// 
+// Description: Format and Exit Confirm Menu
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::exitConfirmMenu(){
   _prevMenu = _currentMenu;
   _currentMenu = EXIT_MENU;
@@ -722,6 +855,16 @@ void LSScreen::calibMenu(void) {
 
 }
 
+
+//*********************************//
+// Function   : modeMenu 
+// 
+// Description: Format and display Operating Mode Menu
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::modeMenu(void) {
   _currentMenu = MODE_MENU;
 
@@ -773,7 +916,16 @@ void LSScreen::modeMenu(void) {
   _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK); // Reset text colour to white on black
   
 }
-//
+
+//*********************************//
+// Function   : confirmModeChange 
+// 
+// Description: Format and display Change Mode Confirm Menu
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::confirmModeChange() {
   _currentMenu = CONFIRM_MODE_CHANGE;
   _currentMenuText = _modeConfirmText;
@@ -784,6 +936,16 @@ void LSScreen::confirmModeChange() {
 
 }
 
+
+//*********************************//
+// Function   : changeMode 
+// 
+// Description: Format and display Change Mode Menu
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::changeMode(){
   if (_communicationMode != _tempCommunicationMode){
     _communicationMode = _tempCommunicationMode;
@@ -803,6 +965,16 @@ void LSScreen::changeMode(){
 
 }
 
+
+//*********************************//
+// Function   : cursorSpeedMenu 
+// 
+// Description: Format and display Cursor Speed Menu
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::cursorSpeedMenu(void) { 
   _currentMenu = CURSOR_SP_MENU;
   _cursorSpeedLevel = getCursorSpeed(true,false); 
@@ -818,6 +990,15 @@ void LSScreen::cursorSpeedMenu(void) {
 
 }
 
+//*********************************//
+// Function   : moreMenu 
+// 
+// Description: Format and display More Menu
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::moreMenu(){
   _currentMenu = MORE_MENU;
 
@@ -831,6 +1012,16 @@ void LSScreen::moreMenu(){
 }
 
 // ----- CALIBRATION PAGES ----- //
+
+//*********************************//
+// Function   : centerResetPage 
+// 
+// Description: Format and display Center Reset Start Page
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::centerResetPage(void){
   setupDisplay();
 
@@ -847,6 +1038,15 @@ void LSScreen::centerResetPage(void){
   
 }
 
+//*********************************//
+// Function   : centerResetCompletePage 
+// 
+// Description: Format and display Center Reset Complete Page
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::centerResetCompletePage(void){
   showCenterResetComplete = false;
     
@@ -867,6 +1067,15 @@ void LSScreen::centerResetCompletePage(void){
   }
 }
 
+//*********************************//
+// Function   : fullCalibrationPage 
+// 
+// Description: Format and display Full Calibration Start Page
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::fullCalibrationPage(void){
   setupDisplay();
 
@@ -886,6 +1095,15 @@ void LSScreen::fullCalibrationPage(void){
   setJoystickCalibration(false,false);
 }
 
+//*********************************//
+// Function   : fullCalibrationPrompt 
+// 
+// Description: Format and display a  page for each step of the full calibration.
+// 
+// Arguments :  stepNum : int : The number of the calibration step
+// 
+// Return     : void
+//*********************************//
 void LSScreen::fullCalibrationPrompt(int stepNum){
   setupDisplay();
 
@@ -932,7 +1150,16 @@ void LSScreen::fullCalibrationPrompt(int stepNum){
 
 // ----- MORE SETTINGS MENUS ----- //
 
-void LSScreen::soundMenu(){
+//*********************************//
+// Function   : soundMenu 
+// 
+// Description: Format and display Sound Menu
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSScreen::soundMenu(void){
   _currentMenu = SOUND_MENU;
   
   if (_soundMode != CONF_SOUND_MODE_OFF) {
@@ -951,7 +1178,16 @@ void LSScreen::soundMenu(){
   displayMenu();
 }
 
-void LSScreen::sipPuffThreshMenu(){
+//*********************************//
+// Function   : sipPuffThreshMenu 
+// 
+// Description: Format and display Sip and Puff Menu Page
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSScreen::sipPuffThreshMenu(void){
   _currentMenu = SIP_PUFF_MENU;
 
   _currentMenuLength = _sipPuffThreshMenuLen;
@@ -962,6 +1198,15 @@ void LSScreen::sipPuffThreshMenu(){
   displayMenu();
 }
 
+//*********************************//
+// Function   : adjustSipThreshMenu 
+// 
+// Description: Format and display Sip Threshold Adjustment Page
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::adjustSipThreshMenu(void) { 
   _currentMenu = SIP_THRESH_MENU;
   _sipPressThresh = getSipPressureThreshold(false,false);
@@ -977,6 +1222,15 @@ void LSScreen::adjustSipThreshMenu(void) {
 
 }
 
+//*********************************//
+// Function   : adjustPuffThreshMenu 
+// 
+// Description: Format and display Puff Threshold Adjustment Page
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::adjustPuffThreshMenu(void) { 
   _currentMenu = PUFF_THRESH_MENU;
   _sipPressThresh = getPuffPressureThreshold(false,false);
@@ -992,6 +1246,15 @@ void LSScreen::adjustPuffThreshMenu(void) {
 
 }
 
+//*********************************//
+// Function   : restartConfirmPage 
+// 
+// Description: Format and display Restart Confirmation Page
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::restartConfirmPage(void){
   _currentMenu = RESTART_PAGE;
   _currentMenuLength = _restartConfirmLen;
@@ -1002,6 +1265,16 @@ void LSScreen::restartConfirmPage(void){
   displayMenu();
 }
 
+
+//*********************************//
+// Function   : factoryResetConfirm1Page 
+// 
+// Description: Format and display Factory Reset Confirmation Page 1
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::factoryResetConfirm1Page(void){
   _currentMenu = FACTORY_RESET_PAGE;
   _currentMenuLength = _factoryResetConfirm1Len;
@@ -1012,6 +1285,15 @@ void LSScreen::factoryResetConfirm1Page(void){
   displayMenu();
 }
 
+//*********************************//
+// Function   : factoryResetConfirm2Page 
+// 
+// Description: Format and display Factory Reset Confirmation Page 2
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::factoryResetConfirm2Page(void){
   setupDisplay();
   _display.println("This will"); _display.println("erase all"); _display.println("custom"); _display.println("settings"); 
