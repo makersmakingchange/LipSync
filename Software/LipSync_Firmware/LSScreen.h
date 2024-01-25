@@ -101,6 +101,7 @@ private:
   void displayCursor();
   void scrollLongText();
   void drawCentreString(const String &buf, int y);
+  void modeMenuHighlight();
 
   void mainMenu();
   void exitConfirmMenu();
@@ -291,8 +292,10 @@ void LSScreen::splashScreen2() {
       }
       break;
     case CONF_OPERATING_MODE_GAMEPAD:
+      _display.setCursor(0, 48);
+      _display.print("USB"); _display.setTextSize(1); _display.print(" "); _display.setTextSize(2); _display.print("Gamepad"); // text size changed for space so it would all fit on one line
       //_display.print("USB"); _display.setTextSize(1); _display.print(" "); _display.setTextSize(2); _display.print("Gamepad"); // text size changed for space so it would all fit on one line
-      drawCentreString("Gamepad", 48);
+      //drawCentreString("Gamepad", 48);
       break;
     default:
       _display.println("Error");
@@ -596,8 +599,8 @@ void LSScreen::setupDisplay() {
   _display.setCursor(0, 0);
 }
 
-void LSScreen::displayMenu() {
 
+void LSScreen::displayMenu() {
   setupDisplay();
 
   for (int i = 0; i < TEXT_ROWS; i++) {
@@ -608,11 +611,16 @@ void LSScreen::displayMenu() {
     }
   }
 
+  if (_currentMenu == MODE_MENU){
+    modeMenuHighlight();
+  }
+
   _display.display();
 
   //_currentSelection = 0;
   displayCursor();
 }
+
 
 void LSScreen::displayCursor() {
   int cursorPos;
@@ -764,21 +772,13 @@ void LSScreen::modeMenu(void) {
 
   displayMenu();
 
+  modeMenuHighlight();
+  
+}
+
+void LSScreen::modeMenuHighlight() {
+
   _display.setTextColor(SSD1306_BLACK, SSD1306_WHITE); // Draw 'inverse' coloured text
-  /*
-  if (_operatingMode == CONF_OPERATING_MODE_MOUSE){
-      _display.setCursor(12, 0);
-      _display.print(_modeMenuText[CONF_OPERATING_MODE_MOUSE-1]);
-  } else if (_operatingMode == CONF_OPERATING_MODE_BTMOUSE){
-      _display.setCursor(12, 16);
-      //display.print(" MOUSE BLUETOOTH ");
-      _display.print(_modeMenuText[CONF_OPERATING_MODE_BTMOUSE-1]);
-  } else if (_operatingMode == CONF_OPERATING_MODE_GAMEPAD){
-      _display.setCursor(12, 16*2);
-      //display.print(" GAMEPAD ");
-      _display.print(_modeMenuText[CONF_OPERATING_MODE_GAMEPAD-1]);
-  }
-  */
 
   switch (_operatingMode){
     case CONF_OPERATING_MODE_MOUSE:
@@ -802,8 +802,7 @@ void LSScreen::modeMenu(void) {
   }
 
   _display.display();
-  _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK); // Reset text colour to white on black
-  
+  _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK); // Reset text colour to white on black  
 }
 //
 void LSScreen::confirmModeChange() {
