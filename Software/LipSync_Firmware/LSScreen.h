@@ -97,6 +97,13 @@ private:
   float _sipPressThresh;
   float _puffPressThresh;
 
+
+  void displayMenu();
+  void displayCursor();
+  void scrollLongText();
+  void drawCentreString(const String &buf, int y);
+  void modeMenuHighlight();
+
   void mainMenu();  //TODO Jake - 2024-Jan-25 Do these need to be private?
   void exitConfirmMenu();
   void calibMenu();
@@ -153,9 +160,7 @@ public:
   void update();
   void clear();
   void show();
-  //void nextSelection();
-  void scrollLongText();
-
+    
   void setupDisplay();
   void splashScreen();
   void splashScreen2();
@@ -305,8 +310,9 @@ void LSScreen::splashScreen() {
   drawCentreString("LipSync", 12);
 
   _display.setTextSize(1);
-  _display.println("v4.0", 32);   //TODO this should not be static - should pull from version in memory and format appropriately
-  _display.println("Makers Making Change", 54);
+  drawCentreString("v4.0", 32);   //TODO this should not be static - should pull from version in memory and format appropriately
+  drawCentreString("Makers Making Change", 54);
+
   _display.display();
 
   //screenStateTimerId = screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
@@ -695,8 +701,6 @@ void LSScreen::setupDisplay() {
 // Return     : void
 //*********************************//
 void LSScreen::displayMenu() {
-
-void LSScreen::displayMenu() {
   setupDisplay();
 
   for (int i = 0; i < TEXT_ROWS; i++) {
@@ -827,6 +831,15 @@ void LSScreen::scrollLongText() {
   
 }
 
+//*********************************//
+// Function   : drawCentreString 
+// 
+// Description: Format and Display Main Menu
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::drawCentreString(const String &buf, int y)
 {
     int16_t x1, y1;
