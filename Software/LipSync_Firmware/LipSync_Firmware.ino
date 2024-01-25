@@ -1246,6 +1246,7 @@ void performJoystickCalibration(int* args)
   else if (stepNumber < 5) //STEP 1-4: Joystick Calibration Corner Points 
   {
     screen.fullCalibrationPrompt(stepNumber);
+    buzzer.calibCornerTone();
     setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_STEP_BLINK_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
     performLedAction(ledCurrentState);                                                                  // LED Feedback to show start of performJoystickCalibrationStep
     js.zeroInputMax(stepNumber);                                                                        //Clear the existing calibration value 
@@ -1257,6 +1258,7 @@ void performJoystickCalibration(int* args)
   else if (stepNumber == 5) //STEP 5 : Joystick center point initialization
   {
     screen.fullCalibrationPrompt(stepNumber);
+    buzzer.calibCenterTone();
     setJoystickInitialization(false, false); 
     ++stepNumber; 
     calibTimerId[0] = calibTimer.setTimeout(nextStepStart, performJoystickCalibration, (int *)stepNumber);  //Start next step  
