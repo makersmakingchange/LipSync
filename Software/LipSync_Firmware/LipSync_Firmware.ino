@@ -38,6 +38,7 @@
 int comMode;        // 0 = None , 1 = USB , 2 = Wireless
 int operatingMode;  // 0 = None, 1 = Mouse, 2 = Wireless, 3 = Gamepad, 4=Menu
 int soundMode;      // 0 = None, 1 = Basic, 2 = Advanced
+int lightMode;      // 0 = None, 1 = Basic, 2 = Advanced
 
 int debugMode;      // 0 = Debug mode is Off
                     // 1 = Joystick debug mode is On

@@ -38,16 +38,16 @@ _functionList getJoystickInitializationFunction = {"IN", "0", "0", &getJoystickI
 _functionList setJoystickInitializationFunction = {"IN", "1", "1", &setJoystickInitialization};
 _functionList getJoystickCalibrationFunction =    {"CA", "0", "0", &getJoystickCalibration};
 _functionList setJoystickCalibrationFunction =    {"CA", "1", "1", &setJoystickCalibration};
+
 _functionList getJoystickDeadZoneFunction =       {"DZ", "0", "0", &getJoystickDeadZone};
 _functionList setJoystickDeadZoneFunction =       {"DZ", "1", "",  &setJoystickDeadZone};
-
+_functionList getJoystickAccelerationFunction =   {"AV", "0", "0", &getJoystickAcceleration};
+_functionList setJoystickAccelerationFunction =   {"AV", "1", "0", &setJoystickAcceleration};
 
 _functionList getCursorSpeedFunction =            {"SS", "0", "0", &getCursorSpeed};
 _functionList setCursorSpeedFunction =            {"SS", "1", "",  &setCursorSpeed};
 _functionList getScrollLevelFunction =            {"SL", "0", "0", &getScrollLevel};
 _functionList setScrollLevelFunction =            {"SL", "1", "",  &setScrollLevel};
-_functionList getJoystickAccelerationFunction =   {"AV", "0", "0", &getJoystickAcceleration};
-_functionList setJoystickAccelerationFunction =   {"AV", "1", "0", &setJoystickAcceleration};
 
 _functionList getPressureValueFunction =          {"PV", "0", "0", &getPressureValue};
 _functionList getPressureModeFunction =           {"PM", "0", "0", &getPressureMode};
@@ -60,6 +60,8 @@ _functionList setPuffPressureThresholdFunction =  {"PT", "1", "",  &setPuffPress
 
 _functionList getSoundModeFunction =              {"SM", "0", "0", &getSoundMode};
 _functionList setSoundModeFunction =              {"SM", "1", "",  &setSoundMode};
+_functionList getLightModeFunction =              {"LM", "0", "0", &getLightMode};
+_functionList setLightModeFunction =              {"LM", "1", "",  &setLightMode};
 
 _functionList getDebugModeFunction =              {"DM", "0", "0", &getDebugMode};
 _functionList setDebugModeFunction =              {"DM", "1", "",  &setDebugMode};
@@ -71,7 +73,7 @@ _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSetting
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[35] = {
+_functionList apiFunction[37] = {
   getModelNumberFunction,
   getVersionNumberFunction,
   getOperatingModeFunction,
@@ -101,6 +103,8 @@ _functionList apiFunction[35] = {
   setJoystickAccelerationFunction,
   getSoundModeFunction,
   setSoundModeFunction,
+  getLightModeFunction,
+  setLightModeFunction,
   getDebugModeFunction,
   setDebugModeFunction,
   runTestFunction,
@@ -1769,6 +1773,97 @@ void setSoundMode(bool responseEnabled, bool apiEnabled, int inputSoundMode) {
 // Return     : void
 void setSoundMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   setSoundMode(responseEnabled, apiEnabled, optionalParameter.toInt());
+}
+
+//***GET LIGHT MODE STATE FUNCTION***//
+// Function   : getLightMode
+//
+// Description: This function retrieves the state of light mode.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : tempLightMode : int : The current state of light mode.
+//*********************************//
+int getLightMode(bool responseEnabled, bool apiEnabled) {
+  String commandKey = "LM";
+  int tempLightMode;
+  tempLightMode = mem.readInt(CONF_SETTINGS_FILE, commandKey);
+
+  if ((tempLightMode < CONF_LIGHT_MODE_MIN) || (tempLightMode > CONF_LIGHT_MODE_MAX)) {
+    tempLightMode = CONF_LIGHT_MODE_DEFAULT;
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempLightMode);
+  }
+
+  printResponseInt(responseEnabled, apiEnabled, true, 0, "LM,0", true, tempLightMode);
+
+  return tempLightMode;
+}
+
+//***GET LIGHT MODE STATE API FUNCTION***//
+// Function   : getLightMode
+//
+// Description: This function is redefinition of main getLightMode function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void getLightMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
+    getLightMode(responseEnabled, apiEnabled);
+  }
+}
+
+//***SET LIGHT MODE STATE FUNCTION***//
+// Function   : setLightMode
+//
+// Description: This function sets the state of sound mode.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               inputLightMode : int : The new debug mode state ( true = ON , false = OFF )
+//
+// Return     : void
+//*********************************//
+void setLightMode(bool responseEnabled, bool apiEnabled, int inputLightMode) {
+  String commandKey = "LM";
+
+  if ((inputLightMode >= CONF_LIGHT_MODE_MIN) && (inputLightMode <= CONF_LIGHT_MODE_MAX)) {
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputLightMode);
+    lightMode = inputLightMode;
+    //buzzer.setLightModeLevel(inputLightMode);
+    led.setLightModeLevel(inputLightMode);
+    printResponseInt(responseEnabled, apiEnabled, true, 0, "LM,1", true, inputLightMode);
+
+  }
+  else {
+    printResponseInt(responseEnabled, apiEnabled, false, 3, "LM,1", true, inputLightMode);
+
+  }
+
+}
+//***SET LIGHT MODE STATE API FUNCTION***//
+// Function   : setLightMode
+//
+// Description: This function is redefinition of main setLightMode function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void setLightMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  setLightMode(responseEnabled, apiEnabled, optionalParameter.toInt());
 }
 
 // *********************************************************************************

@@ -22,8 +22,6 @@
 #define USB_DEBUG  0 //Set this to 0 for best performance
 
 
-
-
 //***DO NOT CHANGE***//
 #define CONF_LIPSYNC_MODEL 1                // 1: Lipsync w/ Hub
 #define CONF_LIPSYNC_VERSION 4
@@ -99,7 +97,6 @@
 #define INPUT_MAIN_STATE_S123_PRESSED   7
 
 
-
 //Output action numbers
 #define CONF_ACTION_NOTHING 0                              // No action
 #define CONF_ACTION_LEFT_CLICK 1                           // Generates a short left click
@@ -153,7 +150,7 @@
 #define CONF_TIMER_DEBUG 4
 #define CONF_TIMER_SCROLL 5
 #define CONF_TIMER_SCREEN 6
-#define CONF_TIMER_SCREEN 7
+//#define CONF_TIMER_SCREEN 7
 
 
 //Joystick values 
@@ -219,6 +216,14 @@
 #define CONF_SOUND_MODE_MAX 2
 #define CONF_SOUND_MODE_DEFAULT CONF_SOUND_MODE_BASIC
 
+#define CONF_LIGHT_MODE_OFF       0   //LEDs off
+#define CONF_LIGHT_MODE_BASIC     1   //Minimal LEDs
+#define CONF_LIGHT_MODE_ADVANCED  2   //All LEDs
+
+#define CONF_LIGHT_MODE_MIN 0
+#define CONF_LIGHT_MODE_MAX 2
+#define CONF_LIGHT_MODE_DEFAULT CONF_LIGHT_MODE_BASIC
+
 //***CAN BE CHANGED***//
 #define CONF_API_ENABLED true               //Enable or Disable API
 
@@ -231,24 +236,24 @@
 #define CONF_JOY_MAX_DEADZONE 1.0
 
 //Joystick calibration points and related LED feedback settings
-#define CONF_JOY_CALIB_START_DELAY 1000
-#define CONF_JOY_CALIB_START_LED_COLOR LED_CLR_PURPLE                                           //Joystick Calibration process start and end color
-#define CONF_JOY_CALIB_STEP_DELAY 1500
-#define CONF_JOY_CALIB_LED_NUMBER 5
+#define CONF_JOY_CALIB_START_DELAY 1000                       //Number of milliseconds to delay full joystick calibration once triggered
+#define CONF_JOY_CALIB_START_LED_COLOR LED_CLR_RED                                           //Joystick Calibration process start and end color
+#define CONF_JOY_CALIB_STEP_DELAY 1500                        //Number of milliseconds to delay between corner measurements
+#define CONF_JOY_CALIB_LED_NUMBER CONF_LED_ALL
 #define CONF_JOY_CALIB_LED_COLOR LED_CLR_RED                                                    //The color indicates the joystick Calibration process 
 #define CONF_JOY_CALIB_STEP_BLINK 1
 #define CONF_JOY_CALIB_STEP_BLINK_DELAY 150
 #define CONF_JOY_CALIB_READING_DELAY 200
-#define CONF_JOY_CALIB_STEP_BLINK_COLOR LED_CLR_YELLOW                                          //The color indicates the joystick Calibration about to start
+#define CONF_JOY_CALIB_STEP_BLINK_COLOR LED_CLR_RED                                          //The color indicates the joystick Calibration about to start
 #define CONF_JOY_CALIB_READING_NUMBER 10
 
 //Joystick center initialization and related LED feedback settings 
-#define CONF_JOY_INIT_START_DELAY 1000
-#define CONF_JOY_INIT_LED_NUMBER CONF_LED_LEFT
+#define CONF_JOY_INIT_START_DELAY 1000                        // Number of milliseconds to delay joystick neutral calibration once triggered
+#define CONF_JOY_INIT_LED_NUMBER CONF_LED_ALL
 #define CONF_JOY_INIT_LED_COLOR LED_CLR_RED                                                     //Center initialization actual step color 
 #define CONF_JOY_INIT_STEP_BLINK 1
 #define CONF_JOY_INIT_STEP_BLINK_DELAY 150
-#define CONF_JOY_INIT_STEP_BLINK_COLOR LED_CLR_YELLOW                                           //Center initialization start blink color 
+#define CONF_JOY_INIT_STEP_BLINK_COLOR LED_CLR_RED                                           //Center initialization start blink color 
 #define CONF_JOY_INIT_READING_DELAY 100
 #define CONF_JOY_INIT_READING_NUMBER 5
 
@@ -256,30 +261,24 @@
 #define CONF_JOY_CURSOR_SPEED_LEVEL_DEFAULT 5
 #define CONF_JOY_SPEED_CHANGE_LED_DELAY 150
 #define CONF_JOY_SPEED_CHANGE_LED_BLINK 1
-#define CONF_JOY_SPEED_DEC_LED_NUMBER 1
-#define CONF_JOY_SPEED_DEC_LED_COLOR LED_CLR_PURPLE                                            //Decrease speed color
-#define CONF_JOY_SPEED_INC_LED_NUMBER 3
-#define CONF_JOY_SPEED_INC_LED_COLOR LED_CLR_PURPLE                                            //Increase speed color
+#define CONF_JOY_SPEED_DEC_LED_NUMBER CONF_LED_LEFT
+#define CONF_JOY_SPEED_DEC_LED_COLOR LED_CLR_RED                                            //Decrease speed color
+#define CONF_JOY_SPEED_INC_LED_NUMBER CONF_LED_RIGHT
+#define CONF_JOY_SPEED_INC_LED_COLOR LED_CLR_RED                                            //Increase speed color
 #define CONF_JOY_SPEED_LIMIT_LED_DELAY 50
 #define CONF_JOY_SPEED_LIMIT_LED_BLINK 3
 #define CONF_JOY_SPEED_LIMIT_LED_COLOR LED_CLR_RED                                             //Out of range limit speed color
 
-//Joystick cursor acceletaion change 
-#define CONF_JOY_ACCELERATION_LEVEL_MAX 10
-#define CONF_JOY_ACCELERATION_LEVEL_MIN -10
-#define CONF_JOY_ACCELERATION_LEVEL_DEFAULT 0
-
-
 //Scroll level change and related LED feedback settings 
-#define CONF_SCROLL_CHANGE_LED_DELAY 150
-#define CONF_SCROLL_CHANGE_LED_BLINK 1
-#define CONF_SCROLL_DEC_LED_NUMBER 1
-#define CONF_SCROLL_DEC_LED_COLOR LED_CLR_PURPLE                                            //Decrease scroll level color
-#define CONF_SCROLL_INC_LED_NUMBER 3
-#define CONF_SCROLL_INC_LED_COLOR LED_CLR_PURPLE                                            //Increase scroll level color
-#define CONF_SCROLL_LIMIT_LED_DELAY 50
-#define CONF_SCROLL_LIMIT_LED_BLINK 3
-#define CONF_SCROLL_LIMIT_LED_COLOR LED_CLR_RED                                             //Out of range limit scroll level color
+#define CONF_SCROLL_CHANGE_LED_DELAY  150
+#define CONF_SCROLL_CHANGE_LED_BLINK  1
+#define CONF_SCROLL_DEC_LED_NUMBER    CONF_LED_LEFT
+#define CONF_SCROLL_DEC_LED_COLOR     LED_CLR_PURPLE          //Decrease scroll level color
+#define CONF_SCROLL_INC_LED_NUMBER    CONF_LED_RIGHT
+#define CONF_SCROLL_INC_LED_COLOR     LED_CLR_PURPLE          //Increase scroll level color
+#define CONF_SCROLL_LIMIT_LED_DELAY   50
+#define CONF_SCROLL_LIMIT_LED_BLINK   3
+#define CONF_SCROLL_LIMIT_LED_COLOR   LED_CLR_RED             //Out of range limit scroll level color
 
 //Scroll level values 
 #define CONF_SCROLL_LEVEL_DEFAULT 5
@@ -288,6 +287,12 @@
 #define CONF_SCROLL_MOVE_MIN  1
 #define CONF_SCROLL_MOVE_MAX  10
 #define CONF_SCROLL_MOVE_BASE 1
+
+//Joystick cursor acceleration change 
+#define CONF_JOY_ACCELERATION_LEVEL_MAX 10
+#define CONF_JOY_ACCELERATION_LEVEL_MIN -10
+#define CONF_JOY_ACCELERATION_LEVEL_DEFAULT 0
+
 
 //Sip and Puff Default settings
 #define CONF_SIP_THRESHOLD 3.0                    //hPa
@@ -298,7 +303,6 @@
                                                   // 0 = None or PRESS_MODE_NONE
                                                   // 1 = Absolute or PRESS_MODE_ABS
                                                   // 2 = Differential or PRESS_MODE_DIFF
-
                                                   
                                                   
 //Sip and puff main states 
@@ -337,7 +341,6 @@ const accStruct accProperty[]{
   { 7, 1.0, 0, 0 },
   { 8, 1.0, 0, 0 },
   { 9, 1.0, 0, 0 }
-
 };
 
 //Sip and Puff Action Mapping
