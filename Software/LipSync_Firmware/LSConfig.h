@@ -2,7 +2,7 @@
 * File: LSConfig.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0pr (26 January 2024)
+* Version: v4.0.rc1 (26 January 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 Neil Squire Society

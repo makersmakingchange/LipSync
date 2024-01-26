@@ -2,7 +2,7 @@
 * File: LSTestS.ino
 * Firmware: LipSync
 * Developed by: Neil Squire Society / Makers Making Change Program
-* Version: v4.0pr (26 January 2024)
+* Version: v4.0.rc1 (26 January 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 Neil Squire Society
@@ -45,7 +45,15 @@ void activateTest(int inputTest) {
 
 
 
-
+//***ACTIVATE TEST FUNCTION***//
+// Function   : activateTest
+//
+// Description: This function activates different tests
+//
+// Parameters : inputTest : int : The id of the test to activate
+//
+// Return     : void
+//****************************************//
 void testLED() {
 
   //setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
