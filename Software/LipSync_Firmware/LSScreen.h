@@ -1184,8 +1184,9 @@ void LSScreen::fullCalibrationPrompt(int stepNum){
     case 6: // Complete
       _display.println("Joystick");
       _display.println("calibrated");
+      _display.display();
       
-      delay(1000);
+      delay(1500);
       mainMenu();
       break;
   }
