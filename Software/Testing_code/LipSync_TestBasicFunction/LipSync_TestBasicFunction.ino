@@ -1,5 +1,5 @@
 /* 
-* File: LipSyncX_DataCapture.ino
+* File: LipSync_TestBasicFunction.ino
 * Firmware: LipSync
 * Developed by: MakersMakingChange
 * Version: 2023-Dec-11

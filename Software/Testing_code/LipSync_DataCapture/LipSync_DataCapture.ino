@@ -1,6 +1,6 @@
 /* 
-* File: LipSyncX_DataCapture.ino
-* Firmware: LipSync X
+* File: LipSync_DataCapture.ino
+* Firmware: LipSync 4
 * Developed by: MakersMakingChange
 * Version: 2023-Nov-21
 * Copyright Neil Squire Society 2023. 

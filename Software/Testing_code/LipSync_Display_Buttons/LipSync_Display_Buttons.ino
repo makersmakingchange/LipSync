@@ -1,5 +1,5 @@
 /*******************
-  This is an exmaple of the OLED screen menu for the LipSyncX
+  This is an exmaple of the OLED screen menu for the LipSync
   Last edited: November 28, 2023
  *******************/
 

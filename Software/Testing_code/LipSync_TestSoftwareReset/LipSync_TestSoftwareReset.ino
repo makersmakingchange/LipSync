@@ -1,6 +1,6 @@
 /* 
-* File: LipSyncX_TestSoftwareReset.ino
-* Firmware: LipSync X
+* File: LipSync_TestSoftwareReset.ino
+* Firmware: LipSync 4
 * Developed by: MakersMakingChange
 * Version: 2023-Nov-20
 * Copyright Neil Squire Society 2023. 
