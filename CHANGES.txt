@@ -1,0 +1,53 @@
+Version 4.0 | 2024-Feb-02
+- Refined enclosure
+- Full-featured firmware
+	- USB Mouse, Wireless Mouse, USB Gamepad modes
+	- Integrated display menu for settings adjustment
+	- API settings adjustment
+- Documentation released
+	- User Guide
+	- Maker Guide
+	- Quickstart Guide
+ 	- BOM
+ 
+Version 4.0.betaII | 2023-Dec-05
+- Internal test build
+	- prototype enclosures for Hub and Joystick units
+- Basic mouse firmware
+- Basic menu display
+- Updated PCB layout
+- Hub unit with feedback features
+- joystick unit with sensors and rotational mounting
+ 
+ 
+Version 4.0.beta | 2023-Nov-30
+- Initial split architecture
+	- PCB/microcontroller unit (Hub)
+	- Joystick unit 
+- Rebuilt 4 bearing gimbal
+- Mouthpiece in-line with rotation center
+ 
+ 
+Version 4.0.alphaII | 2022-Mar-31
+- Full funcitonal system with magnet-based gimbal mechanism
+- Enclosure with rotatable mounting feature
+- Two-part custom PCB
+- 3 neopixel LEDs for feedback
+- 3 switch ports and on-device buttons for alterantive inputs
+- User tested
+ 
+ 
+Version 4.0.alphaI | 2021-Nov-30
+- Initial gimbal-based magnetic joystick mechanism and sensor proof of concept
+- 3 bearing gimbal
+- Two-part custom PCB
+- Mouthpiece axis offset from rotation axis
+
+Version 3.0 - LipSync Classic | 2021-Sept-01
+- Force sensitive resistor and spring based josytick
+- Additional Bluetooth breakout board available to convert USB unit to wireless
+- updated shell enclosure
+- API settings adjustment
+- Firmware settable mounting angle
+
+
