@@ -4,7 +4,7 @@ The LipSync is a mouth-operated sip-and-puff joystick that can emulate a mouse, 
 
 This most recent version, the LipSync 4.0, is made up of the LipSync Joystick and LipSync Hub. The Joystick is the primary user interface, and contains a low-force Hall-Effect joystick and sip and puff sensors. The Hub has a display that provides a graphical interface for independently adjusting settings, as well as it provides the connection to the host device and up to three external assistive switches with 3.5 mm jacks.
 
-The device is comprised of off-the-shelf electronics and hardware, a custom PCB and 3D printed parts. The overall cost of materials (including materials required in bulk) for a single build is about $325 (plus shipping). In larger quantities, the cost of materials 
+The device is comprised of off-the-shelf electronics and hardware, a custom PCB and 3D printed parts. The overall cost of materials (including materials required in bulk) for a single build is about $325 (plus shipping). In larger quantities, the cost of materials is closer to $175.
 
 The LipSync is compatible with a range of host devices that are able to support a USB Mouse, a USB Gamepad and/or a Bluetooth Mouse. Compatible devices include PC and Mac computers and laptops, Android, iOS, and Windows smartphone and tablets, and the Xbox Adaptice Controller.  
 
