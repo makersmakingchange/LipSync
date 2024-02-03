@@ -1,4 +1,4 @@
- # LipSync
+# LipSync
 
 The LipSync is a mouth-operated sip-and-puff joystick that can emulate a mouse, wireless Bluetooth mouse, or gamepad. It enables people with disabililites that limit their mobility to control a computer, gaming console, smart phone, or tablet.
 
@@ -41,7 +41,6 @@ The [Maker Guide](/Documentation/LipSync_Maker_Guide.pdf) contains all the neces
 ### 2. Order the Off-The-Shelf Components
 
 The [Bill of Materials](/Documentation/LipSync_BOM.xlsx) lists all of the parts and components required to build the device. 
-
 
 ### 3. Print the 3D Printable components
 
@@ -133,6 +132,7 @@ Designers:
  
 
 ---
+
 
 ## About Makers Making Change
 [<img src="https://raw.githubusercontent.com/makersmakingchange/makersmakingchange/main/img/mmc_logo.svg" width="500" alt="Makers Making Change Logo">](https://www.makersmakingchange.com/)
