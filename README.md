@@ -6,7 +6,7 @@ This most recent version, the LipSync 4.0, is made up of the LipSync Joystick an
 
 The device is comprised of off-the-shelf electronics and hardware, a custom PCB and 3D printed parts. The overall cost of materials (including materials required in bulk) for a single build is about $325 (plus shipping). In larger quantities, the cost of materials is closer to $175.
 
-The LipSync is compatible with a range of host devices that are able to support a USB Mouse, a USB Gamepad and/or a Bluetooth Mouse. Compatible devices include PC and Mac computers and laptops, Android, iOS, and Windows smartphone and tablets, and the Xbox Adaptice Controller.  
+The LipSync is compatible with a range of host devices that are able to support a USB Mouse, a USB Gamepad and/or a Bluetooth Mouse. Compatible devices include PC and Mac computers and laptops, Android, iOS, and Windows smartphone and tablets, and the Xbox Adaptive Controller.  
 
 Older versions of the LipSync are now obsolete. Documentation and design files are still available at the [LipSync Classic Repository.](https://github.com/makersmakingchange/OldLipSync)
 
