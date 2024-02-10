@@ -91,6 +91,8 @@ Please see the CERN-OHL-W v2 for applicable conditions.
 
 Source Location: https://github.com/makersmakingchange/LipSync
 
+<img src="LICENSES/oshw_licenses.png" alt="List of open source licenses. Hardware: CERN-OHL-W-2.0, Software: GPL-3.0-or-later, Documentation: CC-BY-SA-4.0.">
+
 ## Attribution
 
 The LipSync was designed by Neil Squire Society / Makers Making Change. The initial development of a 3D printable LipSync was supported by the Google Impact Challenge: Disabilities grant from Google.org. Further development was supported through the Government of Canada's Innovation Science and Economic Development Assistive Technology Program. These and other funders have also enabled Neil Squire / Makers Making Change to deploy numerous LipSyncs to users at reduced cost.
@@ -130,6 +132,11 @@ Designers:
  - Brad Wellington, Neil Squire Society / Makers Making Change.
  - Josie Versloot, Neil Squire Society / Makers Making Change.
  
+## Open Source Hardware Certification
+
+The LipSync Hub has been certified as open source hardware by the Open Source Hardware Association under the OSHWA UID [CA000046](https://certification.oshwa.org/ca000046.html).
+
+<img src="oshw/certification-mark-CA000046-stacked.png" width = 250 alt="Open Source Hardware Certification Mark for LipSync: CA000046">
 
 ---
 
