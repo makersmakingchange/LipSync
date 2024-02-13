@@ -8218,10 +8218,13 @@ einem neuen Namen ab.</description>
 <attribute name="NAME" x="-1.1562" y="-6.5712" size="1.27" layer="25" ratio="10"/>
 </element>
 <element name="U$1" library="MMC Eagle" library_urn="urn:adsk.eagle:library:13126479" package="OSHW_SMALL_LOGO" package3d_urn="urn:adsk.eagle:package:38381648/1" value="" x="-35.6" y="-2" smashed="yes"/>
-<element name="U$2" library="OSHWA" package="CERT-SMALL-SILK" value="CA########" x="70.3" y="15.5" smashed="yes" rot="MR0">
-<attribute name="VALUE" x="73.66994375" y="13.722" size="1.27" layer="22" font="vector" ratio="12" rot="MR0"/>
+<element name="U$2" library="OSHWA" package="CERT-SMALL-SILK" value="CA000046" x="-16.8" y="-8" smashed="yes" rot="MR0">
+<attribute name="VALUE" x="-13.43005625" y="-9.778" size="1.27" layer="22" font="vector" ratio="12" rot="MR0"/>
 </element>
 <element name="U$3" library="MMC Eagle" library_urn="urn:adsk.eagle:library:13126479" package="LABEL-LIPSYNC-X-LG" package3d_urn="urn:adsk.eagle:package:42121751/1" value="" x="24.1" y="-8.1" smashed="yes"/>
+<element name="U$4" library="OSHWA" package="CERT-SMALL-SILK" value="CA000046" x="-18.5" y="-8" smashed="yes">
+<attribute name="VALUE" x="-21.86994375" y="-9.778" size="1.27" layer="21" font="vector" ratio="12"/>
+</element>
 </elements>
 <signals>
 <signal name="GND">
