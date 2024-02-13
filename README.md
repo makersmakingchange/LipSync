@@ -134,7 +134,7 @@ Designers:
  
 ## Open Source Hardware Certification
 
-The LipSync Hub has been certified as open source hardware by the Open Source Hardware Association under the OSHWA UID [CA000046](https://certification.oshwa.org/ca000046.html).
+The LipSync has been certified as open source hardware by the Open Source Hardware Association under the OSHWA UID [CA000046](https://certification.oshwa.org/ca000046.html).
 
 <img src="oshw/certification-mark-CA000046-stacked.png" width = 250 alt="Open Source Hardware Certification Mark for LipSync: CA000046">
 
