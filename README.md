@@ -6,7 +6,9 @@ This most recent version, the LipSync 4.0, is made up of the LipSync Joystick an
 
 The device is comprised of off-the-shelf electronics and hardware, a custom PCB and 3D printed parts. The overall cost of materials (including materials required in bulk) for a single build is about $325 (plus shipping). In larger quantities, the cost of materials is closer to $175.
 
-The LipSync is compatible with a range of host devices that are able to support a USB Mouse, a USB Gamepad and/or a Bluetooth Mouse. Compatible devices include PC and Mac computers and laptops, Android, iOS, and Windows smartphone and tablets, and the Xbox Adaptive Controller.  
+The LipSync is compatible with a range of host devices that are able to support a USB Mouse, a USB Gamepad and/or a Bluetooth Mouse. Compatible devices include PC and Mac computers and laptops, Android, iOS, and Windows smartphone and tablets, and the Xbox Adaptive Controller. 
+
+The LipSync is Open Assistive Technology (OpenAT) and is certified as Open Source Hardware by the Open Source Hardware Association under the OSHWA UID [CA000046](https://certification.oshwa.org/ca000046.html). Under the terms of the open source hardware licenses, the LipSync may be built, used, and improved by anyone.  
 
 Older versions of the LipSync are now obsolete. Documentation and design files are still available at the [LipSync Classic Repository.](https://github.com/makersmakingchange/OldLipSync)
 
@@ -62,9 +64,9 @@ As open source assistive technology, you are welcomed and encouraged to improve 
 |----------------------|---------|--------------------------------------------------------------------------|-------------------|
 | Design Rationale     | 4.0     | [LipSync_Design_Rationale](/Documentation/LipSync_Design_Rationale.pdf)  | In progress - part of future release  |
 | Maker Guide          | 4.0     | [LipSync_Maker_Guide](/Documentation/LipSync_Maker_Guide.pdf)            |                   |
-| Bill of Materials    | 4.0     | [LipSync_Bill_of_Materials](/Documentation/LipSync_BOM.csv)             |                   |
-| User Guide           | 4.0     | [LipSync_User_Guide](/Documentation/LipSync_User_Guide.pdf)             |                   |
-| Quickstart Guide     | 4.0     | [LipSync_Quickstart_Guide](/Documentation/LipSync_Quickstart_Guide.pdf)             |                   |
+| Bill of Materials    | 4.0     | [LipSync_Bill_of_Materials](/Documentation/LipSync_BOM.csv)              |                   |
+| User Guide           | 4.0     | [LipSync_User_Guide](/Documentation/LipSync_User_Guide.pdf)              |                   |
+| Quickstart Guide     | 4.0     | [LipSync_Quickstart_Guide](/Documentation/LipSync_Quickstart_Guide.pdf)  |                   |
 | Changelog            | 4.0     | [LipSync_Changelog](CHANGES.txt)                                         |                   |
 
 ### Design Files
