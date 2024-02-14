@@ -97,7 +97,7 @@ Source Location: https://github.com/makersmakingchange/LipSync
 
 ## Attribution
 
-The LipSync was designed by Neil Squire Society / Makers Making Change. The initial development of a 3D printable LipSync was supported by the Google Impact Challenge: Disabilities grant from Google.org. Further development was supported through the Government of Canada's Innovation Science and Economic Development Assistive Technology Program. These and other funders have also enabled Neil Squire / Makers Making Change to deploy numerous LipSyncs to users at reduced cost.
+The LipSync was designed by Neil Squire Society / Makers Making Change. The initial development of a 3D printable LipSync was supported by the Google Impact Challenge: Disabilities grant from Google.org. Further development was supported through the Government of Canada's Innovation Science and Economic Development [Accessible Technology Program](https://ised-isde.canada.ca/site/accessible-technology-program). These and other funders have also enabled Neil Squire / Makers Making Change to deploy numerous LipSyncs to users at reduced cost.
 
 The latest design (V4.0) incorporates feedback and suggestions from numerous users, clinicians, and volunteer makers. In particular, 4.0.AlphaII was tested by the following users: Omar Al-azawi, Don Danbrook, Ean Price, Jim Ryan and Kaileen Selig.
 
