@@ -18,6 +18,9 @@ Last updated: 2024-Feb-02
 
 Makers Making Change Assistive Device Library Listing: [https://www.makersmakingchange.com/s/product/LipSync](https://www.makersmakingchange.com/s/product/lipsync/01tJR000000698fYAA)
 
+## OpenAT Joysticks
+This design is part of the [OpenAT Joystick Project](https://github.com/makersmakingchange/OpenAT-Joysticks), a collection of open source designs for digital access and adapted gaming. 
+
 ## How to Obtain the Device
 ### 1. Do-it-Yourself (DIY) or Do-it-Together (DIT)
 
