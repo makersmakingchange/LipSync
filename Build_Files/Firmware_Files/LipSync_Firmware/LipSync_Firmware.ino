@@ -1158,7 +1158,7 @@ void initJoystick() {
 // Return     : void
 //****************************************//
 void performJoystickCenter(int* args) {
-  if (USB_DEBUG) { Serial.println("Begin performJoystickCenter ******************");}
+  if (USB_DEBUG) { Serial.println("Begin performJoystickCenter");}
   int stepNumber = (int)args;
   unsigned long readingDuration = CONF_JOY_INIT_READING_DELAY * CONF_JOY_INIT_READING_NUMBER;                                               //Duration of the center point readings (500 seconds )
   unsigned long currentReadingStart = CONF_JOY_INIT_START_DELAY + (CONF_JOY_INIT_STEP_BLINK_DELAY * ((CONF_JOY_INIT_STEP_BLINK * 2) + 1));  //(500 + 150*3)                      //Time until start of current reading.
@@ -1184,7 +1184,7 @@ void performJoystickCenter(int* args) {
     calibTimer.deleteTimer(0);  //Delete timer
     setLedDefault();            //Set default led feedback
     canOutputAction = true;
-    if (USB_DEBUG) { Serial.println("End performJoystickCenter, before buzzer ****************");}
+    if (USB_DEBUG) { Serial.println("End performJoystickCenter, before buzzer");}
     if (startupCenterReset){    // Checks variable to only play sound and show splash screen on startup
       buzzer.startup();
       screen.splashScreen2();
