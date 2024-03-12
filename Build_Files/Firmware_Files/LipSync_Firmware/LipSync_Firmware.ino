@@ -136,6 +136,7 @@ void setup() {
   initMemory();  //Initialize Memory
 
   beginComOpMode();  //Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
+  delay(3000);
 
   //initOperatingMode();                                          //Initialize Operating Mode
 
@@ -195,6 +196,7 @@ void setup() {
 // Return     : void
 //*********************************//
 void loop() {
+  if (USB_DEBUG) {Serial.println("USB_DEBUG: Loop Start ");}
   ledStateTimer.run();  // Timer for lights
 
   calibTimer.run();  // Timer for calibration measurements
@@ -1156,7 +1158,7 @@ void initJoystick() {
 // Return     : void
 //****************************************//
 void performJoystickCenter(int* args) {
-  if (USB_DEBUG) { Serial.println("Begin performJoystickCenter");}
+  if (USB_DEBUG) { Serial.println("Begin performJoystickCenter ******************");}
   int stepNumber = (int)args;
   unsigned long readingDuration = CONF_JOY_INIT_READING_DELAY * CONF_JOY_INIT_READING_NUMBER;                                               //Duration of the center point readings (500 seconds )
   unsigned long currentReadingStart = CONF_JOY_INIT_START_DELAY + (CONF_JOY_INIT_STEP_BLINK_DELAY * ((CONF_JOY_INIT_STEP_BLINK * 2) + 1));  //(500 + 150*3)                      //Time until start of current reading.
@@ -1182,6 +1184,7 @@ void performJoystickCenter(int* args) {
     calibTimer.deleteTimer(0);  //Delete timer
     setLedDefault();            //Set default led feedback
     canOutputAction = true;
+    if (USB_DEBUG) { Serial.println("End performJoystickCenter, before buzzer ****************");}
     if (startupCenterReset){    // Checks variable to only play sound and show splash screen on startup
       buzzer.startup();
       screen.splashScreen2();
@@ -1189,7 +1192,6 @@ void performJoystickCenter(int* args) {
     if (screen.showCenterResetComplete){screen.centerResetCompletePage();}      // Checks variable so center reset complete page only shows if accessed from menu, not on startup or during full calibration
     startupCenterReset = false;
   }
-  if (USB_DEBUG) { Serial.println("End performJoystickCenter");}
 }
 
 //***PERFORM JOYSTICK CENTER STEP FUNCTION***//
