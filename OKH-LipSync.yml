@@ -11,7 +11,7 @@ keywords:
 project-link: https://github.com/makersmakingchange/LipSync
 image: https://github.com/makersmakingchange/LipSync/blob/main/Photos/LipSync.jpg
 made: true
-made-independently: false
+made-independently: true
 license:
   hardware: CERN-OHL-W-2.0
   documentation: CC-BY-SA-4.0
