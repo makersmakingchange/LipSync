@@ -1279,7 +1279,7 @@ void LSScreen::adjustSipThreshMenu(void) {
 //*********************************//
 void LSScreen::adjustPuffThreshMenu(void) { 
   _currentMenu = PUFF_THRESH_MENU;
-  _sipPressThresh = getPuffPressureThreshold(false,false);
+  _puffPressThresh = getPuffPressureThreshold(false,false);
   
   _adjustPuffThreshMenuText[0] = "Puff: " + String(_puffPressThresh) + " ";
   
