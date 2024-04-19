@@ -992,6 +992,14 @@ void LSScreen::confirmModeChange() {
 // Return     : void
 //*********************************//
 void LSScreen::changeMode(){
+  setupDisplay();
+  _display.println("Changing");
+  _display.println("mode.");
+  _display.println("Release");
+  _display.println("joystick");
+  _display.display();
+  delay(2000);
+  
   if (_communicationMode != _tempCommunicationMode){
     _communicationMode = _tempCommunicationMode;
     setCommunicationMode(false, false, _tempCommunicationMode); // Sets new communication mode, saves in memory
@@ -1001,8 +1009,7 @@ void LSScreen::changeMode(){
     _operatingMode = _tempOperatingMode;
     setOperatingMode(false, false, _tempOperatingMode);     // Sets new operating mode, saves in memory, and conducts software reset
   }
-
-
+  
   softwareReset();    //TODO: is there a way to avoid software reset if just changing com mode? 
 
   _currentMenu = MAIN_MENU;

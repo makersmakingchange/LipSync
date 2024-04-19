@@ -137,10 +137,6 @@ void setup() {
 
   beginComOpMode();  //Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
 
-  //initOperatingMode();                                          //Initialize Operating Mode
-
-  //initCommunicationMode();                                      //Initialize Communication Mode
-
   if (USB_DEBUG) {
     Serial.print("USBDEBUG: comMode: ");
     Serial.println(comMode);
