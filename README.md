@@ -12,7 +12,7 @@ The LipSync is Open Assistive Technology (OpenAT) and is certified as Open Sourc
 
 Older versions of the LipSync are now obsolete. Documentation and design files are still available at the [LipSync Classic Repository.](https://github.com/makersmakingchange/OldLipSync)
 
-Last updated: 2024-Feb-02
+Last updated: 2024-Apr-24
 
 <img src="Photos/LipSync-4.jpg" width="500" alt="Picture of LipSync.">
 
@@ -65,8 +65,8 @@ As open source assistive technology, you are welcomed and encouraged to improve 
 ### Documentation
 | Document             | Version | Link                                                                     | Notes             |
 |----------------------|---------|--------------------------------------------------------------------------|-------------------|
-| Design Rationale     | 4.0     | [LipSync_Design_Rationale](/Documentation/LipSync_Design_Rationale.pdf)  | In progress - part of future release  |
-| Maker Guide          | 4.0     | [LipSync_Maker_Guide](/Documentation/LipSync_Maker_Guide.pdf)            |                   |
+| Design Rationale     | 4.0     | [LipSync_Design_Rationale](/Documentation/LipSync_Design_Rationale.pdf)  |                   |
+| Maker Guide          | 4.0.1   | [LipSync_Maker_Guide](/Documentation/LipSync_Maker_Guide.pdf)            |                   |
 | Bill of Materials    | 4.0     | [LipSync_Bill_of_Materials](/Documentation/LipSync_BOM.csv)              |                   |
 | User Guide           | 4.0     | [LipSync_User_Guide](/Documentation/LipSync_User_Guide.pdf)              |                   |
 | Quickstart Guide     | 4.0     | [LipSync_Quickstart_Guide](/Documentation/LipSync_Quickstart_Guide.pdf)  |                   |
