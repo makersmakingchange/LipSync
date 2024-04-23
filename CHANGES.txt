@@ -1,3 +1,7 @@
+Version 4.0.1 2024-Apr-23
+- Added instructions to use Tiny USB Library v2.3.0 to avoid startup error to Maker Guide.
+
+
 Version 4.0 | 2024-Feb-02
 - Refined enclosure
 - Full-featured firmware
