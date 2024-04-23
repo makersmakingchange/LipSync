@@ -83,6 +83,9 @@ LSTimer<void> pollTimer;
 int ledTimerId[3];
 LSTimer<ledStateStruct> ledStateTimer;
 
+int usbTimeoutTimerId[1];
+LSTimer<int> usbTimeoutTimer;
+
 //Joystick module variables and structures
 int xVal;
 int yVal;
@@ -136,6 +139,8 @@ void setup() {
   initMemory();  //Initialize Memory
 
   beginComOpMode();  //Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
+
+  usbCommunicationTimeout();
 
   if (USB_DEBUG) {
     Serial.print("USBDEBUG: comMode: ");
@@ -192,6 +197,8 @@ void setup() {
 //*********************************//
 void loop() {
   ledStateTimer.run();  // Timer for lights
+
+  usbTimeoutTimer.run();
 
   calibTimer.run();  // Timer for calibration measurements
 
@@ -443,6 +450,20 @@ void initCommunicationMode() {
   comMode = getCommunicationMode(false, false);
 }
 
+void usbCommunicationTimeout(void){
+  if (comMode == CONF_COM_MODE_USB){
+    
+    if ((usbmouse.usbTimeout) || (gamepad.usbTimeout)){
+      led.setLedColor(CONF_LED_MICRO, LED_CLR_WHITE, CONF_LED_BRIGHTNESS);
+      setCommunicationMode(false, false, CONF_COM_MODE_BLE);
+      if (operatingMode != CONF_OPERATING_MODE_MOUSE){
+        operatingMode = CONF_OPERATING_MODE_MOUSE;
+        setOperatingMode(false, false, CONF_OPERATING_MODE_MOUSE);     // Sets new operating mode, saves in memory, and conducts software reset
+      }
+      softwareReset();
+    }
+  }
+}
 
 //*********************************//
 // Operating Mode Functions
@@ -482,8 +503,6 @@ void initOperatingMode() {
   */
 }
 
-
-
 //***CHANGE OPERATING MODE FUNCTION***//
 // Function   : changeOperatingMode
 //
@@ -501,6 +520,7 @@ void changeOperatingMode(int inputOperatingState) {
   }
   operatingMode = inputOperatingState;
 }
+
 
 //***INITIALIZE OPERATING MODE FUNCTION***//
 // Function   : beginComOpMode                  //TODO: rename this?

@@ -167,6 +167,8 @@
 
 #define CONF_SPLASH_SCREEN_DURATION 10000    //10 seconds - how long the splash screen stays on on startup
 
+#define CONF_USB_HID_TIMEOUT  5000          //5 seconds - timeout for connecting to USB and defaulting to Bluetooth instead
+
 // Polling Timer IDs for each module
 #define CONF_TIMER_JOYSTICK 0
 #define CONF_TIMER_PRESSURE 1

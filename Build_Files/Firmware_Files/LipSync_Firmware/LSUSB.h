@@ -60,6 +60,7 @@ class LSUSBMouse {
     inline void release(uint8_t b = MOUSE_LEFT); // release LEFT by default
     inline bool isPressed(uint8_t b = MOUSE_LEFT); // check LEFT by default
 	  inline bool isReady(void);
+    bool usbTimeout = false;
   protected:
     uint8_t _buttons;
     void buttons(uint8_t b);
@@ -149,6 +150,7 @@ class LSUSBGamepad {
     inline void yAxis(uint8_t a);
     inline void move(uint8_t x,uint8_t y);
     inline bool isReady(void);
+    bool usbTimeout = false;
   protected:
     HID_GamepadReport_Data_t _report;
     uint32_t startMillis;
@@ -176,8 +178,19 @@ void LSUSBMouse::begin(void)
   this->usb_hid.setStringDescriptor(MOUSE_DESCRIPTOR);
   this->usb_hid.begin();
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing USB HID Mouse");  }
-  while( !USBDevice.mounted() ) delay(1);
+
+  unsigned long timerHidTimeoutBegin = millis();
+  
+  while( !USBDevice.mounted() ) {
+    delay(1);
+    if ((millis() - timerHidTimeoutBegin) > CONF_USB_HID_TIMEOUT){
+      usbTimeout = true;
+      break;
+    }
+  }
+  
 }
+
 
 
 void LSUSBMouse::end(void)
@@ -398,7 +411,17 @@ LSUSBGamepad::LSUSBGamepad(void)
 void LSUSBGamepad::begin(void)
 {
   this->usb_hid.begin();
-  while( !USBDevice.mounted() ) delay(1); // wait until device mounted
+ 
+  unsigned long timerHidGamepadTimeoutBegin = millis();
+  
+  while( !USBDevice.mounted() ) {
+    delay(1);
+    if ((millis() - timerHidGamepadTimeoutBegin) > CONF_USB_HID_TIMEOUT){
+      usbTimeout = true;
+      break;
+    }
+  }
+  
   //Release all the buttons and center joystick
   end();
   startMillis = millis();
