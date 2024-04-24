@@ -126,24 +126,24 @@
 #define CONF_ACTION_NOTHING 0                              // No action
 #define CONF_ACTION_LEFT_CLICK 1                           // Generates a short left click
 #define CONF_ACTION_RIGHT_CLICK 2                          // Generates a short right click
-#define CONF_ACTION_DRAG 3                                 // Initiates drag mode, holding down left click until cancelled
-#define CONF_ACTION_SCROLL 4                               // Initiates scroll mode. Vertical motion generates mouse scroll wheel movement.
-#define CONF_ACTION_CURSOR_CENTER 5                        // Center the joystick 
-#define CONF_ACTION_CURSOR_CALIBRATION 6                   // Initiates the joystick calibration.
-#define CONF_ACTION_MIDDLE_CLICK 7                         // Generates a short middle click
-#define CONF_ACTION_DEC_SPEED 8                            // Decrease cursor movement speed
-#define CONF_ACTION_INC_SPEED 9                            // Increase cursor movement speed
-#define CONF_ACTION_CHANGE_MODE 10                         // Change communication mode
-#define CONF_ACTION_START_MENU 11                          // Start menu on display
-#define CONF_ACTION_STOP_MENU 12                           // Close menu on display
-#define CONF_ACTION_B1_PRESS 13                            // Generates a Button 1 press or button X1(Left USB)/View(Right USB) press in XAC  
-#define CONF_ACTION_B2_PRESS 14                             // Generates a Button 2 press or button X2(Left USB)/Menu(Right USB) press in XAC    
-#define CONF_ACTION_B3_PRESS 15                            // Generates a Button 3 press or button LS(Left USB)/RS(Right USB) press in XAC
-#define CONF_ACTION_B4_PRESS 16                            // Generates a Button 4 press or button LB(Left USB)/RB(Right USB) press in XAC 
-#define CONF_ACTION_B5_PRESS 17                            // Generates a Button 5 press or button A(Left USB)/X(Right USB) press in XAC
-#define CONF_ACTION_B6_PRESS 18                            // Generates a Button 6 press or button B(Left USB)/Y(Right USB) press in XAC
-#define CONF_ACTION_B7_PRESS 19                            // Generates a Button 7 press or button View(Left USB)/X1(Right USB) press in XAC  
-#define CONF_ACTION_B8_PRESS 20                            // Generates a Button 8 press or button Menu(Left USB)/X2(Right USB) press in XAC  
+#define CONF_ACTION_MIDDLE_CLICK 3                         // Generates a short middle click
+#define CONF_ACTION_DRAG 4                                 // Initiates drag mode, holding down left click until cancelled
+#define CONF_ACTION_SCROLL 5                               // Initiates scroll mode. Vertical motion generates mouse scroll wheel movement.
+#define CONF_ACTION_B1_PRESS 6                            // Generates a Button 1 press or button X1(Left USB)/View(Right USB) press in XAC  
+#define CONF_ACTION_B2_PRESS 7                             // Generates a Button 2 press or button X2(Left USB)/Menu(Right USB) press in XAC    
+#define CONF_ACTION_B3_PRESS 8                            // Generates a Button 3 press or button LS(Left USB)/RS(Right USB) press in XAC
+#define CONF_ACTION_B4_PRESS 9                            // Generates a Button 4 press or button LB(Left USB)/RB(Right USB) press in XAC 
+#define CONF_ACTION_B5_PRESS 10                            // Generates a Button 5 press or button A(Left USB)/X(Right USB) press in XAC
+#define CONF_ACTION_B6_PRESS 11                            // Generates a Button 6 press or button B(Left USB)/Y(Right USB) press in XAC
+#define CONF_ACTION_B7_PRESS 12                            // Generates a Button 7 press or button View(Left USB)/X1(Right USB) press in XAC  
+#define CONF_ACTION_B8_PRESS 13                            // Generates a Button 8 press or button Menu(Left USB)/X2(Right USB) press in XAC 
+#define CONF_ACTION_CURSOR_CENTER 14                        // Center the joystick 
+#define CONF_ACTION_CURSOR_CALIBRATION 15                   // Initiates the joystick calibration.
+#define CONF_ACTION_DEC_SPEED 16                            // Decrease cursor movement speed
+#define CONF_ACTION_INC_SPEED 17                            // Increase cursor movement speed
+#define CONF_ACTION_CHANGE_MODE 18                         // Change communication mode
+#define CONF_ACTION_START_MENU 19                          // Start menu on display
+#define CONF_ACTION_STOP_MENU 20                           // Close menu on display
 #define CONF_ACTION_NEXT_MENU_ITEM 21                      // Move to next item in menu
 #define CONF_ACTION_SELECT_MENU_ITEM 22                    // Select current item in menu 
 #define CONF_ACTION_RESET 23                               // Software Reset
