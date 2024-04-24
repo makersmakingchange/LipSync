@@ -84,7 +84,7 @@ private:
   int _soundMode;
   
   bool _scrollOn = false;
-  long _scrollDelayTimer = millis();
+  unsigned long _scrollDelayTimer = millis();
   int _scrollPos = 12;
   
   int _cursorStart = 0;
@@ -96,6 +96,9 @@ private:
 
   float _sipPressThresh;
   float _puffPressThresh;
+
+  unsigned long _lastActivityMillis;
+  
 
 
   void displayMenu();
@@ -214,6 +217,8 @@ void LSScreen::begin() {
   _communicationMode = getCommunicationMode(false, false);
   _soundMode = getSoundMode(false, false);
 
+  _lastActivityMillis = millis();
+
 }
 
 //*********************************//
@@ -247,6 +252,10 @@ void LSScreen::update() {
   if (_scrollOn){
     scrollLongText();
   }
+
+  if (((millis() - _lastActivityMillis) > CONF_MENU_TIMEOUT) && is_active){
+    deactivateMenu();
+  }
 }
 
 //*********************************//
@@ -259,6 +268,7 @@ void LSScreen::update() {
 // Return     : void
 //*********************************//
 void LSScreen::activateMenu() {
+  _lastActivityMillis = millis();
   is_active = true;
   _operatingMode = getOperatingMode(false, false);
   mainMenu();
@@ -366,6 +376,7 @@ void LSScreen::splashScreen2() {
   _display.display();
   
   screenStateTimerId = screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
+  _lastActivityMillis = millis();
 
 }
 
@@ -383,6 +394,8 @@ void LSScreen::splashScreen2() {
 // Return     : void
 //*********************************//
 void LSScreen::nextMenuItem() {
+  _lastActivityMillis = millis();
+  
   if (_scrollOn){
     _display.setCursor(0, _selectedLine *16);
     _display.print("                                   ");
@@ -415,6 +428,8 @@ void LSScreen::nextMenuItem() {
 // Return     : void
 //*********************************//
 void LSScreen::selectMenuItem() {
+  _lastActivityMillis = millis();
+  
   _countMenuScroll = 0;
   switch (_currentMenu) {
     case MAIN_MENU:

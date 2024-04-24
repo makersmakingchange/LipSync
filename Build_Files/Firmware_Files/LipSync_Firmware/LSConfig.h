@@ -167,6 +167,8 @@
 
 #define CONF_SPLASH_SCREEN_DURATION 10000    //10 seconds - how long the splash screen stays on on startup
 
+#define CONF_MENU_TIMEOUT  300000            // 300 seconds (5 minutes) - duration of inactivity after which the screen turns off 
+
 // Polling Timer IDs for each module
 #define CONF_TIMER_JOYSTICK 0
 #define CONF_TIMER_PRESSURE 1
