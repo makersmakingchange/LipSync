@@ -149,6 +149,7 @@
 #define CONF_ACTION_RESET 23                               // Software Reset
 #define CONF_ACTION_FACTORY_RESET 24                       // Factory Reset
 
+
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
 #define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":0.0,\"PT\":0.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[13.0,13.0],\"CA2\":[-13.0,13.0],\"CA3\":[-13.0,-13.0],\"CA4\":[13.0,-13.0],\"SM\":1,\"DM\":0}"
@@ -409,6 +410,8 @@ const ledActionStruct ledActionProperty[]{
   { CONF_ACTION_B4_PRESS,           CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_NONE },
   { CONF_ACTION_B5_PRESS,           CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_NONE },
   { CONF_ACTION_B6_PRESS,           CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_NONE },
+  { CONF_ACTION_B7_PRESS,           CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
+  { CONF_ACTION_B8_PRESS,           CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
   { CONF_ACTION_CURSOR_CENTER,      CONF_LED_MICRO,   LED_CLR_PURPLE, LED_CLR_NONE, LED_ACTION_NONE },
   { CONF_ACTION_CURSOR_CALIBRATION, CONF_LED_MICRO,   LED_CLR_PURPLE, LED_CLR_NONE, LED_ACTION_ON },
   { CONF_ACTION_MIDDLE_CLICK,       CONF_LED_MIDDLE,  LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
