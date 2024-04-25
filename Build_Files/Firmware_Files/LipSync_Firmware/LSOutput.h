@@ -68,7 +68,7 @@ const colorStruct colorProperty[]{
 };
 */
 
-//Color properties - IBM COLORBLIND FRIENDLY PALETTE
+//Color properties
 const colorStruct colorProperty[]{
   { LED_CLR_NONE,   "None",     {   0,   0,   0 } },
   { LED_CLR_BLUE,   "Blue",     {   0,   0, 255 } },
