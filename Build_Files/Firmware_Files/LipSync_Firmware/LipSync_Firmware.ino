@@ -98,6 +98,7 @@ pressureStruct pressureValues = { 0.0, 0.0, 0.0 };
 int outputAction;
 bool canOutputAction = true;
 bool startupCenterReset = true;
+bool calibrationComplete = false;
 
 bool settingsEnabled = false;  //Serial input settings command mode enabled or disabled
 
@@ -1175,6 +1176,7 @@ void initJoystick() {
 // Return     : void
 //****************************************//
 void performJoystickCenter(int* args) {
+  calibrationComplete = false;
   int stepNumber = (int)args;
   unsigned long readingDuration = CONF_JOY_INIT_READING_DELAY * CONF_JOY_INIT_READING_NUMBER;                                               //Duration of the center point readings (500 seconds )
   unsigned long currentReadingStart = CONF_JOY_INIT_START_DELAY + (CONF_JOY_INIT_STEP_BLINK_DELAY * ((CONF_JOY_INIT_STEP_BLINK * 2) + 1));  //(500 + 150*3)                      //Time until start of current reading.
@@ -1206,6 +1208,7 @@ void performJoystickCenter(int* args) {
     }                             
     if (screen.showCenterResetComplete){screen.centerResetCompletePage();}      // Checks variable so center reset complete page only shows if accessed from menu, not on startup or during full calibration
     startupCenterReset = false;
+    calibrationComplete = true;
   }
 }
 
@@ -1245,6 +1248,7 @@ void performJoystickCenterStep(int* args) {
 //****************************************//
 void performJoystickCalibration(int* args) 
 {
+  calibrationComplete = false;
   int stepNumber = (int)args;
   unsigned long readingDuration = CONF_JOY_CALIB_READING_DELAY * CONF_JOY_CALIB_READING_NUMBER;                                               //Duration of the max corner reading ( 2 seconds )
   unsigned long currentReadingStart = CONF_JOY_CALIB_STEP_DELAY + (CONF_JOY_CALIB_STEP_BLINK_DELAY * ((CONF_JOY_CALIB_STEP_BLINK * 2) + 1));  //Time until start of current reading
@@ -1287,6 +1291,7 @@ void performJoystickCalibration(int* args)
     js.setMinimumRadius();                                                                                                      //Update the minimum cursor operating radius 
     setLedDefault();
     canOutputAction = true;
+    calibrationComplete = true;
     pollTimer.enable(CONF_TIMER_JOYSTICK);                                                                                      //Enable joystick data polling 
     pollTimer.enable(CONF_TIMER_SCROLL);                                                                                        //Enable joystick data polling 
     screen.fullCalibrationPrompt(stepNumber);
@@ -1339,7 +1344,9 @@ void joystickLoop() {
 
   pointIntType joyOutPoint = js.getXYOut();  //Read the filtered values
 
-  performJoystick(joyOutPoint);  //Perform joystick move action
+  if (calibrationComplete){
+    performJoystick(joyOutPoint);  //Perform joystick move action
+  }
 
   //if (USB_DEBUG) { Serial.println("USBDEBUG: End of joystickLoop");  }
 }
