@@ -173,6 +173,7 @@ public:
   void centerResetPage();
   void centerResetCompletePage();
   void fullCalibrationPrompt(int stepNum);
+  void usbTimeoutPage();
 
   bool showCenterResetComplete = false;
 };
@@ -1360,6 +1361,24 @@ void LSScreen::factoryResetConfirm2Page(void){
   _currentSelection = 0;
 
   displayMenu();
+}
+
+//*********************************//
+// Function   : usbTimeoutPage
+// 
+// Description: Format and display USB Timeout Page
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSScreen::usbTimeoutPage(void){
+  setupDisplay();
+  _display.println("No USB"); _display.println("connection."); _display.println("Starting"); _display.println("BT Mouse"); 
+  _display.display();
+  delay(3000);
+  
+
 }
 
 #endif

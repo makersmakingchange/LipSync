@@ -460,6 +460,9 @@ void usbCommunicationTimeout(void){
         operatingMode = CONF_OPERATING_MODE_MOUSE;
         setOperatingMode(false, false, CONF_OPERATING_MODE_MOUSE);     // Sets new operating mode, saves in memory, and conducts software reset
       }
+      screen.begin();         //Begin screen
+      screen.usbTimeoutPage();
+      
       softwareReset();
     }
   }
