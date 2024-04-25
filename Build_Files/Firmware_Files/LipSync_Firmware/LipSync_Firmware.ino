@@ -455,7 +455,7 @@ void usbCommunicationTimeout(void){
   if (comMode == CONF_COM_MODE_USB){
     
     if ((usbmouse.usbTimeout) || (gamepad.usbTimeout)){
-      led.setLedColor(CONF_LED_MICRO, LED_CLR_WHITE, CONF_LED_BRIGHTNESS);
+      //led.setLedColor(CONF_LED_MICRO, LED_CLR_WHITE, CONF_LED_BRIGHTNESS);
       setCommunicationMode(false, false, CONF_COM_MODE_BLE);
       if (operatingMode != CONF_OPERATING_MODE_MOUSE){
         operatingMode = CONF_OPERATING_MODE_MOUSE;
@@ -721,14 +721,14 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
 
   //Handle input action when it's in hold state
   if ((actionState.secondaryState == INPUT_SEC_STATE_RELEASED) && (outputAction == CONF_ACTION_SCROLL || outputAction == CONF_ACTION_DRAG)) {
-    setLedDefault();  //Set default led feedback
+    //setLedDefault();  //Set default led feedback
     //Set new state of current output action
     releaseOutputAction();
     canEvaluateAction = false;
   }  //Detected input release after defined time limits.
   else if (actionState.secondaryState == INPUT_SEC_STATE_RELEASED && actionState.elapsedTime > actionMaxEndTime) {
     //Set Led color to default
-    setLedDefault();
+    //setLedDefault();
   }
 
   // Code to switch between joystick controlled scroll and joystick controlled cursor movement
@@ -759,7 +759,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       }
 
       //Set Led color to default
-      setLedDefault();
+      //setLedDefault();
       //Set Led state
       setLedState(ledActionProperty[tempActionIndex].ledEndAction,
                   ledActionProperty[tempActionIndex].ledEndColor,
@@ -793,7 +793,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       }
 
       //Set Led color to default
-      setLedDefault();
+      //setLedDefault();
       //Set Led state
       setLedState(LED_ACTION_ON,
                   ledActionProperty[tempActionIndex].ledStartColor,
@@ -1745,8 +1745,10 @@ void setLedDefault() {
   switch (operatingMode) {
     case CONF_OPERATING_MODE_MOUSE:
       {
-        led.setLedColor(CONF_LED_MICRO, LED_CLR_PURPLE, CONF_LED_BRIGHTNESS);
-        if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected()) {  //Set micro LED to blue if it's in BLE MODE
+        if (comMode == CONF_COM_MODE_USB){
+          led.setLedColor(CONF_LED_MICRO, LED_CLR_PURPLE, CONF_LED_BRIGHTNESS);
+        }
+        else if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected()) {  //Set micro LED to blue if it's in BLE MODE
           led.setLedColor(CONF_BT_LED_NUMBER, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
         }
         
@@ -1805,7 +1807,7 @@ void performLedAction(ledStateStruct* args) {
   {
     case LED_ACTION_NONE:
       {
-        setLedDefault();
+        //setLedDefault();
         break;
       }
     case LED_ACTION_OFF:
