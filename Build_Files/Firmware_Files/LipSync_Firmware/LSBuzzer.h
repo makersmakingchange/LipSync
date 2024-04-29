@@ -2,7 +2,7 @@
 * File: LSBuzzer.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.rc1 (26 January 2024)
+* Version: v4.0.1 (29 April 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 Neil Squire Society
@@ -113,7 +113,7 @@
 
 class LSBuzzer {
   private:
-    boolean _buzzerOn = true;     // TODO: make this something that is saved in memory and not saved just here, then load from memory instead of setting to true;
+    boolean _buzzerOn = true;     // TODO: do we need this variable or is just soundModeLevel enough?
     int _soundModeLevel;
 
   public: 
@@ -134,7 +134,7 @@ LSBuzzer::LSBuzzer() {
 
 void LSBuzzer::begin(){
   pinMode(CONF_BUZZER_PIN, OUTPUT);
-  //TODO: check if sound is emabled by reading from memory 
+  // Read sound mode level from memory
   _soundModeLevel = getSoundMode(false, false);
 }
 

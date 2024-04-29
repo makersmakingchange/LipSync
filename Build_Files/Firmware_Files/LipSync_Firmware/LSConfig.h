@@ -2,7 +2,7 @@
 * File: LSConfig.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.rc1 (26 January 2024)
+* Version: v4.0.1 (29 April 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 Neil Squire Society
@@ -25,6 +25,7 @@
 //***DO NOT CHANGE***//
 #define CONF_LIPSYNC_MODEL 1                // 1: Lipsync w/ Hub
 #define CONF_LIPSYNC_VERSION 4
+const String lipsyncVersionStr = "4.0.1";
 
 //Input pins
 #define CONF_BUTTON1_PIN 9                  // Pushbutton S1

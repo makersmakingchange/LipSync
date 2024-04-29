@@ -2,7 +2,7 @@
 * File: LSScreen.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.rc1 (26 January 2024)
+* Version: v4.0.1 (29 April 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 Neil Squire Society
@@ -86,6 +86,7 @@ private:
   bool _scrollOn = false;
   unsigned long _scrollDelayTimer = millis();
   int _scrollPos = 12;
+  const int _maxCharPerLine = 10;
   
   int _cursorStart = 0;
   int _countMenuScroll = 0;
@@ -322,12 +323,10 @@ void LSScreen::splashScreen() {
   drawCentreString("LipSync", 12);
 
   _display.setTextSize(1);
-  drawCentreString("v4.0", 32);   //TODO this should not be static - should pull from version in memory and format appropriately
+  drawCentreString(lipsyncVersionStr, 32); 
   drawCentreString("Makers Making Change", 54);
 
   _display.display();
-
-  //screenStateTimerId = screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
 
 }
 
@@ -756,7 +755,6 @@ void LSScreen::displayCursor() {
     cursorPos = _currentSelection;
   }
 
-  // TODO These settings are likely already implemented and these lines can likely be removed, this is mostly here just to make sure 
   _display.setTextSize(2);                                   // 2x scale text
   _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
 
@@ -775,7 +773,7 @@ void LSScreen::displayCursor() {
   _selectedLine = _cursorStart + _currentSelection;
   _selectedText = _currentMenuText[_selectedLine];
   
-  if (_selectedText.length() > 9){        // TODO Change magic number to constant 
+  if (_selectedText.length() > (_maxCharPerLine - 1)){       
     //Serial.println("Long text");
     _scrollOn = true;
     _scrollPos = 12;
@@ -1150,13 +1148,6 @@ void LSScreen::fullCalibrationPage(void){
   _display.println("Follow");
   _display.println("on screen");
   _display.println("prompts");
-
-  //Options:                          //TODO: confirm above text and remove other options
-  //"Get ready to calibrate"
-  //"Follow on screen prompts"
-  //"Move joystick to described corner"
-  //"Follow prompts to move joystick"
-  //"Move joystick as described"
 
   _display.display();
 
