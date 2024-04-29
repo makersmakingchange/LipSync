@@ -721,14 +721,14 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
 
   //Handle input action when it's in hold state
   if ((actionState.secondaryState == INPUT_SEC_STATE_RELEASED) && (outputAction == CONF_ACTION_SCROLL || outputAction == CONF_ACTION_DRAG)) {
-    //setLedDefault();  //Set default led feedback
+    setLedDefault();  //Set default led feedback
     //Set new state of current output action
     releaseOutputAction();
     canEvaluateAction = false;
   }  //Detected input release after defined time limits.
   else if (actionState.secondaryState == INPUT_SEC_STATE_RELEASED && actionState.elapsedTime > actionMaxEndTime) {
     //Set Led color to default
-    //setLedDefault();
+    setLedDefault();
   }
 
   // Code to switch between joystick controlled scroll and joystick controlled cursor movement
