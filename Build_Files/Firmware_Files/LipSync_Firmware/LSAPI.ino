@@ -355,7 +355,7 @@ void getModelNumber(bool responseEnabled, bool apiEnabled, String optionalParame
 void getVersionNumber(bool responseEnabled, bool apiEnabled) {
   String commandKey = "VN";
   int tempVersionNumber = mem.readFloat(CONF_SETTINGS_FILE, commandKey);
-  if (tempVersionNumber != CONF_LIPSYNC_VERSION) {                          //If the previous firmware was different version then reset the settings
+  if (tempVersionNumber != CONF_LIPSYNC_VERSION_MAJOR) {                          //If the previous firmware was different version then reset the settings
     resetSettings(responseEnabled, apiEnabled);
 
     tempVersionNumber = CONF_LIPSYNC_MODEL;                               //And store the version number
