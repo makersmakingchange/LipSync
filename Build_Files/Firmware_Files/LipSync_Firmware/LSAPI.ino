@@ -1051,24 +1051,18 @@ void getJoystickValue(bool responseEnabled, bool apiEnabled, String optionalPara
 //*********************************//
 void getPressureValue(bool responseEnabled, bool apiEnabled) {
 
-  ps.update();      //Request new values from pressure class
+  ps.update();      // Request new values from pressure class
   
-  int outputArraySize = 3; 
-  float tempPressureArray[outputArraySize];
-  
-  float tempSapPressure[3];
-    tempSapPressure[0] = ps.getSapPressureAbs();  //Read the main pressure 
-    tempSapPressure[1] = ps.getAmbientPressure();   //Read the ref pressure
-    tempSapPressure[2] = ps.getSapPressure();  //Read the diff pressure
+  int outputArraySize = 3;   
+  float tempSapPressure[outputArraySize];
+  tempSapPressure[0] = ps.getSapPressureAbs();  // Read the main pressure 
+  tempSapPressure[1] = ps.getAmbientPressure();   // Read the ref pressure
+  tempSapPressure[2] = ps.getSapPressure();  // Read the diff pressure
 
   
-  printResponseFloatArray(responseEnabled, apiEnabled, true, 0, "PV,0", true, "", outputArraySize, ',', tempPressureArray);
-
-
-  //float tempPressureValue = (float) ps.getSapPressure();
-  //printResponseFloat(responseEnabled, apiEnabled, true, 0, "PV,0", true, tempPressureValue);
-
+  printResponseFloatArray(responseEnabled, apiEnabled, true, 0, "PV,0", true, "", outputArraySize, ',', tempSapPressure);
 }
+
 //***GET PRESSURE VALUE API FUNCTION***//
 // Function   : getPressureValue
 //
