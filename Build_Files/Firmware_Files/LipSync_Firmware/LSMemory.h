@@ -28,7 +28,7 @@ using namespace Adafruit_LittleFS_Namespace;
 
 #define BUFFER_SIZE  512
 
-DynamicJsonDocument doc(1024);
+JsonDocument doc;
 //Initialize FileSystem
 File file(InternalFS);
 class LSMemory {
