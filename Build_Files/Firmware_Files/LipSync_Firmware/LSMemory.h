@@ -2,7 +2,7 @@
 * File: LSMemory.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.1 (29 April 2024)
+* Version: v4.0.1 (01 May 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 Neil Squire Society
@@ -28,44 +28,71 @@ using namespace Adafruit_LittleFS_Namespace;
 
 #define BUFFER_SIZE  512
 
-DynamicJsonDocument doc(1024);
-//Initialize FileSystem
+JsonDocument doc;
+
+// Initialize FileSystem
 File file(InternalFS);
+
 class LSMemory {
   public:
     LSMemory();   
     void begin();                                                   
-    void initialize(String fileString,String jsonString);   
+    void initialize(String fileString, String jsonString);   
     void clear(String fileString);
     void format();
     String readAll(String fileString);
-    void writeAll(String fileString,String jsonString);
+    void writeAll(String fileString, String jsonString);
     JsonObject readObject(String fileString);
-    int readInt(String fileString,String key);
-    float readFloat(String fileString,String key);
-    String readString(String fileString,String key);
-    pointFloatType readPoint(String fileString,String key);
-    void writeObject(String fileString,String key,JsonObject obj);
-    void writeInt(String fileString,String key,int value);
-    void writeFloat(String fileString,String key,float value);
-    void writeString(String fileString,String key,String value);
-    void writePoint(String fileString,String key,pointFloatType value);
+    int readInt(String fileString, String key);
+    float readFloat(String fileString, String key);
+    String readString(String fileString, String key);
+    pointFloatType readPoint(String fileString, String key);
+    void writeObject(String fileString, String key, JsonObject obj);
+    void writeInt(String fileString, String key, int value);
+    void writeFloat(String fileString, String key, float value);
+    void writeString(String fileString, String key, String value);
+    void writePoint(String fileString, String key, pointFloatType value);
 };
 
+
+//*********************************//
+// Function   : LSMemory 
+// 
+// Description: Construct LSMemory
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 LSMemory::LSMemory() {
 
 }
 
-//***BEGIN FILE SYSTEM FUNCTION***//
-
-
+//*********************************//
+// Function   : begin 
+// 
+// Description: Begins internal file structure.
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSMemory::begin() {
   InternalFS.begin();
 }
 
-//***INITIALIZE MEMORY FILE FUNCTION***//
 
-void LSMemory::initialize(String fileString,String jsonString) {
+//*********************************//
+// Function   : initialize 
+// 
+// Description: Initializes memory file.
+// 
+// Arguments :  fileString : String : the name of the file
+//              jsonString : String : the default json string with list of key and value pairs 
+// 
+// Return     : void
+//*********************************//
+void LSMemory::initialize(String fileString, String jsonString) {
   const char* fileName = fileString.c_str();
 
   file.open(fileName, FILE_O_READ);
@@ -92,8 +119,16 @@ void LSMemory::initialize(String fileString,String jsonString) {
   }
 }
 
-//***DELETE MEMORY FILE FUNCTION***//
 
+//*********************************//
+// Function   : clear 
+// 
+// Description: Deletes the memory file
+// 
+// Arguments :  fileString : String : the name of the file
+// 
+// Return     : void
+//*********************************//
 void LSMemory::clear(String fileString) {
   const char* fileName = fileString.c_str();
   InternalFS.remove(fileName);
@@ -102,14 +137,30 @@ void LSMemory::clear(String fileString) {
 }
 
 //***FORMAT ALL FILES FUNCTION***//
-
+//*********************************//
+// Function   : format 
+// 
+// Description: Formats all files in the internal file system
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSMemory::format(){
   InternalFS.format();
   delay(1);
 }
 
-//***READ JSON STRING FROM MEMORY FILE FUNCTION***//
 
+//*********************************//
+// Function   : readAll 
+// 
+// Description: Reads all Json data from the settings file and stores it in a buffer
+// 
+// Arguments :  fileString : String : the name of the file
+// 
+// Return     : buffer : String array : Output from file
+//*********************************//
 String LSMemory::readAll(String fileString){
   const char* fileName = fileString.c_str();
 
@@ -125,9 +176,18 @@ String LSMemory::readAll(String fileString){
   return buffer;
 }
 
-//***WRITE JSON STRING TO MEMORY FILE FUNCTION***//
 
-void LSMemory::writeAll(String fileString,String jsonString){
+//*********************************//
+// Function   : writeAll 
+// 
+// Description: Replaces the entire settings file with new values
+// 
+// Arguments :  fileString : String : the name of the file
+//              jsonString : String : a json string with list of key and value pairs 
+// 
+// Return     : void
+//*********************************//
+void LSMemory::writeAll(String fileString, String jsonString){
 
     const char* fileName = fileString.c_str();
 
@@ -145,7 +205,16 @@ void LSMemory::writeAll(String fileString,String jsonString){
 
 }
 
-//***READ MEMORY FILE FUNCTION***//
+
+//*********************************//
+// Function   : readObject 
+// 
+// Description: Reads the settings file and returns it as a Json Object
+// 
+// Arguments :  fileString : String : the name of the file
+// 
+// Return     : obj : JsonObject : A Json Object of the file contents
+//*********************************//
 JsonObject LSMemory::readObject(String fileString){
   
   uint32_t readLenght;
@@ -161,30 +230,79 @@ JsonObject LSMemory::readObject(String fileString){
   return obj;
 }
 
-int LSMemory::readInt(String fileString,String key){
+
+//*********************************//
+// Function   : readInt 
+// 
+// Description: Returns the value of the corresponding key within the settings file.
+// 
+// Arguments :  fileString : String : the name of the file
+//              key : String : the key of the desired Json value
+// 
+// Return     : value : int : The returned value corresponding to the key.
+//*********************************//
+int LSMemory::readInt(String fileString, String key){
   int value = readObject(fileString)[key];
   return value;
 }
 
 
-float LSMemory::readFloat(String fileString,String key){
+//*********************************//
+// Function   : readFloat 
+// 
+// Description: Returns the value of the corresponding key within the settings file.
+// 
+// Arguments :  fileString : String : the name of the file
+//              key : String : the key of the desired Json value
+// 
+// Return     : value : float : The returned value corresponding to the key.
+float LSMemory::readFloat(String fileString, String key){
   float value = readObject(fileString)[key];
   return value;
 }
 
-String LSMemory::readString(String fileString,String key){
+
+//*********************************//
+// Function   : readString 
+// 
+// Description: Returns the value of the corresponding key within the settings file.
+// 
+// Arguments :  fileString : String : the name of the file
+//              key : String : the key of the desired Json value
+// 
+// Return     : value : string : The returned value corresponding to the key.
+String LSMemory::readString(String fileString, String key){
   String value = readObject(fileString)[key];
   return value;
 }
 
-pointFloatType LSMemory::readPoint(String fileString,String key){
+//*********************************//
+// Function   : readPoint 
+// 
+// Description: Returns the value of the corresponding key within the settings file.
+// 
+// Arguments :  fileString : String : the name of the file
+//              key : String : the key of the desired Json value
+// 
+// Return     : value : point : The returned value corresponding to the key.
+pointFloatType LSMemory::readPoint(String fileString, String key){
   JsonObject obj = readObject(fileString);
   return {obj[key][0], obj[key][1]};
 }
 
-//***WRITE MEMORY FILE FUNCTION***//
 
-void LSMemory::writeObject(String fileString,String key,JsonObject obj){
+//*********************************//
+// Function   : writeObject 
+// 
+// Description: General function for writing an individual attribute-value pair to the settings file
+// 
+// Arguments :  fileString : String : the name of the file
+//              key : String : the key of the desired Json attribute
+//              obj : JsonObject : the Json Object value
+// 
+// Return     : void
+//*********************************//
+void LSMemory::writeObject(String fileString, String key, JsonObject obj){
 
     const char* fileName = fileString.c_str();
     
@@ -203,27 +321,72 @@ void LSMemory::writeObject(String fileString,String key,JsonObject obj){
     file.close();
 }
 
-void LSMemory::writeInt(String fileString,String key,int value){
+
+//*********************************//
+// Function   : writeInt 
+// 
+// Description: Writing an individual int value to the corresponding attribute-value pair given by the key to the settings file
+// 
+// Arguments :  fileString : String : the name of the file
+//              key : String : the key of the desired Json attribute
+//              value : int : The integer to write
+// 
+// Return     : void
+//*********************************//
+void LSMemory::writeInt(String fileString, String key, int value){
   JsonObject obj = readObject(fileString);
   obj[String(key)] = value;
   writeObject(fileString,key,obj);
 }
 
-void LSMemory::writeFloat(String fileString,String key,float value){
+//*********************************//
+// Function   : writeFloat 
+// 
+// Description: Writing an individual float value to the corresponding attribute-value pair given by the key to the settings file
+// 
+// Arguments :  fileString : String : the name of the file
+//              key : String : the key of the desired Json attribute
+//              value : float : The float value to write
+// 
+// Return     : void
+//*********************************//
+void LSMemory::writeFloat(String fileString, String key, float value){
   JsonObject obj = readObject(fileString);
   obj[String(key)] = value;
   writeObject(fileString,key,obj);
 }
 
-void LSMemory::writeString(String fileString,String key,String value){
+//*********************************//
+// Function   : writeString 
+// 
+// Description: Writing an individual string value to the corresponding attribute-value pair given by the key to the settings file
+// 
+// Arguments :  fileString : String : the name of the file
+//              key : String : the key of the desired Json attribute
+//              value : string : The string to write to the settings file
+// 
+// Return     : void
+//*********************************//
+void LSMemory::writeString(String fileString, String key, String value){
   JsonObject obj = readObject(fileString);
   obj[String(key)] = value;
   writeObject(fileString,key,obj);
 }
 
-void LSMemory::writePoint(String fileString,String key,pointFloatType value){
+//*********************************//
+// Function   : writePoint 
+// 
+// Description: Writing an individual point value to the corresponding attribute-value pair given by the key to the settings file
+// 
+// Arguments :  fileString : String : the name of the file
+//              key : String : the key of the desired Json attribute
+//              value : pointFloatType : The point to write to the settings file
+// 
+// Return     : void
+//*********************************//
+void LSMemory::writePoint(String fileString, String key, pointFloatType value){
   JsonObject obj = readObject(fileString);
-  JsonArray point = obj.createNestedArray(key);
+  JsonArray point = obj[key].to<JsonArray>();
   point.add(value.x);
   point.add(value.y);
   writeObject(fileString,key,obj);
