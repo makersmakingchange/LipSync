@@ -223,7 +223,7 @@ void LSMemory::writeString(String fileString,String key,String value){
 
 void LSMemory::writePoint(String fileString,String key,pointFloatType value){
   JsonObject obj = readObject(fileString);
-  JsonArray point = obj.createNestedArray(key);
+  JsonArray point = obj[key].to<JsonArray>();
   point.add(value.x);
   point.add(value.y);
   writeObject(fileString,key,obj);
