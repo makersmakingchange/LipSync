@@ -2,7 +2,7 @@
 * File: LSScreen.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.rc1 (26 January 2024)
+* Version: v4.0.1 (29 April 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 Neil Squire Society
@@ -84,8 +84,9 @@ private:
   int _soundMode;
   
   bool _scrollOn = false;
-  long _scrollDelayTimer = millis();
+  unsigned long _scrollDelayTimer = millis();
   int _scrollPos = 12;
+  const int _maxCharPerLine = 10;
   
   int _cursorStart = 0;
   int _countMenuScroll = 0;
@@ -96,6 +97,9 @@ private:
 
   float _sipPressThresh;
   float _puffPressThresh;
+
+  unsigned long _lastActivityMillis;
+  
 
 
   void displayMenu();
@@ -173,6 +177,7 @@ public:
   void centerResetPage();
   void centerResetCompletePage();
   void fullCalibrationPrompt(int stepNum);
+  void usbTimeoutPage();
 
   bool showCenterResetComplete = false;
 };
@@ -214,6 +219,8 @@ void LSScreen::begin() {
   _communicationMode = getCommunicationMode(false, false);
   _soundMode = getSoundMode(false, false);
 
+  _lastActivityMillis = millis();
+
 }
 
 //*********************************//
@@ -247,6 +254,10 @@ void LSScreen::update() {
   if (_scrollOn){
     scrollLongText();
   }
+
+  if (((millis() - _lastActivityMillis) > CONF_MENU_TIMEOUT) && is_active){
+    deactivateMenu();
+  }
 }
 
 //*********************************//
@@ -259,6 +270,7 @@ void LSScreen::update() {
 // Return     : void
 //*********************************//
 void LSScreen::activateMenu() {
+  _lastActivityMillis = millis();
   is_active = true;
   _operatingMode = getOperatingMode(false, false);
   mainMenu();
@@ -311,12 +323,10 @@ void LSScreen::splashScreen() {
   drawCentreString("LipSync", 12);
 
   _display.setTextSize(1);
-  drawCentreString("v4.0", 32);   //TODO this should not be static - should pull from version in memory and format appropriately
+  drawCentreString(lipsyncVersionStr, 32); 
   drawCentreString("Makers Making Change", 54);
 
   _display.display();
-
-  //screenStateTimerId = screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
 
 }
 
@@ -366,6 +376,7 @@ void LSScreen::splashScreen2() {
   _display.display();
   
   screenStateTimerId = screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
+  _lastActivityMillis = millis();
 
 }
 
@@ -383,6 +394,8 @@ void LSScreen::splashScreen2() {
 // Return     : void
 //*********************************//
 void LSScreen::nextMenuItem() {
+  _lastActivityMillis = millis();
+  
   if (_scrollOn){
     _display.setCursor(0, _selectedLine *16);
     _display.print("                                   ");
@@ -415,6 +428,8 @@ void LSScreen::nextMenuItem() {
 // Return     : void
 //*********************************//
 void LSScreen::selectMenuItem() {
+  _lastActivityMillis = millis();
+  
   _countMenuScroll = 0;
   switch (_currentMenu) {
     case MAIN_MENU:
@@ -740,7 +755,6 @@ void LSScreen::displayCursor() {
     cursorPos = _currentSelection;
   }
 
-  // TODO These settings are likely already implemented and these lines can likely be removed, this is mostly here just to make sure 
   _display.setTextSize(2);                                   // 2x scale text
   _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);       // Draw white text on solid black background
 
@@ -759,7 +773,7 @@ void LSScreen::displayCursor() {
   _selectedLine = _cursorStart + _currentSelection;
   _selectedText = _currentMenuText[_selectedLine];
   
-  if (_selectedText.length() > 9){        // TODO Change magic number to constant 
+  if (_selectedText.length() > (_maxCharPerLine - 1)){       
     //Serial.println("Long text");
     _scrollOn = true;
     _scrollPos = 12;
@@ -992,6 +1006,14 @@ void LSScreen::confirmModeChange() {
 // Return     : void
 //*********************************//
 void LSScreen::changeMode(){
+  setupDisplay();
+  _display.println("Changing");
+  _display.println("mode.");
+  _display.println("Release");
+  _display.println("joystick");
+  _display.display();
+  delay(2000);
+  
   if (_communicationMode != _tempCommunicationMode){
     _communicationMode = _tempCommunicationMode;
     setCommunicationMode(false, false, _tempCommunicationMode); // Sets new communication mode, saves in memory
@@ -1001,8 +1023,7 @@ void LSScreen::changeMode(){
     _operatingMode = _tempOperatingMode;
     setOperatingMode(false, false, _tempOperatingMode);     // Sets new operating mode, saves in memory, and conducts software reset
   }
-
-
+  
   softwareReset();    //TODO: is there a way to avoid software reset if just changing com mode? 
 
   _currentMenu = MAIN_MENU;
@@ -1127,13 +1148,6 @@ void LSScreen::fullCalibrationPage(void){
   _display.println("Follow");
   _display.println("on screen");
   _display.println("prompts");
-
-  //Options:                          //TODO: confirm above text and remove other options
-  //"Get ready to calibrate"
-  //"Follow on screen prompts"
-  //"Move joystick to described corner"
-  //"Follow prompts to move joystick"
-  //"Move joystick as described"
 
   _display.display();
 
@@ -1353,6 +1367,24 @@ void LSScreen::factoryResetConfirm2Page(void){
   _currentSelection = 0;
 
   displayMenu();
+}
+
+//*********************************//
+// Function   : usbTimeoutPage
+// 
+// Description: Format and display USB Timeout Page
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSScreen::usbTimeoutPage(void){
+  setupDisplay();
+  _display.println("No USB"); _display.println("connection."); _display.println("Starting"); _display.println("BT Mouse"); 
+  _display.display();
+  delay(3000);
+  
+
 }
 
 #endif

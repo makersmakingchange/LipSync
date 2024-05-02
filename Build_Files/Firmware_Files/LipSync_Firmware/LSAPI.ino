@@ -2,7 +2,7 @@
 * File: LSAPI.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.rc1 (26 January 2024)
+* Version: v4.0.1 (29 April 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 Neil Squire Society
@@ -354,14 +354,41 @@ void getModelNumber(bool responseEnabled, bool apiEnabled, String optionalParame
 //*********************************//
 void getVersionNumber(bool responseEnabled, bool apiEnabled) {
   String commandKey = "VN";
-  int tempVersionNumber = mem.readFloat(CONF_SETTINGS_FILE, commandKey);
-  if (tempVersionNumber != CONF_LIPSYNC_VERSION) {                          //If the previous firmware was different version then reset the settings
-    resetSettings(responseEnabled, apiEnabled);
+  
+  int tempMajorVersionNumber = mem.readInt(CONF_SETTINGS_FILE, "VN1");
+  int tempMinorVersionNumber = mem.readInt(CONF_SETTINGS_FILE, "VN2");
+  int tempRevVersionNumber = mem.readInt(CONF_SETTINGS_FILE, "VN3");
+  
+  if (tempMajorVersionNumber != CONF_LIPSYNC_VERSION_MAJOR) {                          //If the previous firmware was different version then reset the settings
+    // could add factory reset here if version number saved in memory is different
+    tempMajorVersionNumber = CONF_LIPSYNC_VERSION_MAJOR;                               //And store the version number
+    mem.writeInt(CONF_SETTINGS_FILE, "VN1", tempMajorVersionNumber);
+    
+    tempMinorVersionNumber = CONF_LIPSYNC_VERSION_MINOR;                               //And store the version number
+    mem.writeInt(CONF_SETTINGS_FILE, "VN2", tempMinorVersionNumber);
 
-    tempVersionNumber = CONF_LIPSYNC_MODEL;                               //And store the version number
-    mem.writeFloat(CONF_SETTINGS_FILE, commandKey, tempVersionNumber);
+    tempRevVersionNumber = CONF_LIPSYNC_VERSION_REV;                               //And store the version number
+    mem.writeInt(CONF_SETTINGS_FILE, "VN3", tempRevVersionNumber);
   }
-  printResponseFloat(responseEnabled, apiEnabled, true, 0, "VN,0", true, tempVersionNumber);
+
+  else if (tempMinorVersionNumber != CONF_LIPSYNC_VERSION_MINOR) {                          //If the previous firmware was different version then reset the settings
+    // could reset some settings here if version number saved in memory is different
+    tempMinorVersionNumber = CONF_LIPSYNC_VERSION_MINOR;                               //And store the version number
+    mem.writeInt(CONF_SETTINGS_FILE, "VN2", tempMinorVersionNumber);
+
+    tempRevVersionNumber = CONF_LIPSYNC_VERSION_REV;                               //And store the version number
+    mem.writeInt(CONF_SETTINGS_FILE, "VN3", tempRevVersionNumber);
+  }
+
+  else if (tempRevVersionNumber != CONF_LIPSYNC_VERSION_REV) {                          //If the previous firmware was different version then reset the settings
+    tempRevVersionNumber = CONF_LIPSYNC_VERSION_REV;                               //And store the version number
+    mem.writeInt(CONF_SETTINGS_FILE, "VN3", tempRevVersionNumber);
+  }
+  
+
+  String tempLipsyncVersionStr = String(tempMajorVersionNumber) + "." + String(tempMinorVersionNumber) + "." + String(tempRevVersionNumber);
+  
+  printResponseString(responseEnabled, apiEnabled, true, 0, "VN,0", true, tempLipsyncVersionStr);
 }
 //***GET VERSION API FUNCTION***//
 // Function   : getVersionNumber
@@ -1051,24 +1078,18 @@ void getJoystickValue(bool responseEnabled, bool apiEnabled, String optionalPara
 //*********************************//
 void getPressureValue(bool responseEnabled, bool apiEnabled) {
 
-  ps.update();      //Request new values from pressure class
+  ps.update();      // Request new values from pressure class
   
-  int outputArraySize = 3; 
-  float tempPressureArray[outputArraySize];
-  
-  float tempSapPressure[3];
-    tempSapPressure[0] = ps.getSapPressureAbs();  //Read the main pressure 
-    tempSapPressure[1] = ps.getAmbientPressure();   //Read the ref pressure
-    tempSapPressure[2] = ps.getSapPressure();  //Read the diff pressure
+  int outputArraySize = 3;   
+  float tempSapPressure[outputArraySize];
+  tempSapPressure[0] = ps.getSapPressureAbs();  // Read the main pressure 
+  tempSapPressure[1] = ps.getAmbientPressure();   // Read the ref pressure
+  tempSapPressure[2] = ps.getSapPressure();  // Read the diff pressure
 
   
-  printResponseFloatArray(responseEnabled, apiEnabled, true, 0, "PV,0", true, "", outputArraySize, ',', tempPressureArray);
-
-
-  //float tempPressureValue = (float) ps.getSapPressure();
-  //printResponseFloat(responseEnabled, apiEnabled, true, 0, "PV,0", true, tempPressureValue);
-
+  printResponseFloatArray(responseEnabled, apiEnabled, true, 0, "PV,0", true, "", outputArraySize, ',', tempSapPressure);
 }
+
 //***GET PRESSURE VALUE API FUNCTION***//
 // Function   : getPressureValue
 //

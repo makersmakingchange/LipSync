@@ -2,7 +2,7 @@
 * File: LSConfig.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.rc1 (26 January 2024)
+* Version: v4.0.1 (29 April 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 Neil Squire Society
@@ -24,7 +24,12 @@
 
 //***DO NOT CHANGE***//
 #define CONF_LIPSYNC_MODEL 1                // 1: Lipsync w/ Hub
-#define CONF_LIPSYNC_VERSION 4
+
+#define CONF_LIPSYNC_VERSION_MAJOR  4
+#define CONF_LIPSYNC_VERSION_MINOR  0
+#define CONF_LIPSYNC_VERSION_REV  1
+
+const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + String(CONF_LIPSYNC_VERSION_MINOR) + "." + String(CONF_LIPSYNC_VERSION_REV);
 
 //Input pins
 #define CONF_BUTTON1_PIN 9                  // Pushbutton S1
@@ -126,32 +131,33 @@
 #define CONF_ACTION_NOTHING 0                              // No action
 #define CONF_ACTION_LEFT_CLICK 1                           // Generates a short left click
 #define CONF_ACTION_RIGHT_CLICK 2                          // Generates a short right click
-#define CONF_ACTION_DRAG 3                                 // Initiates drag mode, holding down left click until cancelled
-#define CONF_ACTION_SCROLL 4                               // Initiates scroll mode. Vertical motion generates mouse scroll wheel movement.
-#define CONF_ACTION_CURSOR_CENTER 5                        // Center the joystick 
-#define CONF_ACTION_CURSOR_CALIBRATION 6                   // Initiates the joystick calibration.
-#define CONF_ACTION_MIDDLE_CLICK 7                         // Generates a short middle click
-#define CONF_ACTION_DEC_SPEED 8                            // Decrease cursor movement speed
-#define CONF_ACTION_INC_SPEED 9                            // Increase cursor movement speed
-#define CONF_ACTION_CHANGE_MODE 10                         // Change communication mode
-#define CONF_ACTION_START_MENU 11                          // Start menu on display
-#define CONF_ACTION_STOP_MENU 12                           // Close menu on display
-#define CONF_ACTION_B1_PRESS 13                            // Generates a Button 1 press or button X1(Left USB)/View(Right USB) press in XAC  
-#define CONF_ACTION_B2_PRESS 14                             // Generates a Button 2 press or button X2(Left USB)/Menu(Right USB) press in XAC    
-#define CONF_ACTION_B3_PRESS 15                            // Generates a Button 3 press or button LS(Left USB)/RS(Right USB) press in XAC
-#define CONF_ACTION_B4_PRESS 16                            // Generates a Button 4 press or button LB(Left USB)/RB(Right USB) press in XAC 
-#define CONF_ACTION_B5_PRESS 17                            // Generates a Button 5 press or button A(Left USB)/X(Right USB) press in XAC
-#define CONF_ACTION_B6_PRESS 18                            // Generates a Button 6 press or button B(Left USB)/Y(Right USB) press in XAC
-#define CONF_ACTION_B7_PRESS 19                            // Generates a Button 7 press or button View(Left USB)/X1(Right USB) press in XAC  
-#define CONF_ACTION_B8_PRESS 20                            // Generates a Button 8 press or button Menu(Left USB)/X2(Right USB) press in XAC  
+#define CONF_ACTION_MIDDLE_CLICK 3                         // Generates a short middle click
+#define CONF_ACTION_DRAG 4                                 // Initiates drag mode, holding down left click until cancelled
+#define CONF_ACTION_SCROLL 5                               // Initiates scroll mode. Vertical motion generates mouse scroll wheel movement.
+#define CONF_ACTION_B1_PRESS 6                            // Generates a Button 1 press or button X1(Left USB)/View(Right USB) press in XAC  
+#define CONF_ACTION_B2_PRESS 7                             // Generates a Button 2 press or button X2(Left USB)/Menu(Right USB) press in XAC    
+#define CONF_ACTION_B3_PRESS 8                            // Generates a Button 3 press or button LS(Left USB)/RS(Right USB) press in XAC
+#define CONF_ACTION_B4_PRESS 9                            // Generates a Button 4 press or button LB(Left USB)/RB(Right USB) press in XAC 
+#define CONF_ACTION_B5_PRESS 10                            // Generates a Button 5 press or button A(Left USB)/X(Right USB) press in XAC
+#define CONF_ACTION_B6_PRESS 11                            // Generates a Button 6 press or button B(Left USB)/Y(Right USB) press in XAC
+#define CONF_ACTION_B7_PRESS 12                            // Generates a Button 7 press or button View(Left USB)/X1(Right USB) press in XAC  
+#define CONF_ACTION_B8_PRESS 13                            // Generates a Button 8 press or button Menu(Left USB)/X2(Right USB) press in XAC 
+#define CONF_ACTION_CURSOR_CENTER 14                        // Center the joystick 
+#define CONF_ACTION_CURSOR_CALIBRATION 15                   // Initiates the joystick calibration.
+#define CONF_ACTION_DEC_SPEED 16                            // Decrease cursor movement speed
+#define CONF_ACTION_INC_SPEED 17                            // Increase cursor movement speed
+#define CONF_ACTION_CHANGE_MODE 18                         // Change communication mode
+#define CONF_ACTION_START_MENU 19                          // Start menu on display
+#define CONF_ACTION_STOP_MENU 20                           // Close menu on display
 #define CONF_ACTION_NEXT_MENU_ITEM 21                      // Move to next item in menu
 #define CONF_ACTION_SELECT_MENU_ITEM 22                    // Select current item in menu 
 #define CONF_ACTION_RESET 23                               // Software Reset
 #define CONF_ACTION_FACTORY_RESET 24                       // Factory Reset
 
+
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
-#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN\":0.0,\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":0.0,\"PT\":0.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[13.0,13.0],\"CA2\":[-13.0,13.0],\"CA3\":[-13.0,-13.0],\"CA4\":[13.0,-13.0],\"SM\":1,\"DM\":0}"
+#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN1\":4,\"VN2\":0,\"VN3\":1,\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":0.0,\"PT\":0.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[13.0,13.0],\"CA2\":[-13.0,13.0],\"CA3\":[-13.0,-13.0],\"CA4\":[13.0,-13.0],\"SM\":1,\"DM\":0}"
 
 //Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 50          //50ms - Measure, 
@@ -166,6 +172,9 @@
 #define CONF_BUTTON_PRESS_DELAY 150         //150ms - 
 
 #define CONF_SPLASH_SCREEN_DURATION 10000    //10 seconds - how long the splash screen stays on on startup
+
+#define CONF_MENU_TIMEOUT  300000            // 300 seconds (5 minutes) - duration of inactivity after which the screen turns off 
+#define CONF_USB_HID_TIMEOUT  5000          //5 seconds - timeout for connecting to USB and defaulting to Bluetooth instead
 
 // Polling Timer IDs for each module
 #define CONF_TIMER_JOYSTICK 0
@@ -401,17 +410,19 @@ const ledActionStruct ledActionProperty[]{
   { CONF_ACTION_NOTHING,            CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_NONE },
   { CONF_ACTION_LEFT_CLICK,         CONF_LED_LEFT,    LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
   { CONF_ACTION_RIGHT_CLICK,        CONF_LED_RIGHT,   LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
-  { CONF_ACTION_DRAG,               CONF_LED_LEFT,    LED_CLR_RED,   LED_CLR_RED,  LED_ACTION_ON },
-  { CONF_ACTION_SCROLL,             CONF_LED_RIGHT,   LED_CLR_RED,   LED_CLR_RED,  LED_ACTION_ON },
+  { CONF_ACTION_MIDDLE_CLICK,       CONF_LED_MIDDLE,  LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
+  { CONF_ACTION_DRAG,               CONF_LED_LEFT,    LED_CLR_RED,    LED_CLR_RED,  LED_ACTION_ON },
+  { CONF_ACTION_SCROLL,             CONF_LED_RIGHT,   LED_CLR_RED,    LED_CLR_RED,  LED_ACTION_ON },
   { CONF_ACTION_B1_PRESS,           CONF_LED_LEFT,    LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
   { CONF_ACTION_B2_PRESS,           CONF_LED_RIGHT,   LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
-  { CONF_ACTION_B3_PRESS,           CONF_LED_RIGHT,   LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_NONE },
-  { CONF_ACTION_B4_PRESS,           CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_NONE },
-  { CONF_ACTION_B5_PRESS,           CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_NONE },
-  { CONF_ACTION_B6_PRESS,           CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_NONE },
+  { CONF_ACTION_B3_PRESS,           CONF_LED_LEFT,    LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
+  { CONF_ACTION_B4_PRESS,           CONF_LED_RIGHT,   LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
+  { CONF_ACTION_B5_PRESS,           CONF_LED_MIDDLE,  LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
+  { CONF_ACTION_B6_PRESS,           CONF_LED_MIDDLE,  LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
+  { CONF_ACTION_B7_PRESS,           CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
+  { CONF_ACTION_B8_PRESS,           CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
   { CONF_ACTION_CURSOR_CENTER,      CONF_LED_MICRO,   LED_CLR_PURPLE, LED_CLR_NONE, LED_ACTION_NONE },
   { CONF_ACTION_CURSOR_CALIBRATION, CONF_LED_MICRO,   LED_CLR_PURPLE, LED_CLR_NONE, LED_ACTION_ON },
-  { CONF_ACTION_MIDDLE_CLICK,       CONF_LED_MIDDLE,  LED_CLR_NONE,   LED_CLR_RED,  LED_ACTION_BLINK },
   { CONF_ACTION_DEC_SPEED,          CONF_LED_LEFT,    LED_CLR_RED,    LED_CLR_RED,  LED_ACTION_BLINK },
   { CONF_ACTION_INC_SPEED,          CONF_LED_RIGHT,   LED_CLR_RED,    LED_CLR_RED,  LED_ACTION_BLINK },
   { CONF_ACTION_CHANGE_MODE,        CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_NONE },

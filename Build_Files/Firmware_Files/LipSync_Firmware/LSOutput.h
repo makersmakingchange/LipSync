@@ -2,7 +2,7 @@
 * File: LSOutput.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.rc1 (26 January 2024)
+* Version: v4.0.1 (29 April 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 Neil Squire Society
@@ -55,6 +55,7 @@ const colorStruct colorProperty[]{
 };
 */
 
+/*
 //Color properties - IBM COLORBLIND FRIENDLY PALETTE
 const colorStruct colorProperty[]{
   { LED_CLR_NONE,   "None",     {   0,   0,   0 } },
@@ -63,6 +64,22 @@ const colorStruct colorProperty[]{
   { LED_CLR_RED,    "Red",      { 220,  38, 127 } },
   { LED_CLR_ORANGE, "Orange",   { 254,  97,   0 } },
   { LED_CLR_YELLOW, "Yellow",   { 255, 176,   0 } },
+  { LED_CLR_WHITE,  "White",    { 255, 255, 255 } }
+};
+*/
+
+//Color properties
+const colorStruct colorProperty[]{
+  { LED_CLR_NONE,   "None",     {   0,   0,   0 } },
+  { LED_CLR_BLUE,   "Blue",     {   0,   0, 255 } },
+  { LED_CLR_PURPLE, "Purple",   { 170,   0, 255 } },
+  { LED_CLR_MAGENTA, "Magenta", { 255,   0, 255 } },
+  { LED_CLR_PINK,   "Pink",     { 255, 127, 127 } },
+  { LED_CLR_RED,    "Red",      { 230,   0,   0 } },
+  { LED_CLR_ORANGE, "Orange",   { 254,  97,   0 } },
+  { LED_CLR_YELLOW, "Yellow",   { 255, 255,   0 } },
+  { LED_CLR_GREEN,  "Green",    { 0,   255,   0 } },
+  { LED_CLR_TEAL,   "Teal",     { 0,  255,  255 } },  
   { LED_CLR_WHITE,  "White",    { 255, 255, 255 } }
 };
 

@@ -2,7 +2,7 @@
 * File: LipSync_Firmware.ino
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.rc1 (26 January 2024)
+* Version: v4.0.1 (29 April 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 Neil Squire Society
@@ -83,6 +83,9 @@ LSTimer<void> pollTimer;
 int ledTimerId[3];
 LSTimer<ledStateStruct> ledStateTimer;
 
+int usbTimeoutTimerId[1];
+LSTimer<int> usbTimeoutTimer;
+
 //Joystick module variables and structures
 int xVal;
 int yVal;
@@ -95,6 +98,7 @@ pressureStruct pressureValues = { 0.0, 0.0, 0.0 };
 int outputAction;
 bool canOutputAction = true;
 bool startupCenterReset = true;
+bool calibrationComplete = false;
 
 bool settingsEnabled = false;  //Serial input settings command mode enabled or disabled
 
@@ -134,12 +138,11 @@ void setup() {
   ledWaitFeedback();
 
   initMemory();  //Initialize Memory
+  getVersionNumber(false, false);
 
   beginComOpMode();  //Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
 
-  //initOperatingMode();                                          //Initialize Operating Mode
-
-  //initCommunicationMode();                                      //Initialize Communication Mode
+  usbCommunicationTimeout();
 
   if (USB_DEBUG) {
     Serial.print("USBDEBUG: comMode: ");
@@ -196,6 +199,8 @@ void setup() {
 //*********************************//
 void loop() {
   ledStateTimer.run();  // Timer for lights
+
+  usbTimeoutTimer.run();
 
   calibTimer.run();  // Timer for calibration measurements
 
@@ -447,6 +452,23 @@ void initCommunicationMode() {
   comMode = getCommunicationMode(false, false);
 }
 
+void usbCommunicationTimeout(void){
+  if (comMode == CONF_COM_MODE_USB){
+    
+    if ((usbmouse.usbTimeout) || (gamepad.usbTimeout)){
+      //led.setLedColor(CONF_LED_MICRO, LED_CLR_WHITE, CONF_LED_BRIGHTNESS);
+      setCommunicationMode(false, false, CONF_COM_MODE_BLE);
+      if (operatingMode != CONF_OPERATING_MODE_MOUSE){
+        operatingMode = CONF_OPERATING_MODE_MOUSE;
+        setOperatingMode(false, false, CONF_OPERATING_MODE_MOUSE);     // Sets new operating mode, saves in memory, and conducts software reset
+      }
+      screen.begin();         //Begin screen
+      screen.usbTimeoutPage();
+      
+      softwareReset();
+    }
+  }
+}
 
 //*********************************//
 // Operating Mode Functions
@@ -486,8 +508,6 @@ void initOperatingMode() {
   */
 }
 
-
-
 //***CHANGE OPERATING MODE FUNCTION***//
 // Function   : changeOperatingMode
 //
@@ -505,6 +525,7 @@ void changeOperatingMode(int inputOperatingState) {
   }
   operatingMode = inputOperatingState;
 }
+
 
 //***INITIALIZE OPERATING MODE FUNCTION***//
 // Function   : beginComOpMode                  //TODO: rename this?
@@ -739,7 +760,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       }
 
       //Set Led color to default
-      setLedDefault();
+      //setLedDefault();
       //Set Led state
       setLedState(ledActionProperty[tempActionIndex].ledEndAction,
                   ledActionProperty[tempActionIndex].ledEndColor,
@@ -773,7 +794,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       }
 
       //Set Led color to default
-      setLedDefault();
+      //setLedDefault();
       //Set Led state
       setLedState(LED_ACTION_ON,
                   ledActionProperty[tempActionIndex].ledStartColor,
@@ -1156,6 +1177,7 @@ void initJoystick() {
 // Return     : void
 //****************************************//
 void performJoystickCenter(int* args) {
+  calibrationComplete = false;
   int stepNumber = (int)args;
   unsigned long readingDuration = CONF_JOY_INIT_READING_DELAY * CONF_JOY_INIT_READING_NUMBER;                                               //Duration of the center point readings (500 seconds )
   unsigned long currentReadingStart = CONF_JOY_INIT_START_DELAY + (CONF_JOY_INIT_STEP_BLINK_DELAY * ((CONF_JOY_INIT_STEP_BLINK * 2) + 1));  //(500 + 150*3)                      //Time until start of current reading.
@@ -1187,6 +1209,7 @@ void performJoystickCenter(int* args) {
     }                             
     if (screen.showCenterResetComplete){screen.centerResetCompletePage();}      // Checks variable so center reset complete page only shows if accessed from menu, not on startup or during full calibration
     startupCenterReset = false;
+    calibrationComplete = true;
   }
 }
 
@@ -1226,6 +1249,7 @@ void performJoystickCenterStep(int* args) {
 //****************************************//
 void performJoystickCalibration(int* args) 
 {
+  calibrationComplete = false;
   int stepNumber = (int)args;
   unsigned long readingDuration = CONF_JOY_CALIB_READING_DELAY * CONF_JOY_CALIB_READING_NUMBER;                                               //Duration of the max corner reading ( 2 seconds )
   unsigned long currentReadingStart = CONF_JOY_CALIB_STEP_DELAY + (CONF_JOY_CALIB_STEP_BLINK_DELAY * ((CONF_JOY_CALIB_STEP_BLINK * 2) + 1));  //Time until start of current reading
@@ -1268,6 +1292,7 @@ void performJoystickCalibration(int* args)
     js.setMinimumRadius();                                                                                                      //Update the minimum cursor operating radius 
     setLedDefault();
     canOutputAction = true;
+    calibrationComplete = true;
     pollTimer.enable(CONF_TIMER_JOYSTICK);                                                                                      //Enable joystick data polling 
     pollTimer.enable(CONF_TIMER_SCROLL);                                                                                        //Enable joystick data polling 
     screen.fullCalibrationPrompt(stepNumber);
@@ -1320,7 +1345,9 @@ void joystickLoop() {
 
   pointIntType joyOutPoint = js.getXYOut();  //Read the filtered values
 
-  performJoystick(joyOutPoint);  //Perform joystick move action
+  if (calibrationComplete){
+    performJoystick(joyOutPoint);  //Perform joystick move action
+  }
 
   //if (USB_DEBUG) { Serial.println("USBDEBUG: End of joystickLoop");  }
 }
@@ -1719,8 +1746,10 @@ void setLedDefault() {
   switch (operatingMode) {
     case CONF_OPERATING_MODE_MOUSE:
       {
-        led.setLedColor(CONF_LED_MICRO, LED_CLR_PURPLE, CONF_LED_BRIGHTNESS);
-        if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected()) {  //Set micro LED to blue if it's in BLE MODE
+        if (comMode == CONF_COM_MODE_USB){
+          led.setLedColor(CONF_LED_MICRO, LED_CLR_PURPLE, CONF_LED_BRIGHTNESS);
+        }
+        else if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected()) {  //Set micro LED to blue if it's in BLE MODE
           led.setLedColor(CONF_BT_LED_NUMBER, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
         }
         
@@ -1779,7 +1808,7 @@ void performLedAction(ledStateStruct* args) {
   {
     case LED_ACTION_NONE:
       {
-        setLedDefault();
+        //setLedDefault();
         break;
       }
     case LED_ACTION_OFF:
