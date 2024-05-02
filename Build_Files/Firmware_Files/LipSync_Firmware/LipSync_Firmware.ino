@@ -138,6 +138,7 @@ void setup() {
   ledWaitFeedback();
 
   initMemory();  //Initialize Memory
+  getVersionNumber(false, false);
 
   beginComOpMode();  //Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
 

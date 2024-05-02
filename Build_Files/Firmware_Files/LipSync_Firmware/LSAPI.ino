@@ -354,14 +354,41 @@ void getModelNumber(bool responseEnabled, bool apiEnabled, String optionalParame
 //*********************************//
 void getVersionNumber(bool responseEnabled, bool apiEnabled) {
   String commandKey = "VN";
-  int tempVersionNumber = mem.readFloat(CONF_SETTINGS_FILE, commandKey);
-  if (tempVersionNumber != CONF_LIPSYNC_VERSION_MAJOR) {                          //If the previous firmware was different version then reset the settings
-    resetSettings(responseEnabled, apiEnabled);
+  
+  int tempMajorVersionNumber = mem.readInt(CONF_SETTINGS_FILE, "VN1");
+  int tempMinorVersionNumber = mem.readInt(CONF_SETTINGS_FILE, "VN2");
+  int tempRevVersionNumber = mem.readInt(CONF_SETTINGS_FILE, "VN3");
+  
+  if (tempMajorVersionNumber != CONF_LIPSYNC_VERSION_MAJOR) {                          //If the previous firmware was different version then reset the settings
+    // could add factory reset here if version number saved in memory is different
+    tempMajorVersionNumber = CONF_LIPSYNC_VERSION_MAJOR;                               //And store the version number
+    mem.writeInt(CONF_SETTINGS_FILE, "VN1", tempMajorVersionNumber);
+    
+    tempMinorVersionNumber = CONF_LIPSYNC_VERSION_MINOR;                               //And store the version number
+    mem.writeInt(CONF_SETTINGS_FILE, "VN2", tempMinorVersionNumber);
 
-    tempVersionNumber = CONF_LIPSYNC_MODEL;                               //And store the version number
-    mem.writeFloat(CONF_SETTINGS_FILE, commandKey, tempVersionNumber);
+    tempRevVersionNumber = CONF_LIPSYNC_VERSION_REV;                               //And store the version number
+    mem.writeInt(CONF_SETTINGS_FILE, "VN3", tempRevVersionNumber);
   }
-  printResponseFloat(responseEnabled, apiEnabled, true, 0, "VN,0", true, tempVersionNumber);
+
+  else if (tempMinorVersionNumber != CONF_LIPSYNC_VERSION_MINOR) {                          //If the previous firmware was different version then reset the settings
+    // could reset some settings here if version number saved in memory is different
+    tempMinorVersionNumber = CONF_LIPSYNC_VERSION_MINOR;                               //And store the version number
+    mem.writeInt(CONF_SETTINGS_FILE, "VN2", tempMinorVersionNumber);
+
+    tempRevVersionNumber = CONF_LIPSYNC_VERSION_REV;                               //And store the version number
+    mem.writeInt(CONF_SETTINGS_FILE, "VN3", tempRevVersionNumber);
+  }
+
+  else if (tempRevVersionNumber != CONF_LIPSYNC_VERSION_REV) {                          //If the previous firmware was different version then reset the settings
+    tempRevVersionNumber = CONF_LIPSYNC_VERSION_REV;                               //And store the version number
+    mem.writeInt(CONF_SETTINGS_FILE, "VN3", tempRevVersionNumber);
+  }
+  
+
+  String tempLipsyncVersionStr = String(tempMajorVersionNumber) + "." + String(tempMinorVersionNumber) + "." + String(tempRevVersionNumber);
+  
+  printResponseString(responseEnabled, apiEnabled, true, 0, "VN,0", true, tempLipsyncVersionStr);
 }
 //***GET VERSION API FUNCTION***//
 // Function   : getVersionNumber
