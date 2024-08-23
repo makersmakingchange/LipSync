@@ -1,6 +1,6 @@
 # LipSync
 
-The LipSync is a mouth-operated sip-and-puff joystick that can emulate a mouse, wireless Bluetooth mouse, or gamepad. It enables people with disabililites that limit their mobility to control a computer, gaming console, smart phone, or tablet.
+The LipSync is a mouth-operated sip-and-puff joystick that can emulate a mouse, wireless Bluetooth mouse, or gamepad. It enables people with disabilities that limit their mobility to control a computer, gaming console, smart phone, or tablet.
 
 This most recent version, the LipSync 4.0, is made up of the LipSync Joystick and LipSync Hub. The Joystick is the primary user interface, and contains a low-force Hall-Effect joystick and sip and puff sensors. The Hub has a display that provides a graphical interface for independently adjusting settings, as well as it provides the connection to the host device and up to three external assistive switches with 3.5 mm jacks.
 
