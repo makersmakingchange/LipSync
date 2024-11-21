@@ -2,7 +2,7 @@
 * File: LSPressure.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.1 (29 April 2024)
+* Version: v4.0.2 (21 November 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 Neil Squire Society
@@ -390,10 +390,12 @@ void LSPressure::updatePressure() {
     float tempAmbientPressure = lps22_pressure.pressure;  //Set a temporary reference value to new reference pressure reading 
     //Update offset pressure value if reference pressure is changed using tolerance value 
     if(abs(ambientPressure-tempAmbientPressure)>=refTolVal && tempAmbientPressure > 0.00){ 
-        //offsetPressure+=ambientPressure-tempAmbientPressure;                //Add the reference pressure change to the offset value 
-        offsetPressure=sapPressureAbs-tempAmbientPressure;               //Update the offset value 
+        offsetPressure+=ambientPressure-tempAmbientPressure;                //Add the reference pressure change to the offset value 
+        //offsetPressure=sapPressureAbs-tempAmbientPressure;               //Update the offset value 
+
+        ambientPressure=tempAmbientPressure; 
       }    
-      if(tempAmbientPressure > 0.00) { ambientPressure=tempAmbientPressure; } // Update the reference pressure value 
+      //if(tempAmbientPressure > 0.00) { ambientPressure=tempAmbientPressure; } // Update the reference pressure value 
    };
 
   

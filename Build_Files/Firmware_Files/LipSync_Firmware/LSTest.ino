@@ -2,7 +2,7 @@
 * File: LSTestS.ino
 * Firmware: LipSync
 * Developed by: Neil Squire Society / Makers Making Change Program
-* Version: v4.0.1 (29 April 2024)
+* Version: v4.0.2 (21 November 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 Neil Squire Society

@@ -2,7 +2,7 @@
 * File: LSMemory.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.1 (01 May 2024)
+* Version: v4.0.2 (21 November 2024)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 Neil Squire Society
