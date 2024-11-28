@@ -391,7 +391,6 @@ void LSPressure::updatePressure() {
     //Update offset pressure value if reference pressure is changed using tolerance value 
     if(abs(ambientPressure-tempAmbientPressure)>=refTolVal && tempAmbientPressure > 0.00){ 
         offsetPressure+=ambientPressure-tempAmbientPressure;                //Add the reference pressure change to the offset value 
-        //offsetPressure=sapPressureAbs-tempAmbientPressure;               //Update the offset value 
 
         ambientPressure=tempAmbientPressure; 
       }    
