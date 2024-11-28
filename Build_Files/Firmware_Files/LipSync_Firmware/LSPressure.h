@@ -389,12 +389,13 @@ void LSPressure::updatePressure() {
     lps22.getEvent(&lps22_pressure, &lps22_temperature); 
     float tempAmbientPressure = lps22_pressure.pressure;  //Set a temporary reference value to new reference pressure reading 
     //Update offset pressure value if reference pressure is changed using tolerance value 
-    if(abs(ambientPressure-tempAmbientPressure)>=refTolVal && tempAmbientPressure > 0.00){ 
-        offsetPressure+=ambientPressure-tempAmbientPressure;                //Add the reference pressure change to the offset value 
+    /*if(abs(ambientPressure-tempAmbientPressure)>=refTolVal && tempAmbientPressure > 0.00){ 
+        //offsetPressure+=ambientPressure-tempAmbientPressure;                //Add the reference pressure change to the offset value 
 
-        ambientPressure=tempAmbientPressure; 
-      }    
-      //if(tempAmbientPressure > 0.00) { ambientPressure=tempAmbientPressure; } // Update the reference pressure value 
+        //ambientPressure=tempAmbientPressure; 
+      }  
+      */  
+      if(tempAmbientPressure > 0.00) { ambientPressure=tempAmbientPressure; } // Update the reference pressure value 
    };
 
   
@@ -471,7 +472,8 @@ void LSPressure::updateState() {
   }
 
   //No action in 1 minute : reset timer
-  if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_WAITING && mainStateTimer.elapsedTime(sapStateTimerId)>PRESS_SAP_ACTION_TIMEOUT){
+  //if(sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_WAITING && mainStateTimer.elapsedTime(sapStateTimerId)>PRESS_SAP_ACTION_TIMEOUT){
+  if(mainStateTimer.elapsedTime(sapStateTimerId)>PRESS_SAP_ACTION_TIMEOUT){
       setZeroPressure();                                   //Update pressure offset value 
       //Reset and start the timer    
       mainStateTimer.restartTimer(sapStateTimerId);   
