@@ -448,7 +448,7 @@ void LSPressure::updateState()
     float pressureValue = getSapPressure();    //Get the current pressure difference 
 
   //check for sip and puff conditions
-  if (pressureValue > puffThreshold) m{
+  if (pressureValue > puffThreshold) {
     sapMainState = PRESS_SAP_MAIN_STATE_PUFF; //Puff detected
   }
   else if (pressureValue < -1 * sipThreshold) {
