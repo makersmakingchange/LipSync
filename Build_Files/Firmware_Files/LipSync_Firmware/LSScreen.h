@@ -39,8 +39,8 @@
 #define MORE_MENU                   5
 
 //Calibration pages
-#define CENTER_RESET_PAGE           11
-#define FULL_CALIB_PAGE             12
+#define CENTER_RESET_PAGE           21
+//#define FULL_CALIB_PAGE             22
 
 //Mode pages
 #define CONFIRM_MODE_CHANGE         31
@@ -50,9 +50,11 @@
 #define SIP_PUFF_MENU               52
 #define SIP_THRESH_MENU             521
 #define PUFF_THRESH_MENU            522
-#define RESTART_PAGE                53
-#define FACTORY_RESET_PAGE          54
-#define FACTORY_RESET_CONFIRM2_PAGE 541
+#define FULL_CALIB_PAGE             53
+#define FULL_CALIB_CONFIRM_PAGE     531
+#define RESTART_PAGE                54
+#define FACTORY_RESET_PAGE          55
+#define FACTORY_RESET_CONFIRM2_PAGE 551
 
 #define SCROLL_DELAY_MILLIS   100
 
@@ -118,6 +120,7 @@ private:
   void bluetoothMenu();
   void moreMenu();
   void fullCalibrationPage();
+  void fullCalibrationConfirmPage();
   void centerReset();
   void soundMenu();
   void sipPuffThreshMenu();
@@ -129,11 +132,11 @@ private:
 
   String _mainMenuText[5] = {"Exit Menu", "Calibrate", "Mode", "Cursor Speed", "More"};
   String _exitConfirmText[4] = {"Exit", "settings?", "Confirm", "... Back"};
-  String _calibMenuText[4] = {"Center Reset", "Full Calibration", "... Back", " "};
+  String _calibMenuText[4] = {"Center Reset", "... Back", " ", " "};
   String _modeMenuText[4] = {"MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back"};
   String _modeConfirmText[4] = {"Change", "mode?", "Confirm", "... Back"};
   String _cursorSpMenuText[4] = {"Speed: ", "Increase", "Decrease", "... Back"};
-  String _moreMenuText[5] = {"Sound", "Sip & Puff", "Restart LipSync", "Factory Reset", "... Back",};
+  String _moreMenuText[6] = {"Sound", "Sip & Puff", "Full Calibration", "Restart LipSync", "Factory Reset", "... Back",};
   String _soundMenuText[4] = {"Sound:", "<>", "Turn <>", "... Back"};
   String _sipPuffThreshMenuText[4] = {"Sip Threshold", "Puff Threshold", "... Back"};
   String _adjustSipThreshMenuText[4] = {"Sip: ", "Increase", "Decrease", "... Back"};
@@ -141,14 +144,15 @@ private:
   String _restartConfirmText[4] = {"Restart", "LipSync?", "Confirm", "... Back"};
   String _factoryResetConfirm1Text[4] = {"Reset to", "defaults?", "Confirm", "... Back"};
   String _factoryResetConfirm2Text[4] = {"Are you", "sure?", "Confirm", "... Back"};
+  String _fullCalibrationConfirmText[4]= {"Are you", "sure?", "Confirm", "... Back"};
 
   // Number of selectable options in each menu
   const int _mainMenuLen = 5;
   const int _exitConfirmLen = 2;
-  const int _calibMenuLen = 3;
+  const int _calibMenuLen = 2;
   const int _modeMenuLen = 4;
   const int _cursorSpMenuLen = 3;
-  const int _moreMenuLen = 5;
+  const int _moreMenuLen = 6;
   const int _soundMenuLen = 2;
   const int _sipPuffThreshMenuLen = 3;
   const int _adjustSipThreshMenuLen = 3;
@@ -156,6 +160,7 @@ private:
   const int _restartConfirmLen = 2;
   const int _factoryResetConfirm1Len = 2;
   const int _factoryResetConfirm2Len = 2;
+  const int _fullCalibrationConfirmLen = 2;
 
 
 public:
@@ -473,9 +478,6 @@ void LSScreen::selectMenuItem() {
         _currentMenu = CENTER_RESET_PAGE;
         centerResetPage();
       } else if (_currentSelection == 1){
-        _currentMenu = FULL_CALIB_PAGE;
-        fullCalibrationPage();
-      } else if (_currentSelection == 2){
         _currentMenu = MAIN_MENU;
         mainMenu();
       }
@@ -545,12 +547,15 @@ void LSScreen::selectMenuItem() {
         _currentMenu = SIP_PUFF_MENU;
         sipPuffThreshMenu();
       } else if (_currentSelection == 2){
+        _currentMenu = FULL_CALIB_CONFIRM_PAGE;
+        fullCalibrationConfirmPage();
+      } else if (_currentSelection == 3){
         _currentMenu = RESTART_PAGE;
         restartConfirmPage();
-      } else if (_currentSelection == 3){
+      } else if (_currentSelection == 4){
         _currentMenu = FACTORY_RESET_PAGE;
         factoryResetConfirm1Page();
-      } else if (_currentSelection == 4){
+      } else if (_currentSelection == 5){
         _currentMenu = MAIN_MENU;
         mainMenu();
       }
@@ -584,8 +589,8 @@ void LSScreen::selectMenuItem() {
           adjustPuffThreshMenu();
           break;
         case 2:
-          _currentMenu = MAIN_MENU;
-          mainMenu();
+          _currentMenu = MORE_MENU;
+          moreMenu();
           break;
         }
         break;
@@ -610,8 +615,8 @@ void LSScreen::selectMenuItem() {
             _display.display();
             break;
           case 2:       //Back
-            _currentMenu = MAIN_MENU;
-            mainMenu();
+            _currentMenu = SIP_PUFF_MENU;
+            sipPuffThreshMenu();
             break;
         }
         break;
@@ -636,6 +641,18 @@ void LSScreen::selectMenuItem() {
             _display.display();
             break;
           case 2:       //Back
+            _currentMenu = SIP_PUFF_MENU;
+            sipPuffThreshMenu();
+            break;
+        }
+        break;
+      case FULL_CALIB_CONFIRM_PAGE:
+        switch (_currentSelection){
+          case 0:   //Perform full calibration
+            _currentMenu = FULL_CALIB_PAGE;
+            fullCalibrationPage();
+            break;
+          case 1:   //Back
             _currentMenu = MAIN_MENU;
             mainMenu();
             break;
@@ -1304,6 +1321,31 @@ void LSScreen::adjustPuffThreshMenu(void) {
 
   displayMenu();
 
+}
+
+//*********************************//
+// Function   : fullCalibrationConfirmPage 
+// 
+// Description: Format and display Full Calibration Confirmation Page 
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSScreen::fullCalibrationConfirmPage(void){
+  setupDisplay();
+  _display.println("Replaces"); _display.println("max values."); _display.println("Can cause"); _display.println("drift."); 
+  _display.display();
+  delay(3000);
+
+  
+  _currentMenu = FULL_CALIB_CONFIRM_PAGE;
+  _currentMenuLength = _fullCalibrationConfirmLen;
+  _currentMenuText = _fullCalibrationConfirmText;
+  _cursorStart = 2;
+  _currentSelection = 0;
+
+  displayMenu();
 }
 
 //*********************************//
