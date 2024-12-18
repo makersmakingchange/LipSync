@@ -1334,7 +1334,10 @@ void LSScreen::adjustPuffThreshMenu(void) {
 //*********************************//
 void LSScreen::fullCalibrationConfirmPage(void){
   setupDisplay();
-  _display.println("Replaces"); _display.println("max values."); _display.println("Can cause"); _display.println("drift."); 
+  _display.println("Incorrect"); 
+  _display.println("full calib."); 
+  _display.println("may cause"); 
+  _display.println("drift."); 
   _display.display();
   delay(3000);
 
