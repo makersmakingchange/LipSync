@@ -108,10 +108,6 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define LED_ACTION_BLINK 3
 #define LED_ACTION_BLINKFAST 4
 
-#define LED_STATE_OFF 0
-#define LED_STATE_ON 1
-
-
 
 // Display
 #define CONF_DISPLAY_ENABLED false
