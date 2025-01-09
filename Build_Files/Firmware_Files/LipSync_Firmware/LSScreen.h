@@ -86,7 +86,7 @@ private:
   bool _scrollOn = false;
   unsigned long _scrollDelayTimer = millis();
   int _scrollPos = 12;
-  const int _maxCharPerLine = 10;
+  const unsigned int _maxCharPerLine = 10;
   
   int _cursorStart = 0;
   int _countMenuScroll = 0;
