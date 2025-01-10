@@ -353,7 +353,7 @@ int LSJoystick::getOutputRange(){
 //*********************************//
 void LSJoystick::setOutputRange(int rangeLevel){
   if (_operatingMode == CONF_OPERATING_MODE_MOUSE){
-    //Calculate the output range value
+    //Calculate the output range value for mouse output, depending on mouse speed (range level)
     _rangeValue = (int)((0.125 * sq(rangeLevel)) + ( 0.3 * rangeLevel ) + 2);       //Polynomial 
     // [0:2; 1:2; 2:3; 3:4; 4:5; 5:7; 6:8; 7:10; 8:12; 9:15; 10:18]
     
