@@ -93,10 +93,10 @@ class LSJoystick {
     float _inputRadius;                                                   //The minimum radius of operating area calculated using calibration points.
     bool _skipInputChange;                                                //The flag to low-pass filter the input changes 
     int _operatingMode;                                                   //Operating mode, gamepad or mouse
-    double sensorT;                                                      //Magnetic sensor temperature (C)
-    double sensorX;                                                      //Magnetic sensor X (mT)
-    double sensorY;                                                      //Magnetic sensor Y (mT)
-    double sensorZ;                                                      //Magnetic sensor Z (mT)
+    double _sensorT;                                                      //Magnetic sensor temperature (C)
+    double _sensorX;                                                      //Magnetic sensor X (mT)
+    double _sensorY;                                                      //Magnetic sensor Y (mT)
+    double _sensorZ;                                                      //Magnetic sensor Z (mT)
   public:
     LSJoystick();                                                         //Constructor
     void begin();
@@ -275,9 +275,9 @@ void LSJoystick::setMagnetZDirection() {
   float zReading = 0.0;
   for (int i = 0 ; i < JOY_MAG_SAMPLE_SIZE ; i++){        //Get the average of 5 z direction reading 
     //Tlv493dSensor.updateData();
-    Tlv493dSensor.getMagneticFieldAndTemperature(&sensorX, &sensorY, &sensorZ, &sensorT);
+    Tlv493dSensor.getMagneticFieldAndTemperature(&_sensorX, &_sensorY, &_sensorZ, &_sensorT);
     //zReading += Tlv493dSensor.getZ();
-    zReading += float(sensorZ);
+    zReading += float(_sensorZ);
   }
   zReading = ((float) zReading) / JOY_MAG_SAMPLE_SIZE;
    
@@ -460,9 +460,9 @@ void LSJoystick::evaluateInputCenter() {
 //*********************************//
 void LSJoystick::updateInputCenterBuffer() {
   //Tlv493dSensor.updateData();
-  Tlv493dSensor.getMagneticFieldAndTemperature(&sensorX, &sensorY, &sensorZ, &sensorT);
+  Tlv493dSensor.getMagneticFieldAndTemperature(&_sensorX, &_sensorY, &_sensorZ, &_sensorT);
   //joystickCenterBuffer.pushElement({Tlv493dSensor.getY(), Tlv493dSensor.getX()});   //Joystick direction mapping
-  joystickCenterBuffer.pushElement({float(sensorY), float(sensorX)});   //Joystick direction mapping //todo Jake 2025-01-09 sensor direction should be abstracted out
+  joystickCenterBuffer.pushElement({float(_sensorY), float(_sensorX)});   //Joystick direction mapping //todo Jake 2025-01-09 sensor direction should be abstracted out
 }
 
 
@@ -477,10 +477,10 @@ void LSJoystick::updateInputCenterBuffer() {
 //*********************************//
 pointFloatType LSJoystick::getInputMax(int quad) {
   //Tlv493dSensor.updateData();
-  Tlv493dSensor.getMagneticFieldAndTemperature(&sensorX, &sensorY, &sensorZ, &sensorT);
+  Tlv493dSensor.getMagneticFieldAndTemperature(&_sensorX, &_sensorY, &_sensorZ, &_sensorT);
   //Get new x and y reading
   //pointFloatType tempCalibrationPoint = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};
-  pointFloatType tempCalibrationPoint = {float(sensorY), float(sensorX)};
+  pointFloatType tempCalibrationPoint = {float(_sensorY), float(_sensorX)};
 //  Serial.print("x:");
 //  Serial.print(tempCalibrationPoint.x);
 //  Serial.print("y:");
@@ -539,10 +539,10 @@ void LSJoystick::zeroInputMax(int quad) {
 void LSJoystick::update() {
 
   //Tlv493dSensor.updateData();
-  Tlv493dSensor.getMagneticFieldAndTemperature(&sensorX, &sensorY, &sensorZ, &sensorT);
+  Tlv493dSensor.getMagneticFieldAndTemperature(&_sensorX, &_sensorY, &_sensorZ, &_sensorT);
   //Get the new readings as a point
   //_rawPoint = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};
-  _rawPoint = {float(sensorY), float(sensorX)};     
+  _rawPoint = {float(_sensorY), float(_sensorX)};     
   
   _skipInputChange = canSkipInputChange(_rawPoint);
   joystickRawBuffer.pushElement(_rawPoint);                  //Push raw points to joystickRawBuffer : DON'T MOVE THIS
@@ -831,6 +831,7 @@ float LSJoystick::magnitudePoint(pointFloatType inputPoint, pointFloatType offse
 // Return     : sign : int : sign of float value ( -1 or +1 )
 //*********************************//
 int LSJoystick::sgn(float val) {
-  return (0.0 < va
+  return (0.0 < val) - (val < 0.0);
+}
 
-
+#endif
