@@ -99,6 +99,7 @@ int outputAction;
 bool canOutputAction = true;
 bool startupCenterReset = true;
 bool calibrationComplete = false;
+bool calError = false;
 
 bool settingsEnabled = false;  //Serial input settings command mode enabled or disabled
 
@@ -1251,6 +1252,7 @@ void performJoystickCenterStep(int* args) {
 void performJoystickCalibration(int* args) 
 {
   calibrationComplete = false;
+  calError = false;
   int stepNumber = (int)args;
   unsigned long readingDuration = CONF_JOY_CALIB_READING_DELAY * CONF_JOY_CALIB_READING_NUMBER;                                               //Duration of the max corner reading ( 2 seconds )
   unsigned long currentReadingStart = CONF_JOY_CALIB_STEP_DELAY + (CONF_JOY_CALIB_STEP_BLINK_DELAY * ((CONF_JOY_CALIB_STEP_BLINK * 2) + 1));  //Time until start of current reading
@@ -1297,6 +1299,7 @@ void performJoystickCalibration(int* args)
     pollTimer.enable(CONF_TIMER_JOYSTICK);                                                                                      //Enable joystick data polling 
     pollTimer.enable(CONF_TIMER_SCROLL);                                                                                        //Enable joystick data polling 
     screen.fullCalibrationPrompt(stepNumber);
+    calError = false;
   } 
 }
 //***PERFORM JOYSTICK CALIBRATION STEP FUNCTION***//
@@ -1322,12 +1325,38 @@ void performJoystickCalibrationStep(int* args) {
 
   maxPoint = js.getInputMax(stepNumber);  //Get maximum x and y for the step number
 
+  if ((abs(maxPoint.x)<CONF_JOY_CALIB_CORNER_MIN) || (abs(maxPoint.y)<CONF_JOY_CALIB_CORNER_MIN)){
+    pointFloatType tempDefaultPoint;
+    switch (stepNumber){
+      case 1: //Top left corner
+        tempDefaultPoint = {-CONF_JOY_CALIB_CORNER_DEFAULT, CONF_JOY_CALIB_CORNER_DEFAULT};
+        break;
+      case 2: //Top right corner
+        tempDefaultPoint = {CONF_JOY_CALIB_CORNER_DEFAULT, CONF_JOY_CALIB_CORNER_DEFAULT};
+        break;
+      case 3: //Bottom right corner
+        tempDefaultPoint = {CONF_JOY_CALIB_CORNER_DEFAULT, -CONF_JOY_CALIB_CORNER_DEFAULT};
+        break;
+      case 4: //Bottom left corner
+        tempDefaultPoint = {-CONF_JOY_CALIB_CORNER_DEFAULT, -CONF_JOY_CALIB_CORNER_DEFAULT};
+        break;
+    }
+    maxPoint = tempDefaultPoint;
+    js.setInputMax(stepNumber, maxPoint);
+    calError = true;
+  }
+
   //Turn off all the leds to orange to indicate end of the process
   if (calibTimer.getNumRuns(0) == CONF_JOY_CALIB_READING_NUMBER) {  //Turn Led's OFF when timer is running for last time
     mem.writePoint(CONF_SETTINGS_FILE, stepKey, maxPoint);          //Store the point in Flash Memory
     setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0, CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);
     printResponseFloatPoint(true, true, true, 0, stepCommand, true, maxPoint);
+    if (calError){
+      screen.fullCalibrationPrompt(CONF_JOY_CALIB_ERROR);
+      delay(3000);
+      calError = false;
+    }
   }
 }
 

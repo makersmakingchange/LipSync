@@ -297,12 +297,12 @@ float LSPressure::getOffsetPressure()
   {
     
   }
-
+/*
   if (USB_DEBUG)
   {
     Serial.print("USBDEBUG: tempOffsetPresssure: ");
     Serial.println(tempOffsetPressure);  
-  }
+  }  */
 
   return tempOffsetPressure;                         //Return offset value
 }
