@@ -19,7 +19,7 @@
 
 #include "LSUtils.h"
 
-#define USB_DEBUG  1 //Set this to 0 for best performance
+#define USB_DEBUG  0 //Set this to 0 for best performance
 
 
 //***DO NOT CHANGE***//
