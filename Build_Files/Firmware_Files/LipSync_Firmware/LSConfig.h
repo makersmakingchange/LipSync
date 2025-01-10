@@ -157,7 +157,7 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
-#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN1\":4,\"VN2\":0,\"VN3\":1,\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":0.0,\"PT\":0.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[13.0,13.0],\"CA2\":[-13.0,13.0],\"CA3\":[-13.0,-13.0],\"CA4\":[13.0,-13.0],\"SM\":1,\"DM\":0}"
+#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN1\":4,\"VN2\":0,\"VN3\":1,\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":0.0,\"PT\":0.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[-13.0,13.0],\"CA2\":[13.0,13.0],\"CA3\":[13.0,-13.0],\"CA4\":[-13.0,-13.0],\"SM\":1,\"DM\":0}"
 
 //Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 50          //50ms - Measure, 
@@ -247,6 +247,7 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_JOY_MAX_DEADZONE 1.0
 
 //Joystick calibration points and related LED feedback settings
+#define CONF_JOY_CALIB_CORNER_DEFAULT 13.0
 #define CONF_JOY_CALIB_START_DELAY 1000                       //Number of milliseconds to delay full joystick calibration once triggered
 #define CONF_JOY_CALIB_START_LED_COLOR LED_CLR_RED                                           //Joystick Calibration process start and end color
 #define CONF_JOY_CALIB_STEP_DELAY 1500                        //Number of milliseconds to delay between corner measurements
@@ -257,6 +258,9 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_JOY_CALIB_READING_DELAY 200
 #define CONF_JOY_CALIB_STEP_BLINK_COLOR LED_CLR_RED                                          //The color indicates the joystick Calibration about to start
 #define CONF_JOY_CALIB_READING_NUMBER 10
+
+#define CONF_JOY_CALIB_ERROR 10           //flag to display message stating there was an error with one or more corner calibrations
+#define CONF_JOY_CALIB_CORNER_MIN   3     //Minimum value for a corner coordinate when completing full calibration. Less than this will be set to default.
 
 //Joystick center initialization and related LED feedback settings 
 #define CONF_JOY_INIT_START_DELAY 1000                        // Number of milliseconds to delay joystick neutral calibration once triggered
