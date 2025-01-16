@@ -183,10 +183,11 @@ void LSUSBMouse::begin(void)
   
   while( !USBDevice.mounted() ) {
     delay(1);
+    
     if ((millis() - timerHidTimeoutBegin) > CONF_USB_HID_TIMEOUT){
-      usbTimeout = true;
+      //usbTimeout = true;
       break;
-    }
+    } 
   }
   
 }
@@ -207,7 +208,14 @@ void LSUSBMouse::wakeup(void)
 void LSUSBMouse::mouseReport(int8_t b, int8_t x, int8_t y, int8_t wheel, int8_t pan) 
 {
 	wakeup();
-    while(!isReady()) delay(1);
+    unsigned long timerTimeoutBegin = millis();
+    
+    while(!isReady()) {
+      delay(1);
+      if (timerTimeoutBegin > 5000){
+        break;
+      }
+    }
     usb_hid.mouseReport(RID_MOUSE,b,x,y,wheel,pan);
 }
 
