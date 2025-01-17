@@ -145,8 +145,6 @@ void setup() {
   getVersionNumber(false, false);
 
   beginComOpMode();  //Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
-
-  usbCommunicationTimeout();
 /*
   if (USB_DEBUG) {
     Serial.print("USBDEBUG: comMode: ");
