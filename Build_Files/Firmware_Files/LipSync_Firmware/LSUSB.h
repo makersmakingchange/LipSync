@@ -228,7 +228,7 @@ void LSUSBMouse::mouseReport(int8_t b, int8_t x, int8_t y, int8_t wheel, int8_t 
     
     while(!isReady()) {
       delay(1);
-      if (timerTimeoutBegin > 5000){
+      if (timerTimeoutBegin > CONF_USB_HID_TIMEOUT){
         break;
       }
     }
@@ -448,6 +448,7 @@ void LSUSBGamepad::begin(void)
   }
   
   while( !USBDevice.mounted() ) {
+    unsigned long timerTimeoutBegin = millis();
     delay(1);
 
     if ((millis() - timerHidTimeoutBegin) > usbTimeoutMillis){
@@ -470,7 +471,14 @@ void LSUSBGamepad::send(void)
 {
   if (startMillis != millis()) {
   wakeup();
-  while(!isReady()) delay(1);
+  unsigned long timerTimeoutBegin = millis();
+  //while(!isReady()) delay(1);
+  while(!isReady()) {
+    delay(1);
+    if (timerTimeoutBegin > CONF_USB_HID_TIMEOUT){
+      break;
+    }
+  }
   GamepadReport(&_report, sizeof(_report));
     startMillis = millis();
   }
@@ -494,14 +502,28 @@ void LSUSBGamepad::wakeup(void)
 void LSUSBGamepad::write(void)
 {
   wakeup();
-  while(!isReady()) delay(1);
+  unsigned long timerTimeoutBegin = millis();
+  //while(!isReady()) delay(1);
+  while(!isReady()) {
+    delay(1);
+    if (timerTimeoutBegin > CONF_USB_HID_TIMEOUT){
+      break;
+    }
+  }
   GamepadReport(&_report, sizeof(_report));
 }
 
 void LSUSBGamepad::write(void *report)
 {
   wakeup();
-  while(!isReady()) delay(1);
+  unsigned long timerTimeoutBegin = millis();
+  //while(!isReady()) delay(1);
+  while(!isReady()) {
+    delay(1);
+    if (timerTimeoutBegin > CONF_USB_HID_TIMEOUT){
+      break;
+    }
+  }
   memcpy(&_report, report, sizeof(_report));
   GamepadReport(&_report, sizeof(_report));
 }

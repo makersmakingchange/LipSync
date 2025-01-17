@@ -343,6 +343,10 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_BT_LED_COLOR LED_CLR_BLUE 
 #define CONF_BT_LED_BRIGHTNESS CONF_LED_BRIGHTNESS
 
+//Error codes
+#define CONF_ERROR_NONE 0
+#define CONF_ERROR_USB  1
+
 
 //Acceleration
 // Cursor acceleration structure

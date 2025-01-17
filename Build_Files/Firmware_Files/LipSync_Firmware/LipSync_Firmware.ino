@@ -47,6 +47,9 @@ int debugMode;      // 0 = Debug mode is Off
                     // 4 = Switch debug mode is On
                     // 5 = Sip & Puff state debug mode is On
 
+int errorCode = 0;
+
+bool readyToUseFirstTime = true;
 
 bool btIsConnected = false;  //Bluetooth connection state
 
@@ -218,6 +221,38 @@ void loop() {
   settingsEnabled = serialSettings(settingsEnabled);  //Check to see if setting option is enabled in Lipsync
 
   //if (USB_DEBUG) {Serial.print("USB_DEBUG: Loop: "); Serial.println(millis());}
+}
+
+//***ERROR CHECKING FUNCTION***//
+// Function   : errorCheck
+//
+// Description: This function checks for errors with the LipSync device
+//
+// Parameters : void
+//
+// Return     : void
+//****************************************//
+void errorCheck(void) {
+  if (usbmouse.usbRetrying || gamepad.usbRetrying){
+    errorCode = CONF_ERROR_USB;
+  } 
+  else{
+    errorCode = CONF_ERROR_NONE; //0
+  }
+  //add if cases for other errors
+}
+
+void readyToUse(void) {
+  errorCheck();
+  if (!errorCode && readyToUseFirstTime && calibrationComplete){
+    buzzer.startup();
+    screen.splashScreen2();
+    readyToUseFirstTime=false;
+  } else {
+    //Serial.print("Error code:  "); Serial.println(errorCode);
+    //Serial.print("Ready To Use First Time:  "); Serial.println(readyToUseFirstTime);
+    //Serial.print("Calibration complete:  "); Serial.println(calibrationComplete);
+  }
 }
 
 //***ENABLE POLL FUNCTION***//
@@ -475,7 +510,7 @@ void usbRetryConnection(void){
       gamepad.begin();
     }
 
-    screen.testPage();
+    //screen.testPage();
 
     //increase variable usbConnectDelay
     if (usbConnectDelay < 120000){
@@ -484,6 +519,12 @@ void usbRetryConnection(void){
 
     usbConnectTimerId[0] = usbConnectTimer.setTimeout(usbConnectDelay, usbRetryConnection);   //keep retrying connection until USB connection is made
 
+  } else if (!usbmouse.isReady() && !gamepad.isReady()){
+    //screen.testPage();
+    usbConnectTimerId[0] = usbConnectTimer.setTimeout(usbConnectDelay, usbRetryConnection);   //keep retrying connection until USB connection is made
+    //Serial.println("Not ready");
+  } else {
+    readyToUse();
   }
 }
 
@@ -1220,13 +1261,12 @@ void performJoystickCenter(int* args) {
     calibTimer.deleteTimer(0);  //Delete timer
     setLedDefault();            //Set default led feedback
     canOutputAction = true;
+    calibrationComplete = true;
     if (startupCenterReset){    // Checks variable to only play sound and show splash screen on startup
-      buzzer.startup();
-      screen.splashScreen2();
+      readyToUse();
     }                             
     if (screen.showCenterResetComplete){screen.centerResetCompletePage();}      // Checks variable so center reset complete page only shows if accessed from menu, not on startup or during full calibration
     startupCenterReset = false;
-    calibrationComplete = true;
   }
 }
 
