@@ -185,6 +185,7 @@ public:
   void centerResetCompletePage();
   void fullCalibrationPrompt(int stepNum);
   void testPage();
+  void noUsbPage();
 
   bool showCenterResetComplete = false;
 };
@@ -1447,6 +1448,16 @@ void LSScreen::testPage(void){
   _display.println(usbAttempt);
 
   _display.println(usbConnectDelay);
+  _display.display();
+}
+
+void LSScreen::noUsbPage(void){
+  setupDisplay();
+
+  _display.println("No USB");
+  _display.println("Use menu");
+  _display.println("to change");
+  _display.println("modes");
   _display.display();
 }
 
