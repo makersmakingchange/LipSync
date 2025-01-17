@@ -32,6 +32,8 @@
 
 #define GAMEPAD_DESCRIPTOR "LipSync Gamepad"
 
+extern int usbAttempt;
+
 // https://github.com/hathach/tinyusb/blob/master/examples/device/hid_generic_inout/src/usb_descriptors.c
 
 //uint8_t const _ascii2keycode[128][2] = {HID_ASCII_TO_KEYCODE};
@@ -60,7 +62,7 @@ class LSUSBMouse {
     inline void release(uint8_t b = MOUSE_LEFT); // release LEFT by default
     inline bool isPressed(uint8_t b = MOUSE_LEFT); // check LEFT by default
 	  inline bool isReady(void);
-    bool usbTimeout = false;
+    bool usbRetrying = false;
   protected:
     uint8_t _buttons;
     void buttons(uint8_t b);
@@ -150,7 +152,7 @@ class LSUSBGamepad {
     inline void yAxis(uint8_t a);
     inline void move(uint8_t x,uint8_t y);
     inline bool isReady(void);
-    bool usbTimeout = false;
+    bool usbRetrying = false;
   protected:
     HID_GamepadReport_Data_t _report;
     uint32_t startMillis;
@@ -180,14 +182,28 @@ void LSUSBMouse::begin(void)
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing USB HID Mouse");  }
 
   unsigned long timerHidTimeoutBegin = millis();
+
+  int usbTimeoutMillis;
+  usbAttempt++;
+    
+  if (usbRetrying) {
+    usbTimeoutMillis = 200;                     // when reattemping to connect the USB, uses a smaller value to not freeze up the code for long but will keep retrying 
+  } else {
+    usbTimeoutMillis = CONF_USB_HID_TIMEOUT;    // the first time the usb tried to connect, use the default timeout
+  }
   
   while( !USBDevice.mounted() ) {
     delay(1);
-    
-    if ((millis() - timerHidTimeoutBegin) > CONF_USB_HID_TIMEOUT){
-      //usbTimeout = true;
+
+    if ((millis() - timerHidTimeoutBegin) > usbTimeoutMillis){
+      usbRetrying = true;
       break;
     } 
+  }
+
+  if (USBDevice.mounted()) {
+    usbRetrying = false;
+    usbAttempt = 0;
   }
   
 }
@@ -419,15 +435,30 @@ LSUSBGamepad::LSUSBGamepad(void)
 void LSUSBGamepad::begin(void)
 {
   this->usb_hid.begin();
- 
-  unsigned long timerHidGamepadTimeoutBegin = millis();
+
+  unsigned long timerHidTimeoutBegin = millis();
+
+  int usbTimeoutMillis;
+  usbAttempt++;
+    
+  if (usbRetrying) {
+    usbTimeoutMillis = 200;                     // when reattemping to connect the USB, uses a smaller value to not freeze up the code for long but will keep retrying 
+  } else {
+    usbTimeoutMillis = CONF_USB_HID_TIMEOUT;    // the first time the usb tried to connect, use the default timeout
+  }
   
   while( !USBDevice.mounted() ) {
     delay(1);
-    if ((millis() - timerHidGamepadTimeoutBegin) > CONF_USB_HID_TIMEOUT){
-      usbTimeout = true;
+
+    if ((millis() - timerHidTimeoutBegin) > usbTimeoutMillis){
+      usbRetrying = true;
       break;
-    }
+    } 
+  }
+
+  if (USBDevice.mounted()) {
+    usbRetrying = false;
+    usbAttempt = 0;
   }
   
   //Release all the buttons and center joystick

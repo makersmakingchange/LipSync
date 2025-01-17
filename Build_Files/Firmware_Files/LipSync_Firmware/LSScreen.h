@@ -63,6 +63,8 @@
 #define _MODE_GAMEPAD_USB   3
 
 const int TEXT_ROWS = 4; 
+extern int usbAttempt;
+extern int usbConnectDelay;
 
 class LSScreen {
 private:
@@ -182,7 +184,7 @@ public:
   void centerResetPage();
   void centerResetCompletePage();
   void fullCalibrationPrompt(int stepNum);
-  void usbTimeoutPage();
+  void testPage();
 
   bool showCenterResetComplete = false;
 };
@@ -1419,22 +1421,33 @@ void LSScreen::factoryResetConfirm2Page(void){
   displayMenu();
 }
 
-//*********************************//
-// Function   : usbTimeoutPage
-// 
-// Description: Format and display USB Timeout Page
-// 
-// Arguments :  void
-// 
-// Return     : void
-//*********************************//
-void LSScreen::usbTimeoutPage(void){
-  setupDisplay();
-  _display.println("No USB"); _display.println("connection."); _display.println("Starting"); _display.println("BT Mouse"); 
-  _display.display();
-  delay(3000);
-  
 
+
+void LSScreen::testPage(void){
+  setupDisplay();
+
+  switch (_operatingMode){
+    case CONF_OPERATING_MODE_MOUSE:
+      switch(_communicationMode){
+        case CONF_COM_MODE_USB:
+          _display.println("USB Mouse");
+          break;
+        case CONF_COM_MODE_BLE:
+          _display.println("BT Mouse");
+          break;
+      }
+      break;
+    case CONF_OPERATING_MODE_GAMEPAD:
+      _display.println("Gamepad");
+      break;
+    default:
+      _display.println("Error");
+  }
+  _display.print("Attempt:");
+  _display.println(usbAttempt);
+
+  _display.println(usbConnectDelay);
+  _display.display();
 }
 
 #endif

@@ -83,8 +83,11 @@ LSTimer<void> pollTimer;
 int ledTimerId[3];
 LSTimer<ledStateStruct> ledStateTimer;
 
-int usbTimeoutTimerId[1];
-LSTimer<int> usbTimeoutTimer;
+int usbConnectTimerId[1];
+LSTimer<int> usbConnectTimer;
+int usbAttempt = 0;
+
+int usbConnectDelay = CONF_USB_HID_INIT_DELAY;
 
 //Joystick module variables and structures
 int xVal;
@@ -182,6 +185,10 @@ void setup() {
   pollTimerId[CONF_TIMER_SCROLL] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, CONF_SCROLL_POLL_RATE, joystickLoop);
   pollTimerId[CONF_TIMER_SCREEN] = pollTimer.setInterval(CONF_SCREEN_POLL_RATE, 0, screenLoop);
 
+  //usbConnectTimerId[0] = usbConnectTimer.setInterval(usbConnectDelay, CONF_USB_HID_INIT_DELAY, usbRetryConnection);
+
+  usbConnectTimerId[0] = usbConnectTimer.setTimeout(usbConnectDelay, usbRetryConnection);
+
   enablePoll(true);
   ledActionEnabled = true;
 
@@ -202,7 +209,7 @@ void setup() {
 void loop() {
   ledStateTimer.run();  // Timer for lights
 
-  usbTimeoutTimer.run();
+  usbConnectTimer.run();
 
   calibTimer.run();  // Timer for calibration measurements
 
@@ -454,21 +461,31 @@ void initCommunicationMode() {
   comMode = getCommunicationMode(false, false);
 }
 
-void usbCommunicationTimeout(void){
-  if (comMode == CONF_COM_MODE_USB){
+void usbRetryConnection(void){
+  if (usbmouse.usbRetrying || gamepad.usbRetrying){
     
-    if ((usbmouse.usbTimeout) || (gamepad.usbTimeout)){
-      //led.setLedColor(CONF_LED_MICRO, LED_CLR_WHITE, CONF_LED_BRIGHTNESS);
-      setCommunicationMode(false, false, CONF_COM_MODE_BLE);
-      if (operatingMode != CONF_OPERATING_MODE_MOUSE){
-        operatingMode = CONF_OPERATING_MODE_MOUSE;
-        setOperatingMode(false, false, CONF_OPERATING_MODE_MOUSE);     // Sets new operating mode, saves in memory, and conducts software reset
-      }
-      screen.begin();         //Begin screen
-      screen.usbTimeoutPage();
-      
-      softwareReset();
+    if (usbmouse.usbRetrying){
+      Serial.print("Reattempting USB Mouse ");
+      Serial.println(millis());
+
+      usbmouse.begin();
     }
+    else if (gamepad.usbRetrying){
+      Serial.print("Reattempting USB Gamepad");
+      Serial.println(millis());
+
+      gamepad.begin();
+    }
+
+    screen.testPage();
+
+    //increase variable usbConnectDelay
+    if (usbConnectDelay < 120000){
+      usbConnectDelay = usbConnectDelay*1.2;
+    }
+
+    usbConnectTimerId[0] = usbConnectTimer.setTimeout(usbConnectDelay, usbRetryConnection);   //keep retrying connection until USB connection is made
+
   }
 }
 
