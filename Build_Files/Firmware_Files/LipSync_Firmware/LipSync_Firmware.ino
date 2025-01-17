@@ -511,7 +511,9 @@ void usbRetryConnection(void){
     }
 
     //screen.testPage();
-    screen.noUsbPage();
+    if (!screen.isMenuActive()){
+      screen.noUsbPage();
+    }
 
     //increase variable usbConnectDelay
     if (usbConnectDelay < 120000){
@@ -522,7 +524,9 @@ void usbRetryConnection(void){
 
   } else if (!usbmouse.isReady() && !gamepad.isReady()){
     //screen.testPage();
-    screen.noUsbPage();
+    if (!screen.isMenuActive()){
+      screen.noUsbPage();
+    }
     usbConnectTimerId[0] = usbConnectTimer.setTimeout(usbConnectDelay, usbRetryConnection);   //keep retrying connection until USB connection is made
     //Serial.println("Not ready");
   } else {
