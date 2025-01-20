@@ -236,7 +236,7 @@ void loop() {
 // Return     : void
 //****************************************//
 void errorCheck(void) {
-  if (usbmouse.usbRetrying || gamepad.usbRetrying){
+  if (!usbmouse.isReady() || !gamepad.isReady()){
     errorCode = CONF_ERROR_USB;
   } 
   else{
