@@ -188,7 +188,10 @@ void setup() {
 
   //usbConnectTimerId[0] = usbConnectTimer.setInterval(usbConnectDelay, CONF_USB_HID_INIT_DELAY, usbRetryConnection);
 
-  usbConnectTimerId[0] = usbConnectTimer.setTimeout(usbConnectDelay, usbRetryConnection);
+  if (comMode == CONF_COM_MODE_USB){
+    usbConnectTimerId[0] = usbConnectTimer.setTimeout(usbConnectDelay, usbRetryConnection);
+  }
+
 
   enablePoll(true);
   ledActionEnabled = true;
