@@ -26,8 +26,8 @@
 #define CONF_LIPSYNC_MODEL 1                // 1: Lipsync w/ Hub
 
 #define CONF_LIPSYNC_VERSION_MAJOR  4
-#define CONF_LIPSYNC_VERSION_MINOR  0
-#define CONF_LIPSYNC_VERSION_REV  2
+#define CONF_LIPSYNC_VERSION_MINOR  1
+#define CONF_LIPSYNC_VERSION_REV  0
 
 const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + String(CONF_LIPSYNC_VERSION_MINOR) + "." + String(CONF_LIPSYNC_VERSION_REV);
 
