@@ -2,10 +2,10 @@
 * File: LSBuzzer.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.2 (21 November 2024)
+* Version: v4.1rc (20 January 2025)
   License: GPL v3.0 or later
 
-  Copyright (C) 2024 Neil Squire Society
+  Copyright (C) 2024 - 2025 Neil Squire Society
   This program is free software: you can redistribute it and/or modify it under the terms of
   the GNU General Public License as published by the Free Software Foundation,
   either version 3 of the License, or (at your option) any later version.
