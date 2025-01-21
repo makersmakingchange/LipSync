@@ -228,7 +228,7 @@ void loop() {
 
 }
 
-//***ERROR CHECKING FUNCTION***//
+//***ERROR CHECK FUNCTION***//
 // Function   : errorCheck
 //
 // Description: This function checks for errors with the LipSync device
@@ -253,7 +253,18 @@ void errorCheck(void) {
   //add if cases for other errors
 }
 
+
+//***ERROR SCREEN FUNCTION***//
+// Function   : errorScreen
+//
+// Description: This function calls the corresponding error screen function
+//
+// Parameters : void
+//
+// Return     : void
+//****************************************//
 void errorScreen(void) {
+  errorCheck();
   if (!screen.isMenuActive()){
     if (errorCode == CONF_ERROR_USB){
       screen.noUsbPage();
@@ -261,20 +272,26 @@ void errorScreen(void) {
   }
 }
 
+
+//***READY TO USE FUNCTION***//
+// Function   : readyToUse
+//
+// Description: This function checks for errors and startup conditions, and then displays the Ready To Use screen. 
+//              If errors are present, the error screen function is called.
+//
+// Parameters : void
+//
+// Return     : void
+//****************************************//
 void readyToUse(void) {
   errorCheck();
   if (!errorCode && readyToUseFirstTime && calibrationComplete){
     buzzer.startup();
     screen.splashScreen2();
     readyToUseFirstTime=false;      
-    
-
   } 
-  else {
+  else if (errorCode){
     errorScreen();
-    //Serial.print("Error code:  "); Serial.println(errorCode);
-    //Serial.print("Ready To Use First Time:  "); Serial.println(readyToUseFirstTime);
-    //Serial.print("Calibration complete:  "); Serial.println(calibrationComplete);
   }
 }
 
@@ -518,7 +535,17 @@ void initCommunicationMode() {
 }
 
 
-
+//***USB RETRY CONNECTION FUNCTION***//
+// Function   : usbRetryConnection
+//
+// Description: This function checks if the USB connection is attempting to retry mounting, not ready, or timed out
+//              In this case an error screen is shown, and the function is called again after a set time. 
+//              If the USB connection has not been made, it calls another insteance of usb.begin.
+//
+// Parameters : void
+//
+// Return     : void
+//****************************************//
 void usbRetryConnection(void){
   if (usbmouse.usbRetrying || gamepad.usbRetrying){
     
