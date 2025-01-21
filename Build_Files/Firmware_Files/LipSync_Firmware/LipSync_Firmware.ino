@@ -146,6 +146,7 @@ void setup() {
 
   initMemory();  //Initialize Memory
   getVersionNumber(false, false);
+  checkI2C(); //Check that I2C devices are connected
 
   beginComOpMode();  //Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
 /*
@@ -1640,6 +1641,80 @@ void setDebugState(int inputDebugMode) {
   } else {
     pollTimer.enable(CONF_TIMER_DEBUG);  //Enable debug data polling
   }
+}
+
+
+//***CHECK I2C FUNCTION***//
+// Function   : checkI2C
+//
+// Description: This function checks to ensure the necessary i2C devices are connected.
+//
+// Parameters : void
+//
+// Return     : void
+//****************************************//
+void checkI2C()
+{
+  if (USB_DEBUG) { Serial.println("USBDEBUG: Checking I2C Devices"); }
+  
+  Wire.begin();
+
+  Wire.beginTransmission(I2CADDR_DISPLAY);
+    byte error_display;
+    error_display = Wire.endTransmission();
+
+    if (error_display == 0)
+    {
+      Serial.println("Display: Found");
+    }
+    else
+    {
+      Serial.println("Display: Not found");
+    }
+
+  // Scan for Ambient Pressure Sensor
+    Wire.beginTransmission(I2CADDR_LPS22);
+    byte error_LPS22;
+    error_LPS22 = Wire.endTransmission();
+
+    if (error_LPS22 == 0)
+    {
+      Serial.println("Ambient Pressure Sensor: Found");
+    }
+    else
+    {
+      Serial.println("Ambient Pressure Sensor: Not found");
+    }
+
+  // Scan for Sip and Puff Sensor
+    Wire.beginTransmission(I2CADDR_LPS35HW);
+    byte error_LPS35HW;
+    error_LPS35HW = Wire.endTransmission();
+
+    if (error_LPS35HW == 0)
+    {
+      Serial.println("Sip and Puff Sensor: Found");
+    }
+    else
+    {
+      Serial.println("Sip and Puff Sensor: Not found");
+    }
+
+  // Scan for Joystick Sensor
+    Wire.beginTransmission(I2CADDR_TLV493D);
+    byte error_TLV493D;
+    error_TLV493D = Wire.endTransmission();
+
+    if (error_TLV493D == 0)
+    {
+      Serial.println("Joystick Sensor: Found");
+    }
+    else
+    {
+      Serial.println("Joystick Sensor: Not found");
+    }
+  Wire.end();
+
 }
 
 

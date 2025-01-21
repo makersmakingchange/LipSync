@@ -31,6 +31,13 @@
 
 const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + String(CONF_LIPSYNC_VERSION_MINOR) + "." + String(CONF_LIPSYNC_VERSION_REV);
 
+//I2C Devices
+#define I2CADDR_DISPLAY 0x3D   // Display address (61)
+#define I2CADDR_LPS22 0x5C     // Modified LPS22 address (92)
+#define I2CADDR_LPS35HW  0x5D  // LPS35HW address (93)
+#define I2CADDR_TLV493D 0x5E   // 3D Hall Effect Sensor (94)
+
+
 //Input pins
 #define CONF_BUTTON1_PIN 9                  // Pushbutton S1
 #define CONF_BUTTON2_PIN 3                  // Pushbutton S2
