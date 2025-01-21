@@ -177,7 +177,7 @@ void LSUSBMouse::begin(void)
   _buttons = 0;
   this->usb_hid.setPollInterval(1);
   this->usb_hid.setReportDescriptor(mouse_desc_hid_report, sizeof(mouse_desc_hid_report));
-  this->usb_hid.setStringDescriptor(MOUSE_DESCRIPTOR);
+  //this->usb_hid.setStringDescriptor(MOUSE_DESCRIPTOR); //todo this causes TinyUSB to crash 2025-Jan-20
   this->usb_hid.begin();
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing USB HID Mouse");  }
 
@@ -432,7 +432,7 @@ LSUSBGamepad::LSUSBGamepad(void)
 {
   this->usb_hid.setPollInterval(1);
   this->usb_hid.setReportDescriptor(gamepad_desc_hid_report, sizeof(gamepad_desc_hid_report));
-  this->usb_hid.setStringDescriptor(GAMEPAD_DESCRIPTOR);
+  //this->usb_hid.setStringDescriptor(GAMEPAD_DESCRIPTOR); //todo this causes TinyUSB to crash 2025-Jan-20
 }
 
 void LSUSBGamepad::begin(void)
