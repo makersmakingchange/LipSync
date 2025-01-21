@@ -182,7 +182,7 @@ void LSUSBMouse::begin(void)
 
   unsigned long timerHidTimeoutBegin = millis();
 
-  int usbTimeoutMillis;
+  unsigned long usbTimeoutMillis;
   usbAttempt++;
     
   if (usbRetrying) {
@@ -440,7 +440,7 @@ void LSUSBGamepad::begin(void)
 
   unsigned long timerHidTimeoutBegin = millis();
 
-  int usbTimeoutMillis;
+  unsigned long usbTimeoutMillis;
   usbAttempt++;
     
   if (usbRetrying) {
