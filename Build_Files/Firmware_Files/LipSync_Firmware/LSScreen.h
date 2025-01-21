@@ -132,7 +132,7 @@ private:
   void factoryResetConfirm1Page();
   void factoryResetConfirm2Page();
 
-  String _mainMenuText[5] = {"Exit Menu", "Calibrate", "Mode", "Cursor Speed", "More"};
+  String _mainMenuText[5] = {"Exit Menu", "Center Reset", "Mode", "Cursor Speed", "More"};
   String _exitConfirmText[4] = {"Exit", "settings?", "Confirm", "... Back"};
   String _calibMenuText[4] = {"Center Reset", "... Back", " ", " "};
   String _modeMenuText[4] = {"MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back"};
