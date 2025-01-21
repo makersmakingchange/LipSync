@@ -1390,7 +1390,7 @@ void performJoystickCalibrationStep(int* args) {
   maxPoint = js.getInputMax(stepNumber);  //Get maximum x and y for the step number
 
   if ((abs(maxPoint.x)<CONF_JOY_CALIB_CORNER_MIN) || (abs(maxPoint.y)<CONF_JOY_CALIB_CORNER_MIN)){
-    pointFloatType tempDefaultPoint;
+    pointFloatType tempDefaultPoint = {0,0};
     switch (stepNumber){
       case 1: //Top left corner
         tempDefaultPoint = {-CONF_JOY_CALIB_CORNER_DEFAULT, CONF_JOY_CALIB_CORNER_DEFAULT};
