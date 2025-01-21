@@ -1032,7 +1032,7 @@ void LSScreen::changeMode(){
   _display.println("Changing");
   _display.println("mode.");
   _display.println("Release");
-  _display.println("joystick");
+  _display.println("joystick.");
   _display.display();
   delay(2000);
   
