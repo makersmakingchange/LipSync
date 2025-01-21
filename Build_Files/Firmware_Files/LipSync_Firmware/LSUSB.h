@@ -181,8 +181,8 @@ void LSUSBMouse::begin(void)
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing USB HID Mouse");  }
 
   unsigned long timerHidTimeoutBegin = millis();
-
   unsigned long usbTimeoutMillis;
+
   usbAttempt++;
     
   if (usbRetrying) {
@@ -439,8 +439,8 @@ void LSUSBGamepad::begin(void)
   this->usb_hid.begin();
 
   unsigned long timerHidTimeoutBegin = millis();
-
   unsigned long usbTimeoutMillis;
+
   usbAttempt++;
     
   if (usbRetrying) {
@@ -450,7 +450,6 @@ void LSUSBGamepad::begin(void)
   }
   
   while( !USBDevice.mounted() ) {
-    unsigned long timerTimeoutBegin = millis();
     delay(1);
 
     if ((millis() - timerHidTimeoutBegin) > usbTimeoutMillis){
