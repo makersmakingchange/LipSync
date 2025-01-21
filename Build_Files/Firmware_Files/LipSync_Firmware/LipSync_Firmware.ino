@@ -224,6 +224,7 @@ void loop() {
   settingsEnabled = serialSettings(settingsEnabled);  //Check to see if setting option is enabled in Lipsync
 
   //if (USB_DEBUG) {Serial.print("USB_DEBUG: Loop: "); Serial.println(millis());}
+
 }
 
 //***ERROR CHECKING FUNCTION***//
@@ -236,13 +237,27 @@ void loop() {
 // Return     : void
 //****************************************//
 void errorCheck(void) {
-  if (!usbmouse.isReady() || !gamepad.isReady()){
+  //if (!usbmouse.isReady() || !gamepad.isReady()){
+  //  errorCode = CONF_ERROR_USB;
+  //} 
+  if ((operatingMode == CONF_OPERATING_MODE_MOUSE) && (comMode == CONF_COM_MODE_USB) && (!usbmouse.isReady() || usbmouse.usbRetrying || usbmouse.timedOut)){
     errorCode = CONF_ERROR_USB;
-  } 
+  }
+  else if ((operatingMode == CONF_OPERATING_MODE_GAMEPAD) && !gamepad.isReady()) {
+    errorCode = CONF_ERROR_USB;
+  }
   else{
     errorCode = CONF_ERROR_NONE; //0
   }
   //add if cases for other errors
+}
+
+void errorScreen(void) {
+  if (!screen.isMenuActive()){
+    if (errorCode == CONF_ERROR_USB){
+      screen.noUsbPage();
+    }
+  }
 }
 
 void readyToUse(void) {
@@ -250,8 +265,12 @@ void readyToUse(void) {
   if (!errorCode && readyToUseFirstTime && calibrationComplete){
     buzzer.startup();
     screen.splashScreen2();
-    readyToUseFirstTime=false;
-  } else {
+    readyToUseFirstTime=false;      
+    
+
+  } 
+  else {
+    errorScreen();
     //Serial.print("Error code:  "); Serial.println(errorCode);
     //Serial.print("Ready To Use First Time:  "); Serial.println(readyToUseFirstTime);
     //Serial.print("Calibration complete:  "); Serial.println(calibrationComplete);
@@ -497,6 +516,8 @@ void initCommunicationMode() {
   comMode = getCommunicationMode(false, false);
 }
 
+
+
 void usbRetryConnection(void){
   if (usbmouse.usbRetrying || gamepad.usbRetrying){
     
@@ -532,10 +553,20 @@ void usbRetryConnection(void){
     }
     usbConnectTimerId[0] = usbConnectTimer.setTimeout(usbConnectDelay, usbRetryConnection);   //keep retrying connection until USB connection is made
     //Serial.println("Not ready");
-  } else {
+  } 
+  else if (usbmouse.timedOut){
+    if (!screen.isMenuActive()){
+      screen.noUsbPage();
+    }
+    usbConnectTimerId[0] = usbConnectTimer.setTimeout(usbConnectDelay, usbRetryConnection);   //keep retrying connection until USB connection is made
+  }
+  else {
     readyToUse();
   }
+
 }
+
+
 
 //*********************************//
 // Operating Mode Functions

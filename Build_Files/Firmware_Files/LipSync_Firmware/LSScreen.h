@@ -94,6 +94,8 @@ private:
   
   int _cursorStart = 0;
   int _countMenuScroll = 0;
+
+  int testScreenAttempt = 0;
   
   int _currentMenuLength;
   String *_currentMenuText;
@@ -1426,6 +1428,7 @@ void LSScreen::factoryResetConfirm2Page(void){
 
 void LSScreen::testPage(void){
   setupDisplay();
+  testScreenAttempt++;
 
   switch (_operatingMode){
     case CONF_OPERATING_MODE_MOUSE:
@@ -1445,7 +1448,7 @@ void LSScreen::testPage(void){
       _display.println("Error");
   }
   _display.print("Attempt:");
-  _display.println(usbAttempt);
+  _display.println(testScreenAttempt);
 
   _display.println(usbConnectDelay);
   _display.display();
