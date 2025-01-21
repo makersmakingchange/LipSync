@@ -1424,7 +1424,15 @@ void LSScreen::factoryResetConfirm2Page(void){
   displayMenu();
 }
 
-
+//*********************************//
+// Function   : testPage 
+// 
+// Description: Format and display a test page that shows the operating mode and number of times this function has been called
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::testPage(void){
   setupDisplay();
   testScreenAttempt++;
@@ -1453,6 +1461,15 @@ void LSScreen::testPage(void){
   _display.display();
 }
 
+//*********************************//
+// Function   : noUsbPage 
+// 
+// Description: Format and display an error page when the USB has not successfully connected.
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSScreen::noUsbPage(void){
   setupDisplay();
 
