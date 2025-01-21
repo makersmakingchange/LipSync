@@ -34,6 +34,7 @@
 
 extern int usbAttempt;
 
+
 // https://github.com/hathach/tinyusb/blob/master/examples/device/hid_generic_inout/src/usb_descriptors.c
 
 //uint8_t const _ascii2keycode[128][2] = {HID_ASCII_TO_KEYCODE};
@@ -63,6 +64,8 @@ class LSUSBMouse {
     inline bool isPressed(uint8_t b = MOUSE_LEFT); // check LEFT by default
 	  inline bool isReady(void);
     bool usbRetrying = false;
+    bool showTestPage = false;
+    bool timedOut = false;
   protected:
     uint8_t _buttons;
     void buttons(uint8_t b);
@@ -203,6 +206,7 @@ void LSUSBMouse::begin(void)
   if (USBDevice.mounted()) {
     usbRetrying = false;
     usbAttempt = 0;
+    move(0,0);
   }
   
 }
@@ -225,14 +229,17 @@ void LSUSBMouse::mouseReport(int8_t b, int8_t x, int8_t y, int8_t wheel, int8_t 
 	wakeup();
   unsigned long timerTimeoutBegin = millis();
     
-    while(!isReady() && !usbRetrying) {
+    while(!isReady() && !usbRetrying && !timedOut) {
       delay(1);
-      if (timerTimeoutBegin > CONF_USB_HID_TIMEOUT){
+      if ((millis() - timerTimeoutBegin) > CONF_USB_HID_TIMEOUT){
+        timedOut = true;
+        showTestPage=true;
         break;
       }
     }
     if (isReady()){
       usb_hid.mouseReport(RID_MOUSE,b,x,y,wheel,pan);
+      timedOut = false;
     }
     
 }
@@ -476,7 +483,7 @@ void LSUSBGamepad::send(void)
   //while(!isReady()) delay(1);
   while(!isReady() && !usbRetrying) {
     delay(1);
-    if (timerTimeoutBegin > CONF_USB_HID_TIMEOUT){
+    if ((millis() - timerTimeoutBegin) > CONF_USB_HID_TIMEOUT){
       break;
     }
   }
@@ -507,7 +514,7 @@ void LSUSBGamepad::write(void)
   //while(!isReady()) delay(1);
   while(!isReady() && !usbRetrying) {
     delay(1);
-    if (timerTimeoutBegin > CONF_USB_HID_TIMEOUT){
+    if ((millis() - timerTimeoutBegin) > CONF_USB_HID_TIMEOUT){
       break;
     }
   }
@@ -521,7 +528,7 @@ void LSUSBGamepad::write(void *report)
   //while(!isReady()) delay(1);
   while(!isReady() && !usbRetrying) {
     delay(1);
-    if (timerTimeoutBegin > CONF_USB_HID_TIMEOUT){
+    if ((millis() - timerTimeoutBegin) > CONF_USB_HID_TIMEOUT){
       break;
     }
   }
