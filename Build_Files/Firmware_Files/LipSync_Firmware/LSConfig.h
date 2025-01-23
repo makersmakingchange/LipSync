@@ -348,6 +348,10 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 //Error codes
 #define CONF_ERROR_NONE 0
 #define CONF_ERROR_USB  1
+#define CONF_ERROR_DISPLAY 2
+#define CONF_ERROR_JOYSTICK 3
+#define CONF_ERROR_SIPPUFF 4
+#define CONF_ERROR_AMBIENT 5
 
 
 //Acceleration
