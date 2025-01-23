@@ -146,19 +146,10 @@ void setup() {
 
   initMemory();  //Initialize Memory
   getVersionNumber(false, false);
+  
   checkI2C(); //Check that I2C devices are connected
 
   beginComOpMode();  //Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
-/*
-  if (USB_DEBUG) {
-    Serial.print("USBDEBUG: comMode: ");
-    Serial.println(comMode);
-  }
-  if (USB_DEBUG) {
-    Serial.print("USBDEBUG: operatingMode: ");
-    Serial.println(operatingMode);
-  }
-  */
 
   initScreen();  //Initialize screen
 
@@ -197,7 +188,7 @@ void setup() {
   enablePoll(true);
   ledActionEnabled = true;
 
-  if (USB_DEBUG) { Serial.println("End setup");}
+  if (USB_DEBUG) { Serial.println("USB_DEBUG: Setup complete.");}
 
 }  //end setup
 
@@ -284,11 +275,12 @@ void errorScreen(void) {
 // Return     : void
 //****************************************//
 void readyToUse(void) {
-  errorCheck();
+  errorCheck(); // Check for errors
+  
   if (!errorCode && readyToUseFirstTime && calibrationComplete){
     buzzer.startup();
     screen.splashScreen2();
-    readyToUseFirstTime=false;      
+    readyToUseFirstTime = false;      
   } 
   else if (errorCode){
     errorScreen();
@@ -336,7 +328,7 @@ void enablePoll(bool isEnabled) {
 //****************************************//
 void initMemory() {
   mem.begin();  //Begin memory
-  //mem.format();                                                   //DON'T UNCOMMENT - use a factory reset through the serial if need to wipe memory (FR,1:1)
+  //mem.format();    //DON'T UNCOMMENT - use a factory reset through the serial if need to wipe memory (FR,1:1)
   mem.initialize(CONF_SETTINGS_FILE, CONF_SETTINGS_JSON);  //Initialize flash memory to store settings
 }
 
@@ -369,6 +361,7 @@ void resetMemory() {
 // Return     : void
 //****************************************//
 void initScreen() {
+  
   screen.begin();         //Begin screen
   screen.splashScreen();  //Show splash screen
 }
@@ -383,7 +376,9 @@ void initScreen() {
 // Return     : void
 //****************************************//
 void closeMenu() {
+
   screen.deactivateMenu();
+
 }
 
 //***CLEAR SPLASH SCREEN FUNCTION***//
@@ -396,6 +391,7 @@ void closeMenu() {
 // Return     : void
 //****************************************//
 void clearSplashScreen() {
+  
   //Check if menu is active, only turn off screen if menu is not open
   if (!screen.isMenuActive()) {
     screen.deactivateMenu();
@@ -427,7 +423,7 @@ void showCenterResetComplete() {
 //****************************************//
 void screenLoop() {
 
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: screenLoop"); }
+  if (USB_DEBUG) { Serial.println("USBDEBUG: screenLoop"); }
   //Request update
   screen.update();
 
@@ -448,7 +444,7 @@ void screenLoop() {
 // Return     : void
 //****************************************//
 void initBuzzer() {
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Buzzer"); }
+  if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Buzzer"); }
   buzzer.begin();
   //buzzer.startup();         // moved to be called in center calibration function to ensure it happens after center calibration is complete
 }
@@ -464,8 +460,9 @@ void initBuzzer() {
 //****************************************//
 void buzzerLoop() {
 
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: buzzerLoop");  }
-  //Request update
+  if (USB_DEBUG) { Serial.println("USBDEBUG: buzzerLoop");  }
+  
+  // Request update
   buzzer.update();
 }
 
@@ -511,7 +508,7 @@ void buzzerSoundOff() {
 // Return     : void
 //****************************************//
 void initAcceleration() {
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Acceleration"); }
+  if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Acceleration"); }
   //  acceleration=getJoystickAcceleration(false,false);
 }
 
@@ -530,8 +527,15 @@ void initAcceleration() {
 // Return     : void
 //****************************************//
 void initCommunicationMode() {
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Communication Mode"); }
+  if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Communication Mode"); }
+  
   comMode = getCommunicationMode(false, false);
+  
+  if (USB_DEBUG) {
+    Serial.print("USBDEBUG: comMode: ");
+    Serial.println(comMode);
+  }
+
 }
 
 
@@ -547,6 +551,9 @@ void initCommunicationMode() {
 // Return     : void
 //****************************************//
 void usbRetryConnection(void){
+  if (USB_DEBUG) { Serial.println("USBDEBUG: USB Retry Connection"); }
+
+
   if (usbmouse.usbRetrying || gamepad.usbRetrying){
     
     if (usbmouse.usbRetrying){
@@ -567,9 +574,9 @@ void usbRetryConnection(void){
       screen.noUsbPage();
     }
 
-    //increase variable usbConnectDelay
+    // increase variable usbConnectDelay
     if (usbConnectDelay < 120000){
-      usbConnectDelay = usbConnectDelay*1.2;
+      usbConnectDelay = usbConnectDelay * 1.2;
     }
 
     usbConnectTimerId[0] = usbConnectTimer.setTimeout(usbConnectDelay, usbRetryConnection);   //keep retrying connection until USB connection is made
@@ -665,9 +672,9 @@ void changeOperatingMode(int inputOperatingState) {
 //****************************************//
 void beginComOpMode() {
 
-  initCommunicationMode();
-  initOperatingMode();
-
+  initCommunicationMode(); // Retrieve communication mode from memory (None, USB, Bluetooth)
+  initOperatingMode(); // Retrieve operating mode from memory (USB Mouse, Bluetooth Mouse, Gamepad)
+  
   switch (operatingMode) {
     case CONF_OPERATING_MODE_MOUSE:
       switch (comMode) {
@@ -685,7 +692,15 @@ void beginComOpMode() {
       //default:
       //TODO: error handling?
   }
-}
+
+  
+
+  if (USB_DEBUG) {
+    Serial.print("USBDEBUG: operatingMode: ");
+    Serial.println(operatingMode);
+  }
+
+} // end beginComOpMode
 
 //*********************************//
 // Input Functions
@@ -702,7 +717,7 @@ void beginComOpMode() {
 // Return     : void
 //****************************************//
 void initInput() {
-  //if (USB_DEBUG) {    Serial.println("USBDEBUG: Initializing Input");  }
+  if (USB_DEBUG) {    Serial.println("USBDEBUG: Initializing Input");  }
   ib.begin();                                                                      //Begin input buttons
   is.begin();                                                                      //Begin input switches
   buttonActionSize = sizeof(buttonActionProperty) / sizeof(inputActionStruct);     //Size of total available input button actions
@@ -1025,7 +1040,6 @@ void performOutputAction(int action) {
       }
     case CONF_ACTION_B1_PRESS:
       {
-        //if (USB_DEBUG) { Serial.println("GAMEPAD: Button 1 Press"); }
         gamepadButtonPress(1);
         break;
       }
