@@ -93,8 +93,8 @@ int usbAttempt = 0;
 int usbConnectDelay = CONF_USB_HID_INIT_DELAY;
 
 //Joystick module variables and structures
-int xVal;
-int yVal;
+int xVal; //todo Jake 2025-Jan-24 Assess removal: doesn't appear to be used
+int yVal; //todo Jake 2025-Jan-24 Assess removal: doesn't appear to be used
 int acceleration = 0;
 int scrollLevel = 0;
 
