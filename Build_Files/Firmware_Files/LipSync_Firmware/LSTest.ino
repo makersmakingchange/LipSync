@@ -45,12 +45,12 @@ void activateTest(int inputTest) {
 
 
 
-//***ACTIVATE TEST FUNCTION***//
-// Function   : activateTest
+//***TEST LED FUNCTION***//
+// Function   : testLED
 //
-// Description: This function activates different tests
+// Description: This function tests the LED patterns
 //
-// Parameters : inputTest : int : The id of the test to activate
+// Parameters : void
 //
 // Return     : void
 //****************************************//
