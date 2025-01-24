@@ -218,8 +218,9 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 // Internal Test
 #define CONF_TEST_MODE_MIN 1
-#define CONF_TEST_MODE_MAX 1
+#define CONF_TEST_MODE_MAX 2
 #define CONF_TEST_MODE_LED 1
+#define CONF_TEST_MODE_BUZZER 2
 
                                                                                               
 #define CONF_SOUND_MODE_OFF       0   //Sound off

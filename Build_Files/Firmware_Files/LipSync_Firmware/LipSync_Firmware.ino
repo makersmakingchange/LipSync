@@ -144,6 +144,8 @@ void setup() {
   initLed();  //Initialize LED Feedback
   ledWaitFeedback();
 
+  initBuzzer();  //Initialize Buzzer 
+
   initMemory();  //Initialize Memory
   getVersionNumber(false, false);
   
@@ -161,7 +163,7 @@ void setup() {
 
   initAcceleration();  //Initialize Cursor Acceleration
 
-  initBuzzer();  //Initialize Buzzer
+  
 
   initDebug();  //Initialize Debug Mode operation
 
@@ -278,7 +280,7 @@ void readyToUse(void) {
   errorCheck(); // Check for errors
   
   if (!errorCode && readyToUseFirstTime && calibrationComplete){
-    buzzer.startup();
+    buzzer.playStartupSound();
     screen.splashScreen2();
     readyToUseFirstTime = false;      
   } 
@@ -445,8 +447,9 @@ void screenLoop() {
 //****************************************//
 void initBuzzer() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Buzzer"); }
-  buzzer.begin();
-  //buzzer.startup();         // moved to be called in center calibration function to ensure it happens after center calibration is complete
+  
+  buzzer.begin(); // Initialize buzzer for sound feedback
+
 }
 
 //***BUZZER LOOP FUNCTION***//

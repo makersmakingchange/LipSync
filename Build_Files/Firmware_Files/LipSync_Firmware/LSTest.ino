@@ -38,6 +38,10 @@ void activateTest(int inputTest) {
     case (CONF_TEST_MODE_LED):
       testLED();
       break;
+    
+    case (CONF_TEST_MODE_BUZZER):
+      testBuzzer();
+      break;
   }
   Serial.println("Test Complete");
 }
@@ -111,4 +115,43 @@ void testLED() {
   Serial.println("TEST_MODE_LED: ALL LED OFF");
   led.clearLedAll();
   setLedDefault(); // set LEDs to default
+}
+
+//***TEST BUZZER FUNCTION***//
+// Function   : testBuzzer
+//
+// Description: This function tests the buzzer sounds
+//
+// Parameters : void
+//
+// Return     : void
+//****************************************//
+void testBuzzer() {
+
+  Serial.println("BUZZER TEST ACTIVATED");
+
+  Serial.println("TEST_MODE_BUZZER: Playing startup sound.");
+  buzzer.playStartupSound(); 
+  delay(1000);
+
+  Serial.println("TEST_MODE_BUZZER: Playing ready sounds.");
+  buzzer.playReadySound() ;
+  delay(1000);
+
+  Serial.println("TEST_MODE_BUZZER: Playing error sound.");
+  buzzer.playErrorSound(); 
+  delay(1000);
+
+  Serial.println("TEST_MODE_BUZZER: Playing corner calibration sound.");
+  buzzer.calibCornerTone(); 
+  delay(1000);
+
+  Serial.println("TEST_MODE_BUZZER: Playing center calibration sound.");
+  buzzer.calibCenterTone(); 
+  delay(1000);
+
+  //TODO Test Sound levels
+  //TODO test enable/disable sound
+
+  Serial.println("SOUND TEST COMPLETE");
 }

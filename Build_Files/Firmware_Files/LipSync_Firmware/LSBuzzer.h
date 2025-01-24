@@ -112,66 +112,189 @@
 #define NOTE_DS8 4978
 
 class LSBuzzer {
-  private:
-    boolean _buzzerOn = true;     // TODO: do we need this variable or is just soundModeLevel enough?
-    int _soundModeLevel;
-
   public: 
     LSBuzzer();
     void begin();
     void update();
     void clear();
-    void startup();
+    void playStartupSound();
+    void playReadySound();
+    void playErrorSound();
     void enable();
     void disable();
     void setSoundModeLevel(int inputSoundMode);
     void calibCornerTone();
     void calibCenterTone();
+
+  private:
+    boolean _buzzerOn = true; //Sound feedback is on by default
+    int _soundModeLevel; // Levels that correspond to volume
 };
 
+//*********************************//
+// Function   : LSBuzzer 
+// 
+// Description: Construct LSBuzzer
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 LSBuzzer::LSBuzzer() {
 }
 
+//*********************************//
+// Function   : begin function 
+// 
+// Description: Initialize LSBuzzer with default settings 
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSBuzzer::begin(){
   pinMode(CONF_BUZZER_PIN, OUTPUT);
   // Read sound mode level from memory
   _soundModeLevel = getSoundMode(false, false);
 }
 
+//*********************************//
+// Function   : update
+// 
+// Description: Updates buzzer (currently not implemented)
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSBuzzer::update(){
   
 }
 
+//*********************************//
+// Function   : clear function 
+// 
+// Description: Clears buzzer (currently no implemented) 
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSBuzzer::clear(){
-  
+  // No current implementation  
 }
 
+//*********************************//
+// Function   : enable
+// 
+// Description: Enable sounds feedback
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSBuzzer::enable(){
   _buzzerOn = true;
 }
 
+//*********************************//
+// Function   : disable
+// 
+// Description: Disable sound feedback
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSBuzzer::disable(){
   _buzzerOn = false;
 }
 
+//*********************************//
+// Function   : setSoundModeLevel
+// 
+// Description: Set sound level
+// 
+// Arguments :  inputSoundMode : int : desired sound level
+// 
+// Return     : void
+//*********************************//
 void LSBuzzer::setSoundModeLevel(int inputSoundMode){
   _soundModeLevel = inputSoundMode;
 }
 
-void LSBuzzer::startup(){
+//*********************************//
+// Function   : playStartupSound 
+// 
+// Description: Sound to play to indicate LipSync startup.
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSBuzzer::playStartupSound(){ 
   if (_buzzerOn && (_soundModeLevel != CONF_SOUND_MODE_OFF)){
     tone(CONF_BUZZER_PIN, NOTE_F5, 500);
-    delay(500);                             // TODO: add timer instead of delay
+    delay(500);  // TODO: add timer instead of delay
     tone(CONF_BUZZER_PIN, NOTE_C6, 500);
   }
 }
 
+//*********************************//
+// Function   : playReadySound 
+// 
+// Description: Sound to play to indicate that LipSync is ready to use.
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSBuzzer::playReadySound(){ 
+  if (_buzzerOn && (_soundModeLevel != CONF_SOUND_MODE_OFF)){
+    tone(CONF_BUZZER_PIN, NOTE_F5, 500);
+    delay(500);  // TODO: add timer instead of delay
+    tone(CONF_BUZZER_PIN, NOTE_C6, 500);
+  }
+}
+
+//*********************************//
+// Function   : playErrorSound 
+// 
+// Description: Sound to play to indicate LipSync error.
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSBuzzer::playErrorSound(){
+    tone(CONF_BUZZER_PIN, NOTE_G4, 500);
+    tone(CONF_BUZZER_PIN, NOTE_C4, 500);       
+}
+
+//*********************************//
+// Function   : calibCornerTone 
+// 
+// Description: Sound to play to indicate corner during full calibration. 
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSBuzzer::calibCornerTone(){
   if (_buzzerOn && (_soundModeLevel != CONF_SOUND_MODE_OFF)){
     tone(CONF_BUZZER_PIN, NOTE_A4, 300);
   }
 }
 
+//*********************************//
+// Function   : calibCenterTone 
+// 
+// Description: Sound to play to indicate center during full calibration. 
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSBuzzer::calibCenterTone(){
   if (_buzzerOn && (_soundModeLevel != CONF_SOUND_MODE_OFF)){
     tone(CONF_BUZZER_PIN, NOTE_A6, 500);
