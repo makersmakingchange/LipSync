@@ -38,15 +38,13 @@ void activateTest(int inputTest) {
     case (CONF_TEST_MODE_LED):
       testLED();
       break;
-    
+
     case (CONF_TEST_MODE_BUZZER):
       testBuzzer();
       break;
   }
   Serial.println("Test Complete");
 }
-
-
 
 
 //***TEST LED FUNCTION***//
@@ -112,9 +110,23 @@ void testLED() {
   led.setLedColor(CONF_LED_MICRO, LED_CLR_YELLOW, CONF_LED_BRIGHTNESS);
   delay(1000);
 
+  Serial.println("TEST_MODE_LED: Left LED Brightness");
+  led.clearLedAll();
+
+  int brightnessDirection = 1;
+
+  for (int brightness = 0; brightness > -1; brightness = brightness + brightnessDirection) {
+    led.setLedColor(CONF_LED_LEFT, LED_CLR_RED, brightness);
+    if (brightness == 255) {
+      brightnessDirection = -1;  // Switch direction at peak
+    }
+    delay(10);
+  }
+  delay(1000);
+
   Serial.println("TEST_MODE_LED: ALL LED OFF");
   led.clearLedAll();
-  setLedDefault(); // set LEDs to default
+  setLedDefault();  // set LEDs to default
 }
 
 //***TEST BUZZER FUNCTION***//
@@ -131,23 +143,23 @@ void testBuzzer() {
   Serial.println("BUZZER TEST ACTIVATED");
 
   Serial.println("TEST_MODE_BUZZER: Playing startup sound.");
-  buzzer.playStartupSound(); 
+  buzzer.playStartupSound();
   delay(1000);
 
   Serial.println("TEST_MODE_BUZZER: Playing ready sounds.");
-  buzzer.playReadySound() ;
+  buzzer.playReadySound();
   delay(1000);
 
   Serial.println("TEST_MODE_BUZZER: Playing error sound.");
-  buzzer.playErrorSound(); 
+  buzzer.playErrorSound();
   delay(1000);
 
   Serial.println("TEST_MODE_BUZZER: Playing corner calibration sound.");
-  buzzer.calibCornerTone(); 
+  buzzer.calibCornerTone();
   delay(1000);
 
   Serial.println("TEST_MODE_BUZZER: Playing center calibration sound.");
-  buzzer.calibCenterTone(); 
+  buzzer.calibCenterTone();
   delay(1000);
 
   //TODO Test Sound levels
