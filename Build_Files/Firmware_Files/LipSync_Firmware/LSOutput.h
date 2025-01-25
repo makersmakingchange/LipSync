@@ -137,7 +137,6 @@ void LSOutput::begin() {
   pinMode(LED_GREEN, OUTPUT);
   pinMode(LED_BLUE, OUTPUT);
 
-  //ledPixels.begin();
   clearLedAll();
 }
 
@@ -152,9 +151,8 @@ void LSOutput::begin() {
 // 
 // Return     : void
 //*********************************//
-void LSOutput::clearLedAll() {
-  // Turn off all LEDs
-  clearLed(CONF_LED_ALL);
+void LSOutput::clearLedAll() { 
+  clearLed(CONF_LED_ALL); // Turn off all LEDs
 }
 
 //***CLEAR RGB LED FUNCTION***//
@@ -185,9 +183,7 @@ void LSOutput::clearLed(int ledNumber) {
 uint32_t LSOutput::getLedColor(int ledNumber) {
 
   //uint32_t colorValue = ledPixels.getPixelColor(ledNumber-1);
-
   return 0;
-  //return colorValue;
 }
 
 
@@ -202,10 +198,9 @@ uint32_t LSOutput::getLedColor(int ledNumber) {
 // Return     : void
 //*********************************//
 uint8_t LSOutput::getLedBrightness() {
-  return _ledBrightness;
   //  return (ledPixels.getBrightness());
+  return _ledBrightness;
 }
-
 
 
 //***SET RGB LED BRIGHTNESS FUNCTION***//
@@ -220,8 +215,6 @@ uint8_t LSOutput::getLedBrightness() {
 //*********************************//
 void LSOutput::setLedBrightness(int ledBrightness) {
   _ledBrightness = ledBrightness;
-  //show();
-
 }
 
 //*********************************//
@@ -323,7 +316,6 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
       }
 
   }  //end switch
-
 
 } //end LSOutput::setLedColor
 
