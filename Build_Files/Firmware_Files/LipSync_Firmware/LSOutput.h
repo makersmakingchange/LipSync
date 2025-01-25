@@ -85,10 +85,6 @@ const colorStruct colorProperty[]{
 
 
 class LSOutput {
-private:
-  int _ledBrightness = 255; //TODO Jake 2024-01-24. This currently doesn't do anything without Neopixels
-  int _lightModeLevel = 1;  
-
 public:
   LSOutput();
   void begin();
