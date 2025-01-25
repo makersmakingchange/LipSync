@@ -188,6 +188,11 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_TIMER_SCROLL 5
 #define CONF_TIMER_SCREEN 6
 
+#define CONF_TIMER_LED_STARTUP 0
+#define CONF_TIMER_LED_IBM 1
+#define CONF_TIMER_LED_BLINK 2
+#define CONF_TIMER_LED_BT 3
+
 
 //Joystick values 
 #define CONF_JOY_CURSOR_SPEED_LEVEL_MIN 0
