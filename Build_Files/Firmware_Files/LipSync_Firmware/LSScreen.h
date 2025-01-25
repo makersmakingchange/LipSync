@@ -67,6 +67,31 @@ extern int usbAttempt;
 extern int usbConnectDelay;
 
 class LSScreen {
+
+public:
+  LSScreen();
+  void begin();
+  void update();
+  void clear();
+  void show();
+    
+  void setupDisplay();
+  void splashScreen();
+  void splashScreen2();
+
+  void nextMenuItem();
+  void selectMenuItem();
+  bool isMenuActive();
+  void activateMenu();
+  void deactivateMenu();
+  void centerResetPage();
+  void centerResetCompletePage();
+  void fullCalibrationPrompt(int stepNum);
+  void testPage();
+  void noUsbPage();
+
+  bool showCenterResetComplete = false;
+
 private:
   Adafruit_SSD1306 _display = Adafruit_SSD1306(CONF_SCREEN_WIDTH, CONF_SCREEN_HEIGHT, &Wire, OLED_RESET);
   bool is_active = false;
@@ -114,7 +139,7 @@ private:
   void drawCentreString(const String &buf, int y);
   void modeMenuHighlight();
 
-  void mainMenu();  //TODO Jake - 2024-Jan-25 Do these need to be private?
+  void mainMenu();
   void exitConfirmMenu();
   void calibMenu();
   void modeMenu();
@@ -166,30 +191,6 @@ private:
   const int _factoryResetConfirm2Len = 2;
   const int _fullCalibrationConfirmLen = 2;
 
-
-public:
-  LSScreen();
-  void begin();
-  void update();
-  void clear();
-  void show();
-    
-  void setupDisplay();
-  void splashScreen();
-  void splashScreen2();
-
-  void nextMenuItem();
-  void selectMenuItem();
-  bool isMenuActive();
-  void activateMenu();
-  void deactivateMenu();
-  void centerResetPage();
-  void centerResetCompletePage();
-  void fullCalibrationPrompt(int stepNum);
-  void testPage();
-  void noUsbPage();
-
-  bool showCenterResetComplete = false;
 };
 
 

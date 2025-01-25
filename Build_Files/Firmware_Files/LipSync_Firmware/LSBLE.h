@@ -27,8 +27,7 @@ BLEHidAdafruit blehid;
 bool needsInitialization = true;
 
 class LSBLEMouse {
-  private:
-    void mouseReport(signed char b, signed char x, signed char y, signed char wheel = 0, signed char pan = 0);
+
   public:
     inline LSBLEMouse(void);
     inline void begin(const char* s = "LipSync");
@@ -45,6 +44,8 @@ class LSBLEMouse {
   protected:
     uint8_t _buttons;
     void buttons(uint8_t b);
+  private:
+    void mouseReport(signed char b, signed char x, signed char y, signed char wheel = 0, signed char pan = 0);
 };
 
 typedef struct

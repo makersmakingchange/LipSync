@@ -28,12 +28,13 @@ class LSCircularBuffer {
   public:
     LSCircularBuffer();
     ~LSCircularBuffer();
-    T getElement( uint16_t );                       //Zero is the push location of new element 
+    T getElement( uint16_t );  //Zero is the push location of new element 
     void begin( uint16_t inputSize );
     void pushElement(const T elementVal);
     void updateLastElement(const T elementVal);
     T getLastElement( void ); 
     uint16_t getLength( void );
+
   private:
     uint16_t cBufferSize;
     T *cBufferData;

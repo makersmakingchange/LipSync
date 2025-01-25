@@ -49,7 +49,8 @@ class LSTimer {
     timer_t timer[MAX_TIMERS];
     int numTimers; 
     int findFirstFreeSlot();                                                      //Find the first available slot
-    int setupTimer(unsigned long d, unsigned long o, boolean on, boolean h, unsigned n, void* f, T* p);                                                               
+    int setupTimer(unsigned long d, unsigned long o, boolean on, boolean h, unsigned n, void* f, T* p);  
+    
   public:
     LSTimer();                                                                    //Constructor
     void run();                                                                   //Must be called inside loop()
@@ -70,6 +71,8 @@ class LSTimer {
     int getNumTimers();                                                           //Returns the number of used timers
     int getNumAvailableTimers() { return MAX_TIMERS - numTimers; };               //Returns the number of available timers
     int getNumRuns(int numTimer);                                                 //Returns the number of executed runs
+
+                                                             
 };
 
 static inline unsigned long elapsed() { return millis(); }

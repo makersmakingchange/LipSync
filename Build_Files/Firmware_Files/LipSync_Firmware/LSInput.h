@@ -31,6 +31,14 @@
 #define INPUT_ACTION_TIMEOUT 60000
 
 class LSInput {
+  public:
+    LSInput(int* inputPinArray, int inputNumber);
+    ~LSInput();
+    void begin();                                    
+    void clear();  
+    void update();    
+    inputStateStruct getInputState();
+  
   private: 
     LSCircularBuffer <inputStateStruct> inputBuffer;
     int *_inputPinArray;
@@ -41,13 +49,7 @@ class LSInput {
     inputStateStruct inputPrevState = {0, 0, 0};
     LSTimer <void> inputStateTimer;
     int inputStateTimerId;
-  public:
-    LSInput(int* inputPinArray, int inputNumber);
-    ~LSInput();
-    void begin();                                    
-    void clear();  
-    void update();    
-    inputStateStruct getInputState();
+
 };
 
 LSInput::LSInput(int* inputPinArray, int inputNumber)

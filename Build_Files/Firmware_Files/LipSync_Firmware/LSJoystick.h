@@ -60,6 +60,35 @@
 
 
 class LSJoystick {
+  public:
+    LSJoystick();                                                         //Constructor
+    void begin();
+    void clear();   
+    int getMagnetXDirection();                                            //Get the X direction of the magnet.
+    void setMagnetXDirection(int magnetXDirection);                       //Set or update the magnet X direction variable.
+    int getMagnetYDirection();                                            //Get the Y direction of the magnet.
+    void setMagnetYDirection(int magnetYDirection);                       //Set or update the magnet Y direction variable.
+    int getMagnetZDirection();                                            //Get the Z direction of the magnet.
+    void setMagnetZDirection();                                           //Update the magnet Z direction variable.
+    void setMagnetDirection(int magnetXDirection, int magnetYDirection);  //Set magnet direction based on orientation of magnet (z axis), X and Y direction variables.
+    void setDeadzone(bool deadzoneEnabled,float deadzoneFactor);          //Enable or disable deadzone and set deadzone scale factor (0.12) 
+    int getOutputRange();                                                 //Get the output range or speed levels.
+    void setOutputRange(int rangeLevel);                                  //Set the output range or speed levels.
+    int getMinimumRadius();                                               //Get the minimum input radius for square to circle mapping.
+    void setMinimumRadius();                                              //Set or update the minimum input radius for square to circle mapping.
+    pointFloatType getInputCenter();                                      //Get the updated center compensation point.
+    void evaluateInputCenter();                                           //Evaluate the center compensation point.
+    void updateInputCenterBuffer();                                       //Push new center compensation point to joystickCenter
+    pointFloatType getInputMax(int quad);                                 //Get the updated maximum input reading from the selected corner of joystick using the input quadrant. (Calibration purposes)
+    void setInputMax(int quad, pointFloatType point);                     //Set the maximum input reading for each corner of joystick using the input quadrant. 
+    void zeroInputMax(int quad);                                          //Zero the maximum input reading for each corner of joystick using the input quadrant. 
+    void update();                                                        //Update the joystick reading to get new input from the magnetic sensor and calculate the output.
+    int getXOut();                                                        //Get the output x value.
+    int getYOut();                                                        //Get the output y value.
+    pointFloatType getXYRaw();                                            //Get the raw x and y values.
+    pointIntType getXYIn();                                               //Get the mapped and filtered x and y values.
+    pointIntType getXYOut();                                              //Get the output x and y values.
+
   private:
     Tlv493d Tlv493dSensor = Tlv493d();                                    //Create an object of Tlv493d class
     LSCircularBuffer <pointFloatType> joystickRawBuffer;                  //Create a buffer of type pointFloatType to push raw readings 
@@ -93,34 +122,6 @@ class LSJoystick {
     float _inputRadius;                                                   //The minimum radius of operating area calculated using calibration points.
     bool _skipInputChange;                                                //The flag to low-pass filter the input changes 
     int _operatingMode;                                                   //Operating mode, gamepad or mouse
-  public:
-    LSJoystick();                                                         //Constructor
-    void begin();
-    void clear();   
-    int getMagnetXDirection();                                            //Get the X direction of the magnet.
-    void setMagnetXDirection(int magnetXDirection);                       //Set or update the magnet X direction variable.
-    int getMagnetYDirection();                                            //Get the Y direction of the magnet.
-    void setMagnetYDirection(int magnetYDirection);                       //Set or update the magnet Y direction variable.
-    int getMagnetZDirection();                                            //Get the Z direction of the magnet.
-    void setMagnetZDirection();                                           //Update the magnet Z direction variable.
-    void setMagnetDirection(int magnetXDirection, int magnetYDirection);  //Set magnet direction based on orientation of magnet (z axis), X and Y direction variables.
-    void setDeadzone(bool deadzoneEnabled,float deadzoneFactor);          //Enable or disable deadzone and set deadzone scale factor (0.12) 
-    int getOutputRange();                                                 //Get the output range or speed levels.
-    void setOutputRange(int rangeLevel);                                  //Set the output range or speed levels.
-    int getMinimumRadius();                                               //Get the minimum input radius for square to circle mapping.
-    void setMinimumRadius();                                              //Set or update the minimum input radius for square to circle mapping.
-    pointFloatType getInputCenter();                                      //Get the updated center compensation point.
-    void evaluateInputCenter();                                           //Evaluate the center compensation point.
-    void updateInputCenterBuffer();                                       //Push new center compensation point to joystickCenter
-    pointFloatType getInputMax(int quad);                                 //Get the updated maximum input reading from the selected corner of joystick using the input quadrant. (Calibration purposes)
-    void setInputMax(int quad, pointFloatType point);                     //Set the maximum input reading for each corner of joystick using the input quadrant. 
-    void zeroInputMax(int quad);                                          //Zero the maximum input reading for each corner of joystick using the input quadrant. 
-    void update();                                                        //Update the joystick reading to get new input from the magnetic sensor and calculate the output.
-    int getXOut();                                                        //Get the output x value.
-    int getYOut();                                                        //Get the output y value.
-    pointFloatType getXYRaw();                                            //Get the raw x and y values.
-    pointIntType getXYIn();                                               //Get the mapped and filtered x and y values.
-    pointIntType getXYOut();                                              //Get the output x and y values.
 
 };
 
