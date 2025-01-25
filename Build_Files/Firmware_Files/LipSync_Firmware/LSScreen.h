@@ -94,16 +94,16 @@ public:
 
 private:
   Adafruit_SSD1306 _display = Adafruit_SSD1306(CONF_SCREEN_WIDTH, CONF_SCREEN_HEIGHT, &Wire, OLED_RESET);
-  bool is_active = false;
-  LSTimer <void> screenStateTimer;                      //Timer 
-  int screenStateTimerId;                               //The id for the sap state timer
+ 
+  LSTimer <void> _screenStateTimer;                      //Timer 
+  int _screenStateTimerId;                               //The id for the sap state timer
+  
+   bool _isActive = false;
   int _currentMenu = 0;
   int _prevMenu = -1;
   int _currentSelection = 0;
   int _selectedLine; 
 
-  //int _mode = MODE_MOUSE_USB;
-  //int _tempMode = MODE_MOUSE_USB;
   int _operatingMode;
   int _tempOperatingMode;
   int _communicationMode;
@@ -120,7 +120,7 @@ private:
   int _cursorStart = 0;
   int _countMenuScroll = 0;
 
-  int testScreenAttempt = 0;
+  int _testScreenAttempt = 0;
   
   int _currentMenuLength;
   String *_currentMenuText;
@@ -131,8 +131,6 @@ private:
 
   unsigned long _lastActivityMillis;
   
-
-
   void displayMenu();
   void displayCursor();
   void scrollLongText();
@@ -219,6 +217,7 @@ void LSScreen::begin() {
   
   if (!_display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) { // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
     Serial.println(F("SSD1306 allocation failed"));
+
     for (;;); // Don't proceed, loop forever  //TODO Implement watchdog to throw error instead of infinite loop
   }
 
@@ -259,14 +258,14 @@ void LSScreen::clear() {
 // Return     : void
 //*********************************//
 void LSScreen::update() {
-  screenStateTimer.run();
+  _screenStateTimer.run();
   
   //Loop for screen functions 
   if (_scrollOn){
     scrollLongText();
   }
 
-  if (((millis() - _lastActivityMillis) > CONF_MENU_TIMEOUT) && is_active){
+  if (((millis() - _lastActivityMillis) > CONF_MENU_TIMEOUT) && _isActive){
     deactivateMenu();
   }
 }
@@ -282,7 +281,7 @@ void LSScreen::update() {
 //*********************************//
 void LSScreen::activateMenu() {
   _lastActivityMillis = millis();
-  is_active = true;
+  _isActive = true;
   _operatingMode = getOperatingMode(false, false);
   mainMenu();
 }
@@ -297,7 +296,7 @@ void LSScreen::activateMenu() {
 // Return     : void
 //*********************************//
 void LSScreen::deactivateMenu() {
-  is_active = false;
+  _isActive = false;
   clear();
   _display.display();
   
@@ -310,11 +309,11 @@ void LSScreen::deactivateMenu() {
 //              
 // Arguments :  void
 // 
-// Return     : bool : is_active : true = menu activated
+// Return     : bool : _isActive : true = menu activated
 //*********************************//
 bool LSScreen::isMenuActive() {
 
-return is_active;
+return _isActive;
  
 }
 
@@ -386,7 +385,7 @@ void LSScreen::splashScreen2() {
   
   _display.display();
   
-  screenStateTimerId = screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
+  _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
   _lastActivityMillis = millis();
 
 }
@@ -1149,7 +1148,7 @@ void LSScreen::centerResetCompletePage(void){
 
   delay(2000);
 
-  if (is_active){
+  if (_isActive){
     mainMenu();
   } else{
     deactivateMenu();
@@ -1436,7 +1435,7 @@ void LSScreen::factoryResetConfirm2Page(void){
 //*********************************//
 void LSScreen::testPage(void){
   setupDisplay();
-  testScreenAttempt++;
+  _testScreenAttempt++;
 
   switch (_operatingMode){
     case CONF_OPERATING_MODE_MOUSE:
@@ -1456,7 +1455,7 @@ void LSScreen::testPage(void){
       _display.println("Error");
   }
   _display.print("Attempt:");
-  _display.println(testScreenAttempt);
+  _display.println(_testScreenAttempt);
 
   _display.println(usbConnectDelay);
   _display.display();
