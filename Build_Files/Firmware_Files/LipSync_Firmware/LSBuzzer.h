@@ -234,9 +234,7 @@ void LSBuzzer::setSoundModeLevel(int inputSoundMode){
 //*********************************//
 void LSBuzzer::playStartupSound(){ 
   if (_buzzerOn && (_soundModeLevel != CONF_SOUND_MODE_OFF)){
-    tone(CONF_BUZZER_PIN, NOTE_F5, 500);
-    delay(500);  // TODO: add timer instead of delay
-    tone(CONF_BUZZER_PIN, NOTE_C6, 500);
+    tone(CONF_BUZZER_PIN, NOTE_F5, 200);
   }
 }
 
