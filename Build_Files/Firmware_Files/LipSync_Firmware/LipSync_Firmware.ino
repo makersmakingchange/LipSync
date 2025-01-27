@@ -33,6 +33,8 @@
 #include "LSScreen.h"
 #include "LSBuzzer.h"
 
+// Unique ID
+String g_deviceUID = "";
 
 //Communication mode and debug mode variables
 int comMode;        // 0 = None , 1 = USB , 2 = Wireless
@@ -137,6 +139,9 @@ void setup() {
   //while (!Serial) { delay(1); }  // Wait until serial port is opened
 
   initMemory();  //Initialize Memory
+
+  //initUID(); // Intilize unique identifier
+  getDeviceID(false,false);
 
   initLed();  //Initialize LED Feedback
   ledWaitFeedback();
@@ -339,6 +344,32 @@ void resetMemory() {
   mem.format();                                            //Format and remove existing text files in flash memory
   mem.initialize(CONF_SETTINGS_FILE, CONF_SETTINGS_JSON);  //Initialize flash memory to store settings
 }
+
+//***Read UID FUNCTION***//
+// Function   : readUID
+//
+// Description: This function reads the device's unique ID from the microcontroller
+//
+// Parameters : void
+//
+// Return     : const char* : deviceIDString : 8 hexadecimal string UID from board
+//****************************************//
+const char* readUID() {
+
+  static char deviceIDString[9];
+  uint32_t deviceID = 0;
+
+  //#ifdef NRF52480_XXAA
+  deviceID = NRF_FICR->DEVICEID[0]; // First part of Device ID for NRF52840 boards 
+  //#endif
+  
+  itoa(deviceID, deviceIDString, 16); // Convert uint32_t to hex string
+
+  return deviceIDString;
+    
+}
+
+
 
 //*********************************//
 // Screen Functions
