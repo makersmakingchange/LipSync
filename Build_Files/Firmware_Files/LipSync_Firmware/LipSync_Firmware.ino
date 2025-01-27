@@ -1913,10 +1913,9 @@ void ledBlinkEffect(ledStateStruct* args) {
 void ledBtScanEffect() {
   if (ledStateTimer.getNumRuns(CONF_TIMER_LED_BT) % 2) {
     led.setLedColor(CONF_BT_LED_NUMBER, LED_CLR_NONE, CONF_BT_LED_BRIGHTNESS);
-    Serial.println("Bluetooth LED OFF");
+    
   } else {
     led.setLedColor(CONF_BT_LED_NUMBER, CONF_BT_LED_COLOR, CONF_BT_LED_BRIGHTNESS);
-    Serial.println("Bluetooth LED ON");
   }
 }
 
