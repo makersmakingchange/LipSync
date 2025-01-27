@@ -29,6 +29,7 @@ typedef struct {                                  //Type definition for API func
 // Declare individual API functions with command, parameter, and corresponding function
 _functionList getModelNumberFunction =            {"MN", "0", "0", &getModelNumber};
 _functionList getVersionNumberFunction =          {"VN", "0", "0", &getVersionNumber};
+_functionList getDeviceIDFunction =               {"ID", "0", "0", &getDeviceID};
 _functionList getOperatingModeFunction =          {"OM", "0", "0", &getOperatingMode};
 _functionList setOperatingModeFunction =          {"OM", "1", "",  &setOperatingMode};
 _functionList getCommunicationModeFunction =      {"CM", "0", "0", &getCommunicationMode};
@@ -73,9 +74,10 @@ _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSetting
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[37] = {
+_functionList apiFunction[38] = {
   getModelNumberFunction,
   getVersionNumberFunction,
+  getDeviceIDFunction,
   getOperatingModeFunction,
   setOperatingModeFunction,
   getCommunicationModeFunction,
@@ -405,6 +407,49 @@ void getVersionNumber(bool responseEnabled, bool apiEnabled) {
 void getVersionNumber(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
     getVersionNumber(responseEnabled, apiEnabled);
+  }
+}
+
+//***GET DEVICE ID FUNCTION***//
+// Function   : getDeviceID
+//
+// Description: This function retrieves the UID from the device
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : void
+//*********************************//
+void getDeviceID(bool responseEnabled, bool apiEnabled) {
+  String commandKey = "ID";
+  String tempDeviceID = mem.readString(CONF_SETTINGS_FILE, commandKey);
+  String deviceID = readUID();
+ 
+  if (tempDeviceID != deviceID){//If string doesn't match, store to memory
+    mem.writeString(CONF_SETTINGS_FILE, commandKey, deviceID);
+  }
+  g_deviceUID = deviceID; // Update global variable
+  
+  printResponseString(responseEnabled, apiEnabled, true, 0, "ID,0", true, tempDeviceID);
+
+}
+//***GET DEVICE ID API FUNCTION***//
+// Function   : getDeviceID
+//
+// Description: This function is redefinition of main getDeviceID function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void getDeviceID(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
+    getDeviceID(responseEnabled, apiEnabled);
   }
 }
 

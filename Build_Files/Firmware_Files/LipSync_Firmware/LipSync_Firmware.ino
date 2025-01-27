@@ -33,6 +33,8 @@
 #include "LSScreen.h"
 #include "LSBuzzer.h"
 
+// Unique ID
+String g_deviceUID = "";
 
 //Communication mode and debug mode variables
 int comMode;        // 0 = None , 1 = USB , 2 = Wireless
@@ -83,7 +85,7 @@ LSTimer<int> calibTimer;
 int pollTimerId[8];  // 8 poll timers
 LSTimer<void> pollTimer;
 
-int ledTimerId[3];
+int ledTimerId[4];  // 3 LED timers 0 - startup feedback, 1 - IBM, 2- normal blinks, 3 - Bluetooth Status
 LSTimer<ledStateStruct> ledStateTimer;
 
 int usbConnectTimerId[1];
@@ -137,6 +139,9 @@ void setup() {
   //while (!Serial) { delay(1); }  // Wait until serial port is opened
 
   initMemory();  //Initialize Memory
+
+  //initUID(); // Intilize unique identifier
+  getDeviceID(false,false);
 
   initLed();  //Initialize LED Feedback
   ledWaitFeedback();
@@ -339,6 +344,32 @@ void resetMemory() {
   mem.format();                                            //Format and remove existing text files in flash memory
   mem.initialize(CONF_SETTINGS_FILE, CONF_SETTINGS_JSON);  //Initialize flash memory to store settings
 }
+
+//***Read UID FUNCTION***//
+// Function   : readUID
+//
+// Description: This function reads the device's unique ID from the microcontroller
+//
+// Parameters : void
+//
+// Return     : const char* : deviceIDString : 8 hexadecimal string UID from board
+//****************************************//
+const char* readUID() {
+
+  static char deviceIDString[9];
+  uint32_t deviceID = 0;
+
+  //#ifdef NRF52480_XXAA
+  deviceID = NRF_FICR->DEVICEID[0]; // First part of Device ID for NRF52840 boards 
+  //#endif
+  
+  itoa(deviceID, deviceIDString, 16); // Convert uint32_t to hex string
+
+  return deviceIDString;
+    
+}
+
+
 
 //*********************************//
 // Screen Functions
@@ -1306,7 +1337,7 @@ void performJoystickCenter(int* args) {
   calibrationComplete = false;
   int stepNumber = (int)args;
   unsigned long readingDuration = CONF_JOY_INIT_READING_DELAY * CONF_JOY_INIT_READING_NUMBER;                                               //Duration of the center point readings (500 seconds )
-  unsigned long currentReadingStart = CONF_JOY_INIT_START_DELAY + (CONF_JOY_INIT_STEP_BLINK_DELAY * ((CONF_JOY_INIT_STEP_BLINK * 2) + 1));  //(500 + 150*3)                      //Time until start of current reading.
+  unsigned long currentReadingStart = CONF_JOY_INIT_START_DELAY + (CONF_JOY_INIT_STEP_BLINK_DELAY * ((CONF_JOY_INIT_STEP_BLINK * 2) + 1));  //(500 + 150*3)  //Time until start of current reading.
   unsigned long nextStepStart = currentReadingStart + readingDuration;                                                                      //Time until start of next step. (1450 seconds )
   pointFloatType centerPoint;
 
@@ -1319,7 +1350,7 @@ void performJoystickCenter(int* args) {
     //Start timer to get 5 reading every 100ms
     calibTimerId[1] = calibTimer.setTimer(CONF_JOY_INIT_READING_DELAY, currentReadingStart, CONF_JOY_INIT_READING_NUMBER, performJoystickCenterStep, (int*)stepNumber);
     ++stepNumber;
-    ///Start exit step
+    //Start exit step
     calibTimerId[0] = calibTimer.setTimeout(nextStepStart, performJoystickCenter, (int*)stepNumber);
   } else {
     js.evaluateInputCenter();           //Evaluate the center point using values in the buffer
@@ -1330,8 +1361,9 @@ void performJoystickCenter(int* args) {
     setLedDefault();            //Set default led feedback
     canOutputAction = true;
     calibrationComplete = true;
+
     if (startupCenterReset) {  // Checks variable to only play sound and show splash screen on startup
-      readyToUse();
+      readyToUse(); //TODO JDMc 2025-Jan-24 Probably want sound to play after every calibration to indicate joystick is ready to be used again.
     }
     if (screen.showCenterResetComplete) { screen.centerResetCompletePage(); }  // Checks variable so center reset complete page only shows if accessed from menu, not on startup or during full calibration
     startupCenterReset = false;
@@ -1376,14 +1408,14 @@ void performJoystickCalibration(int* args) {
   calibrationComplete = false;
   calError = false;
   int stepNumber = (int)args;
-  unsigned long readingDuration = CONF_JOY_CALIB_READING_DELAY * CONF_JOY_CALIB_READING_NUMBER;                                               //Duration of the max corner reading ( 2 seconds )
+  unsigned long readingDuration = CONF_JOY_CALIB_READING_DELAY * CONF_JOY_CALIB_READING_NUMBER;  //Duration of the max corner reading ( 2 seconds )
   unsigned long currentReadingStart = CONF_JOY_CALIB_STEP_DELAY + (CONF_JOY_CALIB_STEP_BLINK_DELAY * ((CONF_JOY_CALIB_STEP_BLINK * 2) + 1));  //Time until start of current reading
   //Time until start of current reading. (1.5 + (3*300) seconds )
   unsigned long nextStepStart = currentReadingStart + readingDuration + CONF_JOY_CALIB_START_DELAY;  //Time until start of next reading. ( 2.4 + 2 + 1 seconds )
 
   if (stepNumber == 0)  //STEP 0: Calibration started
   {
-    pollTimer.disable(0);  //Disable joystick data polling
+    pollTimer.disable(CONF_TIMER_JOYSTICK);  //Temporarily disable joystick data polling timer
     setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_START_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY, CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);
     ++stepNumber;
@@ -1417,7 +1449,7 @@ void performJoystickCalibration(int* args) {
     canOutputAction = true;
     calibrationComplete = true;
     pollTimer.enable(CONF_TIMER_JOYSTICK);  //Enable joystick data polling
-    pollTimer.enable(CONF_TIMER_SCROLL);    //Enable joystick data polling
+    pollTimer.enable(CONF_TIMER_SCROLL);    //Enable scroll data polling
     screen.fullCalibrationPrompt(stepNumber);
     calError = false;
   }
@@ -1800,7 +1832,7 @@ void startupFeedback() {
   //setLedState(LED_ACTION_NONE, LED_CLR_NONE, CONF_LED_ALL, 0, 0, CONF_LED_BRIGHTNESS); // Turn all LEDs off
   //performLedAction(ledCurrentState);
 
-  ledTimerId[0] = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
+  ledTimerId[CONF_TIMER_LED_STARTUP] = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
 }
 
 //***SET LED STATE FUNCTION***//
@@ -1842,7 +1874,7 @@ void ledIBMEffect(ledStateStruct* args) {
   if (args->ledColorNumber < 7) {
     led.setLedColor(args->ledNumber, args->ledColorNumber, args->ledBrightness);
     setLedState(args->ledAction, (args->ledColorNumber) + 1, args->ledNumber, args->ledBlinkNumber, (args->ledBlinkTime), args->ledBrightness);
-    ledTimerId[1] = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
+    ledTimerId[CONF_TIMER_LED_IBM] = ledStateTimer.setTimeout(ledCurrentState->ledBlinkTime, ledIBMEffect, ledCurrentState);
   } else if (args->ledColorNumber == 7) {
     ledActionEnabled = true;
     enablePoll(true);
@@ -1859,13 +1891,13 @@ void ledIBMEffect(ledStateStruct* args) {
 // Return     : void
 //****************************************//
 void ledBlinkEffect(ledStateStruct* args) {
-  if (ledStateTimer.getNumRuns(0) % 2) {
+  if (ledStateTimer.getNumRuns(CONF_TIMER_LED_BLINK) % 2) {
     led.setLedColor(args->ledNumber, 0, args->ledBrightness);
   } else {
     led.setLedColor(args->ledNumber, args->ledColorNumber, args->ledBrightness);
   }
 
-  if (ledStateTimer.getNumRuns(0) == ((args->ledBlinkNumber) * 2) + 1) {
+  if (ledStateTimer.getNumRuns(CONF_TIMER_LED_BLINK) == ((args->ledBlinkNumber) * 2) + 1) {
     //
     setLedDefault();
   }
@@ -1879,12 +1911,11 @@ void ledBlinkEffect(ledStateStruct* args) {
 // Return     : void
 //****************************************//
 void ledBtScanEffect() {
-  if (ledStateTimer.getNumRuns(0) % 2) {
+  if (ledStateTimer.getNumRuns(CONF_TIMER_LED_BT) % 2) {
     led.setLedColor(CONF_BT_LED_NUMBER, LED_CLR_NONE, CONF_BT_LED_BRIGHTNESS);
-    Serial.println("Bluetooth LED OFF");
+    
   } else {
     led.setLedColor(CONF_BT_LED_NUMBER, CONF_BT_LED_COLOR, CONF_BT_LED_BRIGHTNESS);
-    Serial.println("Bluetooth LED ON");
   }
 }
 
@@ -1939,7 +1970,7 @@ void turnLedOn(ledStateStruct* args) {
 //****************************************//
 void blinkLed(ledStateStruct* args) {
   int blinkOffset = 0;  // number of milliseconds to delay start of blink
-  ledTimerId[2] = ledStateTimer.setTimer(args->ledBlinkTime, blinkOffset, ((args->ledBlinkNumber) * 2) + 1, ledBlinkEffect, ledCurrentState);
+  ledTimerId[CONF_TIMER_LED_BLINK] = ledStateTimer.setTimer(args->ledBlinkTime, blinkOffset, ((args->ledBlinkNumber) * 2) + 1, ledBlinkEffect, ledCurrentState);
 }
 
 //***SET DEFAULT LED EFFECT FUNCTION***//
@@ -1995,8 +2026,8 @@ void btFeedbackLoop() {
   //Perform bluetooth LED blinking if bluetooth is not connected and wasn't connected before
   if (comMode == CONF_COM_MODE_BLE && tempIsConnected == false && tempIsConnected == btIsConnected) {
     btIsConnected = false;
-    //pollTimerId[5] = pollTimer.setTimer(CONF_BT_SCAN_BLINK_DELAY, 0, ((CONF_BT_SCAN_BLINK_NUMBER * 2) + 1), ledBtScanEffect); //TODO JDMc 2025-Jan-24 '5' should be replaced with appropriate pollTimer number 
-    ledTimerId[0] = ledStateTimer.setTimer(CONF_BT_SCAN_BLINK_DELAY, 0, ((CONF_BT_SCAN_BLINK_NUMBER * 2) + 1), ledBtScanEffect); 
+    int blinkStartDelay = 0;
+    ledTimerId[CONF_TIMER_LED_BT] = ledStateTimer.setTimer(CONF_BT_SCAN_BLINK_DELAY, blinkStartDelay, ((CONF_BT_SCAN_BLINK_NUMBER * 2) + 1), ledBtScanEffect); 
 
   }  //Set the default LED effect if bluetooth connection state is changed
   else if (comMode == CONF_COM_MODE_BLE && tempIsConnected != btIsConnected) {
