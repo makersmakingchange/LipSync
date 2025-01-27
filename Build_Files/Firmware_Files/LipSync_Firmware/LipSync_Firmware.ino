@@ -1949,13 +1949,13 @@ void ledIBMEffect(ledStateStruct* args) {
 // Return     : void
 //****************************************//
 void ledBlinkEffect(ledStateStruct* args) {
-  if (ledStateTimer.getNumRuns(CONF_TIMER_LED_BLINK) % 2) {
+  if (ledStateTimer.getNumRuns(ledTimerId[CONF_TIMER_LED_BLINK]) % 2) {
     led.setLedColor(args->ledNumber, 0, args->ledBrightness);
   } else {
     led.setLedColor(args->ledNumber, args->ledColorNumber, args->ledBrightness);
   }
 
-  if (ledStateTimer.getNumRuns(CONF_TIMER_LED_BLINK) == ((args->ledBlinkNumber) * 2) + 1) {
+  if (ledStateTimer.getNumRuns(ledTimerId[CONF_TIMER_LED_BLINK]) == ((args->ledBlinkNumber) * 2) + 1) {
     //
     setLedDefault();
   }
@@ -1969,7 +1969,7 @@ void ledBlinkEffect(ledStateStruct* args) {
 // Return     : void
 //****************************************//
 void ledBtScanEffect() {
-  if (ledStateTimer.getNumRuns(CONF_TIMER_LED_BT) % 2) {
+  if (ledStateTimer.getNumRuns(ledTimerId[CONF_TIMER_LED_BT]) % 2) {
     led.setLedColor(CONF_BT_LED_NUMBER, LED_CLR_NONE, CONF_BT_LED_BRIGHTNESS);
 
   } else {
@@ -1985,7 +1985,7 @@ void ledBtScanEffect() {
 // Return     : void
 //****************************************//
 void ledErrorEffect() {
-  if (ledStateTimer.getNumRuns(CONF_TIMER_LED_ERROR) % 2) {
+  if (ledStateTimer.getNumRuns(ledTimerId[CONF_TIMER_LED_ERROR]) % 2) {
     led.setLedColor(CONF_ERROR_LED_NUMBER, LED_CLR_NONE, CONF_ERROR_LED_BRIGHTNESS);
 
   } else {
