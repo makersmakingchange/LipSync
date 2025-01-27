@@ -124,6 +124,30 @@ void testLED() {
   }
   delay(1000);
 
+  Serial.println("TEST_MODE_LED: Error 1");
+  led.clearLedAll();
+  ledError(1);
+  delay(3000);
+  led.clearLedAll();
+  setLedDefault();  // set LEDs to default
+  delay(1000);
+
+  Serial.println("TEST_MODE_LED: Error 2");
+  led.clearLedAll();
+  ledError(2);
+  delay(3000);
+  led.clearLedAll();
+  setLedDefault();  // set LEDs to default
+  delay(1000);
+
+  Serial.println("TEST_MODE_LED: Error 3");
+  led.clearLedAll();
+  ledError(2);
+  delay(3000);
+  led.clearLedAll();
+  setLedDefault();  // set LEDs to default
+  delay(1000);
+
   Serial.println("TEST_MODE_LED: ALL LED OFF");
   led.clearLedAll();
   setLedDefault();  // set LEDs to default

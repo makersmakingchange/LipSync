@@ -96,7 +96,8 @@ public:
   void fullCalibrationPrompt(int stepNum);
   void testPage();
   void noUsbPage();
-  void errorPage();
+  void errorPageI2C();
+  void errorPageCable();
 
   bool showCenterResetComplete = false;
 
@@ -240,7 +241,7 @@ void LSScreen::begin() {
   _display.setTextWrap(false);
   _display.display();
 
-  _operatingMode = getOperatingMode(false, false); //TODO JDMc 2025-Jan-24 These should be moved to update function so they are updated if changed through serial API
+  _operatingMode = getOperatingMode(false, false);  //TODO JDMc 2025-Jan-24 These should be moved to update function so they are updated if changed through serial API
   _communicationMode = getCommunicationMode(false, false);
   _soundMode = getSoundMode(false, false);
 
@@ -1486,7 +1487,7 @@ void LSScreen::noUsbPage(void) {
 }
 
 //*********************************//
-// Function   : errorPage
+// Function   : errorPageI2C
 //
 // Description: Format and display an error page
 //
@@ -1494,28 +1495,51 @@ void LSScreen::noUsbPage(void) {
 //
 // Return     : void
 //*********************************//
-void LSScreen::errorPage() {
+void LSScreen::errorPageI2C() {
   setupDisplay();
 
-  _display.println("INIT ERROR:");
+  _display.println("ERROR: I2C");
 
-  if(!joystickSensorConnected) {
+  if (!joystickSensorConnected) {
     _display.println("JOYSTICK");
   } else {
     _display.println("");
   }
 
-  if(!mouthpiecePressureSensorConnected) {
+  if (!mouthpiecePressureSensorConnected) {
     _display.println("PRESSURE");
   } else {
     _display.println("");
   }
 
-  if(!ambientPressureSensorConnected) {
+  if (!ambientPressureSensorConnected) {
     _display.println("AMBIENT");
   } else {
     _display.println("");
   }
+
+  _display.display();
+}
+
+//*********************************//
+// Function   : errorPageCable
+//
+// Description: Format and display an error page related to Interface Cable
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
+void LSScreen::errorPageCable() {
+  // Joystick sensor, ambient pressure sensor and mouthpiece pressure sensor not detected
+  // Likely a cable issue
+
+  setupDisplay();
+
+  _display.println("ERROR: ");
+  _display.println("Joystick not");
+  _display.println("detected.");
+  _display.println("Try cable.");
 
   _display.display();
 }

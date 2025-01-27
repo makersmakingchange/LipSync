@@ -257,6 +257,7 @@ void errorCheck(void) {
     // All joystick sensors not detected
     buzzer.playErrorSound();
     Serial.println("ERROR: No sensors detected in joystick. Check interface cable.");
+    screen.errorPageCable();
   } else if (!joystickSensorConnected || !mouthpiecePressureSensorConnected || !ambientPressureSensorConnected) {
     // One or more sensors but not all
     buzzer.playErrorSound();
@@ -269,7 +270,7 @@ void errorCheck(void) {
     if (!ambientPressureSensorConnected) {
       Serial.println("ERROR: Ambient Pressure Sensor not detected.");
     }
-    screen.errorPage();
+    screen.errorPageI2C();
   }
 
   if ((operatingMode == CONF_OPERATING_MODE_MOUSE) && (comMode == CONF_COM_MODE_USB)
@@ -1378,9 +1379,9 @@ void initJoystick() {
 void performJoystickCenter(int* args) {
   calibrationComplete = false;
   int stepNumber = (int)args;
-  unsigned long readingDuration = CONF_JOY_INIT_READING_DELAY * CONF_JOY_INIT_READING_NUMBER;                                               // Duration of the center point readings (500 seconds )
+  unsigned long readingDuration = CONF_JOY_INIT_READING_DELAY * CONF_JOY_INIT_READING_NUMBER;  // Duration of the center point readings (500 seconds )
   unsigned long currentReadingStart = CONF_JOY_INIT_START_DELAY + (CONF_JOY_INIT_STEP_BLINK_DELAY * ((CONF_JOY_INIT_STEP_BLINK * 2) + 1));  //(500 + 150*3)  //Time until start of current reading.
-  unsigned long nextStepStart = currentReadingStart + readingDuration;                                                                      //Time until start of next step. (1450 seconds )
+  unsigned long nextStepStart = currentReadingStart + readingDuration;  //Time until start of next step. (1450 seconds )
   pointFloatType centerPoint;
 
   if (stepNumber == 0)  // STEP 0: Joystick Compensation Center Point
@@ -1995,7 +1996,7 @@ void ledErrorEffect() {
 //***LED ERROR FUNCTION***//
 // Function   : ledError
 //
-// Description: This function performs displays LED sequence for hardware error
+// Description: This function displays LED sequence for hardware error
 //
 // Return     : void
 //****************************************//

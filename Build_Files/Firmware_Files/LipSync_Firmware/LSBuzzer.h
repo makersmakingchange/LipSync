@@ -252,7 +252,7 @@ void LSBuzzer::playReadySound(){
   if (_buzzerOn && (_soundModeLevel != CONF_SOUND_MODE_OFF)){
     tone(CONF_BUZZER_PIN, NOTE_F5, 500);
     delay(500);  // TODO: add timer instead of delay
-    tone(CONF_BUZZER_PIN, NOTE_C6, 500);
+    tone(CONF_BUZZER_PIN, NOTE_C6, 250);
   }
 }
 
@@ -285,7 +285,8 @@ void LSBuzzer::playShutdownSound(){
     delay(250);
     tone(CONF_BUZZER_PIN, NOTE_G5, 500);       
     delay(250);
-    tone(CONF_BUZZER_PIN, NOTE_C5, 500);   
+    tone(CONF_BUZZER_PIN, NOTE_C5, 300);
+    delay(500);   
 }
 
 //*********************************//
