@@ -18,7 +18,7 @@ Version 4.1.0 | 2025-Jan-27
 
 
 Version 4.0.2 | 2024-Dec-10
-- Fixed bug realated to sip and puff pressure calibration. 
+- Fixed bug related to sip and puff pressure calibration. 
 	- Bug caused permanent sips or puffs if ambient pressure changed while sipping or puffing.
 
 
