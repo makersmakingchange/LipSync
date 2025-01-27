@@ -2091,6 +2091,8 @@ void performLedAction(ledStateStruct* args) {
 // Return     : none
 //******************************************//
 void softwareReset() {
+  buzzer.playShutdownSound(); 
+  
   releaseOutputAction();
   usbmouse.end();
   gamepad.end();

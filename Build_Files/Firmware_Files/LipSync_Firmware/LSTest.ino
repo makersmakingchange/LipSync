@@ -162,6 +162,10 @@ void testBuzzer() {
   buzzer.calibCenterTone();
   delay(1000);
 
+ Serial.println("TEST_MODE_BUZZER: Playing shutdown sound.");
+  buzzer.playShutdownSound();
+  delay(1000);
+
   //TODO Test Sound levels
   //TODO test enable/disable sound
 

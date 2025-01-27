@@ -120,6 +120,7 @@ class LSBuzzer {
     void playStartupSound();
     void playReadySound();
     void playErrorSound();
+    void playShutdownSound();
     void enable();
     void disable();
     void setSoundModeLevel(int inputSoundMode);
@@ -268,6 +269,23 @@ void LSBuzzer::playErrorSound(){
     tone(CONF_BUZZER_PIN, NOTE_G4, 500);
     delay(500);
     tone(CONF_BUZZER_PIN, NOTE_C4, 500);       
+}
+
+//*********************************//
+// Function   : playShutdownSound 
+// 
+// Description: Sound to play to indicate LipSync shutdown.
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSBuzzer::playShutdownSound(){
+    tone(CONF_BUZZER_PIN, NOTE_C6, 500);
+    delay(250);
+    tone(CONF_BUZZER_PIN, NOTE_G5, 500);       
+    delay(250);
+    tone(CONF_BUZZER_PIN, NOTE_C5, 500);   
 }
 
 //*********************************//
