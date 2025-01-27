@@ -16,7 +16,7 @@
   If not, see <http://www.gnu.org/licenses/>
 */
 
-
+#include <String.h>
 #include <Wire.h>
 #include "LSUtils.h"
 #include "LSConfig.h"
@@ -34,7 +34,7 @@
 #include "LSBuzzer.h"
 
 // Unique ID
-String g_deviceUID = "";
+String g_deviceUID = "";  // Global variable for storing unique identifier for board
 
 //Communication mode and debug mode variables
 int comMode;        // 0 = None , 1 = USB , 2 = Wireless
@@ -49,15 +49,25 @@ int debugMode;  // 0 = Debug mode is Off
                 // 4 = Switch debug mode is On
                 // 5 = Sip & Puff state debug mode is On
 
-int g_errorCode = 0;
+int g_errorCode = 0;  // Global variable for storing error code. 0 is no error. Additional errors defined in LSConfig.h
 
 bool readyToUseFirstTime = true;
 
-bool btIsConnected = false;  //Bluetooth connection state
+bool btIsConnected = false;                      // Bluetooth connection state
 
-bool ledActionEnabled = false;  //LED module variables
+bool displayConnected = false;                   // Display connection state
+bool joystickSensorConnected = false;            // Joystick sensor connection state
+bool mouthpiecePressureSensorConnected = false;  // Mouthpiece pressure sensor connection state
+bool ambientPressureSensorConnected = false;     // Ambient pressure sensor connection state
+bool hardwareOkay = true;                        // Flag for hardware status
 
-ledStateStruct* ledCurrentState = new ledStateStruct;  //pointer to LED current state structure
+// System State
+//systemStateStruct* ls = new systemStateStruct; // point to system state structure
+
+
+// LED module variables
+ledStateStruct* ledCurrentState = new ledStateStruct;  // pointer to LED current state structure
+bool ledActionEnabled = false;
 
 // Input module variables
 int buttonActionSize, switchActionSize;
@@ -85,14 +95,14 @@ LSTimer<int> calibrationTimer;
 int pollTimerId[8];  // 8 poll timers
 LSTimer<void> pollTimer;
 
-int ledTimerId[4];  // 3 LED timers 0 - startup feedback, 1 - IBM, 2- normal blinks, 3 - Bluetooth Status
+int ledTimerId[5];  // 3 LED timers 0 - startup feedback, 1 - IBM, 2- normal blinks, 3 - Bluetooth Status, 4 - error
 LSTimer<ledStateStruct> ledStateTimer;
 
 int usbConnectTimerId[1];
 LSTimer<int> usbConnectTimer;
-int usbAttempt = 0;
 
-int usbConnectDelay = CONF_USB_HID_INIT_DELAY;
+int g_usbAttempt = 0;
+int g_usbConnectDelay = CONF_USB_HID_INIT_DELAY;
 
 //Joystick module variables and structures
 int xVal;  //todo Jake 2025-Jan-24 Assess removal: doesn't appear to be used
@@ -106,7 +116,7 @@ pressureStruct pressureValues = { 0.0, 0.0, 0.0 };
 int outputAction;
 bool canOutputAction = true;
 bool startupCenterReset = true;
-bool calibrationComplete = false;
+bool calibrationComplete = false;  // Status flag
 bool calibrationError = false;
 
 bool settingsEnabled = false;  //Serial input settings command mode enabled or disabled
@@ -141,12 +151,14 @@ void setup() {
   initMemory();  //Initialize Memory
 
   //initUID(); // Intilize unique identifier
-  getDeviceID(false,false);
+  getDeviceID(false, false);
 
   initLed();  //Initialize LED Feedback
   ledWaitFeedback();
 
   initBuzzer();  //Initialize Buzzer
+
+  initInput();  //Initialize input buttons and input switches
 
   getVersionNumber(false, false);  //Retrieve version number from memory
 
@@ -157,8 +169,6 @@ void setup() {
   initScreen();  //Initialize screen
 
   initSipAndPuff();  //Initialize Sip And Puff
-
-  initInput();  //Initialize input buttons and input switches
 
   initJoystick();  //Initialize Joystick
 
@@ -179,10 +189,11 @@ void setup() {
   pollTimerId[CONF_TIMER_SCROLL] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, CONF_SCROLL_POLL_RATE, joystickLoop);
   pollTimerId[CONF_TIMER_SCREEN] = pollTimer.setInterval(CONF_SCREEN_POLL_RATE, 0, screenLoop);
 
-  //usbConnectTimerId[0] = usbConnectTimer.setInterval(usbConnectDelay, CONF_USB_HID_INIT_DELAY, usbRetryConnection);
+  //usbConnectTimerId[0] = usbConnectTimer.setInterval(g_usbConnectDelay, CONF_USB_HID_INIT_DELAY, usbRetryConnection);
 
+  //
   if (comMode == CONF_COM_MODE_USB) {
-    usbConnectTimerId[0] = usbConnectTimer.setTimeout(usbConnectDelay, usbRetryConnection);  // Call usbRetryConnection function when usbConnectDelay reached
+    usbConnectTimerId[0] = usbConnectTimer.setTimeout(g_usbConnectDelay, usbRetryConnection);  // Call usbRetryConnection function when g_usbConnectDelay reached
   }
 
 
@@ -232,7 +243,37 @@ void errorCheck(void) {
   //if (!usbmouse.isReady() || !gamepad.isReady()){
   //  g_errorCode = CONF_ERROR_USB;
   //}
-  if ((operatingMode == CONF_OPERATING_MODE_MOUSE) && (comMode == CONF_COM_MODE_USB) && (!usbmouse.isReady() || usbmouse.usbRetrying || usbmouse.timedOut)) {
+
+  // I2C Connection Errors (Display, Joystick, Mouthpiece Pressure, Ambient Pressure)
+  if (displayConnected == false) {
+    // Display not connected / detected
+    buzzer.playErrorSound();
+    Serial.println("ERROR: Display not detected");
+    ledError(3);
+      
+  }
+
+  if (!joystickSensorConnected && !mouthpiecePressureSensorConnected && !ambientPressureSensorConnected) {
+    // All joystick sensors not detected
+    buzzer.playErrorSound();
+    Serial.println("ERROR: No sensors detected in joystick. Check interface cable.");
+  } else if (!joystickSensorConnected || !mouthpiecePressureSensorConnected || !ambientPressureSensorConnected) {
+    // One or more sensors but not all
+    buzzer.playErrorSound();
+    if (!joystickSensorConnected) {
+      Serial.println("ERROR: Joystick sensor not detected.");
+    }
+    if (!mouthpiecePressureSensorConnected) {
+      Serial.println("ERROR: Mouthpiece Pressure Sensor not detected.");
+    }
+    if (!ambientPressureSensorConnected) {
+      Serial.println("ERROR: Ambient Pressure Sensor not detected.");
+    }
+    screen.errorPage();
+  }
+
+  if ((operatingMode == CONF_OPERATING_MODE_MOUSE) && (comMode == CONF_COM_MODE_USB)
+      && (!usbmouse.isReady() || usbmouse.usbRetrying || usbmouse.timedOut)) {
     g_errorCode = CONF_ERROR_USB;
   } else if ((operatingMode == CONF_OPERATING_MODE_GAMEPAD) && !gamepad.isReady()) {
     g_errorCode = CONF_ERROR_USB;
@@ -254,6 +295,7 @@ void errorCheck(void) {
 //****************************************//
 void errorScreen(void) {
   errorCheck();
+
   if (!screen.isMenuActive()) {
     if (g_errorCode == CONF_ERROR_USB) {
       screen.noUsbPage();
@@ -360,13 +402,12 @@ const char* readUID() {
   uint32_t deviceID = 0;
 
   //#ifdef NRF52480_XXAA
-  deviceID = NRF_FICR->DEVICEID[0]; // First part of Device ID for NRF52840 boards 
+  deviceID = NRF_FICR->DEVICEID[0];  // First part of Device ID for NRF52840 boards
   //#endif
-  
-  itoa(deviceID, deviceIDString, 16); // Convert uint32_t to hex string
+
+  itoa(deviceID, deviceIDString, 16);  // Convert uint32_t to hex string
 
   return deviceIDString;
-    
 }
 
 
@@ -591,28 +632,28 @@ void usbRetryConnection(void) {
     }
 
     if (!screen.isMenuActive()) {
-      screen.noUsbPage(); //Display USB error page
+      screen.noUsbPage();  //Display USB error page
     }
 
-    // increase variable usbConnectDelay
-    if (usbConnectDelay < 120000) {
-      usbConnectDelay = usbConnectDelay * 1.2; //increase time after each attempt
+    // increase variable g_usbConnectDelay
+    if (g_usbConnectDelay < 120000) {
+      g_usbConnectDelay = g_usbConnectDelay * 1.2;  //increase time after each attempt
     }
 
-    usbConnectTimerId[0] = usbConnectTimer.setTimeout(usbConnectDelay, usbRetryConnection);  //Keep retrying connection until USB connection is made
+    usbConnectTimerId[0] = usbConnectTimer.setTimeout(g_usbConnectDelay, usbRetryConnection);  //Keep retrying connection until USB connection is made
 
   } else if (!usbmouse.isReady() && !gamepad.isReady()) {
 
     if (!screen.isMenuActive()) {
       screen.noUsbPage();
     }
-    usbConnectTimerId[0] = usbConnectTimer.setTimeout(usbConnectDelay, usbRetryConnection);  //Keep retrying connection until USB connection is made
+    usbConnectTimerId[0] = usbConnectTimer.setTimeout(g_usbConnectDelay, usbRetryConnection);  //Keep retrying connection until USB connection is made
     //Serial.println("Not ready");
   } else if (usbmouse.timedOut) {
     if (!screen.isMenuActive()) {
       screen.noUsbPage();
     }
-    usbConnectTimerId[0] = usbConnectTimer.setTimeout(usbConnectDelay, usbRetryConnection);  //Keep retrying connection until USB connection is made
+    usbConnectTimerId[0] = usbConnectTimer.setTimeout(g_usbConnectDelay, usbRetryConnection);  //Keep retrying connection until USB connection is made
   } else {
     readyToUse();
   }
@@ -698,8 +739,9 @@ void beginComOpMode() {
         case CONF_COM_MODE_USB:  // USB Mouse
           usbmouse.begin();
           break;
-        case CONF_COM_MODE_BLE:  // Bluetooth Mouse
-          btmouse.begin();
+        case CONF_COM_MODE_BLE:                                      // Bluetooth Mouse
+          String btName = String("LipSync_") + String(g_deviceUID);  //Form Bluetooth name using device UID //TODO This may be limited to 15 characters
+          btmouse.begin(btName.c_str());
           break;
       }
       break;
@@ -1336,12 +1378,12 @@ void initJoystick() {
 void performJoystickCenter(int* args) {
   calibrationComplete = false;
   int stepNumber = (int)args;
-  unsigned long readingDuration = CONF_JOY_INIT_READING_DELAY * CONF_JOY_INIT_READING_NUMBER;                                               //Duration of the center point readings (500 seconds )
+  unsigned long readingDuration = CONF_JOY_INIT_READING_DELAY * CONF_JOY_INIT_READING_NUMBER;                                               // Duration of the center point readings (500 seconds )
   unsigned long currentReadingStart = CONF_JOY_INIT_START_DELAY + (CONF_JOY_INIT_STEP_BLINK_DELAY * ((CONF_JOY_INIT_STEP_BLINK * 2) + 1));  //(500 + 150*3)  //Time until start of current reading.
   unsigned long nextStepStart = currentReadingStart + readingDuration;                                                                      //Time until start of next step. (1450 seconds )
   pointFloatType centerPoint;
 
-  if (stepNumber == 0)  //STEP 0: Joystick Compensation Center Point
+  if (stepNumber == 0)  // STEP 0: Joystick Compensation Center Point
   {
     if (ledActionEnabled) {
       setLedState(LED_ACTION_BLINK, CONF_JOY_INIT_STEP_BLINK_COLOR, CONF_JOY_INIT_LED_NUMBER, CONF_JOY_INIT_STEP_BLINK, CONF_JOY_INIT_STEP_BLINK_DELAY, CONF_LED_BRIGHTNESS);
@@ -1363,9 +1405,11 @@ void performJoystickCenter(int* args) {
     calibrationComplete = true;
 
     if (startupCenterReset) {  // Checks variable to only play sound and show splash screen on startup
-      readyToUse(); //TODO JDMc 2025-Jan-24 Probably want sound to play after every calibration to indicate joystick is ready to be used again.
+      readyToUse();            //TODO JDMc 2025-Jan-24 Probably want sound to play after every calibration to indicate joystick is ready to be used again.
     }
-    if (screen.showCenterResetComplete) { screen.centerResetCompletePage(); }  // Checks variable so center reset complete page only shows if accessed from menu, not on startup or during full calibration
+    if (screen.showCenterResetComplete) {  // Checks variable so center reset complete page only shows if accessed from menu, not on startup or during full calibration
+      screen.centerResetCompletePage();
+    }
     startupCenterReset = false;
   }
 }
@@ -1386,7 +1430,7 @@ void performJoystickCenterStep(int* args) {
     setLedState(LED_ACTION_ON, CONF_JOY_INIT_LED_COLOR, CONF_JOY_INIT_LED_NUMBER, 0, 0, CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);
   }
-  //Push new center values to be evaluated at the end of the process
+  // Push new center values to be evaluated at the end of the process
   js.updateInputCenterBuffer();
 
   // Turn off the second led to orange to indicate end of the process
@@ -1409,7 +1453,7 @@ void performJoystickCalibration(int* args) {
   calibrationComplete = false;
   calibrationError = false;
   int stepNumber = (int)args;
-  unsigned long readingDuration = CONF_JOY_CALIB_READING_DELAY * CONF_JOY_CALIB_READING_NUMBER;  //Duration of the max corner reading ( 2 seconds )
+  unsigned long readingDuration = CONF_JOY_CALIB_READING_DELAY * CONF_JOY_CALIB_READING_NUMBER;                                               //Duration of the max corner reading ( 2 seconds )
   unsigned long currentReadingStart = CONF_JOY_CALIB_STEP_DELAY + (CONF_JOY_CALIB_STEP_BLINK_DELAY * ((CONF_JOY_CALIB_STEP_BLINK * 2) + 1));  //Time until start of current reading
   //Time until start of current reading. (1.5 + (3*300) seconds )
   unsigned long nextStepStart = currentReadingStart + readingDuration + CONF_JOY_CALIB_START_DELAY;  //Time until start of next reading. ( 2.4 + 2 + 1 seconds )
@@ -1478,19 +1522,20 @@ void performJoystickCalibrationStep(int* args) {
 
   maxPoint = js.getInputMax(stepNumber);  //Get maximum x and y for the step number
 
+  // Check for calibration errors
   if ((abs(maxPoint.x) < CONF_JOY_CALIB_CORNER_MIN) || (abs(maxPoint.y) < CONF_JOY_CALIB_CORNER_MIN)) {
     pointFloatType tempDefaultPoint = { 0, 0 };
     switch (stepNumber) {
-      case 1:  //Top left corner
+      case 1:  // Top left corner
         tempDefaultPoint = { -CONF_JOY_CALIB_CORNER_DEFAULT, CONF_JOY_CALIB_CORNER_DEFAULT };
         break;
-      case 2:  //Top right corner
+      case 2:  // Top right corner
         tempDefaultPoint = { CONF_JOY_CALIB_CORNER_DEFAULT, CONF_JOY_CALIB_CORNER_DEFAULT };
         break;
-      case 3:  //Bottom right corner
+      case 3:  // Bottom right corner
         tempDefaultPoint = { CONF_JOY_CALIB_CORNER_DEFAULT, -CONF_JOY_CALIB_CORNER_DEFAULT };
         break;
-      case 4:  //Bottom left corner
+      case 4:  // Bottom left corner
         tempDefaultPoint = { -CONF_JOY_CALIB_CORNER_DEFAULT, -CONF_JOY_CALIB_CORNER_DEFAULT };
         break;
     }
@@ -1718,10 +1763,12 @@ void checkI2C() {
   error_display = Wire.endTransmission();
 
   if (error_display == 0) {
-    Serial.println("Display: Found");
+    //Serial.println("Display: Found");
+    displayConnected = true;
   } else {
-    Serial.println("Display: Not found");
-    g_errorCode = CONF_ERROR_DISPLAY;
+    Serial.println("ERROR: Display: Not found");
+    displayConnected = false;
+    hardwareOkay = false;
   }
 
   // Scan for Ambient Pressure Sensor
@@ -1730,10 +1777,12 @@ void checkI2C() {
   error_LPS22 = Wire.endTransmission();
 
   if (error_LPS22 == 0) {
-    Serial.println("Ambient Pressure Sensor: Found");
+    //Serial.println("Ambient Pressure Sensor: Found");
+    ambientPressureSensorConnected = true;
   } else {
-    Serial.println("Ambient Pressure Sensor: Not found");
-    g_errorCode = CONF_ERROR_AMBIENT;
+    Serial.println("ERROR: Ambient Pressure Sensor: Not found");
+    ambientPressureSensorConnected = false;
+    hardwareOkay = false;
   }
 
   // Scan for Sip and Puff Sensor
@@ -1742,10 +1791,12 @@ void checkI2C() {
   error_LPS35HW = Wire.endTransmission();
 
   if (error_LPS35HW == 0) {
-    Serial.println("Sip and Puff Sensor: Found");
+    //Serial.println("Sip and Puff Sensor: Found");
+    mouthpiecePressureSensorConnected = true;
   } else {
-    Serial.println("Sip and Puff Sensor: Not found");
-    g_errorCode = CONF_ERROR_SIPPUFF;
+    Serial.println("ERROR: Mouthpiece Pressure Sensor: Not found");
+    mouthpiecePressureSensorConnected = false;
+    hardwareOkay = false;
   }
 
   // Scan for Joystick Sensor
@@ -1754,12 +1805,17 @@ void checkI2C() {
   error_TLV493D = Wire.endTransmission();
 
   if (error_TLV493D == 0) {
-    Serial.println("Joystick Sensor: Found");
+    //Serial.println("Joystick Sensor: Found");
+    joystickSensorConnected = true;
   } else {
-    Serial.println("Joystick Sensor: Not found");
-    g_errorCode = CONF_ERROR_JOYSTICK;
+    Serial.println("ERROR: Joystick Sensor: Not found");
+    joystickSensorConnected = false;
+    hardwareOkay = false;
   }
   Wire.end();
+
+
+
 }
 
 
@@ -1914,10 +1970,40 @@ void ledBlinkEffect(ledStateStruct* args) {
 void ledBtScanEffect() {
   if (ledStateTimer.getNumRuns(CONF_TIMER_LED_BT) % 2) {
     led.setLedColor(CONF_BT_LED_NUMBER, LED_CLR_NONE, CONF_BT_LED_BRIGHTNESS);
-    
+
   } else {
     led.setLedColor(CONF_BT_LED_NUMBER, CONF_BT_LED_COLOR, CONF_BT_LED_BRIGHTNESS);
   }
+}
+
+//***LED ERROR EFFECT FUNCTION***//
+// Function   : ledErrorEffect
+//
+// Description: This function performs LED error ffect.
+//
+// Return     : void
+//****************************************//
+void ledErrorEffect() {
+  if (ledStateTimer.getNumRuns(CONF_TIMER_LED_ERROR) % 2) {
+    led.setLedColor(CONF_ERROR_LED_NUMBER, LED_CLR_NONE, CONF_ERROR_LED_BRIGHTNESS);
+
+  } else {
+    led.setLedColor(CONF_ERROR_LED_NUMBER, CONF_ERROR_LED_COLOR, CONF_ERROR_LED_BRIGHTNESS);
+  }
+}
+
+//***LED ERROR FUNCTION***//
+// Function   : ledError
+//
+// Description: This function performs displays LED sequence for hardware error
+//
+// Return     : void
+//****************************************//
+void ledError(int errorBlinks) {
+
+  int blinkStartDelay = 0;
+  ledTimerId[CONF_TIMER_LED_ERROR] = ledStateTimer.setTimer(CONF_ERROR_LED_BLINK_DELAY, blinkStartDelay, ((errorBlinks * 2) + 1), ledErrorEffect);
+
 }
 
 //***TURN ALL LEDS OFF FUNCTION***//
@@ -2027,8 +2113,8 @@ void btFeedbackLoop() {
   //Perform bluetooth LED blinking if bluetooth is not connected and wasn't connected before
   if (comMode == CONF_COM_MODE_BLE && tempIsConnected == false && tempIsConnected == btIsConnected) {
     btIsConnected = false;
-    int blinkStartDelay = 0;
-    ledTimerId[CONF_TIMER_LED_BT] = ledStateTimer.setTimer(CONF_BT_SCAN_BLINK_DELAY, blinkStartDelay, ((CONF_BT_SCAN_BLINK_NUMBER * 2) + 1), ledBtScanEffect); 
+    const int blinkStartDelay = 0;
+    ledTimerId[CONF_TIMER_LED_BT] = ledStateTimer.setTimer(CONF_BT_SCAN_BLINK_DELAY, blinkStartDelay, ((CONF_BT_SCAN_BLINK_NUMBER * 2) + 1), ledBtScanEffect);
 
   }  //Set the default LED effect if bluetooth connection state is changed
   else if (comMode == CONF_COM_MODE_BLE && tempIsConnected != btIsConnected) {
@@ -2093,7 +2179,7 @@ void performLedAction(ledStateStruct* args) {
 //******************************************//
 void softwareReset() {
   buzzer.playShutdownSound(); 
-  
+
   releaseOutputAction();
   usbmouse.end();
   gamepad.end();

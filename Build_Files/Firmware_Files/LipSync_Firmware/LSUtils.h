@@ -81,4 +81,11 @@ typedef struct
   uint8_t accEndSpeed;
 } accStruct;
 
+
+// Overall system state structure
+// typdef struct {
+//   bool 
+
+// } systemStateStruct;
+
 #endif

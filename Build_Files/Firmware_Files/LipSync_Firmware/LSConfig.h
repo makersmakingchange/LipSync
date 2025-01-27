@@ -192,6 +192,7 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_TIMER_LED_IBM 1
 #define CONF_TIMER_LED_BLINK 2
 #define CONF_TIMER_LED_BT 3
+#define CONF_TIMER_LED_ERROR 4
 
 
 //Joystick values 
@@ -227,7 +228,8 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_TEST_MODE_LED 1
 #define CONF_TEST_MODE_BUZZER 2
 
-                                                                                              
+
+// Sound Modes                                                                                              
 #define CONF_SOUND_MODE_OFF       0   //Sound off
 #define CONF_SOUND_MODE_BASIC     1   //Minimal sounds
 #define CONF_SOUND_MODE_ADVANCED  2   //All sounds
@@ -236,6 +238,8 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_SOUND_MODE_MAX 2
 #define CONF_SOUND_MODE_DEFAULT CONF_SOUND_MODE_BASIC
 
+
+//Light Modes
 #define CONF_LIGHT_MODE_OFF       0   //LEDs off
 #define CONF_LIGHT_MODE_BASIC     1   //Minimal LEDs
 #define CONF_LIGHT_MODE_ADVANCED  2   //All LEDs
@@ -245,66 +249,67 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_LIGHT_MODE_DEFAULT CONF_LIGHT_MODE_BASIC
 
 //***CAN BE CHANGED***//
+// API
 #define CONF_API_ENABLED true               //Enable or Disable API
 
 //Startup Default settings
 #define CONF_STARTUP_LED_STEP_TIME 500      //Time for each color
 
-//Joystick Deadzone Default settings
+// Joystick Deadzone Default settings
 #define CONF_JOY_DEADZONE_DEFAULT 0.12
 #define CONF_JOY_MIN_DEADZONE 0.01
 #define CONF_JOY_MAX_DEADZONE 1.0
 
-//Joystick calibration points and related LED feedback settings
+// Joystick full calibration points and related LED feedback settings
 #define CONF_JOY_CALIB_CORNER_DEFAULT 13.0
-#define CONF_JOY_CALIB_START_DELAY 1000                       //Number of milliseconds to delay full joystick calibration once triggered
-#define CONF_JOY_CALIB_START_LED_COLOR LED_CLR_RED                                           //Joystick Calibration process start and end color
-#define CONF_JOY_CALIB_STEP_DELAY 1500                        //Number of milliseconds to delay between corner measurements
+#define CONF_JOY_CALIB_START_DELAY 1000  // Number of milliseconds to delay full joystick calibration once triggered
+#define CONF_JOY_CALIB_START_LED_COLOR LED_CLR_RED  // Joystick Calibration process start and end color
+#define CONF_JOY_CALIB_STEP_DELAY 1500 // Number of milliseconds to delay between corner measurements
 #define CONF_JOY_CALIB_LED_NUMBER CONF_LED_ALL
-#define CONF_JOY_CALIB_LED_COLOR LED_CLR_RED                                                    //The color indicates the joystick Calibration process 
+#define CONF_JOY_CALIB_LED_COLOR LED_CLR_RED  // LED color for joystick calibration process 
 #define CONF_JOY_CALIB_STEP_BLINK 1
 #define CONF_JOY_CALIB_STEP_BLINK_DELAY 150
 #define CONF_JOY_CALIB_READING_DELAY 200
-#define CONF_JOY_CALIB_STEP_BLINK_COLOR LED_CLR_RED                                          //The color indicates the joystick Calibration about to start
-#define CONF_JOY_CALIB_READING_NUMBER 10
+#define CONF_JOY_CALIB_STEP_BLINK_COLOR LED_CLR_RED  // The color indicates the joystick Calibration about to start
+#define CONF_JOY_CALIB_READING_NUMBER 10  // Number of readings to measure (and then average) for each calibration point  
 
-#define CONF_JOY_CALIB_ERROR 10           //flag to display message stating there was an error with one or more corner calibrations
-#define CONF_JOY_CALIB_CORNER_MIN   3     //Minimum value for a corner coordinate when completing full calibration. Less than this will be set to default.
+#define CONF_JOY_CALIB_ERROR 10  // flag to display message stating there was an error with one or more corner calibrations
+#define CONF_JOY_CALIB_CORNER_MIN 3  // Minimum value for a corner coordinate when completing full calibration. Less than this will be set to default.
 
-//Joystick center initialization and related LED feedback settings 
-#define CONF_JOY_INIT_START_DELAY 1000                        // Number of milliseconds to delay joystick neutral calibration once triggered
+// Joystick center initialization and related LED feedback settings 
+#define CONF_JOY_INIT_START_DELAY 1000  // Number of milliseconds to delay joystick neutral calibration once triggered
 #define CONF_JOY_INIT_LED_NUMBER CONF_LED_ALL
-#define CONF_JOY_INIT_LED_COLOR LED_CLR_RED                                                     //Center initialization actual step color 
+#define CONF_JOY_INIT_LED_COLOR LED_CLR_RED  // LED color for center initialization step
 #define CONF_JOY_INIT_STEP_BLINK 1
 #define CONF_JOY_INIT_STEP_BLINK_DELAY 150
-#define CONF_JOY_INIT_STEP_BLINK_COLOR LED_CLR_RED                                           //Center initialization start blink color 
+#define CONF_JOY_INIT_STEP_BLINK_COLOR LED_CLR_RED // LED color for Center initialization start blink color 
 #define CONF_JOY_INIT_READING_DELAY 100
 #define CONF_JOY_INIT_READING_NUMBER 5
 
-//Joystick cursor speed change and related LED feedback settings 
-#define CONF_JOY_CURSOR_SPEED_LEVEL_DEFAULT 5
+// Joystick cursor speed change and related LED feedback settings 
+#define CONF_JOY_CURSOR_SPEED_LEVEL_DEFAULT 5  // Default cursor speed level
 #define CONF_JOY_SPEED_CHANGE_LED_DELAY 150
 #define CONF_JOY_SPEED_CHANGE_LED_BLINK 1
-#define CONF_JOY_SPEED_DEC_LED_NUMBER CONF_LED_LEFT
-#define CONF_JOY_SPEED_DEC_LED_COLOR LED_CLR_RED                                            //Decrease speed color
-#define CONF_JOY_SPEED_INC_LED_NUMBER CONF_LED_RIGHT
-#define CONF_JOY_SPEED_INC_LED_COLOR LED_CLR_RED                                            //Increase speed color
+#define CONF_JOY_SPEED_DEC_LED_NUMBER CONF_LED_LEFT // Which LED indicates decrease in cursor speed level
+#define CONF_JOY_SPEED_DEC_LED_COLOR LED_CLR_RED // Decrease speed color
+#define CONF_JOY_SPEED_INC_LED_NUMBER CONF_LED_RIGHT // Which LED indicates increase in cursor speed level
+#define CONF_JOY_SPEED_INC_LED_COLOR LED_CLR_RED  // Increase speed color
 #define CONF_JOY_SPEED_LIMIT_LED_DELAY 50
 #define CONF_JOY_SPEED_LIMIT_LED_BLINK 3
-#define CONF_JOY_SPEED_LIMIT_LED_COLOR LED_CLR_RED                                             //Out of range limit speed color
+#define CONF_JOY_SPEED_LIMIT_LED_COLOR LED_CLR_RED // Out of range limit speed color
 
-//Scroll level change and related LED feedback settings 
+// Scroll level change and related LED feedback settings 
 #define CONF_SCROLL_CHANGE_LED_DELAY  150
 #define CONF_SCROLL_CHANGE_LED_BLINK  1
 #define CONF_SCROLL_DEC_LED_NUMBER    CONF_LED_LEFT
-#define CONF_SCROLL_DEC_LED_COLOR     LED_CLR_PURPLE          //Decrease scroll level color
+#define CONF_SCROLL_DEC_LED_COLOR     LED_CLR_PURPLE  // Decrease scroll level color
 #define CONF_SCROLL_INC_LED_NUMBER    CONF_LED_RIGHT
-#define CONF_SCROLL_INC_LED_COLOR     LED_CLR_PURPLE          //Increase scroll level color
+#define CONF_SCROLL_INC_LED_COLOR     LED_CLR_PURPLE  // Increase scroll level color
 #define CONF_SCROLL_LIMIT_LED_DELAY   50
 #define CONF_SCROLL_LIMIT_LED_BLINK   3
-#define CONF_SCROLL_LIMIT_LED_COLOR   LED_CLR_RED             //Out of range limit scroll level color
+#define CONF_SCROLL_LIMIT_LED_COLOR   LED_CLR_RED // Out of range limit scroll level color
 
-//Scroll level values 
+// Scroll level values 
 #define CONF_SCROLL_LEVEL_DEFAULT 5
 #define CONF_SCROLL_LEVEL_MIN 1
 #define CONF_SCROLL_LEVEL_MAX 10
@@ -312,55 +317,56 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_SCROLL_MOVE_MAX  10
 #define CONF_SCROLL_MOVE_BASE 1
 
-//Joystick cursor acceleration change 
+// Joystick cursor acceleration change 
 #define CONF_JOY_ACCELERATION_LEVEL_MAX 10
 #define CONF_JOY_ACCELERATION_LEVEL_MIN -10
 #define CONF_JOY_ACCELERATION_LEVEL_DEFAULT 0
 
 
-//Sip and Puff Default settings
-#define CONF_SIP_THRESHOLD 3.0                    //hPa
-#define CONF_PUFF_THRESHOLD 3.0                   //hPa
-#define CONF_PRESS_MIN_THRESHOLD 1.0              //hPa
-#define CONF_PRESS_MAX_THRESHOLD 100.0            //hPa
-#define CONF_PRESS_MODE_DEFAULT 1                 //Default pressure mode state = 2 
-                                                  // 0 = None or PRESS_MODE_NONE
-                                                  // 1 = Absolute or PRESS_MODE_ABS
-                                                  // 2 = Differential or PRESS_MODE_DIFF
+// Sip and Puff Default settings
+#define CONF_SIP_THRESHOLD 3.0                    // hPa
+#define CONF_PUFF_THRESHOLD 3.0                   // hPa
+#define CONF_PRESS_MIN_THRESHOLD 1.0              // hPa
+#define CONF_PRESS_MAX_THRESHOLD 100.0            // hPa
+#define CONF_PRESS_MODE_DEFAULT 1                 // Default pressure mode state = 2 
+                                                  //  0 = None or PRESS_MODE_NONE
+                                                  //  1 = Absolute or PRESS_MODE_ABS
+                                                  //  2 = Differential or PRESS_MODE_DIFF
                                                   
                                                   
-//Sip and puff main states 
-#define PRESS_SAP_MAIN_STATE_NONE 0   //No action 
-#define PRESS_SAP_MAIN_STATE_SIP 1    //Sip action sapPressure < -sip threshold
-#define PRESS_SAP_MAIN_STATE_PUFF 2   //Puff action sapPressure > puff threshold
+// Sip and puff main states 
+#define PRESS_SAP_MAIN_STATE_NONE 0   // No action 
+#define PRESS_SAP_MAIN_STATE_SIP 1    // Sip action sapPressure < -sip threshold
+#define PRESS_SAP_MAIN_STATE_PUFF 2   // Puff action sapPressure > puff threshold
 
-//Inputs and related LED feedback settings
-#define CONF_INPUT_LED_DELAY 150          //Led blink time for input actions 
-#define CONF_INPUT_LED_BLINK 1            //Led blink number  for input actions 
+// Inputs and related LED feedback settings
+#define CONF_INPUT_LED_DELAY 150          // Led blink time for input actions 
+#define CONF_INPUT_LED_BLINK 1            // Led blink number  for input actions 
 
-//Communication Mode Default settings
+// Communication Mode Default settings
 #define CONF_COM_MODE_LED_NUMBER  2
 #define CONF_COM_MODE_LED_BLINK   1
 #define CONF_COM_MODE_LED_BLINK_DELAY   1000
 
 
-//Bluetooth connection and related LED feedback settings 
+// Bluetooth connection and related LED feedback settings 
 #define CONF_BT_SCAN_BLINK_DELAY 500
 #define CONF_BT_SCAN_BLINK_NUMBER 1
-#define CONF_BT_LED_NUMBER CONF_LED_MICRO
+#define CONF_BT_LED_NUMBER CONF_LED_MICRO // Which LED indicate Bluetooth connection status
 #define CONF_BT_LED_COLOR LED_CLR_BLUE 
 #define CONF_BT_LED_BRIGHTNESS CONF_LED_BRIGHTNESS
 
-//Error codes
+// Error codes
 #define CONF_ERROR_NONE 0
 #define CONF_ERROR_USB  1
-#define CONF_ERROR_DISPLAY 2
-#define CONF_ERROR_JOYSTICK 3
-#define CONF_ERROR_SIPPUFF 4
-#define CONF_ERROR_AMBIENT 5
+#define CONF_ERROR_I2C  2
 
+#define CONF_ERROR_LED_BLINK_DELAY 500
+#define CONF_ERROR_LED_NUMBER CONF_LED_ALL // All LEDs
+#define CONF_ERROR_LED_COLOR LED_CLR_RED // red Color
+#define CONF_ERROR_LED_BRIGHTNESS 255 // Full brightness
 
-//Acceleration
+// Acceleration
 // Cursor acceleration structure
 const accStruct accProperty[]{
   { 0, 1.0, 0, 0 },
@@ -375,8 +381,10 @@ const accStruct accProperty[]{
   { 9, 1.0, 0, 0 }
 };
 
-//Sip and Puff Action Mapping
-// {INPUT ACTION, OUTPUT, ACTION, minTime, maxTime}
+/* LIPSYNC INPUT AND OUTPUT MAPPING */
+
+// Sip and Puff Action Mapping
+//  {INPUT ACTION, OUTPUT, ACTION, minTime, maxTime}
 const inputActionStruct sapActionProperty[]{
   { PRESS_SAP_MAIN_STATE_NONE,        CONF_ACTION_NOTHING,      CONF_ACTION_NOTHING,    CONF_ACTION_NOTHING,             0,     0 },
   
@@ -425,7 +433,7 @@ const inputActionStruct switchActionProperty[]{
   { INPUT_MAIN_STATE_S13_PRESSED,      CONF_ACTION_START_MENU,  CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,          0, 1000 },
 };
 
-//LED Action for all available output actions. This maps what happens with the lights when different actions are triggered.
+// LED Action for all available output actions. This maps what happens with the lights when different actions are triggered.
 // ledOutputActionNumber, ledNumber, ledStartColor, ledEndColor, ledEndAction
 const ledActionStruct ledActionProperty[]{
   { CONF_ACTION_NOTHING,            CONF_LED_NONE,    LED_CLR_NONE,   LED_CLR_NONE, LED_ACTION_NONE },

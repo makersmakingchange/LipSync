@@ -32,7 +32,7 @@
 
 #define GAMEPAD_DESCRIPTOR "LipSync Gamepad"
 
-extern int usbAttempt;
+extern int g_usbAttempt;
 
 
 // https://github.com/hathach/tinyusb/blob/master/examples/device/hid_generic_inout/src/usb_descriptors.c
@@ -186,7 +186,7 @@ void LSUSBMouse::begin(void)
   unsigned long timerHidTimeoutBegin = millis();
   unsigned long usbTimeoutMillis;
 
-  usbAttempt++;
+  g_usbAttempt++;
     
   if (usbRetrying) {
     usbTimeoutMillis = 200;                     // when reattemping to connect the USB, uses a smaller value to not freeze up the code for long but will keep retrying 
@@ -205,7 +205,7 @@ void LSUSBMouse::begin(void)
 
   if (USBDevice.mounted()) {
     usbRetrying = false;
-    usbAttempt = 0;
+    g_usbAttempt = 0;
     move(0,0);
   }
   
@@ -448,7 +448,7 @@ void LSUSBGamepad::begin(void)
   unsigned long timerHidTimeoutBegin = millis();
   unsigned long usbTimeoutMillis;
 
-  usbAttempt++;
+  g_usbAttempt++;
     
   if (usbRetrying) {
     usbTimeoutMillis = 200;                     // when reattemping to connect the USB, uses a smaller value to not freeze up the code for long but will keep retrying 
@@ -467,7 +467,7 @@ void LSUSBGamepad::begin(void)
 
   if (USBDevice.mounted()) {
     usbRetrying = false;
-    usbAttempt = 0;
+    g_usbAttempt = 0;
   }
   
   //Release all the buttons and center joystick
