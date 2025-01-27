@@ -873,7 +873,7 @@ void getJoystickInitialization(bool responseEnabled, bool apiEnabled, String opt
 void setJoystickInitialization(bool responseEnabled, bool apiEnabled) {
   int stepNumber = 0;
   canOutputAction = false;
-  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_INIT_START_DELAY, performJoystickCenter, (int *)stepNumber);  
+  calibrationTimerId[0] = calibrationTimer.setTimeout(CONF_JOY_INIT_START_DELAY, performJoystickCenter, (int *)stepNumber);  
 }
 //***SET JOYSTICK INITIALIZATION API FUNCTION***//
 // Function   : setJoystickInitialization
@@ -953,7 +953,7 @@ void setJoystickCalibration(bool responseEnabled, bool apiEnabled) {
   js.clear();                                                                                           //Clear previous calibration values
   int stepNumber = 0;
   canOutputAction = false;
-  calibTimerId[0] = calibTimer.setTimeout(CONF_JOY_CALIB_START_DELAY, performJoystickCalibration, (int *)stepNumber);  //Start the process
+  calibrationTimerId[0] = calibrationTimer.setTimeout(CONF_JOY_CALIB_START_DELAY, performJoystickCalibration, (int *)stepNumber);  //Start the process
 }
 //***SET JOYSTICK CALIBRATION API FUNCTION***//
 // Function   : setJoystickCalibration
