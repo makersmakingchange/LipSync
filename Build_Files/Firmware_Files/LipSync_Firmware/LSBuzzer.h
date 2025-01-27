@@ -266,6 +266,7 @@ void LSBuzzer::playReadySound(){
 //*********************************//
 void LSBuzzer::playErrorSound(){
     tone(CONF_BUZZER_PIN, NOTE_G4, 500);
+    delay(500);
     tone(CONF_BUZZER_PIN, NOTE_C4, 500);       
 }
 
