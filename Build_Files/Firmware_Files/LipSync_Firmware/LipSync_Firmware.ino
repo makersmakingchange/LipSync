@@ -107,7 +107,7 @@ int outputAction;
 bool canOutputAction = true;
 bool startupCenterReset = true;
 bool calibrationComplete = false;
-bool calError = false;
+bool calibrationError = false;
 
 bool settingsEnabled = false;  //Serial input settings command mode enabled or disabled
 
@@ -1406,7 +1406,7 @@ void performJoystickCenterStep(int* args) {
 //****************************************//
 void performJoystickCalibration(int* args) {
   calibrationComplete = false;
-  calError = false;
+  calibrationError = false;
   int stepNumber = (int)args;
   unsigned long readingDuration = CONF_JOY_CALIB_READING_DELAY * CONF_JOY_CALIB_READING_NUMBER;  //Duration of the max corner reading ( 2 seconds )
   unsigned long currentReadingStart = CONF_JOY_CALIB_STEP_DELAY + (CONF_JOY_CALIB_STEP_BLINK_DELAY * ((CONF_JOY_CALIB_STEP_BLINK * 2) + 1));  //Time until start of current reading
@@ -1451,7 +1451,7 @@ void performJoystickCalibration(int* args) {
     pollTimer.enable(CONF_TIMER_JOYSTICK);  //Enable joystick data polling
     pollTimer.enable(CONF_TIMER_SCROLL);    //Enable scroll data polling
     screen.fullCalibrationPrompt(stepNumber);
-    calError = false;
+    calibrationError = false;
   }
 }
 //***PERFORM JOYSTICK CALIBRATION STEP FUNCTION***//
@@ -1495,7 +1495,7 @@ void performJoystickCalibrationStep(int* args) {
     }
     maxPoint = tempDefaultPoint;
     js.setInputMax(stepNumber, maxPoint);
-    calError = true;
+    calibrationError = true;
   }
 
   //Turn off all the leds to orange to indicate end of the process
@@ -1504,10 +1504,10 @@ void performJoystickCalibrationStep(int* args) {
     setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0, CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);
     printResponseFloatPoint(true, true, true, 0, stepCommand, true, maxPoint);
-    if (calError) {
+    if (calibrationError) {
       screen.fullCalibrationPrompt(CONF_JOY_CALIB_ERROR);
       delay(3000);
-      calError = false;
+      calibrationError = false;
     }
   }
 }
