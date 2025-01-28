@@ -245,7 +245,7 @@ void errorCheck(void) {
   //}
 
   // I2C Connection Errors (Display, Joystick, Mouthpiece Pressure, Ambient Pressure)
-  if (displayConnected == false) {
+  if (!displayConnected) {
     // Display not connected / detected
     buzzer.playErrorSound();
     Serial.println("ERROR: Display not detected");
