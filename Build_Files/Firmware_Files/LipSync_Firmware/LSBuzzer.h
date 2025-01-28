@@ -281,12 +281,14 @@ void LSBuzzer::playErrorSound(){
 // Return     : void
 //*********************************//
 void LSBuzzer::playShutdownSound(){
+  if (_buzzerOn && (_soundModeLevel != CONF_SOUND_MODE_OFF)) {
     tone(CONF_BUZZER_PIN, NOTE_C6, 500);
     delay(250);
     tone(CONF_BUZZER_PIN, NOTE_G5, 500);       
     delay(250);
     tone(CONF_BUZZER_PIN, NOTE_C5, 300);
-    delay(500);   
+    delay(500);  
+  } 
 }
 
 //*********************************//
