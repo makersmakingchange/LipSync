@@ -162,9 +162,9 @@ void setup() {
 
   getVersionNumber(false, false);  //Retrieve version number from memory
 
-  checkI2C();  //Check that I2C devices are connected
-
   beginComOpMode();  //Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
+
+  checkI2C();  //Check that I2C devices are connected
 
   initScreen();  //Initialize screen
 
