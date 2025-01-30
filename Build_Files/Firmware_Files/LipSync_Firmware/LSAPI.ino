@@ -1344,7 +1344,7 @@ void getSipPressureThreshold(bool responseEnabled, bool apiEnabled, String optio
 void setSipPressureThreshold(bool responseEnabled, bool apiEnabled, float inputSipThreshold) {
   String commandKey = "ST";
 
-  if (inputSipThreshold >= CONF_PRESS_MIN_THRESHOLD && inputSipThreshold < CONF_PRESS_MAX_THRESHOLD) {
+  if (inputSipThreshold > CONF_PRESS_MIN_THRESHOLD && inputSipThreshold < CONF_PRESS_MAX_THRESHOLD) {
     mem.writeFloat(CONF_SETTINGS_FILE, commandKey, inputSipThreshold);
     ps.setSipThreshold(inputSipThreshold);
     printResponseFloat(responseEnabled, apiEnabled, true, 0, "ST,1", true, inputSipThreshold);
@@ -1432,7 +1432,7 @@ void getPuffPressureThreshold(bool responseEnabled, bool apiEnabled, String opti
 void setPuffPressureThreshold(bool responseEnabled, bool apiEnabled, float inputPuffThreshold) {
   String commandKey = "PT";
 
-  if (inputPuffThreshold >= CONF_PRESS_MIN_THRESHOLD && inputPuffThreshold < CONF_PRESS_MAX_THRESHOLD) {
+  if (inputPuffThreshold > CONF_PRESS_MIN_THRESHOLD && inputPuffThreshold < CONF_PRESS_MAX_THRESHOLD) {
     mem.writeFloat(CONF_SETTINGS_FILE, commandKey, inputPuffThreshold);
     ps.setPuffThreshold(inputPuffThreshold);
     printResponseFloat(responseEnabled, apiEnabled, true, 0, "PT,1", true, inputPuffThreshold);

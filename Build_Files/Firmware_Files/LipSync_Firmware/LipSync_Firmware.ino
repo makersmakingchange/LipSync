@@ -162,9 +162,9 @@ void setup() {
 
   getVersionNumber(false, false);  //Retrieve version number from memory
 
-  beginComOpMode();  //Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
-
   checkI2C();  //Check that I2C devices are connected
+
+  beginComOpMode();  //Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
 
   initScreen();  //Initialize screen
 
@@ -240,7 +240,6 @@ void loop() {
 // Return     : void
 //****************************************//
 void errorCheck(void) {
-  if (USB_DEBUG) {Serial.print("USB_DEBUG: errorCheck()"); 
   //if (!usbmouse.isReady() || !gamepad.isReady()){
   //  g_errorCode = CONF_ERROR_USB;
   //}
@@ -742,7 +741,7 @@ void beginComOpMode() {
           usbmouse.begin();
           break;
         case CONF_COM_MODE_BLE:                                      // Bluetooth Mouse
-          String btName = String("LipSync_") + String(g_deviceUID);  // Form Bluetooth name using device UID //TODO This may be limited to 15 characters
+          String btName = String("LipSync_") + String(g_deviceUID);  //Form Bluetooth name using device UID //TODO This may be limited to 15 characters
           btmouse.begin(btName.c_str());
           break;
       }
@@ -753,6 +752,7 @@ void beginComOpMode() {
       //default:
       //TODO: error handling?
   }
+
 
 
   if (USB_DEBUG) {
@@ -1427,7 +1427,7 @@ void performJoystickCenter(int* args) {
 void performJoystickCenterStep(int* args) {
 
   // Turn on and set the second led to orange to indicate start of the process
-  if (calibrationTimer.getNumRuns(calibrationTimerId[1]) == 1 && ledActionEnabled) {  //Turn Led's ON when timer is running for first time
+  if (calibrationTimer.getNumRuns(1) == 1 && ledActionEnabled) {  //Turn Led's ON when timer is running for first time
     setLedState(LED_ACTION_ON, CONF_JOY_INIT_LED_COLOR, CONF_JOY_INIT_LED_NUMBER, 0, 0, CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);
   }
@@ -1435,7 +1435,7 @@ void performJoystickCenterStep(int* args) {
   js.updateInputCenterBuffer();
 
   // Turn off the second led to orange to indicate end of the process
-  if (calibrationTimer.getNumRuns(calibrationTimerId[1]) == CONF_JOY_INIT_READING_NUMBER && ledActionEnabled) {  //Turn Led's OFF when timer is running for last time
+  if (calibrationTimer.getNumRuns(1) == CONF_JOY_INIT_READING_NUMBER && ledActionEnabled) {  //Turn Led's OFF when timer is running for last time
     setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_INIT_LED_NUMBER, 0, 0, CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);
   }
@@ -1516,7 +1516,7 @@ void performJoystickCalibrationStep(int* args) {
   pointFloatType maxPoint;
 
   //Turn on and set all leds to orange to indicate start of the process //TODO Jake update to non-neopixel LEDS
-  if (calibrationTimer.getNumRuns(calibrationTimerId[0]) == 1) {  //Turn Led's ON when timer is running for first time
+  if (calibrationTimer.getNumRuns(0) == 1) {  //Turn Led's ON when timer is running for first time
     setLedState(LED_ACTION_ON, CONF_JOY_CALIB_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, 0, 0, CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);
   }
@@ -1546,7 +1546,7 @@ void performJoystickCalibrationStep(int* args) {
   }
 
   //Turn off all the leds to orange to indicate end of the process
-  if (calibrationTimer.getNumRuns(calibrationTimerId[0]) == CONF_JOY_CALIB_READING_NUMBER) {  //Turn Led's OFF when timer is running for last time
+  if (calibrationTimer.getNumRuns(0) == CONF_JOY_CALIB_READING_NUMBER) {  //Turn Led's OFF when timer is running for last time
     mem.writePoint(CONF_SETTINGS_FILE, stepKey, maxPoint);                //Store the point in Flash Memory
     setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0, CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);
