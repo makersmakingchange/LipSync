@@ -159,7 +159,7 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 //Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
-#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN1\":4,\"VN2\":0,\"VN3\":1,\"ID\":\"\",\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":3.0,\"PT\":3.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[-13.0,13.0],\"CA2\":[13.0,13.0],\"CA3\":[13.0,-13.0],\"CA4\":[-13.0,-13.0],\"SM\":1,\"DM\":0}"
+#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN1\":4,\"VN2\":0,\"VN3\":1,\"ID\":\"\",\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":0.0,\"PT\":0.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[-13.0,13.0],\"CA2\":[13.0,13.0],\"CA3\":[13.0,-13.0],\"CA4\":[-13.0,-13.0],\"SM\":1,\"DM\":0}"
 
 //Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 50          //50ms - Measure, 
@@ -326,8 +326,8 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 // Sip and Puff Default settings
 #define CONF_SIP_THRESHOLD 3.0                    // hPa
 #define CONF_PUFF_THRESHOLD 3.0                   // hPa
-#define CONF_PRESS_MIN_THRESHOLD 2.0              // hPa
-#define CONF_PRESS_MAX_THRESHOLD 150.0            // hPa
+#define CONF_PRESS_MIN_THRESHOLD 1.0              // hPa
+#define CONF_PRESS_MAX_THRESHOLD 100.0            // hPa
 #define CONF_PRESS_MODE_DEFAULT 1                 // Default pressure mode state = 2 
                                                   //  0 = None or PRESS_MODE_NONE
                                                   //  1 = Absolute or PRESS_MODE_ABS
@@ -418,19 +418,19 @@ const inputActionStruct buttonActionProperty[]{
 const inputActionStruct switchActionProperty[]{
   { INPUT_MAIN_STATE_NONE,            CONF_ACTION_NOTHING,      CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,           0,    0 },
   
-  { INPUT_MAIN_STATE_S1_PRESSED,      CONF_ACTION_LEFT_CLICK,   CONF_ACTION_B1_PRESS,       CONF_ACTION_SELECT_MENU_ITEM,  0,  1000 },
+  { INPUT_MAIN_STATE_S1_PRESSED,      CONF_ACTION_LEFT_CLICK,   CONF_ACTION_B1_PRESS,       CONF_ACTION_SELECT_MENU_ITEM,    0,  1000 },
   { INPUT_MAIN_STATE_S1_PRESSED,      CONF_ACTION_DRAG,         CONF_ACTION_B3_PRESS,       CONF_ACTION_NOTHING,        1000,  3000 },
-  { INPUT_MAIN_STATE_S1_PRESSED,      CONF_ACTION_START_MENU,   CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,      3000,  8000 },
+  { INPUT_MAIN_STATE_S1_PRESSED,      CONF_ACTION_START_MENU,   CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,      3000, 5000 },
   
   { INPUT_MAIN_STATE_S2_PRESSED,      CONF_ACTION_MIDDLE_CLICK, CONF_ACTION_B5_PRESS,       CONF_ACTION_NOTHING,           0,  1000 },
   { INPUT_MAIN_STATE_S2_PRESSED,      CONF_ACTION_NOTHING,      CONF_ACTION_B6_PRESS,       CONF_ACTION_NOTHING,        1000,  3000 },
-  { INPUT_MAIN_STATE_S2_PRESSED,      CONF_ACTION_CURSOR_CENTER, CONF_ACTION_CURSOR_CENTER, CONF_ACTION_NOTHING,        3000,  8000 },
+  { INPUT_MAIN_STATE_S2_PRESSED,      CONF_ACTION_CURSOR_CENTER, CONF_ACTION_CURSOR_CENTER, CONF_ACTION_NOTHING,        3000,  5000 },
   
-  { INPUT_MAIN_STATE_S3_PRESSED,      CONF_ACTION_RIGHT_CLICK,  CONF_ACTION_B2_PRESS,       CONF_ACTION_NEXT_MENU_ITEM,    0,  1000 },
+  { INPUT_MAIN_STATE_S3_PRESSED,      CONF_ACTION_RIGHT_CLICK,  CONF_ACTION_B2_PRESS,       CONF_ACTION_NEXT_MENU_ITEM,  0,  1000 },
   { INPUT_MAIN_STATE_S3_PRESSED,      CONF_ACTION_SCROLL,       CONF_ACTION_B4_PRESS,       CONF_ACTION_NOTHING,        1000,  3000 },
-  { INPUT_MAIN_STATE_S3_PRESSED,      CONF_ACTION_MIDDLE_CLICK, CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,        3000,  8000 },
+  { INPUT_MAIN_STATE_S3_PRESSED,      CONF_ACTION_MIDDLE_CLICK, CONF_ACTION_NOTHING,        CONF_ACTION_NOTHING,        3000, 5000 },
   
-  { INPUT_MAIN_STATE_S13_PRESSED,      CONF_ACTION_START_MENU,  CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,          0, 3000 },
+  { INPUT_MAIN_STATE_S13_PRESSED,      CONF_ACTION_START_MENU,  CONF_ACTION_START_MENU,     CONF_ACTION_STOP_MENU,          0, 1000 },
 };
 
 // LED Action for all available output actions. This maps what happens with the lights when different actions are triggered.
