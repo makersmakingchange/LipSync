@@ -16,7 +16,6 @@
   If not, see <http://www.gnu.org/licenses/>.
 */
 
-//extern LSScreen screen;
 
 //***API FUNCTIONS***// - DO NOT CHANGE
 typedef void (*FunctionPointer)(bool, bool, String);      //Type definition for API function pointer
@@ -1956,23 +1955,23 @@ void controlHubMenu(bool responseEnabled, bool apiEnabled, int inputMenuControl)
   String commandKey = "CH";
 
   if ((inputMenuControl >= CONF_MENU_CONTROL_MIN) && (inputMenuControl <= CONF_MENU_CONTROL_MAX)) {
-    switch(inputMenuControl){
-      case CONF_MENU_CONTROL_OPEN: {
+    switch(inputMenuControl) {
+      case CONF_MENU_CONTROL_OPEN: 
         screen.activateMenu();
         break;
-      }
-      case CONF_MENU_CONTROL_SELECT: {
+      
+      case CONF_MENU_CONTROL_SELECT:
         screen.selectMenuItem();
         break;
-      }
-      case CONF_MENU_CONTROL_NEXT: {
+      
+      case CONF_MENU_CONTROL_NEXT:
         screen.nextMenuItem();
         break;
-      }
-      case CONF_MENU_CONTROL_CLOSE: {
+      
+      case CONF_MENU_CONTROL_CLOSE:
         screen.deactivateMenu();
         break;
-      }
+      
     } // end switch
    
     printResponseInt(responseEnabled, apiEnabled, true, 0, "CH,1", true, inputMenuControl);
@@ -2030,6 +2029,7 @@ int getDebugMode(bool responseEnabled, bool apiEnabled) {
 
   return tempDebugMode;
 }
+
 //***GET DEBUG MODE STATE API FUNCTION***//
 // Function   : getDebugMode
 //
@@ -2077,6 +2077,7 @@ void setDebugMode(bool responseEnabled, bool apiEnabled, int inputDebugMode) {
   }
 
 }
+
 //***SET DEBUG MODE STATE API FUNCTION***//
 // Function   : setDebugMode
 //
@@ -2121,6 +2122,7 @@ void runTest(bool responseEnabled, bool apiEnabled, int inputTest) {
   }
 
 }
+
 //***RUN TEST API FUNCTION***//
 // Function   : runTest
 //
@@ -2155,6 +2157,7 @@ void softReset(bool responseEnabled, bool apiEnabled) {
   softwareReset();
 
 }
+
 //***FACTORY RESET API FUNCTION***//
 // Function   : softReset
 //
@@ -2173,7 +2176,6 @@ void softReset(bool responseEnabled, bool apiEnabled, String optionalParameter) 
   }
 }
 
-
 //***RESET SETTINGS FUNCTION***//
 // Function   : resetSettings
 //
@@ -2191,6 +2193,7 @@ void resetSettings(bool responseEnabled, bool apiEnabled) {
   printResponseInt(responseEnabled, apiEnabled, true, 0, "RS,1", true, 0);
 
 }
+
 //***RESET SETTINGS API FUNCTION***//
 // Function   : resetSettings
 //
@@ -2247,6 +2250,7 @@ void factoryReset(bool responseEnabled, bool apiEnabled) {
   softwareReset();
 
 }
+
 //***FACTORY RESET API FUNCTION***//
 // Function   : factoryReset
 //
@@ -2345,7 +2349,13 @@ void printResponseIntArray(bool responseEnabled, bool apiEnabled, bool responseS
 }
 
 
-void printResponseIntPoint(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, pointIntType responseParameter) {
+void printResponseIntPoint(bool responseEnabled,
+                           bool apiEnabled, 
+                           bool responseStatus, 
+                           int responseNumber, 
+                           String responseCommand, 
+                           bool responseParameterEnabled, 
+                           pointIntType responseParameter) {
   String responseParameterString = "";
   responseParameterString.concat(responseParameter.x);
   responseParameterString.concat("|");
@@ -2354,7 +2364,16 @@ void printResponseIntPoint(bool responseEnabled, bool apiEnabled, bool responseS
 
 }
 
-void printResponseIntPointArray(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, String responsePrefix, int responseParameterSize, char responseParameterDelimiter, pointIntType responseParameter[]) {
+void printResponseIntPointArray(bool responseEnabled,
+                                bool apiEnabled, 
+                                bool responseStatus, 
+                                int responseNumber, 
+                                String responseCommand, 
+                                bool responseParameterEnabled, 
+                                String responsePrefix, 
+                                int responseParameterSize, 
+                                char responseParameterDelimiter, 
+                                pointIntType responseParameter[]) {
   char tempParameterDelimiter[1];
 
   (isValidDelimiter(responseParameterDelimiter)) ? tempParameterDelimiter[0] = {responseParameterDelimiter} : tempParameterDelimiter[0] = {'\0'};
@@ -2389,12 +2408,27 @@ void printResponseIntPointArray(bool responseEnabled, bool apiEnabled, bool resp
 //
 // Return     : void
 //***********************************************************************//
-void printResponseFloat(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, float responseParameter) {
+void printResponseFloat(bool responseEnabled,
+                        bool apiEnabled,
+                        bool responseStatus,
+                        int responseNumber,
+                        String responseCommand,
+                        bool responseParameterEnabled,
+                        float responseParameter) {
   printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, String(responseParameter));
 
 }
 
-void printResponseFloatArray(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, String responsePrefix, int responseParameterSize, char responseParameterDelimiter, float responseParameter[]) {
+void printResponseFloatArray(bool responseEnabled, 
+                             bool apiEnabled,
+                             bool responseStatus,
+                             int responseNumber,
+                             String responseCommand,
+                             bool responseParameterEnabled,
+                             String responsePrefix,
+                             int responseParameterSize,
+                             char responseParameterDelimiter,
+                             float responseParameter[]) {
   char tempParameterDelimiter[1];
 
   (isValidDelimiter(responseParameterDelimiter)) ? tempParameterDelimiter[0] = {responseParameterDelimiter} : tempParameterDelimiter[0] = {'\0'};
@@ -2421,7 +2455,16 @@ void printResponseFloatPoint(bool responseEnabled, bool apiEnabled, bool respons
 
 }
 
-void printResponseFloatPointArray(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, String responsePrefix, int responseParameterSize, char responseParameterDelimiter, pointFloatType responseParameter[]) {
+void printResponseFloatPointArray(bool responseEnabled, 
+                                  bool apiEnabled,
+                                  bool responseStatus,
+                                  int responseNumber,
+                                  String responseCommand,
+                                  bool responseParameterEnabled,
+                                  String responsePrefix,
+                                  int responseParameterSize,
+                                  char responseParameterDelimiter,
+                                  pointFloatType responseParameter[]) {
   char tempParameterDelimiter[1];
 
   (isValidDelimiter(responseParameterDelimiter)) ? tempParameterDelimiter[0] = {responseParameterDelimiter} : tempParameterDelimiter[0] = {'\0'};

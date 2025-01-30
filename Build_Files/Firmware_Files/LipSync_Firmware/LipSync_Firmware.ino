@@ -225,7 +225,7 @@ void loop() {
 
   pollTimer.run();  // Timer for normal joystick functions
 
-  settingsEnabled = serialSettings(settingsEnabled);  //Check to see if setting option is enabled in Lipsync
+  settingsEnabled = serialSettings(settingsEnabled);  // Check to see if setting option is enabled in Lipsync
 
   //if (USB_DEBUG) {Serial.print("USB_DEBUG: Loop: "); Serial.println(millis());}
 }
