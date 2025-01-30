@@ -240,7 +240,6 @@ void loop() {
 // Return     : void
 //****************************************//
 void errorCheck(void) {
-  if (USB_DEBUG) {Serial.print("USB_DEBUG: errorCheck()"); 
   //if (!usbmouse.isReady() || !gamepad.isReady()){
   //  g_errorCode = CONF_ERROR_USB;
   //}
@@ -742,7 +741,7 @@ void beginComOpMode() {
           usbmouse.begin();
           break;
         case CONF_COM_MODE_BLE:                                      // Bluetooth Mouse
-          String btName = String("LipSync_") + String(g_deviceUID);  // Form Bluetooth name using device UID //TODO This may be limited to 15 characters
+          String btName = String("LipSync_") + String(g_deviceUID);  //Form Bluetooth name using device UID //TODO This may be limited to 15 characters
           btmouse.begin(btName.c_str());
           break;
       }
@@ -753,6 +752,7 @@ void beginComOpMode() {
       //default:
       //TODO: error handling?
   }
+
 
 
   if (USB_DEBUG) {
