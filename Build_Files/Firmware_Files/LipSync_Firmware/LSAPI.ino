@@ -16,6 +16,8 @@
   If not, see <http://www.gnu.org/licenses/>.
 */
 
+//extern LSScreen screen;
+
 //***API FUNCTIONS***// - DO NOT CHANGE
 typedef void (*FunctionPointer)(bool, bool, String);      //Type definition for API function pointer
 
@@ -64,6 +66,8 @@ _functionList setSoundModeFunction =              {"SM", "1", "",  &setSoundMode
 _functionList getLightModeFunction =              {"LM", "0", "0", &getLightMode};
 _functionList setLightModeFunction =              {"LM", "1", "",  &setLightMode};
 
+_functionList controlHubMenuFunction =            {"CH", "1", "",  &controlHubMenu};
+
 _functionList getDebugModeFunction =              {"DM", "0", "0", &getDebugMode};
 _functionList setDebugModeFunction =              {"DM", "1", "",  &setDebugMode};
 _functionList getJoystickValueFunction =          {"JV", "0", "0", &getJoystickValue};
@@ -74,7 +78,7 @@ _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSetting
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[38] = {
+_functionList apiFunction[39] = {
   getModelNumberFunction,
   getVersionNumberFunction,
   getDeviceIDFunction,
@@ -107,6 +111,7 @@ _functionList apiFunction[38] = {
   setSoundModeFunction,
   getLightModeFunction,
   setLightModeFunction,
+  controlHubMenuFunction,
   getDebugModeFunction,
   setDebugModeFunction,
   runTestFunction,
@@ -1930,6 +1935,69 @@ void setLightMode(bool responseEnabled, bool apiEnabled, int inputLightMode) {
 // Return     : void
 void setLightMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   setLightMode(responseEnabled, apiEnabled, optionalParameter.toInt());
+}
+
+// *********************************************************************************
+
+//***OPEN HUB MENU FUNCTION***//
+// Function   : openHubMenu
+//
+// Description: This function opens the Hub Menu.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               inputLightMode : int : The new debug mode state ( true = ON , false = OFF )
+//
+// Return     : void
+//*********************************//
+void controlHubMenu(bool responseEnabled, bool apiEnabled, int inputMenuControl) {
+  String commandKey = "CH";
+
+  if ((inputMenuControl >= CONF_MENU_CONTROL_MIN) && (inputMenuControl <= CONF_MENU_CONTROL_MAX)) {
+    switch(inputMenuControl){
+      case CONF_MENU_CONTROL_OPEN: {
+        screen.activateMenu();
+        break;
+      }
+      case CONF_MENU_CONTROL_SELECT: {
+        screen.selectMenuItem();
+        break;
+      }
+      case CONF_MENU_CONTROL_NEXT: {
+        screen.nextMenuItem();
+        break;
+      }
+      case CONF_MENU_CONTROL_CLOSE: {
+        screen.deactivateMenu();
+        break;
+      }
+    } // end switch
+   
+    printResponseInt(responseEnabled, apiEnabled, true, 0, "CH,1", true, inputMenuControl);
+
+  } // end if valid inputMenuControl
+  else {
+    printResponseInt(responseEnabled, apiEnabled, false, 3, "CH,1", true, inputMenuControl);
+
+  }
+
+}
+//***CONTROL HUB MENU API FUNCTION***//
+// Function   : controlHubMenu
+//
+// Description: This function is redefinition of main controlHubMenu function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void controlHubMenu(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  controlHubMenu(responseEnabled, apiEnabled, optionalParameter.toInt());
 }
 
 // *********************************************************************************
