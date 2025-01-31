@@ -32,7 +32,7 @@
 
 #define GAMEPAD_DESCRIPTOR "LipSync Gamepad"
 
-extern int g_usbAttempt;
+extern unsigned int g_usbAttempt;
 
 
 // https://github.com/hathach/tinyusb/blob/master/examples/device/hid_generic_inout/src/usb_descriptors.c
