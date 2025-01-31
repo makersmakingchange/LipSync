@@ -121,6 +121,11 @@ bool calibrationError = false;
 
 bool settingsEnabled = false;  //Serial input settings command mode enabled or disabled
 
+long beginMillis;
+long beforeComOpMillis;
+long afterComOpMillis;
+bool showConnectionTime = false;
+
 //Create instances of classes
 LSMemory mem;     //Create an instance of LSMemory for managing flash memory.
 LSJoystick js;    //Create an instance of the LSJoystick object
@@ -145,6 +150,8 @@ LSUSBGamepad gamepad;  //Create an instance of the USB gamepad object
 //*********************************//
 void setup() {
 
+  beginMillis = millis();
+
   Serial.begin(115200);
   //while (!Serial) { delay(1); }  // Wait until serial port is opened
 
@@ -162,7 +169,11 @@ void setup() {
 
   getVersionNumber(false, false);  //Retrieve version number from memory
 
+  beforeComOpMillis = millis() - beginMillis;
+
   beginComOpMode();  //Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
+
+  afterComOpMillis = millis() - beginMillis;
 
   checkI2C();  //Check that I2C devices are connected
 
@@ -318,14 +329,26 @@ void errorScreen(void) {
 void readyToUse(void) {
   errorCheck();  // Check for errors
 
-  if ((g_errorCode == 0) && readyToUseFirstTime && calibrationComplete) {
-    buzzer.playReadySound();
-    screen.splashScreen2();
-    readyToUseFirstTime = false;
-  } else if (g_errorCode) {
-    buzzer.playErrorSound();
-    errorScreen();
+  if (readyToUseFirstTime && calibrationComplete) {
+
+    if (g_errorCode == 0){
+      buzzer.playReadySound();
+      screen.splashScreen2();
+      readyToUseFirstTime = false;
+    } else {
+      buzzer.playErrorSound();
+      errorScreen();
+    }
+
+    if (showConnectionTime){
+      screen.connectionTimingPage();
+      Serial.print("Time until before com op mode: ");
+      Serial.println(beforeComOpMillis);
+      Serial.print("Time until after com op mode: ");
+      Serial.println(afterComOpMillis);
+    }
   }
+
 }
 
 //***ENABLE POLL FUNCTION***//

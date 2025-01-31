@@ -73,6 +73,9 @@ extern bool joystickSensorConnected;            // Joystick sensor connection st
 extern bool mouthpiecePressureSensorConnected;  // Mouthpiece pressure sensor connection state
 extern bool ambientPressureSensorConnected;     // Ambient pressure sensor connection state
 
+extern long beforeComOpMillis;
+extern long afterComOpMillis;
+
 class LSScreen {
 
 public:
@@ -98,6 +101,7 @@ public:
   void noUsbPage();
   void errorPageI2C();
   void errorPageCable();
+  void connectionTimingPage();
 
   bool showCenterResetComplete = false;
 
@@ -1548,6 +1552,31 @@ void LSScreen::errorPageCable() {
   _display.println("Joystick not");
   _display.println("detected.");
   _display.println("Try cable.");
+
+  _display.display();
+}
+
+//*********************************//
+// Function   : connectionTimingPage
+//
+// Description: Format and display an page showing the timestamps related to connecting to USB
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
+
+void LSScreen::connectionTimingPage() {
+  setupDisplay();
+  _display.setTextSize(1);
+  _display.println("Before beginComOpMode");
+  _display.setTextSize(2);
+  _display.println(beforeComOpMillis);
+
+  _display.setTextSize(1);
+  _display.println("After beginComOpMode");
+  _display.setTextSize(2);
+  _display.println(afterComOpMillis);
 
   _display.display();
 }
