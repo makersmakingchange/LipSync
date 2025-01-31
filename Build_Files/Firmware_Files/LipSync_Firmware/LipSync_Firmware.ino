@@ -97,8 +97,8 @@ LSTimer<ledStateStruct> ledStateTimer;
 int usbConnectTimerId[1];
 LSTimer<int> usbConnectTimer;
 
-int g_usbAttempt = 0;
-int g_usbConnectDelay = CONF_USB_HID_INIT_DELAY;
+unsigned int g_usbAttempt = 0;
+unsigned int g_usbConnectDelay = CONF_USB_HID_INIT_DELAY;
 
 // Joystick module variables and structures
 int acceleration = 0;
@@ -115,9 +115,9 @@ bool calibrationError = false;
 
 bool settingsEnabled = false;  // Serial input settings command mode enabled or disabled
 
-long beginMillis;
-long beforeComOpMillis;
-long afterComOpMillis;
+unsigned long beginMillis;
+unsigned long beforeComOpMillis;
+unsigned long afterComOpMillis;
 bool showConnectionTime = false;
 
 // Create instances of classes

@@ -65,16 +65,16 @@
 
 const int TEXT_ROWS = 4;
 
-extern int g_usbAttempt;
-extern int g_usbConnectDelay;
+extern unsigned int g_usbAttempt;
+extern unsigned int g_usbConnectDelay;
 
 extern bool displayConnected;                   // Display connection state
 extern bool joystickSensorConnected;            // Joystick sensor connection state
 extern bool mouthpiecePressureSensorConnected;  // Mouthpiece pressure sensor connection state
 extern bool ambientPressureSensorConnected;     // Ambient pressure sensor connection state
 
-extern long beforeComOpMillis;
-extern long afterComOpMillis;
+extern unsigned long beforeComOpMillis;
+extern unsigned long afterComOpMillis;
 
 class LSScreen {
 
