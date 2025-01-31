@@ -42,7 +42,7 @@ void activateTest(int inputTest) {
     case (CONF_TEST_MODE_BUZZER):
       testBuzzer();
       break;
-  } //end switch inputTest
+  } // end switch inputTest
   Serial.println("Test Complete");
 }
 
@@ -190,8 +190,8 @@ void testBuzzer() {
   buzzer.playShutdownSound();
   delay(1000);
 
-  //TODO Test Sound levels
-  //TODO test enable/disable sound
+  // TODO Test Sound levels
+  // TODO test enable/disable sound
 
   Serial.println("SOUND TEST COMPLETE");
 }

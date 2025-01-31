@@ -18,13 +18,13 @@
 
 
 //***API FUNCTIONS***// - DO NOT CHANGE
-typedef void (*FunctionPointer)(bool, bool, String);      //Type definition for API function pointer
+typedef void (*FunctionPointer)(bool, bool, String);      // Type definition for API function pointer
 
-typedef struct {                                  //Type definition for API function list
-  String endpoint;                                //Unique two character end point
-  String code;                                    //Unique one character command code
-  String parameter;                               //Parameter that is passed to function
-  FunctionPointer function;                       //API function pointer
+typedef struct {                                  // Type definition for API function list
+  String endpoint;                                // Unique two character end point
+  String code;                                    // Unique one character command code
+  String parameter;                               // Parameter that is passed to function
+  FunctionPointer function;                       // API function pointer
 } _functionList;
 
 // Declare individual API functions with command, parameter, and corresponding function
@@ -135,23 +135,23 @@ bool serialSettings(bool enabled) {
   String commandString = "";
   bool settingsFlag = enabled;
 
-  //Set the input parameter to the flag returned. This will help to detect that the settings actions should be performed.
+  // Set the input parameter to the flag returned. This will help to detect that the settings actions should be performed.
   if (Serial.available() > 0)
   {
-    //Check if serial has received or read input string and word "SETTINGS" is in input string.
+    // Check if serial has received or read input string and word "SETTINGS" is in input string.
     commandString = Serial.readString();
     if (settingsFlag == false && commandString == "SETTINGS") {
-      //SETTING received
-      //Set the return flag to true so settings actions can be performed in the next call to the function
+      // SETTING received
+      // Set the return flag to true so settings actions can be performed in the next call to the function
       printResponseInt(true, true, true, 0, commandString, false, 0);
       settingsFlag = true;
     } else if (settingsFlag == true && commandString == "EXIT") {
-      //EXIT Recieved
-      //Set the return flag to false so settings actions can be exited
+      // EXIT Recieved
+      // Set the return flag to false so settings actions can be exited
       printResponseInt(true, true, true, 0, commandString, false, 0);
       settingsFlag = false;
-    } else if (settingsFlag == true && isValidCommandFormat(commandString)) { //Check if command's format is correct and it's in settings mode
-      performCommand(commandString);                  //Sub function to process valid strings
+    } else if (settingsFlag == true && isValidCommandFormat(commandString)) { // Check if command's format is correct and it's in settings mode
+      performCommand(commandString);                  // Sub function to process valid strings
       settingsFlag = false;
     } else {
       printResponseInt(true, true, false, 0, commandString, false, 0);
@@ -175,7 +175,7 @@ bool serialSettings(bool enabled) {
 void performCommand(String inputString) {
   int inputIndex = inputString.indexOf(':');
 
-  //Extract command string from input string
+  // Extract command string from input string
   String inputCommandString = inputString.substring(0, inputIndex);
 
   int inputCommandIndex = inputCommandString.indexOf(',');
@@ -184,13 +184,13 @@ void performCommand(String inputString) {
 
   String inputCodeString = inputCommandString.substring(inputCommandIndex + 1);
 
-  //Extract parameter string from input string
+  // Extract parameter string from input string
   String inputParameterString = inputString.substring(inputIndex + 1);
 
   // Determine total number of API commands
   int apiTotalNumber = sizeof(apiFunction) / sizeof(apiFunction[0]);
 
-  //Iterate through each API command
+  // Iterate through each API command
   for (int apiIndex = 0; apiIndex < apiTotalNumber; apiIndex++) {
 
     // Test if input command string matches API command and input parameter string matches API parameter string
@@ -212,13 +212,13 @@ void performCommand(String inputString) {
       break;
     } else if (apiIndex == (apiTotalNumber - 1)) { // api doesn’t exist
 
-      //Output error message
+      // Output error message
       printResponseInt(true, true, false, 1, inputString, false, 0);
 
       //delay(5);
       break;
     }
-  } //end iterate through API functions
+  } // end iterate through API functions
 
 }
 
@@ -235,11 +235,11 @@ void performCommand(String inputString) {
 //***********************************************//
 bool isValidCommandFormat(String inputCommandString) {
   bool isValidFormat = false;
-  if ((inputCommandString.length() == (6) || //XX,d:d
-       inputCommandString.length() == (7) || //XX,d:dd
-       inputCommandString.length() == (8) || //XX,d:ddd
-       inputCommandString.length() == (9) || //XX,d:dddd
-       inputCommandString.length() == (11)) && inputCommandString.charAt(2) == ',' && inputCommandString.charAt(4) == ':') { //XX,d:dddddd
+  if ((inputCommandString.length() == (6) || // XX,d:d
+       inputCommandString.length() == (7) || // XX,d:dd
+       inputCommandString.length() == (8) || // XX,d:ddd
+       inputCommandString.length() == (9) || // XX,d:dddd
+       inputCommandString.length() == (11)) && inputCommandString.charAt(2) == ',' && inputCommandString.charAt(4) == ':') { // XX,d:dddddd
     isValidFormat = true;
   }
   return isValidFormat;
@@ -276,12 +276,13 @@ bool isValidCommandParameter(String inputParameterString) {
 //******************************************//
 boolean isStrNumber(String str) {
   boolean isNumber = false;
-  for (byte i = 0; i < str.length(); i++)
-  {
+  for (byte i = 0; i < str.length(); i++) {
     isNumber = isDigit(str.charAt(i)) || str.charAt(i) == '+' || str.charAt(i) == '.' || str.charAt(i) == '-';
-    if (!isNumber) return false;
+    if (!isNumber) {
+      return false; // Non numeric character detected
+    }
   }
-  return true;
+  return true; // All numeric characters detected
 }
 
 //***CHECK IF CHAR IS A VALID DELIMITER FUNCTION***//
@@ -319,10 +320,10 @@ bool isValidDelimiter(char inputDelimiter) {
 void getModelNumber(bool responseEnabled, bool apiEnabled) {
   String commandKey = "MN";
   int tempModelNumber = mem.readInt(CONF_SETTINGS_FILE, commandKey);
-  if (tempModelNumber != CONF_LIPSYNC_MODEL) {                          //If the previous firmware was different model then reset the settings
+  if (tempModelNumber != CONF_LIPSYNC_MODEL) {                          // If the previous firmware was different model then reset the settings
     resetSettings(false, false);
 
-    tempModelNumber = CONF_LIPSYNC_MODEL;                               //And store the model number
+    tempModelNumber = CONF_LIPSYNC_MODEL;                               // And store the model number
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempModelNumber);
   }
   printResponseInt(responseEnabled, apiEnabled, true, 0, "MN,0", true, tempModelNumber);
@@ -365,29 +366,29 @@ void getVersionNumber(bool responseEnabled, bool apiEnabled) {
   int tempMinorVersionNumber = mem.readInt(CONF_SETTINGS_FILE, "VN2");
   int tempRevVersionNumber = mem.readInt(CONF_SETTINGS_FILE, "VN3");
   
-  if (tempMajorVersionNumber != CONF_LIPSYNC_VERSION_MAJOR) {                          //If the previous firmware was different version then reset the settings
+  if (tempMajorVersionNumber != CONF_LIPSYNC_VERSION_MAJOR) {                          // If the previous firmware was different version then reset the settings
     // could add factory reset here if version number saved in memory is different
-    tempMajorVersionNumber = CONF_LIPSYNC_VERSION_MAJOR;                               //And store the version number
+    tempMajorVersionNumber = CONF_LIPSYNC_VERSION_MAJOR;                               // And store the version number
     mem.writeInt(CONF_SETTINGS_FILE, "VN1", tempMajorVersionNumber);
     
-    tempMinorVersionNumber = CONF_LIPSYNC_VERSION_MINOR;                               //And store the version number
+    tempMinorVersionNumber = CONF_LIPSYNC_VERSION_MINOR;                               // And store the version number
     mem.writeInt(CONF_SETTINGS_FILE, "VN2", tempMinorVersionNumber);
 
-    tempRevVersionNumber = CONF_LIPSYNC_VERSION_REV;                               //And store the version number
+    tempRevVersionNumber = CONF_LIPSYNC_VERSION_REV;                               // And store the version number
     mem.writeInt(CONF_SETTINGS_FILE, "VN3", tempRevVersionNumber);
   }
 
-  else if (tempMinorVersionNumber != CONF_LIPSYNC_VERSION_MINOR) {                          //If the previous firmware was different version then reset the settings
+  else if (tempMinorVersionNumber != CONF_LIPSYNC_VERSION_MINOR) {                     // If the previous firmware was different version then reset the settings
     // could reset some settings here if version number saved in memory is different
-    tempMinorVersionNumber = CONF_LIPSYNC_VERSION_MINOR;                               //And store the version number
+    tempMinorVersionNumber = CONF_LIPSYNC_VERSION_MINOR;                               // And store the version number
     mem.writeInt(CONF_SETTINGS_FILE, "VN2", tempMinorVersionNumber);
 
-    tempRevVersionNumber = CONF_LIPSYNC_VERSION_REV;                               //And store the version number
+    tempRevVersionNumber = CONF_LIPSYNC_VERSION_REV;                                    // And store the version number
     mem.writeInt(CONF_SETTINGS_FILE, "VN3", tempRevVersionNumber);
   }
 
-  else if (tempRevVersionNumber != CONF_LIPSYNC_VERSION_REV) {                          //If the previous firmware was different version then reset the settings
-    tempRevVersionNumber = CONF_LIPSYNC_VERSION_REV;                               //And store the version number
+  else if (tempRevVersionNumber != CONF_LIPSYNC_VERSION_REV) {                          // If the previous firmware was different version then reset the settings
+    tempRevVersionNumber = CONF_LIPSYNC_VERSION_REV;                                    // And store the version number
     mem.writeInt(CONF_SETTINGS_FILE, "VN3", tempRevVersionNumber);
   }
   
@@ -431,7 +432,7 @@ void getDeviceID(bool responseEnabled, bool apiEnabled) {
   String tempDeviceID = mem.readString(CONF_SETTINGS_FILE, commandKey);
   String deviceID = readUID();
  
-  if (tempDeviceID != deviceID){//If string doesn't match, store to memory
+  if (tempDeviceID != deviceID) {  // If string doesn't match, store to memory
     mem.writeString(CONF_SETTINGS_FILE, commandKey, deviceID);
   }
   g_deviceUID = deviceID; // Update global variable
@@ -527,7 +528,7 @@ void setOperatingMode(bool responseEnabled, bool apiEnabled, int inputOperatingM
     printResponseInt(responseEnabled, apiEnabled, false, 3, "OM,1", true, inputOperatingMode);
   }
 
-  //TODO: move softwareReset() here instead of in changeOperatingMode?
+  // TODO: move softwareReset() here instead of in changeOperatingMode?
 
 }
 //***SET OPERATING MODE STATE API FUNCTION***//
@@ -611,7 +612,7 @@ void setCursorSpeed(bool responseEnabled, bool apiEnabled, int inputSpeedLevel) 
   bool isValidSpeed = true;
   int tempCursorSpeedLevel = inputSpeedLevel;
   
-  if ((tempCursorSpeedLevel >= CONF_JOY_CURSOR_SPEED_LEVEL_MIN) && (tempCursorSpeedLevel <= CONF_JOY_CURSOR_SPEED_LEVEL_MAX)) { //Check if inputSpeedCounter is valid
+  if ((tempCursorSpeedLevel >= CONF_JOY_CURSOR_SPEED_LEVEL_MIN) && (tempCursorSpeedLevel <= CONF_JOY_CURSOR_SPEED_LEVEL_MAX)) { // Check if inputSpeedCounter is valid
     // Valid inputSpeedLevel
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempCursorSpeedLevel);
     if (!CONF_API_ENABLED) {
@@ -621,7 +622,7 @@ void setCursorSpeed(bool responseEnabled, bool apiEnabled, int inputSpeedLevel) 
     isValidSpeed = true;
   }
   else {
-    //Invalid inputSpeedLevel
+    // Invalid inputSpeedLevel
     tempCursorSpeedLevel = mem.readInt(CONF_SETTINGS_FILE, commandKey);
     performLedAction(ledCurrentState);
     isValidSpeed = false;
@@ -714,7 +715,7 @@ void setScrollLevel(bool responseEnabled, bool apiEnabled, int inputScrollLevel)
   bool isValidLevel = true;
   int tempScrollLevel = inputScrollLevel;
   
-  if ((tempScrollLevel >= CONF_SCROLL_LEVEL_MIN) && (tempScrollLevel <= CONF_SCROLL_LEVEL_MAX)) { //Check if inputLevelCounter is valid
+  if ((tempScrollLevel >= CONF_SCROLL_LEVEL_MIN) && (tempScrollLevel <= CONF_SCROLL_LEVEL_MAX)) { // Check if inputLevelCounter is valid
     // Valid inputScrollLevel
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempScrollLevel);
     if (!CONF_API_ENABLED) {
@@ -725,7 +726,7 @@ void setScrollLevel(bool responseEnabled, bool apiEnabled, int inputScrollLevel)
     scrollLevel = tempScrollLevel;
   }
   else {
-    //Invalid inputScrollLevel
+    // Invalid inputScrollLevel
     tempScrollLevel = mem.readInt(CONF_SETTINGS_FILE, commandKey);
     performLedAction(ledCurrentState);
     isValidLevel = false;
@@ -769,13 +770,13 @@ void increaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
   int tempCursorSpeedLevel = js.getOutputRange();
 
   tempCursorSpeedLevel++;
-  if(tempCursorSpeedLevel <= CONF_JOY_CURSOR_SPEED_LEVEL_MAX){
+  if(tempCursorSpeedLevel <= CONF_JOY_CURSOR_SPEED_LEVEL_MAX) {  // Check validity of input
     setLedState(LED_ACTION_BLINK, 
     CONF_JOY_SPEED_INC_LED_COLOR, 
     CONF_JOY_SPEED_INC_LED_NUMBER, 
     CONF_JOY_SPEED_CHANGE_LED_BLINK, 
     CONF_JOY_SPEED_CHANGE_LED_DELAY, 
-    CONF_LED_BRIGHTNESS);   //Blink once
+    CONF_LED_BRIGHTNESS);   // Blink once
   } 
   else{
     setLedState(LED_ACTION_BLINK, 
@@ -783,7 +784,7 @@ void increaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
     CONF_JOY_SPEED_INC_LED_NUMBER, 
     CONF_JOY_SPEED_LIMIT_LED_BLINK, 
     CONF_JOY_SPEED_LIMIT_LED_DELAY, 
-    CONF_LED_BRIGHTNESS);   //Blink 3 times
+    CONF_LED_BRIGHTNESS);   // Blink 3 times
   }
 
   setCursorSpeed(responseEnabled, apiEnabled, tempCursorSpeedLevel);
@@ -805,13 +806,13 @@ void decreaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
   int tempCursorSpeedLevel = js.getOutputRange();
 
   tempCursorSpeedLevel--;
-  if(tempCursorSpeedLevel >= CONF_JOY_CURSOR_SPEED_LEVEL_MIN){
+  if(tempCursorSpeedLevel >= CONF_JOY_CURSOR_SPEED_LEVEL_MIN) {
     setLedState(LED_ACTION_BLINK, 
     CONF_JOY_SPEED_DEC_LED_COLOR, 
     CONF_JOY_SPEED_DEC_LED_NUMBER, 
     CONF_JOY_SPEED_CHANGE_LED_BLINK, 
     CONF_JOY_SPEED_CHANGE_LED_DELAY, 
-    CONF_LED_BRIGHTNESS);   //Blink once
+    CONF_LED_BRIGHTNESS);   // Blink once
   } 
   else{
     setLedState(LED_ACTION_BLINK, 
@@ -819,7 +820,7 @@ void decreaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
     CONF_JOY_SPEED_DEC_LED_NUMBER, 
     CONF_JOY_SPEED_LIMIT_LED_BLINK, 
     CONF_JOY_SPEED_LIMIT_LED_DELAY, 
-    CONF_LED_BRIGHTNESS);   //Blink 3 times
+    CONF_LED_BRIGHTNESS);   // Blink 3 times
   }
   
     
@@ -828,7 +829,7 @@ void decreaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
 
 
 //***GET JOYSTICK INITIALIZATION FUNCTION***//
-/// Function   : getJoystickInitialization
+// Function   : getJoystickInitialization
 //
 // Description: This function retrieves the FSR Neutral values from joystick Initialization.
 //
@@ -841,7 +842,7 @@ void decreaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
 //*********************************//
 void getJoystickInitialization(bool responseEnabled, bool apiEnabled) {
   pointFloatType tempCenterPoint = js.getInputCenter();
-  js.setMinimumRadius();                                                                        //Update the minimum cursor operating radius 
+  js.setMinimumRadius();                                                                        // Update the minimum cursor operating radius 
   printResponseFloatPoint(responseEnabled, apiEnabled, true, 0, "IN,0", true, tempCenterPoint);
 }
 //***GET JOYSTICK INITIALIZATION API FUNCTION***//
@@ -863,7 +864,7 @@ void getJoystickInitialization(bool responseEnabled, bool apiEnabled, String opt
 }
 
 //***SET JOYSTICK INITIALIZATION FUNCTION***//
-/// Function   : setJoystickInitialization
+// Function   : setJoystickInitialization
 //
 // Description: This function performs joystick Initialization.
 //
@@ -898,7 +899,7 @@ void setJoystickInitialization(bool responseEnabled, bool apiEnabled, String opt
 }
 
 //*** GET JOYSTICK CALIBRATION FUNCTION***//
-/// Function   : getJoystickCalibration
+// Function   : getJoystickCalibration
 //
 // Description: This function retrieves FSR maximum values from joystick Calibration.
 //
@@ -919,7 +920,7 @@ void getJoystickCalibration(bool responseEnabled, bool apiEnabled) {
     calibrationPointArray[i] = mem.readPoint(CONF_SETTINGS_FILE, commandKey);
     js.setInputMax(i, calibrationPointArray[i]);
   }
-  js.setMinimumRadius();                                                                              //Update the minimum cursor operating radius 
+  js.setMinimumRadius();                                                                              // Update the minimum cursor operating radius 
   printResponseFloatPointArray(responseEnabled, apiEnabled, true, 0, "CA,0", true, "", 5, ',', calibrationPointArray);
 
 }
@@ -942,7 +943,7 @@ void getJoystickCalibration(bool responseEnabled, bool apiEnabled, String option
 }
 
 //*** SET JOYSTICK CALIBRATION FUNCTION***//
-/// Function   : setJoystickCalibration
+// Function   : setJoystickCalibration
 //
 // Description: This function starts the joystick Calibration.
 //
@@ -954,10 +955,10 @@ void getJoystickCalibration(bool responseEnabled, bool apiEnabled, String option
 // Return     : void
 //*********************************//
 void setJoystickCalibration(bool responseEnabled, bool apiEnabled) {
-  js.clear();                                                                                           //Clear previous calibration values
+  js.clear();                                                                                           // Clear previous calibration values
   int stepNumber = 0;
   canOutputAction = false;
-  calibrationTimerId[0] = calibrationTimer.setTimeout(CONF_JOY_CALIB_START_DELAY, performJoystickCalibration, (int *)stepNumber);  //Start the process
+  calibrationTimerId[0] = calibrationTimer.setTimeout(CONF_JOY_CALIB_START_DELAY, performJoystickCalibration, (int *)stepNumber);  // Start the process
 }
 //***SET JOYSTICK CALIBRATION API FUNCTION***//
 // Function   : setJoystickCalibration
@@ -979,7 +980,7 @@ void setJoystickCalibration(bool responseEnabled, bool apiEnabled, String option
 
 
 //*** GET JOYSTICK DEADZONE FUNCTION***//
-/// Function   : getJoystickDeadZone
+// Function   : getJoystickDeadZone
 //
 // Description: This function retrieves the joystick deadzone.
 //
@@ -1022,7 +1023,7 @@ void getJoystickDeadZone(bool responseEnabled, bool apiEnabled, String optionalP
 }
 
 //*** SET JOYSTICK DEADZONE FUNCTION***//
-/// Function   : setJoystickDeadZone
+// Function   : setJoystickDeadZone
 //
 // Description: This function starts the joystick deadzone.
 //
@@ -1039,11 +1040,9 @@ void setJoystickDeadZone(bool responseEnabled, bool apiEnabled, float inputDeadZ
     mem.writeFloat(CONF_SETTINGS_FILE, deadZoneCommand, inputDeadZone);
     js.setDeadzone(true, inputDeadZone);
     printResponseFloat(responseEnabled, apiEnabled, true, 0, "DZ,1", true, inputDeadZone);
-
   }
   else {
     printResponseFloat(responseEnabled, apiEnabled, false, 3, "DZ,1", true, inputDeadZone);
-
   }
 }
 //***SET JOYSTICK DEADZONE API FUNCTION***//
@@ -1074,14 +1073,14 @@ void setJoystickDeadZone(bool responseEnabled, bool apiEnabled, String optionalP
 // Return     : void
 //*********************************//
 void getJoystickValue(bool responseEnabled, bool apiEnabled) {
-  js.update();      //Request new values from joystick class
+  js.update();      // Request new values from joystick class
   
   int outputArraySize = 6; 
   float tempJoystickArray[outputArraySize];
   
-  pointFloatType tempJoystickRaw = js.getXYRaw();                                 //Read the raw values
-  pointIntType tempJoystickIn = js.getXYIn();                                     //Read the input
-  pointIntType tempJoystickProcessed = js.getXYOut();                             //Read the filtered values  
+  pointFloatType tempJoystickRaw = js.getXYRaw();                                 // Read the raw values
+  pointIntType tempJoystickIn = js.getXYIn();                                     // Read the input
+  pointIntType tempJoystickProcessed = js.getXYOut();                             // Read the filtered values  
   
   tempJoystickArray[0] = tempJoystickRaw.x;
   tempJoystickArray[1] = tempJoystickRaw.y;
@@ -1093,6 +1092,7 @@ void getJoystickValue(bool responseEnabled, bool apiEnabled) {
   printResponseFloatArray(responseEnabled, apiEnabled, true, 0, "JV,0", true, "", outputArraySize, ',', tempJoystickArray);
   
 }
+
 //***GET JOYSTICK VALUE API FUNCTION***//
 // Function   : getJoystickValue
 //
@@ -1110,8 +1110,6 @@ void getJoystickValue(bool responseEnabled, bool apiEnabled, String optionalPara
     getJoystickValue(responseEnabled, apiEnabled);
   }
 }
-
-
 
 //***GET PRESSURE VALUE FUNCTION***//
 // Function   : getPressureValue
@@ -1131,9 +1129,9 @@ void getPressureValue(bool responseEnabled, bool apiEnabled) {
   
   int outputArraySize = 3;   
   float tempSapPressure[outputArraySize];
-  tempSapPressure[0] = ps.getSapPressureAbs();  // Read the main pressure 
+  tempSapPressure[0] = ps.getSapPressureAbs();    // Read the main pressure 
   tempSapPressure[1] = ps.getAmbientPressure();   // Read the ref pressure
-  tempSapPressure[2] = ps.getSapPressure();  // Read the diff pressure
+  tempSapPressure[2] = ps.getSapPressure();       // Read the diff pressure
 
   
   printResponseFloatArray(responseEnabled, apiEnabled, true, 0, "PV,0", true, "", outputArraySize, ',', tempSapPressure);
@@ -1184,6 +1182,7 @@ int getPressureMode(bool responseEnabled, bool apiEnabled) {
 
   return tempPressureMode;
 }
+
 //***GET PRESSURE MODE API FUNCTION***//
 // Function   : getPressureMode
 //
@@ -1217,9 +1216,8 @@ void getPressureMode(bool responseEnabled, bool apiEnabled, String optionalParam
 //*********************************//
 void setPressureMode(bool responseEnabled, bool apiEnabled, int inputPressureMode) {
   String commandKey = "PM";
-  if ((inputPressureMode >= PRESS_MODE_MIN) && (inputPressureMode <= PRESS_MODE_MAX))
-  {
-    //comMode = inputPressureMode;  //TODO: fix
+  if ((inputPressureMode >= PRESS_MODE_MIN) && (inputPressureMode <= PRESS_MODE_MAX)) {
+    //comMode = inputPressureMode;  // TODO: fix
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputPressureMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "PM,1", true, inputPressureMode);
   ps.setPressureMode(inputPressureMode);
@@ -1230,6 +1228,7 @@ void setPressureMode(bool responseEnabled, bool apiEnabled, int inputPressureMod
   }
 
 }
+
 //***SET PRESSURE MODE API FUNCTION***//
 // Function   : setPressureMode
 //
@@ -1265,8 +1264,8 @@ void getPressureThreshold(bool responseEnabled, bool apiEnabled) {
   tempPressureThreshold[1] = getPuffPressureThreshold(false, false);
 
   printResponseFloatArray(responseEnabled, apiEnabled, true, 0, "DT,0", true, "", 2, ',', tempPressureThreshold);
-
 }
+
 //***GET PRESSURE VALUE API FUNCTION***//
 // Function   : getPressureThreshold
 //
@@ -1310,6 +1309,7 @@ float getSipPressureThreshold(bool responseEnabled, bool apiEnabled) {
   printResponseFloat(responseEnabled, apiEnabled, true, 0, "ST,0", true, tempSipThreshold);
   return tempSipThreshold;
 }
+
 //***GET PRESSURE THRESHOLD API FUNCTION***//
 // Function   : getSipPressureThreshold
 //
@@ -1354,6 +1354,7 @@ void setSipPressureThreshold(bool responseEnabled, bool apiEnabled, float inputS
 
   }
 }
+
 //***SET SIP PRESSURE THRESHOLD API FUNCTION***//
 // Function   : setSipPressureThreshold
 //
@@ -1521,7 +1522,7 @@ void setJoystickAcceleration(bool responseEnabled, bool apiEnabled, int inputAcc
   bool isValidAcceleration = true;
   int tempJoystickAccelerationLevel = inputAccelerationLevel;
   
-  if ((tempJoystickAccelerationLevel >= CONF_JOY_ACCELERATION_LEVEL_MIN) && (tempJoystickAccelerationLevel <= CONF_JOY_ACCELERATION_LEVEL_MAX)) { //Check if inputAccelerationCounter is valid
+  if ((tempJoystickAccelerationLevel >= CONF_JOY_ACCELERATION_LEVEL_MIN) && (tempJoystickAccelerationLevel <= CONF_JOY_ACCELERATION_LEVEL_MAX)) { // Check if inputAccelerationCounter is valid
     // Valid inputAccelerationLevel
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempJoystickAccelerationLevel);
     if (!CONF_API_ENABLED) {
@@ -1530,7 +1531,7 @@ void setJoystickAcceleration(bool responseEnabled, bool apiEnabled, int inputAcc
     isValidAcceleration = true;
   }
   else {
-    //Invalid inputAccelerationLevel
+    // Invalid inputAccelerationLevel
     tempJoystickAccelerationLevel = mem.readInt(CONF_SETTINGS_FILE, commandKey);
     isValidAcceleration = false;
   }
@@ -1573,15 +1574,13 @@ void setJoystickAcceleration(bool responseEnabled, bool apiEnabled, String optio
 void increaseJoystickAcceleration(bool responseEnabled, bool apiEnabled) {
   int tempJoystickAccelerationLevel=acceleration;
   tempJoystickAccelerationLevel++;
-  if(tempJoystickAccelerationLevel <= CONF_JOY_ACCELERATION_LEVEL_MAX){
+  if(tempJoystickAccelerationLevel <= CONF_JOY_ACCELERATION_LEVEL_MAX) {
     setJoystickAcceleration(responseEnabled, apiEnabled, tempJoystickAccelerationLevel);
   } 
-  else{
+  else {
   }
 
 }
-
-
 
 //***DECREASE/DECELERATE JOYSTICK MOVEMENT FUNCTION***//
 // Function   : decreaseJoystickAcceleration
@@ -1605,7 +1604,6 @@ void decreaseJoystickAcceleration(bool responseEnabled, bool apiEnabled) {
   }
 
 }
-
 
 //***GET COMMUNICATION MODE FUNCTION***//
 // Function   : getCommunicationMode
@@ -1667,17 +1665,16 @@ void getCommunicationMode(bool responseEnabled, bool apiEnabled, String optional
 void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommunicationMode) {
   String commandKey = "CM";
   
-  if ((inputCommunicationMode >= CONF_COM_MODE_MIN) && (inputCommunicationMode <= CONF_COM_MODE_MAX))
-  {
+  if ((inputCommunicationMode >= CONF_COM_MODE_MIN) && (inputCommunicationMode <= CONF_COM_MODE_MAX)) {
     comMode = inputCommunicationMode;
     setCommunicationModeLed(comMode);
     setLedDefault();
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputCommunicationMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "CM,1", true, inputCommunicationMode);
 
-    //TODO: move this?
+    // TODO: move this?
     releaseOutputAction();
-    switch(comMode){
+    switch(comMode) {
       case CONF_COM_MODE_USB:       // USB Mouse
         btmouse.end();
         usbmouse.begin();    
@@ -1744,12 +1741,10 @@ void setCommunicationMode(bool responseEnabled, bool apiEnabled, String optional
 //
 // Return     : void
 void toggleCommunicationMode(bool responseEnabled, bool apiEnabled) {
-  if (comMode < CONF_COM_MODE_MAX)
-  {
+  if (comMode < CONF_COM_MODE_MAX) {
     comMode++;
   }
-  else
-  {
+  else {
     comMode = CONF_COM_MODE_MIN;
   }
   setCommunicationMode(responseEnabled, apiEnabled, comMode);
@@ -1909,10 +1904,8 @@ void setLightMode(bool responseEnabled, bool apiEnabled, int inputLightMode) {
   if ((inputLightMode >= CONF_LIGHT_MODE_MIN) && (inputLightMode <= CONF_LIGHT_MODE_MAX)) {
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputLightMode);
     lightMode = inputLightMode;
-    //buzzer.setLightModeLevel(inputLightMode);
     led.setLightModeLevel(inputLightMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "LM,1", true, inputLightMode);
-
   }
   else {
     printResponseInt(responseEnabled, apiEnabled, false, 3, "LM,1", true, inputLightMode);
@@ -1920,6 +1913,7 @@ void setLightMode(bool responseEnabled, bool apiEnabled, int inputLightMode) {
   }
 
 }
+
 //***SET LIGHT MODE STATE API FUNCTION***//
 // Function   : setLightMode
 //
@@ -1958,20 +1952,16 @@ void controlHubMenu(bool responseEnabled, bool apiEnabled, int inputMenuControl)
     switch(inputMenuControl) {
       case CONF_MENU_CONTROL_OPEN: 
         screen.activateMenu();
-        break;
-      
+        break;     
       case CONF_MENU_CONTROL_SELECT:
         screen.selectMenuItem();
         break;
-      
       case CONF_MENU_CONTROL_NEXT:
         screen.nextMenuItem();
-        break;
-      
+        break;     
       case CONF_MENU_CONTROL_CLOSE:
         screen.deactivateMenu();
-        break;
-      
+        break;      
     } // end switch
    
     printResponseInt(responseEnabled, apiEnabled, true, 0, "CH,1", true, inputMenuControl);
@@ -2069,11 +2059,9 @@ void setDebugMode(bool responseEnabled, bool apiEnabled, int inputDebugMode) {
     debugMode = inputDebugMode;
     setDebugState(inputDebugMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "DM,1", true, inputDebugMode);
-
   }
   else {
     printResponseInt(responseEnabled, apiEnabled, false, 3, "DM,1", true, inputDebugMode);
-
   }
 
 }
@@ -2110,17 +2098,13 @@ void setDebugMode(bool responseEnabled, bool apiEnabled, String optionalParamete
 void runTest(bool responseEnabled, bool apiEnabled, int inputTest) {
   String commandKey = "RT";
 
-  if ((inputTest >= CONF_TEST_MODE_MIN) && (inputTest <= CONF_TEST_MODE_MAX)) {
-    
+  if ((inputTest >= CONF_TEST_MODE_MIN) && (inputTest <= CONF_TEST_MODE_MAX)) { 
     printResponseInt(responseEnabled, apiEnabled, true, 0, "RT,1", true, inputTest);
-    activateTest(inputTest); //run the test
-
+    activateTest(inputTest); // run the test
   }
   else { // error message
     printResponseInt(responseEnabled, apiEnabled, false, 3, "RT,1", true, inputTest);
-
   }
-
 }
 
 //***RUN TEST API FUNCTION***//
@@ -2152,10 +2136,8 @@ void runTest(bool responseEnabled, bool apiEnabled, String optionalParameter) {
 // Return     : void
 //***************************//
 void softReset(bool responseEnabled, bool apiEnabled) {
-
   printResponseInt(responseEnabled, apiEnabled, true, 0, "SR,1", true, 1);
   softwareReset();
-
 }
 
 //***FACTORY RESET API FUNCTION***//
@@ -2189,9 +2171,7 @@ void softReset(bool responseEnabled, bool apiEnabled, String optionalParameter) 
 // Return     : void
 //***************************//
 void resetSettings(bool responseEnabled, bool apiEnabled) {
-
   printResponseInt(responseEnabled, apiEnabled, true, 0, "RS,1", true, 0);
-
 }
 
 //***RESET SETTINGS API FUNCTION***//
@@ -2226,11 +2206,11 @@ void resetSettings(bool responseEnabled, bool apiEnabled, String optionalParamet
 //***************************//
 void factoryReset(bool responseEnabled, bool apiEnabled) {
 
-  //Set all LEDs to red to indicate factory reset process 
+  // Set all LEDs to red to indicate factory reset process 
   setLedState(LED_ACTION_ON, LED_CLR_RED, CONF_LED_ALL, 0, 0, CONF_LED_BRIGHTNESS);                           
   performLedAction(ledCurrentState);  
 
-  //Factory reset process 
+  // Factory reset process 
   resetMemory();
   setCommunicationMode(false, false, CONF_COM_MODE_DEFAULT);
   setOperatingMode(false, false, CONF_COM_MODE_DEFAULT);
@@ -2243,7 +2223,7 @@ void factoryReset(bool responseEnabled, bool apiEnabled) {
   setJoystickAcceleration(false, false, CONF_JOY_ACCELERATION_LEVEL_DEFAULT);
   printResponseInt(responseEnabled, apiEnabled, true, 0, "FR,1", true, 1);
 
-  //Clear all LEDs to indicate factory reset process is finished 
+  // Clear all LEDs to indicate factory reset process is finished 
   setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);                           
   performLedAction(ledCurrentState);  
 
@@ -2269,10 +2249,6 @@ void factoryReset(bool responseEnabled, bool apiEnabled, String optionalParamete
   }
 }
 
-
-
-
-
 //***SERIAL PRINT OUT COMMAND RESPONSE WITH STRING PARAMETER FUNCTION***//
 // Function   : printResponseString
 //
@@ -2289,7 +2265,13 @@ void factoryReset(bool responseEnabled, bool apiEnabled, String optionalParamete
 //
 // Return     : void
 //***********************************************************************//
-void printResponseString(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, String responseParameter) {
+void printResponseString(bool responseEnabled, 
+                         bool apiEnabled,
+                         bool responseStatus,
+                         int responseNumber,
+                         String responseCommand, 
+                         bool responseParameterEnabled, 
+                         String responseParameter) {
   if (responseEnabled) {
 
     if (responseStatus) {
@@ -2326,12 +2308,42 @@ void printResponseString(bool responseEnabled, bool apiEnabled, bool responseSta
 //
 // Return     : void
 //***********************************************************************//
-void printResponseInt(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, int responseParameter) {
+void printResponseInt(bool responseEnabled, 
+                      bool apiEnabled,
+                      bool responseStatus, 
+                      int responseNumber, 
+                      String responseCommand, 
+                      bool responseParameterEnabled, 
+                      int responseParameter) {
   printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, String(responseParameter));
-
 }
 
-void printResponseIntArray(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, String responsePrefix, int responseParameterSize, char responseParameterDelimiter, int responseParameter[]) {
+//***SERIAL PRINT OUT COMMAND RESPONSE WITH INT PARAMETER FUNCTION***//
+// Function   : printResponseIntArray
+//
+// Description: Serial Print output of the responses from APIs with an int array as the output
+//
+// Parameters :  responseEnabled : bool : Print the response if it's set to true, and skip the response if it's set to false.
+//               apiEnabled : bool : Print the response and indicate if the the function was called via the API if it's set to true.
+//                                   Print Manual response if the function wasn't called via API.
+//               responseStatus : bool : The response status (SUCCESS,FAIL)
+//               responseNumber : int : 0,1,2 (Different meanings depending on the responseStatus)
+//               responseCommand : String : The End-Point command which is returned as output.
+//               responseParameterEnabled : bool : Print the parameter if it's set to true, and skip the parameter if it's set to false.
+//               responseParameter : int[] : The array response parameter printed as output.
+//
+// Return     : void
+//***********************************************************************//
+void printResponseIntArray(bool responseEnabled, 
+                           bool apiEnabled, 
+                           bool responseStatus, 
+                           int responseNumber, 
+                           String responseCommand, 
+                           bool responseParameterEnabled, 
+                           String responsePrefix, 
+                           int responseParameterSize, 
+                           char responseParameterDelimiter, 
+                           int responseParameter[]) {
   char tempParameterDelimiter[1];
 
   (isValidDelimiter(responseParameterDelimiter)) ? tempParameterDelimiter[0] = {responseParameterDelimiter} : tempParameterDelimiter[0] = {'\0'};
@@ -2348,7 +2360,22 @@ void printResponseIntArray(bool responseEnabled, bool apiEnabled, bool responseS
 
 }
 
-
+//***SERIAL PRINT OUT COMMAND RESPONSE WITH POINT PARAMETER FUNCTION***//
+// Function   : printResponseIntPoint
+//
+// Description: Serial Print output of the responses from APIs with an point as the output
+//
+// Parameters :  responseEnabled : bool : Print the response if it's set to true, and skip the response if it's set to false.
+//               apiEnabled : bool : Print the response and indicate if the the function was called via the API if it's set to true.
+//                                   Print Manual response if the function wasn't called via API.
+//               responseStatus : bool : The response status (SUCCESS,FAIL)
+//               responseNumber : int : 0,1,2 (Different meanings depending on the responseStatus)
+//               responseCommand : String : The End-Point command which is returned as output.
+//               responseParameterEnabled : bool : Print the parameter if it's set to true, and skip the parameter if it's set to false.
+//               responseParameter : pointIntType : The response parameter printed as output.
+//
+// Return     : void
+//***********************************************************************//
 void printResponseIntPoint(bool responseEnabled,
                            bool apiEnabled, 
                            bool responseStatus, 
@@ -2364,6 +2391,22 @@ void printResponseIntPoint(bool responseEnabled,
 
 }
 
+//***SERIAL PRINT OUT COMMAND RESPONSE WITH INT POINT ARRAY PARAMETER FUNCTION***//
+// Function   : printResponseIntPointArray
+//
+// Description: Serial Print output of the responses from APIs with an point array as the output
+//
+// Parameters :  responseEnabled : bool : Print the response if it's set to true, and skip the response if it's set to false.
+//               apiEnabled : bool : Print the response and indicate if the the function was called via the API if it's set to true.
+//                                   Print Manual response if the function wasn't called via API.
+//               responseStatus : bool : The response status (SUCCESS,FAIL)
+//               responseNumber : int : 0,1,2 (Different meanings depending on the responseStatus)
+//               responseCommand : String : The End-Point command which is returned as output.
+//               responseParameterEnabled : bool : Print the parameter if it's set to true, and skip the parameter if it's set to false.
+//               responseParameter : pointIntType : The response parameter printed as output.
+//
+// Return     : void
+//***********************************************************************//
 void printResponseIntPointArray(bool responseEnabled,
                                 bool apiEnabled, 
                                 bool responseStatus, 
@@ -2389,7 +2432,6 @@ void printResponseIntPointArray(bool responseEnabled,
   }
 
   printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, responseParameterString);
-
 }
 
 //***SERIAL PRINT OUT COMMAND RESPONSE WITH FLOAT PARAMETER FUNCTION***//
@@ -2416,9 +2458,24 @@ void printResponseFloat(bool responseEnabled,
                         bool responseParameterEnabled,
                         float responseParameter) {
   printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, String(responseParameter));
-
 }
 
+//***SERIAL PRINT OUT COMMAND RESPONSE WITH FLOAT ARRAY PARAMETER FUNCTION***//
+// Function   : printResponseFloat
+//
+// Description: Serial Print output of the responses from APIs with float parameter as the output
+//
+// Parameters :  responseEnabled : bool : Print the response if it's set to true, and skip the response if it's set to false.
+//               apiEnabled : bool : Print the response and indicate if the the function was called via the API if it's set to true.
+//                                   Print Manual response if the function wasn't called via API.
+//               responseStatus : bool : The response status (SUCCESS,FAIL)
+//               responseNumber : int : 0,1,2 (Different meanings depending on the responseStatus)
+//               responseCommand : String : The End-Point command which is returned as output.
+//               responseParameterEnabled : bool : Print the parameter if it's set to true, and skip the parameter if it's set to false.
+//               responseParameter : float[] : The response parameter printed as output.
+//
+// Return     : void
+//***********************************************************************//
 void printResponseFloatArray(bool responseEnabled, 
                              bool apiEnabled,
                              bool responseStatus,
@@ -2442,19 +2499,55 @@ void printResponseFloatArray(bool responseEnabled,
   }
 
   printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, responseParameterString);
-
 }
 
-void printResponseFloatPoint(bool responseEnabled, bool apiEnabled, bool responseStatus, int responseNumber, String responseCommand, bool responseParameterEnabled, pointFloatType responseParameter) {
+//***SERIAL PRINT OUT COMMAND RESPONSE WITH FLOAT POINT PARAMETER FUNCTION***//
+// Function   : printResponseFloatPoint
+//
+// Description: Serial Print output of the responses from APIs with float point as the output
+//
+// Parameters :  responseEnabled : bool : Print the response if it's set to true, and skip the response if it's set to false.
+//               apiEnabled : bool : Print the response and indicate if the the function was called via the API if it's set to true.
+//                                   Print Manual response if the function wasn't called via API.
+//               responseStatus : bool : The response status (SUCCESS,FAIL)
+//               responseNumber : int : 0,1,2 (Different meanings depending on the responseStatus)
+//               responseCommand : String : The End-Point command which is returned as output.
+//               responseParameterEnabled : bool : Print the parameter if it's set to true, and skip the parameter if it's set to false.
+//               responseParameter : pointFloatType : The response parameter printed as output.
+//
+// Return     : void
+//***********************************************************************//
+void printResponseFloatPoint(bool responseEnabled, 
+                             bool apiEnabled, 
+                             bool responseStatus, 
+                             int responseNumber, 
+                             String responseCommand, 
+                             bool responseParameterEnabled, 
+                             pointFloatType responseParameter) {
   String responseParameterString = "";
   responseParameterString.concat(responseParameter.x);
   responseParameterString.concat("|");
   responseParameterString.concat(responseParameter.y);
 
   printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, responseParameterString);
-
 }
 
+//***SERIAL PRINT OUT COMMAND RESPONSE WITH FLOAT POINT ARRAY PARAMETER FUNCTION***//
+// Function   : printResponseFloatPointArray
+//
+// Description: Serial Print output of the responses from APIs with float point as the output
+//
+// Parameters :  responseEnabled : bool : Print the response if it's set to true, and skip the response if it's set to false.
+//               apiEnabled : bool : Print the response and indicate if the the function was called via the API if it's set to true.
+//                                   Print Manual response if the function wasn't called via API.
+//               responseStatus : bool : The response status (SUCCESS,FAIL)
+//               responseNumber : int : 0,1,2 (Different meanings depending on the responseStatus)
+//               responseCommand : String : The End-Point command which is returned as output.
+//               responseParameterEnabled : bool : Print the parameter if it's set to true, and skip the parameter if it's set to false.
+//               responseParameter : pointFloatType[] : The response parameter printed as output.
+//
+// Return     : void
+//***********************************************************************//
 void printResponseFloatPointArray(bool responseEnabled, 
                                   bool apiEnabled,
                                   bool responseStatus,
@@ -2480,5 +2573,4 @@ void printResponseFloatPointArray(bool responseEnabled,
   }
 
   printResponseString(responseEnabled, apiEnabled, responseStatus, responseNumber, responseCommand, responseParameterEnabled, responseParameterString);
-
 }

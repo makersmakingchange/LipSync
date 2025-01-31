@@ -16,7 +16,7 @@
   If not, see <http://www.gnu.org/licenses/>
 */
 
-//Header definition
+// Header definition
 #ifndef _LSINPUT_H
 #define _LSINPUT_H
 
@@ -72,10 +72,8 @@ LSInput::~LSInput()
 
 }
 
-
 void LSInput::begin() {
-  clear();
-  
+  clear();  
 }
 
 void LSInput::clear() {
@@ -103,17 +101,16 @@ void LSInput::update() {
   inputPrevState = inputBuffer.getLastElement();
   
 
-  //inputAllState = inputState[0] + 2 * inputState[1] + 4 * inputState[2];
+  // inputAllState = inputState[0] + 2 * inputState[1] + 4 * inputState[2];
  
   // prev: none,waiting  current : none 
   // prev: press x,started  current : press x 
   if((inputAllState == inputPrevState.mainState // current button states are the same as previous
-      && inputPrevState.secondaryState != INPUT_SEC_STATE_RELEASED)){ // and last state was not a release
+      && inputPrevState.secondaryState != INPUT_SEC_STATE_RELEASED)) { // and last state was not a release
     
     inputCurrState = {inputAllState, inputPrevState.secondaryState, inputStateTimer.elapsedTime(inputStateTimerId)};
 
-    inputBuffer.updateLastElement(inputCurrState);  //add state to buffer
-    //Serial.println("a");
+    inputBuffer.updateLastElement(inputCurrState);  // add state to buffer
 
   } // prev: press x,started  current : press y and elapsed time < reaction time in ms   (120 ms debounce?)
   else if(inputAllState != INPUT_MAIN_STATE_NONE                      // Something is currently pressed
@@ -123,57 +120,49 @@ void LSInput::update() {
     inputCurrState = {inputAllState, inputPrevState.secondaryState, inputStateTimer.elapsedTime(inputStateTimerId)};
 
     inputBuffer.updateLastElement(inputCurrState);  // add state to buffer
-    //Serial.println("b");
   } 
 
   // (current button states are different than previous OR last state was released) OR (current button states are different AND current button state is all off)
   else { 
       // prev: none,waiting  current : press x 
-      if(inputPrevState.secondaryState == INPUT_SEC_STATE_WAITING){
+      if(inputPrevState.secondaryState == INPUT_SEC_STATE_WAITING) {
         
         inputCurrState = {inputAllState, INPUT_SEC_STATE_STARTED, 0};
         
-        //Serial.println("c");
       } // prev: press x,started  current : none  OR prev: press x,started  current : press y and elapsed time >= 150
       else if(inputPrevState.secondaryState == INPUT_SEC_STATE_STARTED 
-           && inputPrevState.elapsedTime >= INPUT_REACTION_TIME){
+           && inputPrevState.elapsedTime >= INPUT_REACTION_TIME) {
         
         inputCurrState = {inputPrevState.mainState, INPUT_SEC_STATE_RELEASED, inputPrevState.elapsedTime};
-        
-        //Serial.println("d");
       } // prev: press x,released  current : none 
-      else if(inputPrevState.secondaryState == INPUT_SEC_STATE_RELEASED && inputAllState == INPUT_MAIN_STATE_NONE){
+      else if(inputPrevState.secondaryState == INPUT_SEC_STATE_RELEASED && inputAllState == INPUT_MAIN_STATE_NONE) {
         
         inputCurrState = {inputAllState, INPUT_SEC_STATE_WAITING, 0};
         
-        //Serial.println("e");
       } // prev: press x,released  current : press y 
       else if(inputPrevState.secondaryState == INPUT_SEC_STATE_RELEASED 
               && inputAllState != INPUT_MAIN_STATE_NONE){
 
         inputCurrState = {inputAllState, INPUT_SEC_STATE_STARTED, 0};
-        //Serial.println("f");
       }     
-      //Push the new state 
-      
-      inputBuffer.pushElement(inputCurrState);   
+       
+      inputBuffer.pushElement(inputCurrState); // Push the new state   
 
-      //Reset and start the timer
-      inputStateTimer.restartTimer(inputStateTimerId);
+      
+      inputStateTimer.restartTimer(inputStateTimerId);  // Reset and start the timer
   }
   
-  //No action in 1 minute : reset timer
+  // No action in 1 minute : reset timer
   if(inputPrevState.secondaryState == INPUT_SEC_STATE_WAITING
-    && inputStateTimer.elapsedTime(inputStateTimerId) > INPUT_ACTION_TIMEOUT){
-      //Reset and start the timer         
+    && inputStateTimer.elapsedTime(inputStateTimerId) > INPUT_ACTION_TIMEOUT) {
+      // Reset and start the timer         
       inputStateTimer.restartTimer(inputStateTimerId);
   }
   
 }
 
-
 inputStateStruct LSInput::getInputState() {
-  inputStateStruct inputCurrState = inputBuffer.getLastElement();  //Get the state
+  inputStateStruct inputCurrState = inputBuffer.getLastElement();  // Get the state
   return inputCurrState;
 }
 

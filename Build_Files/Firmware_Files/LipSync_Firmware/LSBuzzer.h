@@ -16,11 +16,11 @@
   If not, see <http://www.gnu.org/licenses/>
 */
 
-//Header definition
+// Header definition
 #ifndef _LSBUZZER_H
 #define _LSBUZZER_H
 
-//Notes
+// Notes
 #define NOTE_B0  31
 #define NOTE_C1  33
 #define NOTE_CS1 35
@@ -128,7 +128,7 @@ class LSBuzzer {
     void calibCenterTone();
 
   private:
-    boolean _buzzerOn = true; //Sound feedback is on by default
+    boolean _buzzerOn = true; // Sound feedback is on by default
     int _soundModeLevel; // Levels that correspond to volume
 };
 

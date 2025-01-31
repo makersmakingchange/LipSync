@@ -16,7 +16,7 @@
   If not, see <http://www.gnu.org/licenses/>
 */
 
-//Header definition
+// Header definition
 #ifndef _LSSCREEN_H
 #define _LSSCREEN_H
 
@@ -29,7 +29,7 @@
 #define CONF_SCREEN_HEIGHT 64  // OLED display height, in pixels
 
 #define OLED_RESET -1        // Reset pin # (or -1 if sharing Arduino reset pin)
-#define SCREEN_ADDRESS 0x3D  ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+#define SCREEN_ADDRESS 0x3D  // See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 
 #define MAIN_MENU 0
 #define EXIT_MENU 1
@@ -38,14 +38,14 @@
 #define CURSOR_SP_MENU 4
 #define MORE_MENU 5
 
-//Calibration pages
+// Calibration pages
 #define CENTER_RESET_PAGE 21
 //#define FULL_CALIB_PAGE             22
 
-//Mode pages
+// Mode pages
 #define CONFIRM_MODE_CHANGE 31
 
-//More Menus
+// More Menus
 #define SOUND_MENU 51
 #define SIP_PUFF_MENU 52
 #define SIP_THRESH_MENU 521
@@ -108,8 +108,8 @@ public:
 private:
   Adafruit_SSD1306 _display = Adafruit_SSD1306(CONF_SCREEN_WIDTH, CONF_SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-  LSTimer<void> _screenStateTimer;  //Timer
-  int _screenStateTimerId;          //The id for the sap state timer
+  LSTimer<void> _screenStateTimer;  // Timer
+  int _screenStateTimerId;          // The id for the sap state timer
 
   bool _isActive = false;
   int _currentMenu = 0;
@@ -238,14 +238,14 @@ void LSScreen::begin() {
     Serial.println(F("SSD1306 allocation failed"));
 
     for (;;)
-      ;  // Don't proceed, loop forever  //TODO Implement watchdog to throw error instead of infinite loop
+      ;  // Don't proceed, loop forever  // TODO Implement watchdog to throw error instead of infinite loop
   }
 
-  setupDisplay();  //Clear screen
+  setupDisplay();  // Clear screen
   _display.setTextWrap(false);
   _display.display();
 
-  _operatingMode = getOperatingMode(false, false);  //TODO JDMc 2025-Jan-24 These should be moved to update function so they are updated if changed through serial API
+  _operatingMode = getOperatingMode(false, false);  // TODO JDMc 2025-Jan-24 These should be moved to update function so they are updated if changed through serial API
   _communicationMode = getCommunicationMode(false, false);
   _soundMode = getSoundMode(false, false);
 
@@ -279,7 +279,7 @@ void LSScreen::clear() {
 void LSScreen::update() {
   _screenStateTimer.run();
 
-  //Loop for screen functions
+  // Loop for screen functions
   if (_scrollOn) {
     scrollLongText();
   }
@@ -409,9 +409,9 @@ void LSScreen::splashScreen2() {
   _lastActivityMillis = millis();
 }
 
-//------------------------------------------//
+//****************************************//
 // Functions called from inputs
-//------------------------------------------//
+//****************************************//
 
 //*********************************//
 // Function   : nextMenuItem
@@ -541,7 +541,7 @@ void LSScreen::selectMenuItem() {
       break;
     case CURSOR_SP_MENU:
       switch (_currentSelection) {
-        case 0:  //Increase
+        case 0:  // Increase
           increaseCursorSpeed(true, false);
           _cursorSpeedLevel = getCursorSpeed(true, false);
           _cursorSpMenuText[0] = "Speed: " + String(_cursorSpeedLevel) + " ";
@@ -549,7 +549,7 @@ void LSScreen::selectMenuItem() {
           _display.print(_cursorSpMenuText[0]);
           _display.display();
           break;
-        case 1:  //Decrease
+        case 1:  // Decrease
           decreaseCursorSpeed(true, false);
           _cursorSpeedLevel = getCursorSpeed(true, false);
           _cursorSpMenuText[0] = "Speed: " + String(_cursorSpeedLevel) + " ";
@@ -557,7 +557,7 @@ void LSScreen::selectMenuItem() {
           _display.print(_cursorSpMenuText[0]);
           _display.display();
           break;
-        case 2:  //Back
+        case 2:  // Back
           _currentMenu = MAIN_MENU;
           mainMenu();
           break;
@@ -587,11 +587,11 @@ void LSScreen::selectMenuItem() {
     case SOUND_MENU:
       switch (_currentSelection) {
         case 0:
-          //do function for turning sound on/off
+          // do function for turning sound on/off
           if (_soundMode == CONF_SOUND_MODE_OFF) {
             buzzerSoundOn();
             _soundMode = CONF_SOUND_MODE_BASIC;
-            setSoundMode(false, false, _soundMode);  //TODO: change menu to add Advanced Sound to menu
+            setSoundMode(false, false, _soundMode);  // TODO: change menu to add Advanced Sound to menu
           } else {
             buzzerSoundOff();
             _soundMode = CONF_SOUND_MODE_OFF;
@@ -620,7 +620,7 @@ void LSScreen::selectMenuItem() {
       break;
     case SIP_THRESH_MENU:
       switch (_currentSelection) {
-        case 0:  //Increase
+        case 0:  // Increase
           _sipPressThresh = getSipPressureThreshold(false, false);
           _sipPressThresh++;  // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
           setSipPressureThreshold(false, false, _sipPressThresh);
@@ -630,7 +630,7 @@ void LSScreen::selectMenuItem() {
           _display.print(_adjustSipThreshMenuText[0]);
           _display.display();
           break;
-        case 1:  //Decrease
+        case 1:  // Decrease
           _sipPressThresh = getSipPressureThreshold(false, false);
           _sipPressThresh--;  // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
           setSipPressureThreshold(false, false, _sipPressThresh);
@@ -640,7 +640,7 @@ void LSScreen::selectMenuItem() {
           _display.print(_adjustSipThreshMenuText[0]);
           _display.display();
           break;
-        case 2:  //Back
+        case 2:  // Back
           _currentMenu = SIP_PUFF_MENU;
           sipPuffThreshMenu();
           break;
@@ -648,7 +648,7 @@ void LSScreen::selectMenuItem() {
       break;
     case PUFF_THRESH_MENU:
       switch (_currentSelection) {
-        case 0:  //Increase
+        case 0:  // Increase
           _puffPressThresh = getPuffPressureThreshold(false, false);
           _puffPressThresh++;  // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
           setPuffPressureThreshold(false, false, _puffPressThresh);
@@ -658,7 +658,7 @@ void LSScreen::selectMenuItem() {
           _display.print(_adjustPuffThreshMenuText[0]);
           _display.display();
           break;
-        case 1:  //Decrease
+        case 1:  // Decrease
           _puffPressThresh = getPuffPressureThreshold(false, false);
           _puffPressThresh--;  // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?       
           setPuffPressureThreshold(false, false, _puffPressThresh);
@@ -668,7 +668,7 @@ void LSScreen::selectMenuItem() {
           _display.print(_adjustPuffThreshMenuText[0]);
           _display.display();
           break;
-        case 2:  //Back
+        case 2:  // Back
           _currentMenu = SIP_PUFF_MENU;
           sipPuffThreshMenu();
           break;
@@ -676,11 +676,11 @@ void LSScreen::selectMenuItem() {
       break;
     case FULL_CALIB_CONFIRM_PAGE:
       switch (_currentSelection) {
-        case 0:  //Perform full calibration
+        case 0:  // Perform full calibration
           _currentMenu = FULL_CALIB_PAGE;
           fullCalibrationPage();
           break;
-        case 1:  //Back
+        case 1:  // Back
           _currentMenu = MAIN_MENU;
           mainMenu();
           break;
@@ -688,10 +688,10 @@ void LSScreen::selectMenuItem() {
       break;
     case RESTART_PAGE:
       switch (_currentSelection) {
-        case 0:  //Perform factory reset
+        case 0:  // Perform factory reset
           softwareReset();
           break;
-        case 1:  //Back
+        case 1:  // Back
           _currentMenu = MAIN_MENU;
           mainMenu();
           break;
@@ -699,11 +699,11 @@ void LSScreen::selectMenuItem() {
       break;
     case FACTORY_RESET_PAGE:
       switch (_currentSelection) {
-        case 0:  //Perform factory reset
+        case 0:  // Perform factory reset
           _currentMenu = FACTORY_RESET_CONFIRM2_PAGE;
           factoryResetConfirm2Page();
           break;
-        case 1:  //Back
+        case 1:  // Back
           _currentMenu = MAIN_MENU;
           mainMenu();
           break;
@@ -711,13 +711,13 @@ void LSScreen::selectMenuItem() {
       break;
     case FACTORY_RESET_CONFIRM2_PAGE:
       switch (_currentSelection) {
-        case 0:  //Perform factory reset
+        case 0:  // Perform factory reset
           setupDisplay();
           _display.println("Resetting");
           _display.display();
           factoryReset(false, false);
           break;
-        case 1:  //Back
+        case 1:  // Back
           _currentMenu = MAIN_MENU;
           mainMenu();
           break;
@@ -727,9 +727,9 @@ void LSScreen::selectMenuItem() {
 }
 
 
-//------------------------------------------//
+//****************************************//
 // Menu displaying functions
-//------------------------------------------//
+//****************************************//
 
 
 //*********************************//
@@ -873,18 +873,18 @@ void LSScreen::scrollLongText() {
   if (millis() - _scrollDelayTimer >= SCROLL_DELAY_MILLIS) {
     _scrollDelayTimer = millis();
 
-    //Clear previous text by writing over it with blank text
+    // Clear previous text by writing over it with blank text
     _display.setCursor(0, _selectedLine * 16);
     _display.print("                                   ");
 
-    //Display text in new position to simulate scrolling
+    // Display text in new position to simulate scrolling
     _display.setCursor(_scrollPos, _selectedLine * 16);
     _display.print(_selectedText);
 
     _display.setCursor(0, _selectedLine * 16);
     _display.print(">");
     _display.display();
-    //displayCursor();
+    //displayCursor();  // TODO Remove?
     _scrollPos = _scrollPos - 4;
     if (_scrollPos < minPos) _scrollPos = _display.width();
   }
@@ -903,7 +903,7 @@ void LSScreen::drawCentreString(const String &buf, int y) {
   int16_t x1, y1;
   uint16_t w, h;
   int x = 64;
-  _display.getTextBounds(buf, x, y, &x1, &y1, &w, &h);  //calc width of new string
+  _display.getTextBounds(buf, x, y, &x1, &y1, &w, &h);  // Calculate width of new string
   _display.setCursor(x - w / 2, y);
   _display.print(buf);
 }
@@ -1063,7 +1063,7 @@ void LSScreen::changeMode() {
     setOperatingMode(false, false, _tempOperatingMode);  // Sets new operating mode, saves in memory, and conducts software reset
   }
 
-  softwareReset();  //TODO: is there a way to avoid software reset if just changing com mode?
+  softwareReset();  // TODO: is there a way to avoid software reset if just changing com mode?
 
   _currentMenu = MAIN_MENU;
   mainMenu();
@@ -1134,7 +1134,7 @@ void LSScreen::centerResetPage(void) {
 
   _display.display();
 
-  //Perform cursor center
+  // Perform cursor center
   showCenterResetComplete = true;
   setJoystickInitialization(true, false);
 }

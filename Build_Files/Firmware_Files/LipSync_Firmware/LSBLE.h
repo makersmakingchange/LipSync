@@ -95,7 +95,7 @@ void initializeBluefruit(const char* s) {
   Bluefruit.Advertising.setFastTimeout(30);      // number of seconds in fast mode
   Bluefruit.Advertising.start(0);                // 0 = Don't stop advertising after n seconds
 
-  //Serial.println("Initializing Bluetooth");
+  // Serial.println("Initializing Bluetooth");
   if (USB_DEBUG) { Serial.println("Initializing Bluetooth");}
 }
 
@@ -219,7 +219,7 @@ size_t LSBLEKeyboard::press(uint8_t m, uint8_t k)
   uint8_t i;
   _keyReport.modifiers = m;
 
-  //Add key if the it's not already present and if there is an empty spot.
+  // Add key if the it's not already present and if there is an empty spot.
   if (_keyReport.keys[0] != k && _keyReport.keys[1] != k &&
       _keyReport.keys[2] != k && _keyReport.keys[3] != k &&
       _keyReport.keys[4] != k && _keyReport.keys[5] != k) {
@@ -244,7 +244,7 @@ size_t LSBLEKeyboard::release(uint8_t m, uint8_t k)
 {
   uint8_t i;
   _keyReport.modifiers = 0x00;
-  //Check to see if the key is present and clear it if it exists.
+  // Check to see if the key is present and clear it if it exists.
   for (i = 0; i < 6; i++) {
     if (0 != k && _keyReport.keys[i] == k) {
       _keyReport.keys[i] = 0x00;

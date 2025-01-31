@@ -59,8 +59,8 @@ class LSUSBMouse {
     inline void scroll(signed char wheel = 0);
     inline void pan(signed char pan = 0); 
     inline void click(uint8_t b = MOUSE_LEFT);
-    inline void press(uint8_t b = MOUSE_LEFT);   // press LEFT by default
-    inline void release(uint8_t b = MOUSE_LEFT); // release LEFT by default
+    inline void press(uint8_t b = MOUSE_LEFT);     // press LEFT by default
+    inline void release(uint8_t b = MOUSE_LEFT);   // release LEFT by default
     inline bool isPressed(uint8_t b = MOUSE_LEFT); // check LEFT by default
 	  inline bool isReady(void);
     bool usbRetrying = false;
@@ -179,7 +179,7 @@ void LSUSBMouse::begin(void)
   _buttons = 0;
   this->usb_hid.setPollInterval(1);
   this->usb_hid.setReportDescriptor(mouse_desc_hid_report, sizeof(mouse_desc_hid_report));
-  //this->usb_hid.setStringDescriptor(MOUSE_DESCRIPTOR); //todo this causes TinyUSB to crash 2025-Jan-20
+  //this->usb_hid.setStringDescriptor(MOUSE_DESCRIPTOR); // TODO this causes TinyUSB to crash 2025-Jan-20
   this->usb_hid.begin();
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing USB HID Mouse");  }
 
@@ -344,7 +344,7 @@ size_t LSUSBKeyboard::press(uint8_t m, uint8_t k)
 	uint8_t i;
 	_keyReport.modifiers = m;
 
-	//Add key if the it's not already present and if there is an empty spot.
+	// Add key if the it's not already present and if there is an empty spot.
 	if (_keyReport.keys[0] != k && _keyReport.keys[1] != k && 
 	  _keyReport.keys[2] != k && _keyReport.keys[3] != k &&
 	  _keyReport.keys[4] != k && _keyReport.keys[5] != k) {
@@ -369,7 +369,7 @@ size_t LSUSBKeyboard::release(uint8_t m, uint8_t k)
 {
 	uint8_t i;
 	_keyReport.modifiers = 0x00;
-	//Check to see if the key is present and clear it if it exists.
+	// Check to see if the key is present and clear it if it exists.
 	for (i=0; i<6; i++) {
 	  if (0 != k && _keyReport.keys[i] == k) {
 		_keyReport.keys[i] = 0x00;
@@ -438,7 +438,7 @@ LSUSBGamepad::LSUSBGamepad(void)
 {
   this->usb_hid.setPollInterval(1);
   this->usb_hid.setReportDescriptor(gamepad_desc_hid_report, sizeof(gamepad_desc_hid_report));
-  //this->usb_hid.setStringDescriptor(GAMEPAD_DESCRIPTOR); //todo this causes TinyUSB to crash 2025-Jan-20
+  //this->usb_hid.setStringDescriptor(GAMEPAD_DESCRIPTOR); // TODO this causes TinyUSB to crash 2025-Jan-20
 }
 
 void LSUSBGamepad::begin(void)
@@ -470,7 +470,7 @@ void LSUSBGamepad::begin(void)
     g_usbAttempt = 0;
   }
   
-  //Release all the buttons and center joystick
+  // Release all the buttons and center joystick
   end();
   startMillis = millis();
 }
@@ -480,7 +480,7 @@ void LSUSBGamepad::send(void)
   if (startMillis != millis()) {
   wakeup();
   unsigned long timerTimeoutBegin = millis();
-  //while(!isReady()) delay(1);
+
   while(!isReady() && !usbRetrying) {
     delay(1);
     if ((millis() - timerTimeoutBegin) > CONF_USB_HID_TIMEOUT){
@@ -511,7 +511,7 @@ void LSUSBGamepad::write(void)
 {
   wakeup();
   unsigned long timerTimeoutBegin = millis();
-  //while(!isReady()) delay(1);
+
   while(!isReady() && !usbRetrying) {
     delay(1);
     if ((millis() - timerTimeoutBegin) > CONF_USB_HID_TIMEOUT){
@@ -525,7 +525,7 @@ void LSUSBGamepad::write(void *report)
 {
   wakeup();
   unsigned long timerTimeoutBegin = millis();
-  //while(!isReady()) delay(1);
+
   while(!isReady() && !usbRetrying) {
     delay(1);
     if ((millis() - timerTimeoutBegin) > CONF_USB_HID_TIMEOUT){

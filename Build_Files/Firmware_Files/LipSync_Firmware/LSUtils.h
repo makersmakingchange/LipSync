@@ -17,23 +17,23 @@
 */
 
 
-//Header definition
+// Header definition
 #ifndef _LSUTILS_H
 #define _LSUTILS_H
 
-//Struct of float point
+// Struct of float point
 typedef struct {
   float x;
   float y;
 } pointFloatType;
 
-//Struct of int point
+// Struct of int point
 typedef struct {
   int x;
   int y;
 } pointIntType;
 
-//LED action structure ( Led actions for each output action )
+// LED action structure ( Led actions for each output action )
 typedef struct
 {
   uint8_t ledOutputActionNumber;
@@ -43,10 +43,10 @@ typedef struct
   uint8_t ledEndAction;
 } ledActionStruct;
 
-//LED state structure ( Led state which is sent to perform led action )
+// LED state structure ( Led state which is sent to perform led action )
 typedef struct
 {
-  int ledAction; //none = 0, off = 1, on = 2, blink = 3
+  int ledAction; // none = 0, off = 1, on = 2, blink = 3
   int ledColorNumber;
   int ledNumber; // LED index / which LED
   int ledBlinkNumber; // number of blinks
@@ -54,7 +54,7 @@ typedef struct
   int ledBrightness;
 } ledStateStruct;
 
-//Input(sip and puff, switches ,buttons) actions relation with output actions structure
+// Input(sip and puff, switches ,buttons) actions relation with output actions structure
 typedef struct
 {
   uint8_t inputActionState;
@@ -65,14 +65,14 @@ typedef struct
   unsigned long inputActionEndTime;
 } inputActionStruct;
 
-//Input (sip and puff, switches ,buttons) states structure
+// Input (sip and puff, switches ,buttons) states structure
 typedef struct {
-  int mainState;                 //button1 + 2*button2 + 4*button3  or none : 0 ,sip : 1, puff : 2
-  int secondaryState;            //waiting = 0, started = 1, released = 2
-  unsigned long elapsedTime;     //in ms
+  int mainState;                 // button1 + 2*button2 + 4*button3  or none : 0 ,sip : 1, puff : 2
+  int secondaryState;            // waiting = 0, started = 1, released = 2
+  unsigned long elapsedTime;     // in ms
 } inputStateStruct;
 
-//acceleration structure
+// acceleration structure
 typedef struct
 {
   uint8_t accNumber;
@@ -80,12 +80,5 @@ typedef struct
   uint8_t accStartSpeed;
   uint8_t accEndSpeed;
 } accStruct;
-
-
-// Overall system state structure
-// typdef struct {
-//   bool 
-
-// } systemStateStruct;
 
 #endif

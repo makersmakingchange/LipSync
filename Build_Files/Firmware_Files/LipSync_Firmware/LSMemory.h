@@ -16,7 +16,7 @@
   If not, see <http://www.gnu.org/licenses/>
 */
 
-//Header definition
+// Header definition
 #ifndef _LSMEMORY_H
 #define _LSMEMORY_H
 

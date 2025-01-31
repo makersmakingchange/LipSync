@@ -16,13 +16,13 @@
   If not, see <http://www.gnu.org/licenses/>
 */
 
-//Header definition
+// Header definition
 #ifndef _LSOUTPUT_H
 #define _LSOUTPUT_H
 
 #define OUTPUT_LED_NUM 4   // Total number of leds
 #define OUTPUT_MONO_LED_NUM 3  // Number of monocolor leds
-#define OUTPUT_RGB_LED_NUM 1   //Number of RGB leds
+#define OUTPUT_RGB_LED_NUM 1   // Number of RGB leds
 
 
 struct rgbStruct {
@@ -31,14 +31,14 @@ struct rgbStruct {
   int b;  // blue value
 };
 
-//Color structure
+// Color structure
 typedef struct {
   uint8_t colorNumber;
   String colorName;
   rgbStruct colorCode;
 } colorStruct;
 
-//Color properties
+// Color properties
 /*
 const colorStruct colorProperty[]{
   { LED_CLR_NONE, "None", { 0, 0, 0 } },
@@ -56,7 +56,7 @@ const colorStruct colorProperty[]{
 */
 
 /*
-//Color properties - IBM COLORBLIND FRIENDLY PALETTE
+// Color properties - IBM COLORBLIND FRIENDLY PALETTE
 const colorStruct colorProperty[]{
   { LED_CLR_NONE,   "None",     {   0,   0,   0 } },
   { LED_CLR_BLUE,   "Blue",     { 100, 143, 255 } },
@@ -68,7 +68,7 @@ const colorStruct colorProperty[]{
 };
 */
 
-//Color properties
+// Color properties
 const colorStruct colorProperty[]{
   { LED_CLR_NONE,   "None",     {   0,   0,   0 } },
   { LED_CLR_BLUE,   "Blue",     {   0,   0, 255 } },
@@ -315,8 +315,8 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
        break;
       }
 
-  }  //end switch
+  }  // end switch
 
-} //end LSOutput::setLedColor
+} // end LSOutput::setLedColor
 
 #endif

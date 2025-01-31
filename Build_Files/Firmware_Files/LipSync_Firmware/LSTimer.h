@@ -18,59 +18,59 @@
 * Based on: SimpleTimer.h (https://github.com/jfturcot/SimpleTimer)
 */
  
-//Header definition
+// Header definition
 #ifndef _LSTIMER_H
 #define _LSTIMER_H
 
 template<typename T>
 class LSTimer {
   private:
-    const static int MAX_TIMERS = 10;                                             //Maximum number of timers
+    const static int MAX_TIMERS = 10;                                             // Maximum number of timers
     const static int RUN_FOREVER = 0;                 
     const static int RUN_ONCE = 1;
-    const static int DEFCALL_DONTRUN = 0;                                         //Don't call the callback function
-    const static int DEFCALL_RUNONLY = 1;                                         //Call the callback function but don't delete the timer
-    const static int DEFCALL_RUNANDDEL = 2;                                       //Call the callback function and delete the timer
+    const static int DEFCALL_DONTRUN = 0;                                         // Don't call the callback function
+    const static int DEFCALL_RUNONLY = 1;                                         // Call the callback function but don't delete the timer
+    const static int DEFCALL_RUNANDDEL = 2;                                       // Call the callback function and delete the timer
     typedef void (*timer_callback)(void);
     typedef void (*timer_callback_p)(T *);
     typedef struct {
-      unsigned long prev_millis;                                                  //Value returned in the previous run() call
-      void* callback;                                                             //Pointer to the callback function
-      T* param;                                                                   //Function parameter
-      boolean hasParam;                                                           //Check if callback takes a parameter
-      unsigned long delay;                                                        //Delay value
-      unsigned maxNumRuns;                                                        //Number of runs to be executed
-      unsigned numRuns;                                                           //Number of executed runs
-      boolean enabled;                                                            //Check if timer is enabled
-      unsigned long offset;                                                       //Initial offset delay
-      boolean offsetEnabled;                                                      //Check if offset is enabled
-      unsigned toBeCalled;                                                        //Deferred function call
+      unsigned long prev_millis;                                                  // Value returned in the previous run() call
+      void* callback;                                                             // Pointer to the callback function
+      T* param;                                                                   // Function parameter
+      boolean hasParam;                                                           // Check if callback takes a parameter
+      unsigned long delay;                                                        // Delay value
+      unsigned maxNumRuns;                                                        // Number of runs to be executed
+      unsigned numRuns;                                                           // Number of executed runs
+      boolean enabled;                                                            // Check if timer is enabled
+      unsigned long offset;                                                       // Initial offset delay
+      boolean offsetEnabled;                                                      // Check if offset is enabled
+      unsigned toBeCalled;                                                        // Deferred function call
     } timer_t;
     timer_t timer[MAX_TIMERS];
     int numTimers; 
-    int findFirstFreeSlot();                                                      //Find the first available slot
+    int findFirstFreeSlot();                                                      // Find the first available slot
     int setupTimer(unsigned long d, unsigned long o, boolean on, boolean h, unsigned n, void* f, T* p);  
     
   public:
-    LSTimer();                                                                    //Constructor
-    void run();                                                                   //Must be called inside loop()
-    int setInterval(unsigned long d, unsigned long o, timer_callback f);          //Call function f every d milliseconds, start in o milliseconds
+    LSTimer();                                                                    // Constructor
+    void run();                                                                   // Must be called inside loop()
+    int setInterval(unsigned long d, unsigned long o, timer_callback f);          // Call function f every d milliseconds, start in o milliseconds
     int setInterval(unsigned long d, unsigned long o, timer_callback_p f, T* p);
-    int setTimeout(unsigned long o, timer_callback f);                            //Call function f once after d milliseconds
+    int setTimeout(unsigned long o, timer_callback f);                            // Call function f once after d milliseconds
     int setTimeout( unsigned long o, timer_callback_p f, T* p);
-    int setTimer(unsigned long d, unsigned long o, unsigned n, timer_callback f); //Call function f every d milliseconds for n times, start in o milliseconds
+    int setTimer(unsigned long d, unsigned long o, unsigned n, timer_callback f); // Call function f every d milliseconds for n times, start in o milliseconds
     int setTimer(unsigned long d, unsigned long o, unsigned n, timer_callback_p f, T* p);
     int startTimer(); 
     unsigned long elapsedTime(int timerId);
-    void deleteTimer(int numTimer);                                               //Destroy the specified timer
-    void restartTimer(int numTimer);                                              //Restart the specified timer
-    boolean isEnabled(int numTimer);                                              //Returns true if the specified timer is enabled
-    void enable(int numTimer);                                                    //Enables the specified timer
-    void disable(int numTimer);                                                   //Disables the specified timer
-    void toggle(int numTimer);                                                    //Toggle(Enables/Disables) the specified timer
-    int getNumTimers();                                                           //Returns the number of used timers
-    int getNumAvailableTimers() { return MAX_TIMERS - numTimers; };               //Returns the number of available timers
-    int getNumRuns(int numTimer);                                                 //Returns the number of executed runs
+    void deleteTimer(int numTimer);                                               // Destroy the specified timer
+    void restartTimer(int numTimer);                                              // Restart the specified timer
+    boolean isEnabled(int numTimer);                                              // Returns true if the specified timer is enabled
+    void enable(int numTimer);                                                    // Enables the specified timer
+    void disable(int numTimer);                                                   // Disables the specified timer
+    void toggle(int numTimer);                                                    // Toggle(Enables/Disables) the specified timer
+    int getNumTimers();                                                           // Returns the number of used timers
+    int getNumAvailableTimers() { return MAX_TIMERS - numTimers; };               // Returns the number of available timers
+    int getNumRuns(int numTimer);                                                 // Returns the number of executed runs
 
                                                              
 };
@@ -93,7 +93,7 @@ void LSTimer<T>::run() {
     int i;
     unsigned long current_millis,delay_millis;
 
-    //Get the current time
+    // Get the current time
     current_millis = elapsed();
 
     for (i = 0; i < MAX_TIMERS; i++) {
@@ -102,28 +102,28 @@ void LSTimer<T>::run() {
 
         if (timer[i].callback != NULL) {
 
-            //Check if it's time to process timer
+            // Check if it's time to process timer
 
             (timer[i].numRuns==0 && timer[i].offsetEnabled) ? delay_millis=timer[i].offset: delay_millis=timer[i].delay;
             
             if ((current_millis - timer[i].prev_millis) >= delay_millis) {
 
-                //Update time
+                // Update time
                 timer[i].prev_millis += delay_millis;
 
-                //Check if the timer callback has to be executed
+                // Check if the timer callback has to be executed
                 if (timer[i].enabled) {
 
-                    //RUN_FOREVER timers must always be executed
+                    // RUN_FOREVER timers must always be executed
                     if (timer[i].maxNumRuns == RUN_FOREVER) {
                         timer[i].toBeCalled = DEFCALL_RUNONLY;
                     }
-                    //Other timers
+                    // Other timers
                     else if (timer[i].numRuns < timer[i].maxNumRuns) {
                         timer[i].toBeCalled = DEFCALL_RUNONLY;
                         timer[i].numRuns++;
 
-                        //Delete timer after the last run
+                        // Delete timer after the last run
                         if (timer[i].numRuns >= timer[i].maxNumRuns) {
                             timer[i].toBeCalled = DEFCALL_RUNANDDEL;
                         }
@@ -148,10 +148,10 @@ void LSTimer<T>::run() {
 }
 
 
-//Find the first available slot
+// Find the first available slot
 template<typename T>
 int LSTimer<T>::findFirstFreeSlot() {
-    //All slots are used
+    // All slots are used
     if (numTimers >= MAX_TIMERS) {
         return -1;
     }
@@ -163,7 +163,7 @@ int LSTimer<T>::findFirstFreeSlot() {
         }
     }
 
-    //No available slots
+    // No available slots
     return -1;
 }
 
@@ -268,12 +268,12 @@ void LSTimer<T>::deleteTimer(int timerId) {
         return;
     }
 
-    //Don't delete if no timers are in use
+    // Don't delete if no timers are in use
     if (numTimers == 0) {
         return;
     }
 
-    //Don't decrease the number of timers if the slot is already empty
+    // Don't decrease the number of timers if the slot is already empty
     if (timer[timerId].callback != NULL) {
         memset(&timer[timerId], 0, sizeof (timer_t));
         timer[timerId].prev_millis = elapsed();
