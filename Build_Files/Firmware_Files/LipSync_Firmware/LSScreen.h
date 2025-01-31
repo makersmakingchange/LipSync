@@ -1228,7 +1228,11 @@ void LSScreen::fullCalibrationPrompt(int stepNum) {
       _display.display();
 
       delay(1500);
-      mainMenu();
+      if (_isActive) {
+        mainMenu();
+      } else {
+        deactivateMenu();
+      }
       break;
     case CONF_JOY_CALIB_ERROR:  // One or more values were too low to be replaced, flag error message
       _display.println("Movement");
