@@ -173,9 +173,17 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 #define CONF_BUTTON_PRESS_DELAY 150         //150ms - 
 
+// Hub Menu
 #define CONF_SPLASH_SCREEN_DURATION 10000    //10 seconds - how long the splash screen stays on on startup
-
 #define CONF_MENU_TIMEOUT  300000            // 300 seconds (5 minutes) - duration of inactivity after which the screen turns off 
+#define CONF_MENU_CONTROL_MIN 0
+#define CONF_MENU_CONTROL_OPEN 1
+#define CONF_MENU_CONTROL_SELECT 2
+#define CONF_MENU_CONTROL_NEXT 3
+#define CONF_MENU_CONTROL_CLOSE 4
+#define CONF_MENU_CONTROL_MAX 4
+
+
 #define CONF_USB_HID_TIMEOUT  5000          //5 seconds - timeout for connecting to USB and continuing with the program
 #define CONF_USB_HID_INIT_DELAY 2000        //initial delay before attempting to reconnect to usb again
 

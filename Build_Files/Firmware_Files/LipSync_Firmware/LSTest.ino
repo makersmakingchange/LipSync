@@ -42,7 +42,7 @@ void activateTest(int inputTest) {
     case (CONF_TEST_MODE_BUZZER):
       testBuzzer();
       break;
-  }
+  } //end switch inputTest
   Serial.println("Test Complete");
 }
 
@@ -186,7 +186,7 @@ void testBuzzer() {
   buzzer.calibCenterTone();
   delay(1000);
 
- Serial.println("TEST_MODE_BUZZER: Playing shutdown sound.");
+  Serial.println("TEST_MODE_BUZZER: Playing shutdown sound.");
   buzzer.playShutdownSound();
   delay(1000);
 
