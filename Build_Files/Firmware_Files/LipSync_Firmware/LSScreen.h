@@ -620,6 +620,7 @@ void LSScreen::selectMenuItem() {
           _sipPressThresh = getSipPressureThreshold(false, false);
           _sipPressThresh++;  // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
           setSipPressureThreshold(false, false, _sipPressThresh);
+          _sipPressThresh = getSipPressureThreshold(false, false);          
           _adjustSipThreshMenuText[0] = "Sip: " + String(_sipPressThresh) + " ";
           _display.setCursor(0, 0);
           _display.print(_adjustSipThreshMenuText[0]);
@@ -629,6 +630,7 @@ void LSScreen::selectMenuItem() {
           _sipPressThresh = getSipPressureThreshold(false, false);
           _sipPressThresh--;  // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
           setSipPressureThreshold(false, false, _sipPressThresh);
+          _sipPressThresh = getSipPressureThreshold(false, false);
           _adjustSipThreshMenuText[0] = "Sip: " + String(_sipPressThresh) + " ";
           _display.setCursor(0, 0);
           _display.print(_adjustSipThreshMenuText[0]);
@@ -646,6 +648,7 @@ void LSScreen::selectMenuItem() {
           _puffPressThresh = getPuffPressureThreshold(false, false);
           _puffPressThresh++;  // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
           setPuffPressureThreshold(false, false, _puffPressThresh);
+          _puffPressThresh = getPuffPressureThreshold(false, false);
           _adjustPuffThreshMenuText[0] = "Puff: " + String(_puffPressThresh) + " ";
           _display.setCursor(0, 0);
           _display.print(_adjustPuffThreshMenuText[0]);
@@ -653,8 +656,9 @@ void LSScreen::selectMenuItem() {
           break;
         case 1:  //Decrease
           _puffPressThresh = getPuffPressureThreshold(false, false);
-          _puffPressThresh--;  // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
+          _puffPressThresh--;  // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?       
           setPuffPressureThreshold(false, false, _puffPressThresh);
+          _puffPressThresh = getPuffPressureThreshold(false, false);          
           _adjustPuffThreshMenuText[0] = "Puff: " + String(_puffPressThresh) + " ";
           _display.setCursor(0, 0);
           _display.print(_adjustPuffThreshMenuText[0]);
