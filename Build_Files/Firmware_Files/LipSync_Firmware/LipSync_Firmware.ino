@@ -1503,7 +1503,7 @@ void performJoystickCalibrationStep(int* args) {
   pointFloatType maxPoint;
 
   // Turn on and set all leds to orange to indicate start of the process // TODO Jake update to non-neopixel LEDS
-  if (calibrationTimer.getNumRuns(calibrationTimerId[0]) == 1) {  // Turn LLED's ON when timer is running for first time
+  if (calibrationTimer.getNumRuns(calibrationTimerId[1]) == 1) {  // Turn LLED's ON when timer is running for first time
     setLedState(LED_ACTION_ON, CONF_JOY_CALIB_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, 0, 0, CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);
   }
@@ -1533,7 +1533,7 @@ void performJoystickCalibrationStep(int* args) {
   }
 
   // Turn off all the LEDs to orange to indicate end of the process
-  if (calibrationTimer.getNumRuns(calibrationTimerId[0]) == CONF_JOY_CALIB_READING_NUMBER) {  // Turn LED's OFF when timer is running for last time
+  if (calibrationTimer.getNumRuns(calibrationTimerId[1]) == CONF_JOY_CALIB_READING_NUMBER) {  // Turn LED's OFF when timer is running for last time
     mem.writePoint(CONF_SETTINGS_FILE, stepKey, maxPoint);                // Store the point in Flash Memory
     setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0, CONF_LED_BRIGHTNESS);
     performLedAction(ledCurrentState);
