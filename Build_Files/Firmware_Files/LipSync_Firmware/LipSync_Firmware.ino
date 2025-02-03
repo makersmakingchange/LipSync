@@ -1501,6 +1501,7 @@ void performJoystickCalibrationStep(int* args) {
   String stepKey = "CA" + String(stepNumber);       // Key to write new calibration point to Flash memory
   String stepCommand = "CA," + String(stepNumber);  // Command to output calibration point via serial
   pointFloatType maxPoint;
+  int magnetZDirection = js.getMagnetZDirection();
 
   // Turn on and set all leds to orange to indicate start of the process // TODO Jake update to non-neopixel LEDS
   if (calibrationTimer.getNumRuns(calibrationTimerId[1]) == 1) {  // Turn LLED's ON when timer is running for first time
@@ -1515,16 +1516,16 @@ void performJoystickCalibrationStep(int* args) {
     pointFloatType tempDefaultPoint = { 0, 0 };
     switch (stepNumber) {
       case 1:  // Top left corner
-        tempDefaultPoint = { -CONF_JOY_CALIB_CORNER_DEFAULT, CONF_JOY_CALIB_CORNER_DEFAULT };
+        tempDefaultPoint = { CONF_JOY_CALIB_CORNER_DEFAULT * magnetZDirection, -CONF_JOY_CALIB_CORNER_DEFAULT * magnetZDirection};
         break;
       case 2:  // Top right corner
-        tempDefaultPoint = { CONF_JOY_CALIB_CORNER_DEFAULT, CONF_JOY_CALIB_CORNER_DEFAULT };
+        tempDefaultPoint = { -CONF_JOY_CALIB_CORNER_DEFAULT * magnetZDirection, -CONF_JOY_CALIB_CORNER_DEFAULT * magnetZDirection};
         break;
       case 3:  // Bottom right corner
-        tempDefaultPoint = { CONF_JOY_CALIB_CORNER_DEFAULT, -CONF_JOY_CALIB_CORNER_DEFAULT };
+        tempDefaultPoint = { -CONF_JOY_CALIB_CORNER_DEFAULT * magnetZDirection, CONF_JOY_CALIB_CORNER_DEFAULT * magnetZDirection};
         break;
       case 4:  // Bottom left corner
-        tempDefaultPoint = { -CONF_JOY_CALIB_CORNER_DEFAULT, -CONF_JOY_CALIB_CORNER_DEFAULT };
+        tempDefaultPoint = { CONF_JOY_CALIB_CORNER_DEFAULT * magnetZDirection, CONF_JOY_CALIB_CORNER_DEFAULT * magnetZDirection};
         break;
     }
     maxPoint = tempDefaultPoint;
