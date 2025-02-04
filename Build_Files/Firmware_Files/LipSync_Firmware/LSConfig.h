@@ -237,22 +237,22 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 
 // Sound Modes                                                                                              
-#define CONF_SOUND_MODE_OFF       0   // Sound off
-#define CONF_SOUND_MODE_BASIC     1   // Minimal sounds
-#define CONF_SOUND_MODE_ADVANCED  2   // All sounds
+#define CONF_SOUND_MODE_OFF     0   // Sound off
+#define CONF_SOUND_MODE_BASIC   1   // Minimal sounds
+#define CONF_SOUND_MODE_ALL     2   // All sounds
 
-#define CONF_SOUND_MODE_MIN 0
-#define CONF_SOUND_MODE_MAX 2
+#define CONF_SOUND_MODE_MIN     0
+#define CONF_SOUND_MODE_MAX     2
 #define CONF_SOUND_MODE_DEFAULT CONF_SOUND_MODE_BASIC
 
 
 // Light Modes
-#define CONF_LIGHT_MODE_OFF       0   // LEDs off
-#define CONF_LIGHT_MODE_BASIC     1   // Minimal LEDs
-#define CONF_LIGHT_MODE_ADVANCED  2   // All LEDs
+#define CONF_LIGHT_MODE_OFF     0   // LEDs off
+#define CONF_LIGHT_MODE_BASIC   1   // Minimal LEDs
+#define CONF_LIGHT_MODE_ALL     2   // All LEDs
 
-#define CONF_LIGHT_MODE_MIN 0
-#define CONF_LIGHT_MODE_MAX 2
+#define CONF_LIGHT_MODE_MIN     0
+#define CONF_LIGHT_MODE_MAX     2
 #define CONF_LIGHT_MODE_DEFAULT CONF_LIGHT_MODE_BASIC
 
 //***CAN BE CHANGED***//
