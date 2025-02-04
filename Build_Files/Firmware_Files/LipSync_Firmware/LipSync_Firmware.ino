@@ -73,7 +73,7 @@ inputStateStruct buttonState, switchState;
 int inputButtonPinArray[] = { CONF_BUTTON1_PIN, CONF_BUTTON2_PIN };
 int inputSwitchPinArray[] = { CONF_SWITCH1_PIN, CONF_SWITCH2_PIN, CONF_SWITCH3_PIN };
 
-LSInput ib(inputButtonPinArray, CONF_BUTTON_NUMBER);  // Instance of input button object (tactile buttons)
+LSInput ib(inputButtonPinArray, CONF_BUTTON_NUMBER);  // Instance of input button object (tactile buttons on Hub)
 LSInput is(inputSwitchPinArray, CONF_SWITCH_NUMBER);  // Create an instance of the input switch object (external switches)
 
 inputStateStruct sapActionState;
