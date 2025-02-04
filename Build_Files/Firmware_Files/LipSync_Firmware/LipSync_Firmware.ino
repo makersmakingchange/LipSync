@@ -166,6 +166,8 @@ void setup() {
   beginComOpMode();  // Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
   afterComOpMillis = millis() - beginMillis; // Note time after USB/BT connection
 
+  delay(500); //TODO: Remove or reduce? This is to allow serial to connect and print statements if errors are present 
+
   checkI2C();  // Check that I2C devices are connected
 
   initScreen();  // Initialize screen
@@ -193,7 +195,7 @@ void setup() {
 
   // If USB is not connected, try to reconnect
   if (comMode == CONF_COM_MODE_USB) {
-    usbConnectTimerId[0] = usbConnectTimer.setTimeout(g_usbConnectDelay, usbRetryConnection);  // Call usbRetryConnection function when g_usbConnectDelay reached
+    usbConnectTimerId[0] = usbConnectTimer.setTimeout(g_usbConnectDelay, usbCheckConnection);  // Call usbCheckConnection function when g_usbConnectDelay reached
   }
 
 
@@ -493,7 +495,7 @@ void showCenterResetComplete() {
 // Return     : void
 //****************************************//
 void screenLoop() {
-  if (USB_DEBUG) { Serial.println("USBDEBUG: screenLoop"); }
+  //if (USB_DEBUG) { Serial.println("USBDEBUG: screenLoop"); }
 
   screen.update();  // Update the menu and screen
 
@@ -610,7 +612,7 @@ void initCommunicationMode() {
 
 
 //***USB RETRY CONNECTION FUNCTION***//
-// Function   : usbRetryConnection
+// Function   : usbCheckConnection
 //
 // Description: This function checks if the USB connection is attempting to retry mounting, not ready, or timed out
 //              In this case an error screen is shown, and the function is called again after a set time.
@@ -620,8 +622,8 @@ void initCommunicationMode() {
 //
 // Return     : void
 //****************************************//
-void usbRetryConnection(void) {
-  if (USB_DEBUG) { Serial.println("USBDEBUG: USB Retry Connection"); }
+void usbCheckConnection(void) {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: USB Checking Connection"); }
 
 
   if (usbmouse.usbRetrying || gamepad.usbRetrying) {
@@ -632,7 +634,7 @@ void usbRetryConnection(void) {
 
       usbmouse.begin();
     } else if (gamepad.usbRetrying) {
-      Serial.print("Reattempting USB Gamepad");
+      Serial.print("Reattempting USB Gamepad ");
       Serial.println(millis());
 
       gamepad.begin();
@@ -647,20 +649,20 @@ void usbRetryConnection(void) {
       g_usbConnectDelay = g_usbConnectDelay * 1.2;  // Increase time after each unsuccessfull attempt
     }
 
-    usbConnectTimerId[0] = usbConnectTimer.setTimeout(g_usbConnectDelay, usbRetryConnection);  // Keep retrying connection until USB connection is made
+    usbConnectTimerId[0] = usbConnectTimer.setTimeout(g_usbConnectDelay, usbCheckConnection);  // Keep retrying connection until USB connection is made
 
   } else if (!usbmouse.isReady() && !gamepad.isReady()) {
 
     if (!screen.isMenuActive()) {
       screen.noUsbPage();
     }
-    usbConnectTimerId[0] = usbConnectTimer.setTimeout(g_usbConnectDelay, usbRetryConnection);  // Keep retrying connection until USB connection is made
+    usbConnectTimerId[0] = usbConnectTimer.setTimeout(g_usbConnectDelay, usbCheckConnection);  // Keep retrying connection until USB connection is made
     
   } else if (usbmouse.timedOut) {
     if (!screen.isMenuActive()) {
       screen.noUsbPage();
     }
-    usbConnectTimerId[0] = usbConnectTimer.setTimeout(g_usbConnectDelay, usbRetryConnection);  // Keep retrying connection until USB connection is made
+    usbConnectTimerId[0] = usbConnectTimer.setTimeout(g_usbConnectDelay, usbCheckConnection);  // Keep retrying connection until USB connection is made
   } else {
     readyToUse();
   }
@@ -834,7 +836,7 @@ void inputLoop() {
 // Return     : void
 //****************************************//
 void initSipAndPuff() {
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Sip and Puff"); }
+  if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Sip and Puff"); }
   ps.begin();                                                             // Begin sip and puff
   getPressureMode(true, false);                                           // Get the pressure mode stored in flash memory ( 1 = Absolute , 2 = Differential )
   getPressureThreshold(true, false);                                      // Get sip and puff pressure thresholds stored in flash memory
@@ -1347,7 +1349,8 @@ void gamepadButtonReleaseAll() {
 // Return     : void
 //****************************************//
 void initJoystick() {
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Joystick"); }
+  if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Joystick"); }
+  delay(1000);
   js.begin();                                                           // Begin joystick
   js.setMagnetDirection(JOY_DIRECTION_DEFAULT, JOY_DIRECTION_INVERSE);  // Set x and y magnet direction
   getJoystickDeadZone(true, false);                                     // Get joystick deadzone stored in flash memory
@@ -1516,16 +1519,16 @@ void performJoystickCalibrationStep(int* args) {
     pointFloatType tempDefaultPoint = { 0, 0 };
     switch (stepNumber) {
       case 1:  // Top left corner
-        tempDefaultPoint = { CONF_JOY_CALIB_CORNER_DEFAULT * magnetZDirection, -CONF_JOY_CALIB_CORNER_DEFAULT * magnetZDirection};
+        tempDefaultPoint = { float(CONF_JOY_CALIB_CORNER_DEFAULT) * magnetZDirection, float(-CONF_JOY_CALIB_CORNER_DEFAULT) * magnetZDirection};
         break;
       case 2:  // Top right corner
-        tempDefaultPoint = { -CONF_JOY_CALIB_CORNER_DEFAULT * magnetZDirection, -CONF_JOY_CALIB_CORNER_DEFAULT * magnetZDirection};
+        tempDefaultPoint = { float(-CONF_JOY_CALIB_CORNER_DEFAULT) * magnetZDirection, float(-CONF_JOY_CALIB_CORNER_DEFAULT) * magnetZDirection};
         break;
       case 3:  // Bottom right corner
-        tempDefaultPoint = { -CONF_JOY_CALIB_CORNER_DEFAULT * magnetZDirection, CONF_JOY_CALIB_CORNER_DEFAULT * magnetZDirection};
+        tempDefaultPoint = { float(-CONF_JOY_CALIB_CORNER_DEFAULT) * magnetZDirection, float(CONF_JOY_CALIB_CORNER_DEFAULT) * magnetZDirection};
         break;
       case 4:  // Bottom left corner
-        tempDefaultPoint = { CONF_JOY_CALIB_CORNER_DEFAULT * magnetZDirection, CONF_JOY_CALIB_CORNER_DEFAULT * magnetZDirection};
+        tempDefaultPoint = { float(CONF_JOY_CALIB_CORNER_DEFAULT) * magnetZDirection, float(CONF_JOY_CALIB_CORNER_DEFAULT) * magnetZDirection};
         break;
     }
     maxPoint = tempDefaultPoint;
