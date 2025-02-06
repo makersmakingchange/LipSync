@@ -32,7 +32,7 @@
 
 #define GAMEPAD_DESCRIPTOR "LipSync Gamepad"
 
-extern unsigned int g_usbAttempt;
+extern unsigned int g_usbAttempt;  // global variable to keep track of USB connection attempts
 
 
 // https://github.com/hathach/tinyusb/blob/master/examples/device/hid_generic_inout/src/usb_descriptors.c
@@ -63,6 +63,7 @@ class LSUSBMouse {
     inline void release(uint8_t b = MOUSE_LEFT);   // release LEFT by default
     inline bool isPressed(uint8_t b = MOUSE_LEFT); // check LEFT by default
 	  inline bool isReady(void);
+    inline bool isConnected(void);
     bool usbRetrying = false;
     bool showTestPage = false;
     bool timedOut = false;
@@ -212,6 +213,10 @@ void LSUSBMouse::begin(void)
 }
 
 
+bool LSUSBMouse::isConnected(void) {
+  return this->usb_hid.ready() && !USBDevice.suspended();
+}
+
 
 void LSUSBMouse::end(void)
 {
@@ -233,7 +238,7 @@ void LSUSBMouse::mouseReport(int8_t b, int8_t x, int8_t y, int8_t wheel, int8_t 
       delay(1);
       if ((millis() - timerTimeoutBegin) > CONF_USB_HID_TIMEOUT){
         timedOut = true;
-        showTestPage=true;
+        showTestPage = true;
         break;
       }
     }

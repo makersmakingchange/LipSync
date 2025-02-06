@@ -68,13 +68,10 @@ const int TEXT_ROWS = 4;
 extern unsigned int g_usbAttempt;
 extern unsigned int g_usbConnectDelay;
 
-extern bool displayConnected;                   // Display connection state
-extern bool joystickSensorConnected;            // Joystick sensor connection state
-extern bool mouthpiecePressureSensorConnected;  // Mouthpiece pressure sensor connection state
-extern bool ambientPressureSensorConnected;     // Ambient pressure sensor connection state
-
-extern unsigned long beforeComOpMillis;
-extern unsigned long afterComOpMillis;
+extern bool g_displayConnected;                   // Display connection state
+extern bool g_joystickSensorConnected;            // Joystick sensor connection state
+extern bool g_mouthpiecePressureSensorConnected;  // Mouthpiece pressure sensor connection state
+extern bool g_ambientPressureSensorConnected;     // Ambient pressure sensor connection state
 
 class LSScreen {
 
@@ -101,7 +98,7 @@ public:
   void noUsbPage();
   void errorPageI2C();
   void errorPageCable();
-  void connectionTimingPage();
+  void connectionTimingPage(unsigned long, unsigned long);
 
   bool showCenterResetComplete = false;
 
@@ -234,11 +231,13 @@ LSScreen::LSScreen() {
 //*********************************//
 void LSScreen::begin() {
 
-  if (!_display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-    Serial.println(F("SSD1306 allocation failed"));
+  if (_display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+    g_displayConnected = true;
+  } else {
+    Serial.println(F("ERROR: Display SSD1306 allocation failed"));
 
-    for (;;)
-      ;  // Don't proceed, loop forever  // TODO Implement watchdog to throw error instead of infinite loop
+    g_displayConnected = false;
+    //TODO Handle screen not initialized error
   }
 
   setupDisplay();  // Clear screen
@@ -1512,19 +1511,19 @@ void LSScreen::errorPageI2C() {
 
   _display.println("ERROR: I2C");
 
-  if (!joystickSensorConnected) {
+  if (!g_joystickSensorConnected) {
     _display.println("JOYSTICK");
   } else {
     _display.println("");
   }
 
-  if (!mouthpiecePressureSensorConnected) {
+  if (!g_mouthpiecePressureSensorConnected) {
     _display.println("PRESSURE");
   } else {
     _display.println("");
   }
 
-  if (!ambientPressureSensorConnected) {
+  if (!g_ambientPressureSensorConnected) {
     _display.println("AMBIENT");
   } else {
     _display.println("");
@@ -1566,17 +1565,17 @@ void LSScreen::errorPageCable() {
 // Return     : void
 //*********************************//
 
-void LSScreen::connectionTimingPage() {
+void LSScreen::connectionTimingPage(unsigned long before, unsigned long after) {
   setupDisplay();
   _display.setTextSize(1);
   _display.println("Before beginComOpMode");
   _display.setTextSize(2);
-  _display.println(beforeComOpMillis);
+  _display.println(before);
 
   _display.setTextSize(1);
   _display.println("After beginComOpMode");
   _display.setTextSize(2);
-  _display.println(afterComOpMillis);
+  _display.println(after);
 
   _display.display();
 }

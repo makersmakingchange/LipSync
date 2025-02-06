@@ -124,33 +124,24 @@ void testLED() {
   }
   delay(1000);
 
-  Serial.println("TEST_MODE_LED: Error 1");
-  led.clearLedAll();
-  ledError(1);
-  delay(3000);
-  led.clearLedAll();
-  setLedDefault();  // set LEDs to default
-  delay(1000);
-
-  Serial.println("TEST_MODE_LED: Error 2");
-  led.clearLedAll();
-  ledError(2);
-  delay(3000);
-  led.clearLedAll();
-  setLedDefault();  // set LEDs to default
-  delay(1000);
 
   Serial.println("TEST_MODE_LED: Error 3");
   led.clearLedAll();
-  ledError(2);
-  delay(3000);
-  led.clearLedAll();
-  setLedDefault();  // set LEDs to default
-  delay(1000);
+  
+  int blinks = 3;
+  ledError(blinks);
 
-  Serial.println("TEST_MODE_LED: ALL LED OFF");
-  led.clearLedAll();
+  // imitate operation loop
+  while (ledStateTimer.isEnabled(ledTimerId[CONF_TIMER_LED_ERROR]) == true) { 
+    ledStateTimer.run();  // Timer for lights
+    delay(10);
+  }
+
+  delay(1000);
+  Serial.println("TEST_MODE_LED: LED DEFAULT");
   setLedDefault();  // set LEDs to default
+ 
+  Serial.println("TEST_MODE_LED: TEST COMPLETE");
 }
 
 //***TEST BUZZER FUNCTION***//
@@ -194,4 +185,4 @@ void testBuzzer() {
   // TODO test enable/disable sound
 
   Serial.println("SOUND TEST COMPLETE");
-}
+}  // end testBuzzer()

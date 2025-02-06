@@ -19,8 +19,9 @@
 
 #include "LSUtils.h"
 
-#define USB_DEBUG  0 // Set this to 0 for best performance
-
+// Debugging
+#define USB_DEBUG  1 // Set this to 0 for best performance
+#define SHOW_CONNECTION_TIME 0 // Set to 0 for production
 
 //***DO NOT CHANGE***//
 #define CONF_LIPSYNC_MODEL 1                // 1: Lipsync w/ Hub
@@ -194,6 +195,7 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_TIMER_DEBUG 4
 #define CONF_TIMER_SCROLL 5
 #define CONF_TIMER_SCREEN 6
+#define CONF_TIMER_USB 7
 
 #define CONF_TIMER_LED_STARTUP 0
 #define CONF_TIMER_LED_IBM 1

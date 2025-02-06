@@ -146,7 +146,7 @@ bool serialSettings(bool enabled) {
       printResponseInt(true, true, true, 0, commandString, false, 0);
       settingsFlag = true;
     } else if (settingsFlag == true && commandString == "EXIT") {
-      // EXIT Recieved
+      // EXIT Received
       // Set the return flag to false so settings actions can be exited
       printResponseInt(true, true, true, 0, commandString, false, 0);
       settingsFlag = false;
@@ -1813,8 +1813,8 @@ void setSoundMode(bool responseEnabled, bool apiEnabled, int inputSoundMode) {
 
   if ((inputSoundMode >= CONF_SOUND_MODE_MIN) && (inputSoundMode <= CONF_SOUND_MODE_MAX)) {
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputSoundMode);
-    soundMode = inputSoundMode;
-    buzzer.setSoundModeLevel(inputSoundMode);
+    g_soundMode = inputSoundMode;  // Update global variable TODO - currently unused
+    buzzer.setSoundModeLevel(inputSoundMode);  // Update sound mode level within buzzer instance
     printResponseInt(responseEnabled, apiEnabled, true, 0, "SM,1", true, inputSoundMode);
 
   }
