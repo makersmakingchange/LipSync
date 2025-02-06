@@ -2320,6 +2320,8 @@ void performLedAction(ledStateStruct* args) {
 // Return     : none
 //******************************************//
 void softwareReset() {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: softwareReset()"); }
+  screen.resetPage();
   buzzer.playShutdownSound();
 
   releaseOutputAction();
@@ -2328,7 +2330,7 @@ void softwareReset() {
   btmouse.end();
 
   NVIC_SystemReset();
-  delay(10);
+  delay(3000);
 }
 
 void printlnToSerial(String toPrint) {

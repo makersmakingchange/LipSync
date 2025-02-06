@@ -99,6 +99,7 @@ public:
   void errorPageI2C();
   void errorPageCable();
   void connectionTimingPage(unsigned long, unsigned long);
+  void resetPage();
 
   bool showCenterResetComplete = false;
 
@@ -1551,6 +1552,28 @@ void LSScreen::errorPageCable() {
   _display.println("No joystick");
   _display.println("detected.");
   _display.println("Try cable.");
+
+  _display.display();
+}
+
+//*********************************//
+// Function   : resetPage
+//
+// Description: Format and display an page showing the device is going to be reset
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
+
+void LSScreen::resetPage() {
+  setupDisplay();
+
+  _display.println("");
+  _display.println("RESETTING...");
+  _display.println("");
+  //_display.println("");
+  //_display.println("");
 
   _display.display();
 }
