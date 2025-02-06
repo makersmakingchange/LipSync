@@ -18,6 +18,7 @@
 
 #include <String.h>
 #include <Wire.h>
+#include <nrf_wdt.h>
 #include "LSUtils.h"
 #include "LSConfig.h"
 #include "LSTimer.h"
@@ -39,21 +40,21 @@ String g_deviceUID = "";  // Global variable for storing unique identifier for b
 // Communication mode and debug mode variables
 int g_comMode;        // 0 = None , 1 = USB , 2 = Wireless
 int g_operatingMode;  // 0 = None, 1 = Mouse, 2 = Wireless, 3 = Gamepad, 4=Menu
-int g_soundMode;    // 0 = None, 1 = Basic, 2 = Advanced // TODO 2025-Feb-05 Currently not used - buzzer.begin sets sound mode from memory
+int g_soundMode;      // 0 = None, 1 = Basic, 2 = Advanced // TODO 2025-Feb-05 Currently not used - buzzer.begin sets sound mode from memory
 int g_lightMode;      // 0 = None, 1 = Basic, 2 = Advanced
 
 int g_debugMode;  // 0 = Debug mode is Off
-                // 1 = Joystick debug mode is On
-                // 2 = Pressure debug mode is On
-                // 3 = Buttons debug mode is On
-                // 4 = Switch debug mode is On
-                // 5 = Sip & Puff state debug mode is On
+                  // 1 = Joystick debug mode is On
+                  // 2 = Pressure debug mode is On
+                  // 3 = Buttons debug mode is On
+                  // 4 = Switch debug mode is On
+                  // 5 = Sip & Puff state debug mode is On
 
 int g_errorCode = 0;  // Global variable for storing error code. 0 is no error. Additional errors defined in LSConfig.h
 
 bool readyToUseFirstTime = true;
 
-bool g_btIsConnected = false;  // Bluetooth connection state
+bool g_btIsConnected = false;   // Bluetooth connection state
 bool g_usbIsConnected = false;  // USB Connection state
 
 bool g_displayConnected = false;                   // Display connection state
@@ -88,7 +89,7 @@ LSTimer<int> actionTimer;
 int calibrationTimerId[2];  // 2 calibration timers: 0 - , 1-
 LSTimer<int> calibrationTimer;
 
-int pollTimerId[9];  // 8 poll timers
+int pollTimerId[10];  // 9 poll timers
 LSTimer<void> pollTimer;
 
 int ledTimerId[5];  // 3 LED timers 0 - startup feedback, 1 - IBM, 2- normal blinks, 3 - Bluetooth Status, 4 - error
@@ -108,7 +109,7 @@ int outputAction;
 bool canOutputAction = true;
 bool g_startupCenterReset = true;
 bool g_resetCenterComplete = false;  // global variable for center reset status
-bool g_calibrationError = false;  // Global variable for error in full calibration
+bool g_calibrationError = false;     // Global variable for error in full calibration
 
 bool settingsEnabled = false;  // Serial input settings command mode enabled or disabled
 
@@ -176,7 +177,7 @@ void setup() {
 
   if (g_displayConnected) {
     initScreen();  // Initialize screen
-  } 
+  }
 
   if (g_mouthpiecePressureSensorConnected && g_ambientPressureSensorConnected) {
     initSipAndPuff();  // Initialize Sip And Puff
@@ -194,14 +195,17 @@ void setup() {
 
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initialize timers."); }
   // Configure poll timer to perform each feature as a separate loop
-  pollTimerId[CONF_TIMER_JOYSTICK] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, 0, joystickLoop); // poll rate, start delay, function
+  pollTimerId[CONF_TIMER_JOYSTICK] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, 0, joystickLoop);  // poll rate, start delay, function
   pollTimerId[CONF_TIMER_PRESSURE] = pollTimer.setInterval(CONF_PRESSURE_POLL_RATE, 0, pressureLoop);
   pollTimerId[CONF_TIMER_INPUT] = pollTimer.setInterval(CONF_INPUT_POLL_RATE, 0, inputLoop);
   pollTimerId[CONF_TIMER_BLUETOOTH] = pollTimer.setInterval(CONF_BT_FEEDBACK_POLL_RATE, 0, btFeedbackLoop);
   pollTimerId[CONF_TIMER_DEBUG] = pollTimer.setInterval(CONF_DEBUG_POLL_RATE, 0, debugLoop);
   pollTimerId[CONF_TIMER_SCROLL] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, CONF_SCROLL_POLL_RATE, joystickLoop);  //TODO 2025-Feb-05 Why does this have both poll rates?
   pollTimerId[CONF_TIMER_SCREEN] = pollTimer.setInterval(CONF_SCREEN_POLL_RATE, 0, screenLoop);
-  //pollTimerID[CONF_TIMER_UBS]       = pollTimer.setInterval(CONF_USB_POLL_RATE,         0, usbCheckConnection);
+  pollTimerId[CONF_TIMER_USB] = pollTimer.setInterval(CONF_USB_POLL_RATE, 0, usbConnectionLoop);
+  pollTimerId[CONF_TIMER_WATCHDOG] = pollTimer.setInterval(CONF_WATCHDOG_POLL_RATE, 0, watchdogLoop);
+
+
 
   // If USB is not connected, try to reconnect
   if (g_comMode == CONF_COM_MODE_USB) {
@@ -242,6 +246,10 @@ void setup() {
   }
 
 
+  if (CONF_ENABLE_WATCHDOG) {
+    initWatchdog();  // Initialize hardware watchdog
+  }
+
   if (USB_DEBUG) { Serial.println("USBDEBUG: Setup complete."); }
 
 }  // end setup
@@ -272,6 +280,48 @@ if (g_operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
 
   settingsEnabled = serialSettings(settingsEnabled);  // Process Serial API commands
 }
+
+
+//*********************************//
+// Watchdog Functions
+//*********************************//
+
+//***INITIALIZE WATCHDOG FUNCTION***//
+// Function   : initWatchdog
+//
+// Description: This function initializes the hardware watchdog
+//
+// Parameters : void
+//
+// Return     : void
+//****************************************//
+void initWatchdog() {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: initWatchdog()"); }
+  // Configure watchdog timer with a 10-second timeout
+  NRF_WDT->CONFIG = (WDT_CONFIG_HALT_Pause << WDT_CONFIG_HALT_Pos) |  // Keep running during halt
+                    (WDT_CONFIG_SLEEP_Run << WDT_CONFIG_SLEEP_Pos);   // Keep running in sleep mode
+  NRF_WDT->CRV = CONF_WATCHDOG_TIMEOUT_SEC * 32768;                   // Convert 10 seconds to watchdog cycles (1 cycle = 1/32.768kHz)
+  NRF_WDT->RREN |= WDT_RREN_RR0_Msk;                                  // Enable reload register 0
+  NRF_WDT->TASKS_START = 1;                                           // Start watchdog
+}
+
+//***WATCHDOG LOOP FUNCTION***//
+// Function   : watchdogLoop
+//
+// Description: This function
+//
+// Parameters : void
+//
+// Return     : void
+//****************************************//
+void watchdogLoop(void) {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: watchDogLoop()"); }
+
+  NRF_WDT->RR[0] = WDT_RR_RR_Reload;  // Feed (reset) the watchdog timer
+}
+
+
+
 
 //***ERROR CHECK FUNCTION***//
 // Function   : errorCheck
@@ -656,6 +706,23 @@ void initCommunicationMode() {
     Serial.print("USBDEBUG: g_comMode: ");
     Serial.println(g_comMode);
   }
+}
+
+
+//***USB CONNECTION LOOP FUNCTION***//
+// Function   : usbConnectionLoop
+//
+// Description: This function checks status of USB connection
+//
+// Parameters : void
+//
+// Return     : void
+//****************************************//
+void usbConnectionLoop() {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: usbConnectionLoop()"); }
+
+
+  g_usbIsConnected = usbmouse.isConnected();
 }
 
 

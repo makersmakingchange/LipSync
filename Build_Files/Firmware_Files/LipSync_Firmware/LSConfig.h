@@ -22,6 +22,7 @@
 // Debugging
 #define USB_DEBUG  1 // Set this to 0 for best performance
 #define SHOW_CONNECTION_TIME 0 // Set to 0 for production
+#define CONF_ENABLE_WATCHDOG 1 // Used to disable watchdog
 
 //***DO NOT CHANGE***//
 #define CONF_LIPSYNC_MODEL 1                // 1: Lipsync w/ Hub
@@ -170,8 +171,12 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 #define CONF_DEBUG_POLL_RATE 100            // 100ms
 #define CONF_SCREEN_POLL_RATE 100           // 100ms
+#define CONF_USB_POLL_RATE 1000             // Check USB connection every 1 second
+#define CONF_WATCHDOG_POLL_RATE 5000        // Reset watchdog timer every 5 seconds
 
 #define CONF_BUTTON_PRESS_DELAY 150         // 150ms - 
+
+#define CONF_WATCHDOG_TIMEOUT_SEC 10        // 10 second hardware watchdog
 
 // Hub Menu
 #define CONF_SPLASH_SCREEN_DURATION 10000   // 10 seconds - how long the splash screen stays on on startup
@@ -196,6 +201,7 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_TIMER_SCROLL 5
 #define CONF_TIMER_SCREEN 6
 #define CONF_TIMER_USB 7
+#define CONF_TIMER_WATCHDOG 8
 
 #define CONF_TIMER_LED_STARTUP 0
 #define CONF_TIMER_LED_IBM 1
