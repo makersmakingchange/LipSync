@@ -37,12 +37,12 @@
 String g_deviceUID = "";  // Global variable for storing unique identifier for board
 
 // Communication mode and debug mode variables
-int comMode;        // 0 = None , 1 = USB , 2 = Wireless
-int operatingMode;  // 0 = None, 1 = Mouse, 2 = Wireless, 3 = Gamepad, 4=Menu
+int g_comMode;        // 0 = None , 1 = USB , 2 = Wireless
+int g_operatingMode;  // 0 = None, 1 = Mouse, 2 = Wireless, 3 = Gamepad, 4=Menu
 int g_soundMode;    // 0 = None, 1 = Basic, 2 = Advanced // TODO 2025-Feb-05 Currently not used - buzzer.begin sets sound mode from memory
-int lightMode;      // 0 = None, 1 = Basic, 2 = Advanced
+int g_lightMode;      // 0 = None, 1 = Basic, 2 = Advanced
 
-int debugMode;  // 0 = Debug mode is Off
+int g_debugMode;  // 0 = Debug mode is Off
                 // 1 = Joystick debug mode is On
                 // 2 = Pressure debug mode is On
                 // 3 = Buttons debug mode is On
@@ -60,7 +60,6 @@ bool g_displayConnected = false;                   // Display connection state
 bool g_joystickSensorConnected = false;            // Joystick sensor connection state
 bool g_mouthpiecePressureSensorConnected = false;  // Mouthpiece pressure sensor connection state
 bool g_ambientPressureSensorConnected = false;     // Ambient pressure sensor connection state
-bool hardwareOkay = true;                          // Flag for hardware status
 
 // LED module variables
 ledStateStruct* ledCurrentState = new ledStateStruct;  // pointer to LED current state structure
@@ -108,8 +107,8 @@ int scrollLevel = 0;
 int outputAction;
 bool canOutputAction = true;
 bool g_startupCenterReset = true;
-bool g_resetCenterComplete = false;  // Status flag
-bool g_calibrationError = false;
+bool g_resetCenterComplete = false;  // global variable for center reset status
+bool g_calibrationError = false;  // Global variable for error in full calibration
 
 bool settingsEnabled = false;  // Serial input settings command mode enabled or disabled
 
@@ -205,7 +204,7 @@ void setup() {
   //pollTimerID[CONF_TIMER_UBS]       = pollTimer.setInterval(CONF_USB_POLL_RATE,         0, usbCheckConnection);
 
   // If USB is not connected, try to reconnect
-  if (comMode == CONF_COM_MODE_USB) {
+  if (g_comMode == CONF_COM_MODE_USB) {
     usbConnectTimerId[0] = usbConnectTimer.setTimeout(g_usbConnectDelay, usbCheckConnection);  // Call usbCheckConnection function when g_usbConnectDelay reached
   }
 
@@ -266,7 +265,7 @@ if (g_joystickSensorConnected) {
   calibrationTimer.run();  // Timer for calibration measurements
 }
 
-if (operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
+if (g_operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
   actionTimer.run(); 
 }
   pollTimer.run();  // Timer for normal joystick functions
@@ -314,10 +313,10 @@ void errorCheck(void) {
     screen.errorPageI2C();
   }
 
-  if ((operatingMode == CONF_OPERATING_MODE_MOUSE) && (comMode == CONF_COM_MODE_USB)
+  if ((g_operatingMode == CONF_OPERATING_MODE_MOUSE) && (g_comMode == CONF_COM_MODE_USB)
       && (!usbmouse.isReady() || usbmouse.usbRetrying || usbmouse.timedOut)) {
     g_errorCode = CONF_ERROR_USB;
-  } else if ((operatingMode == CONF_OPERATING_MODE_GAMEPAD) && !gamepad.isReady()) {
+  } else if ((g_operatingMode == CONF_OPERATING_MODE_GAMEPAD) && !gamepad.isReady()) {
     g_errorCode = CONF_ERROR_USB;
   } else {
     g_errorCode = CONF_ERROR_NONE;  // 0
@@ -651,11 +650,11 @@ void initAcceleration() {
 void initCommunicationMode() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: initCommunicationMode()"); }
 
-  comMode = getCommunicationMode(false, false);
+  g_comMode = getCommunicationMode(false, false);
 
   if (USB_DEBUG) {
-    Serial.print("USBDEBUG: comMode: ");
-    Serial.println(comMode);
+    Serial.print("USBDEBUG: g_comMode: ");
+    Serial.println(g_comMode);
   }
 }
 
@@ -739,17 +738,17 @@ void usbCheckConnection(void) {
 //****************************************//
 void initOperatingMode() {
 
-  //operatingMode = getOperatingMode(false,false); // retrieve operating mode from memory
-  operatingMode = mem.readInt(CONF_SETTINGS_FILE, "OM");
+  //g_operatingMode = getOperatingMode(false,false); // retrieve operating mode from memory
+  g_operatingMode = mem.readInt(CONF_SETTINGS_FILE, "OM");
 
   /*
-   if (operatingMode==CONF_OPERATING_MODE_MOUSE) {
+   if (g_operatingMode==CONF_OPERATING_MODE_MOUSE) {
     usbmouse.begin();    
   } 
-  else if (operatingMode==CONF_OPERATING_MODE_GAMEPAD) {
+  else if (g_operatingMode==CONF_OPERATING_MODE_GAMEPAD) {
     gamepad.begin();
   }
-  else if (operatingMode==CONF_OPERATING_MODE_BTMOUSE) {
+  else if (g_operatingMode==CONF_OPERATING_MODE_BTMOUSE) {
     btmouse.begin();
   }
   else
@@ -769,12 +768,12 @@ void initOperatingMode() {
 // Return     : void
 //****************************************//
 void changeOperatingMode(int inputOperatingState) {
-  if (inputOperatingState == operatingMode) {
+  if (inputOperatingState == g_operatingMode) {
     // do nothing
   } else {
     softwareReset();
   }
-  operatingMode = inputOperatingState;
+  g_operatingMode = inputOperatingState;
 }
 
 
@@ -793,9 +792,9 @@ void beginComOpMode() {
   initCommunicationMode();  // Retrieve communication mode from memory (None, USB, Bluetooth)
   initOperatingMode();      // Retrieve operating mode from memory (USB Mouse, Bluetooth Mouse, Gamepad)
 
-  switch (operatingMode) {
+  switch (g_operatingMode) {
     case CONF_OPERATING_MODE_MOUSE:
-      switch (comMode) {
+      switch (g_comMode) {
         case CONF_COM_MODE_USB:  // USB Mouse
           usbmouse.begin();
           break;
@@ -813,8 +812,8 @@ void beginComOpMode() {
 
 
   if (USB_DEBUG) {
-    Serial.print("USBDEBUG: operatingMode: ");
-    Serial.println(operatingMode);
+    Serial.print("USBDEBUG: g_operatingMode: ");
+    Serial.println(g_operatingMode);
   }
 
 }  // end beginComOpMode
@@ -1009,7 +1008,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       if (screen.isMenuActive()) {
         tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
       } else {
-        switch (operatingMode) {
+        switch (g_operatingMode) {
           case CONF_OPERATING_MODE_MOUSE:
             tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
             break;
@@ -1046,7 +1045,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
       if (screen.isMenuActive()) {
         tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
       } else {
-        switch (operatingMode) {
+        switch (g_operatingMode) {
           case CONF_OPERATING_MODE_MOUSE:
             tempActionIndex = actionProperty[actionIndex].mouseOutputActionNumber;
             break;
@@ -1086,7 +1085,7 @@ void performOutputAction(int action) {
   switch (action) {
     case CONF_ACTION_NOTHING:
       {
-        if (operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
+        if (g_operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
           gamepadButtonReleaseAll();
           Serial.println("Released all");
         }
@@ -1215,7 +1214,7 @@ void performOutputAction(int action) {
         break;
       }
   }
-  if (operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
+  if (g_operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
     //actionTimerId[0] = actionTimer.setTimeout(CONF_BUTTON_PRESS_DELAY, gamepadButtonRelease, (int *)action);
     actionTimerId[0] = actionTimer.setTimeout(CONF_BUTTON_PRESS_DELAY, gamepadButtonReleaseAll);  // TODO: Change this to just release one
     outputAction = CONF_ACTION_NOTHING;
@@ -1244,9 +1243,9 @@ void performOutputAction(int action) {
 // Return     : void
 //****************************************//
 void cursorLeftClick(void) {
-  if (comMode == CONF_COM_MODE_USB) {
+  if (g_comMode == CONF_COM_MODE_USB) {
     usbmouse.click(MOUSE_LEFT);  // USB Mouse left click
-  } else if (comMode == CONF_COM_MODE_BLE) {
+  } else if (g_comMode == CONF_COM_MODE_BLE) {
     btmouse.click(MOUSE_LEFT);  // Bluetooth mouse left click
   }
 }
@@ -1261,9 +1260,9 @@ void cursorLeftClick(void) {
 // Return     : void
 //****************************************//
 void cursorRightClick(void) {
-  if (comMode == CONF_COM_MODE_USB) {
+  if (g_comMode == CONF_COM_MODE_USB) {
     usbmouse.click(MOUSE_RIGHT);  // USB Mouse right click
-  } else if (comMode == CONF_COM_MODE_BLE) {
+  } else if (g_comMode == CONF_COM_MODE_BLE) {
     btmouse.click(MOUSE_RIGHT);  // Bluetooth mouse right click
   }
 }
@@ -1278,9 +1277,9 @@ void cursorRightClick(void) {
 // Return     : void
 //****************************************//
 void cursorMiddleClick(void) {
-  if (comMode == CONF_COM_MODE_USB) {
+  if (g_comMode == CONF_COM_MODE_USB) {
     usbmouse.click(MOUSE_MIDDLE);  // USB Mouse Middle click
-  } else if (comMode == CONF_COM_MODE_BLE) {
+  } else if (g_comMode == CONF_COM_MODE_BLE) {
     btmouse.click(MOUSE_MIDDLE);  // Bluetooth mouse middle click
   }
 }
@@ -1295,9 +1294,9 @@ void cursorMiddleClick(void) {
 // Return     : void
 //********************//
 void cursorDrag(void) {
-  if (comMode == CONF_COM_MODE_USB) {
+  if (g_comMode == CONF_COM_MODE_USB) {
     usbmouse.press(MOUSE_LEFT);  // USB Mouse press left
-  } else if (comMode == CONF_COM_MODE_BLE) {
+  } else if (g_comMode == CONF_COM_MODE_BLE) {
     btmouse.press(MOUSE_LEFT);  // Bluetooth Mouse press left
   }
 }
@@ -1649,17 +1648,17 @@ void joystickLoop() {
 // Return     : void
 //****************************************//
 void performJoystick(pointIntType inputPoint) {
-  if (operatingMode == CONF_OPERATING_MODE_MOUSE) {
+  if (g_operatingMode == CONF_OPERATING_MODE_MOUSE) {
     // 0 = None , 1 = USB , 2 = Wireless
-    if (comMode == CONF_COM_MODE_USB) {
+    if (g_comMode == CONF_COM_MODE_USB) {
       //(outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : usbmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration)); // TODO Implement acceleration
       (outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y), js.getMinimumRadius(), scrollLevel)) : usbmouse.move(inputPoint.x, inputPoint.y);
 
-    } else if (comMode == CONF_COM_MODE_BLE) {
+    } else if (g_comMode == CONF_COM_MODE_BLE) {
       //(outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : btmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration)); // TODO Implement acceleration
       (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y), js.getMinimumRadius(), scrollLevel)) : btmouse.move(inputPoint.x, inputPoint.y);
     }
-  } else if (operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
+  } else if (g_operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
     // Gamepad is USB only, if wireless gamepad functionality is added, add that here
     //Serial.print("X: \t"); Serial.print(inputPoint.x); Serial.print("\t Y: \t"); Serial.println(inputPoint.y);
     gamepad.move(inputPoint.x, inputPoint.y);
@@ -1727,8 +1726,8 @@ int accelerationModifier(const int cursorValue, const int cursorMaxValue, const 
 //****************************************//
 void initDebug() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: initDebug()"); }
-  debugMode = getDebugMode(false, false);  // Get debug mode number stored in flash memory
-  setDebugState(debugMode);                // Set debug operation state based on the debug mode
+  g_debugMode = getDebugMode(false, false);  // Get debug mode number stored in flash memory
+  setDebugState(g_debugMode);                // Set debug operation state based on the debug mode
 }
 
 //***DEBUG LOOP FUNCTION***//
@@ -1743,33 +1742,33 @@ void initDebug() {
 void debugLoop() {
   //if (USB_DEBUG) { Serial.println("USBDEBUG: debugLoop"); }
   // Debug mode is off if the debug mode is #0
-  if (debugMode == CONF_DEBUG_MODE_JOYSTICK) {  // Debug #1
+  if (g_debugMode == CONF_DEBUG_MODE_JOYSTICK) {  // Debug #1
     js.update();                                // Request new values from joystick class
     pointFloatType debugJoystickArray[3];
     debugJoystickArray[0] = js.getXYRaw();                                       // Read the raw values
     debugJoystickArray[1] = { (float)js.getXYIn().x, (float)js.getXYIn().y };    // Read the filtered values
     debugJoystickArray[2] = { (float)js.getXYOut().x, (float)js.getXYOut().y };  // Read the output values
     printResponseFloatPointArray(true, true, true, 0, "DEBUG,1", true, "", 3, ',', debugJoystickArray);
-  } else if (debugMode == CONF_DEBUG_MODE_PRESSURE) {  // Debug #2
+  } else if (g_debugMode == CONF_DEBUG_MODE_PRESSURE) {  // Debug #2
     ps.update();                                       // Request new pressure difference from sensor and push it to array
     float debugPressureArray[3];
     debugPressureArray[0] = ps.getSapPressureAbs();   // Read the main pressure
     debugPressureArray[1] = ps.getAmbientPressure();  // Read the ref pressure
     debugPressureArray[2] = ps.getSapPressure();      // Read the diff pressure
     printResponseFloatArray(true, true, true, 0, "DEBUG,2", true, "", 3, ',', debugPressureArray);
-  } else if (debugMode == CONF_DEBUG_MODE_BUTTON) {  // Debug #3
+  } else if (g_debugMode == CONF_DEBUG_MODE_BUTTON) {  // Debug #3
     int debugButtonArray[3];
     debugButtonArray[0] = buttonState.mainState;         // Read the main state
     debugButtonArray[1] = buttonState.secondaryState;    // Read the secondary state
     debugButtonArray[2] = (int)buttonState.elapsedTime;  // Read the Elapsed Time
     printResponseIntArray(true, true, true, 0, "DEBUG,3", true, "", 3, ',', debugButtonArray);
-  } else if (debugMode == CONF_DEBUG_MODE_SWITCH) {  // Debug #4
+  } else if (g_debugMode == CONF_DEBUG_MODE_SWITCH) {  // Debug #4
     int debugSwitchArray[3];
     debugSwitchArray[0] = switchState.mainState;         // Read the main state
     debugSwitchArray[1] = switchState.secondaryState;    // Read the secondary state
     debugSwitchArray[2] = (int)switchState.elapsedTime;  // Read the Elapsed Time
     printResponseIntArray(true, true, true, 0, "DEBUG,4", true, "", 3, ',', debugSwitchArray);
-  } else if (debugMode == CONF_DEBUG_MODE_SAP) {  // Debug #5
+  } else if (g_debugMode == CONF_DEBUG_MODE_SAP) {  // Debug #5
     int debugSapArray[3];
     debugSapArray[0] = sapActionState.mainState;         // Read the main state
     debugSapArray[1] = sapActionState.secondaryState;    // Read the secondary state
@@ -1832,7 +1831,6 @@ void checkI2C() {
   } else {
     Serial.println("ERROR: Display: Not found");
     g_displayConnected = false;
-    hardwareOkay = false;
   }
 
   // Scan for Ambient Pressure Sensor
@@ -1845,7 +1843,6 @@ void checkI2C() {
   } else {
     Serial.println("ERROR: Ambient Pressure Sensor: Not found");
     g_ambientPressureSensorConnected = false;
-    hardwareOkay = false;
   }
 
   // Scan for Sip and Puff Sensor
@@ -1858,7 +1855,6 @@ void checkI2C() {
   } else {
     Serial.println("ERROR: Mouthpiece Pressure Sensor: Not found");
     g_mouthpiecePressureSensorConnected = false;
-    hardwareOkay = false;
   }
 
   // Scan for Joystick Sensor
@@ -1871,7 +1867,6 @@ void checkI2C() {
   } else {
     Serial.println("ERROR: Joystick Sensor: Not found");
     g_joystickSensorConnected = false;
-    hardwareOkay = false;
   }
   Wire.end();
 }
@@ -2155,12 +2150,12 @@ void blinkLed(ledStateStruct* args) {
 void setLedDefault() {
   led.clearLedAll();  // Clear all LEDs
 
-  switch (operatingMode) {
+  switch (g_operatingMode) {
     case CONF_OPERATING_MODE_MOUSE:
       {
-        if (comMode == CONF_COM_MODE_USB) {
+        if (g_comMode == CONF_COM_MODE_USB) {
           led.setLedColor(CONF_LED_MICRO, LED_CLR_PURPLE, CONF_LED_BRIGHTNESS);  // Set micro LED to purple if it's in BLE MODE
-        } else if (comMode == CONF_COM_MODE_BLE && btmouse.isConnected()) {      // Set micro LED to blue if it's in BLE MODE
+        } else if (g_comMode == CONF_COM_MODE_BLE && btmouse.isConnected()) {      // Set micro LED to blue if it's in BLE MODE
           led.setLedColor(CONF_BT_LED_NUMBER, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
         }
         break;
@@ -2191,13 +2186,13 @@ void btFeedbackLoop() {
 
   //if (USB_DEBUG) { Serial.println(tempIsConnected); }
   // Perform Bluetooth LED blinking if Bluetooth is not connected and wasn't connected before
-  if (comMode == CONF_COM_MODE_BLE && tempIsConnected == false && tempIsConnected == g_btIsConnected) {
+  if (g_comMode == CONF_COM_MODE_BLE && tempIsConnected == false && tempIsConnected == g_btIsConnected) {
     g_btIsConnected = false;
     const int blinkStartDelay = 0;
     ledTimerId[CONF_TIMER_LED_BT] = ledStateTimer.setTimer(CONF_BT_SCAN_BLINK_DELAY, blinkStartDelay, ((CONF_BT_SCAN_BLINK_NUMBER * 2) + 1), ledBtScanEffect);
 
   }  // Set the default LED effect if bluetooth connection state is changed
-  else if (comMode == CONF_COM_MODE_BLE && tempIsConnected != g_btIsConnected) {
+  else if (g_comMode == CONF_COM_MODE_BLE && tempIsConnected != g_btIsConnected) {
     g_btIsConnected = tempIsConnected;
     setLedDefault();
   }

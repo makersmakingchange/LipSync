@@ -521,7 +521,7 @@ void setOperatingMode(bool responseEnabled, bool apiEnabled, int inputOperatingM
   if ((inputOperatingMode >= CONF_OPERATING_MODE_MIN) && (inputOperatingMode <= CONF_OPERATING_MODE_MAX)) {   
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputOperatingMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "OM,1", true, inputOperatingMode);
-    operatingMode = inputOperatingMode;
+    g_operatingMode = inputOperatingMode;
     //changeOperatingMode(inputOperatingMode);
   }
   else {
@@ -1217,7 +1217,7 @@ void getPressureMode(bool responseEnabled, bool apiEnabled, String optionalParam
 void setPressureMode(bool responseEnabled, bool apiEnabled, int inputPressureMode) {
   String commandKey = "PM";
   if ((inputPressureMode >= PRESS_MODE_MIN) && (inputPressureMode <= PRESS_MODE_MAX)) {
-    //comMode = inputPressureMode;  // TODO: fix
+    //g_comMode = inputPressureMode;  // TODO: fix
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputPressureMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "PM,1", true, inputPressureMode);
   ps.setPressureMode(inputPressureMode);
@@ -1666,15 +1666,15 @@ void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommun
   String commandKey = "CM";
   
   if ((inputCommunicationMode >= CONF_COM_MODE_MIN) && (inputCommunicationMode <= CONF_COM_MODE_MAX)) {
-    comMode = inputCommunicationMode;
-    setCommunicationModeLed(comMode);
+    g_comMode = inputCommunicationMode;
+    setCommunicationModeLed(g_comMode);
     setLedDefault();
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputCommunicationMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "CM,1", true, inputCommunicationMode);
 
     // TODO: move this?
     releaseOutputAction();
-    switch(comMode) {
+    switch(g_comMode) {
       case CONF_COM_MODE_USB:       // USB Mouse
         btmouse.end();
         usbmouse.begin();    
@@ -1741,13 +1741,13 @@ void setCommunicationMode(bool responseEnabled, bool apiEnabled, String optional
 //
 // Return     : void
 void toggleCommunicationMode(bool responseEnabled, bool apiEnabled) {
-  if (comMode < CONF_COM_MODE_MAX) {
-    comMode++;
+  if (g_comMode < CONF_COM_MODE_MAX) {
+    g_comMode++;
   }
   else {
-    comMode = CONF_COM_MODE_MIN;
+    g_comMode = CONF_COM_MODE_MIN;
   }
-  setCommunicationMode(responseEnabled, apiEnabled, comMode);
+  setCommunicationMode(responseEnabled, apiEnabled, g_comMode);
 }
 
 //***GET SOUND MODE STATE FUNCTION***//
@@ -1903,7 +1903,7 @@ void setLightMode(bool responseEnabled, bool apiEnabled, int inputLightMode) {
 
   if ((inputLightMode >= CONF_LIGHT_MODE_MIN) && (inputLightMode <= CONF_LIGHT_MODE_MAX)) {
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputLightMode);
-    lightMode = inputLightMode;
+    g_lightMode = inputLightMode;
     led.setLightModeLevel(inputLightMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "LM,1", true, inputLightMode);
   }
@@ -2056,7 +2056,7 @@ void setDebugMode(bool responseEnabled, bool apiEnabled, int inputDebugMode) {
 
   if ((inputDebugMode >= CONF_DEBUG_MODE_MIN) && (inputDebugMode <= CONF_DEBUG_MODE_MAX)) {
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputDebugMode);
-    debugMode = inputDebugMode;
+    g_debugMode = inputDebugMode;
     setDebugState(inputDebugMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "DM,1", true, inputDebugMode);
   }

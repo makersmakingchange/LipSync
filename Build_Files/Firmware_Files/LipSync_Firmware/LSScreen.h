@@ -1548,7 +1548,7 @@ void LSScreen::errorPageCable() {
   setupDisplay();
 
   _display.println("ERROR: ");
-  _display.println("Joystick not");
+  _display.println("No joystick");
   _display.println("detected.");
   _display.println("Try cable.");
 
