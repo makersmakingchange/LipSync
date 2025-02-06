@@ -65,9 +65,6 @@
 
 const int TEXT_ROWS = 4;
 
-extern unsigned int g_usbAttempt;
-extern unsigned int g_usbConnectDelay;
-
 extern bool g_displayConnected;                   // Display connection state
 extern bool g_joystickSensorConnected;            // Joystick sensor connection state
 extern bool g_mouthpiecePressureSensorConnected;  // Mouthpiece pressure sensor connection state
@@ -94,7 +91,7 @@ public:
   void centerResetPage();
   void centerResetCompletePage();
   void fullCalibrationPrompt(int stepNum);
-  void testPage();
+  void testPage(unsigned int usbConnectDelay);
   void noUsbPage();
   void errorPageI2C();
   void errorPageCable();
@@ -1451,7 +1448,7 @@ void LSScreen::factoryResetConfirm2Page(void) {
 //
 // Return     : void
 //*********************************//
-void LSScreen::testPage(void) {
+void LSScreen::testPage(unsigned int usbConnectDelay) {
   setupDisplay();
   _testScreenAttempt++;
 
@@ -1475,7 +1472,7 @@ void LSScreen::testPage(void) {
   _display.print("Attempt:");
   _display.println(_testScreenAttempt);
 
-  _display.println(g_usbConnectDelay);
+  _display.println(usbConnectDelay);
   _display.display();
 }
 

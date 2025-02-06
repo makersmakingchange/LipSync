@@ -227,8 +227,10 @@ void setup() {
 
   if (g_mouthpiecePressureSensorConnected && g_ambientPressureSensorConnected) {
     pollTimer.enable(CONF_TIMER_PRESSURE);
+    if (USB_DEBUG) { Serial.println("USBDEBUG: Pressure timer started."); }
   } else {
     pollTimer.disable(CONF_TIMER_PRESSURE);
+    if (USB_DEBUG) { Serial.println("USBDEBUG: Pressure timer NOT started."); }
   }
 
   if (g_joystickSensorConnected) {
@@ -269,13 +271,13 @@ void loop() {
 
   usbConnectTimer.run();
 
-if (g_joystickSensorConnected) {
-  calibrationTimer.run();  // Timer for calibration measurements
-}
+  if (g_joystickSensorConnected) {
+    calibrationTimer.run();  // Timer for calibration measurements
+  }
 
-if (g_operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
-  actionTimer.run(); 
-}
+  if (g_operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
+    actionTimer.run(); 
+  }
   pollTimer.run();  // Timer for normal joystick functions
 
   settingsEnabled = serialSettings(settingsEnabled);  // Process Serial API commands
@@ -315,7 +317,7 @@ void initWatchdog() {
 // Return     : void
 //****************************************//
 void watchdogLoop(void) {
-  if (USB_DEBUG) { Serial.println("USBDEBUG: watchDogLoop()"); }
+  //if (USB_DEBUG) { Serial.println("USBDEBUG: watchDogLoop()"); }
 
   NRF_WDT->RR[0] = WDT_RR_RR_Reload;  // Feed (reset) the watchdog timer
 }
@@ -719,7 +721,7 @@ void initCommunicationMode() {
 // Return     : void
 //****************************************//
 void usbConnectionLoop() {
-  if (USB_DEBUG) { Serial.println("USBDEBUG: usbConnectionLoop()"); }
+  //if (USB_DEBUG) { Serial.println("USBDEBUG: usbConnectionLoop()"); }
 
 
   g_usbIsConnected = usbmouse.isConnected();
@@ -1818,11 +1820,12 @@ void debugLoop() {
     printResponseFloatPointArray(true, true, true, 0, "DEBUG,1", true, "", 3, ',', debugJoystickArray);
   } else if (g_debugMode == CONF_DEBUG_MODE_PRESSURE) {  // Debug #2
     ps.update();                                       // Request new pressure difference from sensor and push it to array
-    float debugPressureArray[3];
+    float debugPressureArray[4];
     debugPressureArray[0] = ps.getSapPressureAbs();   // Read the main pressure
     debugPressureArray[1] = ps.getAmbientPressure();  // Read the ref pressure
     debugPressureArray[2] = ps.getSapPressure();      // Read the diff pressure
-    printResponseFloatArray(true, true, true, 0, "DEBUG,2", true, "", 3, ',', debugPressureArray);
+    debugPressureArray[3] = ps.getOffsetPressure();      // Read the diff pressure    
+    printResponseFloatArray(true, true, true, 0, "DEBUG,2", true, "", 4, ',', debugPressureArray);
   } else if (g_debugMode == CONF_DEBUG_MODE_BUTTON) {  // Debug #3
     int debugButtonArray[3];
     debugButtonArray[0] = buttonState.mainState;         // Read the main state
