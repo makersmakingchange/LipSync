@@ -26,7 +26,7 @@
 #define INPUT_SEC_STATE_STARTED 1             // OFF->ON
 #define INPUT_SEC_STATE_RELEASED 2            // ON ->OFF
 
-#define INPUT_REACTION_TIME 120
+#define INPUT_REACTION_TIME 80
 
 #define INPUT_ACTION_TIMEOUT 60000
 

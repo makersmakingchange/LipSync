@@ -176,6 +176,7 @@ void LSPressure::begin()
  
   clear();      // Clear buffers and make sure no sip and puff action is set as previous actions
 
+  delay(20);
   setZeroPressure();    // Set the zero pressure 
 }
 
@@ -311,6 +312,16 @@ float LSPressure::getOffsetPressure()
     Serial.println(tempOffsetPressure);  
   }  */
 
+  /*
+  Serial.print("sapAbs: ");
+  Serial.print(tempSapPressureAbs);
+  Serial.print("\tambient: ");
+  Serial.print(tempAmbientPressure);
+  Serial.print("\toffset: ");
+  Serial.println(tempOffsetPressure);
+  */
+    
+
   return tempOffsetPressure;                         // Return offset value
 }
 
@@ -344,6 +355,11 @@ void LSPressure::setZeroPressure()
     offsetPressure += getOffsetPressure();  
   }
   offsetPressure = (offsetPressure / PRESS_BUFF_SIZE);  // Set the offsetPressure equal to average offset values in pressure buffer  
+
+  if (USB_DEBUG) {
+    Serial.print("Offset Pressure: ");
+    Serial.println(offsetPressure);
+  }
 }
 
 
@@ -436,6 +452,16 @@ void LSPressure::updatePressure()
   if(sapPressureAbs > 0.00 && ambientPressure > 0.00) {
     sapPressure = sapPressureAbs - ambientPressure - offsetPressure;              // Calculate the pressure difference 
     pressureBuffer.pushElement({sapPressureAbs, ambientPressure, sapPressure});   // Push new pressure values to pressure buffer 
+/*
+    Serial.print("sapAbs: ");
+    Serial.print(sapPressureAbs);
+    Serial.print("\tambient: ");
+    Serial.print(ambientPressure);
+    Serial.print("\tsapRel: ");
+    Serial.print(sapPressure);
+    Serial.print("\toffset: ");
+    Serial.println(offsetPressure);
+    */
   }
  
 }
