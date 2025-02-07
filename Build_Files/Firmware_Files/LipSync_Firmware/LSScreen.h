@@ -95,6 +95,7 @@ public:
   void noUsbPage();
   void errorPageI2C();
   void errorPageCable();
+  void warningUSBDebugOn();
   void connectionTimingPage(unsigned long, unsigned long);
   void resetPage();
 
@@ -402,7 +403,13 @@ void LSScreen::splashScreen2() {
 
   _display.display();
 
-  _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
+  if (USB_DEBUG){
+    delay(2000);
+    warningUSBDebugOn();
+  } else {
+    _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
+  }
+
   _lastActivityMillis = millis();
 }
 
@@ -1551,6 +1558,27 @@ void LSScreen::errorPageCable() {
   _display.println("Try cable.");
 
   _display.display();
+}
+
+//*********************************//
+// Function   : warningUSBDebugOn
+//
+// Description: Format and display an error page when USB_DEBUG is set to 1 (on)
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
+void LSScreen::warningUSBDebugOn(void) {
+  setupDisplay();
+
+  _display.println("Warning:");
+  _display.println("USB_DEBUG=1");
+  _display.println("Set to 0");
+  _display.println("for user.");
+  _display.display();
+
+  _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
 }
 
 //*********************************//
