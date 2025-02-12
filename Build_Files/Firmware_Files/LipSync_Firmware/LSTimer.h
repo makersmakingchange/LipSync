@@ -96,7 +96,8 @@ void LSTimer<T>::run() {
     // Get the current time
     current_millis = elapsed();
 
-    for (i = 0; i < MAX_TIMERS; i++) {
+    //  Iterate through all timers and determine if they should be triggered
+    for (i = 0; i < MAX_TIMERS; i++) { 
 
         timer[i].toBeCalled = DEFCALL_DONTRUN;
 
@@ -133,7 +134,8 @@ void LSTimer<T>::run() {
         }
     }
 
-    for (i = 0; i < MAX_TIMERS; i++) {
+    // Iterate through all timers and either: do nothing, call callback, or call callback and delete timer
+    for (i = 0; i < MAX_TIMERS; i++) { 
         if (timer[i].toBeCalled == DEFCALL_DONTRUN)
             continue;
 
