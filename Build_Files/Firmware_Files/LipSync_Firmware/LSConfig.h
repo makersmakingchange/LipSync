@@ -161,16 +161,16 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN1\":4,\"VN2\":0,\"VN3\":1,\"ID\":\"\",\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":3.0,\"PT\":3.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[-13.0,13.0],\"CA2\":[13.0,13.0],\"CA3\":[13.0,-13.0],\"CA4\":[-13.0,-13.0],\"SM\":1,\"DM\":0}"
 
 // Polling rates for each module
-#define CONF_JOYSTICK_POLL_RATE 50          // 50ms - Measure, 
-#define CONF_SCROLL_POLL_RATE 150           // 150ms
-#define CONF_PRESSURE_POLL_RATE 50          // 50ms
-#define CONF_INPUT_POLL_RATE 50             // 50ms
+#define CONF_JOYSTICK_POLL_RATE 50          // 50 ms - 
+#define CONF_SCROLL_POLL_RATE 50            // 150 ms
+#define CONF_PRESSURE_POLL_RATE 50          // 50 ms
+#define CONF_INPUT_POLL_RATE 25             // 50 ms
 #define CONF_BT_FEEDBACK_POLL_RATE 1000     // 1s         
 
-#define CONF_DEBUG_POLL_RATE 100            // 100ms
-#define CONF_SCREEN_POLL_RATE 100           // 100ms
+#define CONF_DEBUG_POLL_RATE 100            // 100 ms
+#define CONF_SCREEN_POLL_RATE 100           // 100 ms
 
-#define CONF_BUTTON_PRESS_DELAY 150         // 150ms - 
+#define CONF_BUTTON_PRESS_DELAY 150         // 150 ms - Duration of single 
 
 // Hub Menu
 #define CONF_SPLASH_SCREEN_DURATION 10000   // 10 seconds - how long the splash screen stays on on startup

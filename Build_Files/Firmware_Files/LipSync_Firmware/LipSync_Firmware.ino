@@ -190,7 +190,7 @@ void setup() {
   pollTimerId[CONF_TIMER_INPUT] = pollTimer.setInterval(CONF_INPUT_POLL_RATE, 0, inputLoop);
   pollTimerId[CONF_TIMER_BLUETOOTH] = pollTimer.setInterval(CONF_BT_FEEDBACK_POLL_RATE, 0, btFeedbackLoop);
   pollTimerId[CONF_TIMER_DEBUG] = pollTimer.setInterval(CONF_DEBUG_POLL_RATE, 0, debugLoop);
-  pollTimerId[CONF_TIMER_SCROLL] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, CONF_SCROLL_POLL_RATE, joystickLoop);
+  pollTimerId[CONF_TIMER_SCROLL] = pollTimer.setInterval(CONF_SCROLL_POLL_RATE, 0, joystickLoop);
   pollTimerId[CONF_TIMER_SCREEN] = pollTimer.setInterval(CONF_SCREEN_POLL_RATE, 0, screenLoop);
 
   // If USB is not connected, try to reconnect
@@ -2122,7 +2122,7 @@ void performLedAction(ledStateStruct* args) {
   {
     case LED_ACTION_NONE:
       {
-        //setLedDefault(); // TODO Check to see if this should be uncommented
+        setLedDefault(); // TODO Check to see if this should be uncommented
         break;
       }
     case LED_ACTION_OFF:

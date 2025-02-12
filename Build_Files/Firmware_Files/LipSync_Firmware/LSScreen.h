@@ -57,7 +57,7 @@
 #define FACTORY_RESET_CONFIRM2_PAGE 551
 #define INFO_PAGE 56
 
-#define SCROLL_DELAY_MILLIS 100
+#define SCROLL_DELAY_MILLIS 100 // [ms] This controls the scroll speed of long menu items
 
 #define _MODE_MOUSE_USB 1
 #define _MODE_MOUSE_BT 2
@@ -886,7 +886,10 @@ void LSScreen::scrollLongText() {
     _display.display();
     //displayCursor();  // TODO Remove?
     _scrollPos = _scrollPos - 4;
-    if (_scrollPos < minPos) _scrollPos = _display.width();
+    
+    if (_scrollPos < minPos) {
+      _scrollPos = _display.width();
+    }
   }
 }
 
