@@ -391,7 +391,7 @@ const accStruct accProperty[]{
 /* LIPSYNC INPUT AND OUTPUT MAPPING */
 
 // Sip and Puff Action Mapping
-//  {INPUT ACTION, OUTPUT, ACTION, minTime, maxTime}
+//  {INPUT ACTION, MOUSE MODE ACTION, GAMEPAD MODE ACTION, MENU MODE ACTION, minTime, maxTime}
 const inputActionStruct sapActionProperty[]{
   { PRESS_SAP_MAIN_STATE_NONE,        CONF_ACTION_NOTHING,      CONF_ACTION_NOTHING,    CONF_ACTION_NOTHING,             0,     0 },
   
