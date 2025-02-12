@@ -159,23 +159,28 @@ void LSTimer<T>::run() {
         }
     }
 
-    //  Run the timers that needs to be run
+    //  Trigger the timers that needs to be run
     for (i = 0; i < MAX_TIMERS; i++) {
       switch(timer[i].toBeCalled) {
         case DEFCALL_DONTRUN:
           break;
         case DEFCALL_RUNONLY:
-          if (timer[i].hasParam) {
-            (*(timer_callback_p)timer[i].callback)(timer[i].param);
-          } else {
-            (*(timer_callback)timer[i].callback)();
-          }
+            //  If a timer is triggered, increment the number of runs
           if (timer[i].numRuns == (MAX_INT-1)) { // -1 ensures that even / odd remain consistent
             timer[i].numRuns = 1;  // Reset to avoid overflow
           } else {
             timer[i].numRuns++;  //  Increment the number of times   
           }
+          
+          if (timer[i].hasParam) {
+            (*(timer_callback_p)timer[i].callback)(timer[i].param);
+          } else {
+            (*(timer_callback)timer[i].callback)();
+          }
+          
           break;
+
+      
         case DEFCALL_RUNANDDEL:
           if (timer[i].hasParam) {
             (*(timer_callback_p)timer[i].callback)(timer[i].param);
@@ -194,7 +199,7 @@ void LSTimer<T>::run() {
 //*********************************//
 // Function   : findFirstFreeSlot 
 // 
-// Description: This function finds the first available slotn
+// Description: This function finds the first available slot
 //
 // Arguments :  void
 // 

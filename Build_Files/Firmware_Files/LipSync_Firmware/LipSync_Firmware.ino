@@ -2122,7 +2122,7 @@ void performLedAction(ledStateStruct* args) {
   {
     case LED_ACTION_NONE:
       {
-        setLedDefault(); // TODO Check to see if this should be uncommented
+        //setLedDefault(); // TODO Check to see if this should be uncommented
         break;
       }
     case LED_ACTION_OFF:
