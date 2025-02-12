@@ -22,6 +22,7 @@
 #ifndef _LSTIMER_H
 #define _LSTIMER_H
 
+
 template<typename T>
 class LSTimer {
   private:
@@ -31,12 +32,13 @@ class LSTimer {
     const static int DEFCALL_DONTRUN = 0;                                         // Don't call the callback function
     const static int DEFCALL_RUNONLY = 1;                                         // Call the callback function but don't delete the timer
     const static int DEFCALL_RUNANDDEL = 2;                                       // Call the callback function and delete the timer
+    const static int MAX_INT = 65535;
     typedef void (*timer_callback)(void);
     typedef void (*timer_callback_p)(T *);
     typedef struct {
-      unsigned long prev_millis;                                                  // Value returned in the previous run() call
+      unsigned long prev_millis;                                                  // Last time the timer was triggered 
       void* callback;                                                             // Pointer to the callback function
-      T* param;                                                                   // Function parameter
+      T* param;                                                                   // Pointer to the function parameter
       boolean hasParam;                                                           // Check if callback takes a parameter
       unsigned long delay;                                                        // Delay value
       unsigned maxNumRuns;                                                        // Number of runs to be executed
@@ -46,7 +48,7 @@ class LSTimer {
       boolean offsetEnabled;                                                      // Check if offset is enabled
       unsigned toBeCalled;                                                        // Deferred function call
     } timer_t;
-    timer_t timer[MAX_TIMERS];
+    
     int numTimers; 
     int findFirstFreeSlot();                                                      // Find the first available slot
     int setupTimer(unsigned long d, unsigned long o, boolean on, boolean h, unsigned n, void* f, T* p);  
@@ -54,14 +56,14 @@ class LSTimer {
   public:
     LSTimer();                                                                    // Constructor
     void run();                                                                   // Must be called inside loop()
-    int setInterval(unsigned long d, unsigned long o, timer_callback f);          // Call function f every d milliseconds, start in o milliseconds
+    int setInterval(unsigned long interval, unsigned long o, timer_callback f);   // Call function f every d milliseconds, start in o milliseconds
     int setInterval(unsigned long d, unsigned long o, timer_callback_p f, T* p);
     int setTimeout(unsigned long o, timer_callback f);                            // Call function f once after d milliseconds
-    int setTimeout( unsigned long o, timer_callback_p f, T* p);
+    int setTimeout(unsigned long o, timer_callback_p f, T* p);
     int setTimer(unsigned long d, unsigned long o, unsigned n, timer_callback f); // Call function f every d milliseconds for n times, start in o milliseconds
     int setTimer(unsigned long d, unsigned long o, unsigned n, timer_callback_p f, T* p);
     int startTimer(); 
-    unsigned long elapsedTime(int timerId);
+    unsigned long elapsedTime(int timerId);                                       // Time elapsed
     void deleteTimer(int numTimer);                                               // Destroy the specified timer
     void restartTimer(int numTimer);                                              // Restart the specified timer
     boolean isEnabled(int numTimer);                                              // Returns true if the specified timer is enabled
@@ -71,58 +73,81 @@ class LSTimer {
     int getNumTimers();                                                           // Returns the number of used timers
     int getNumAvailableTimers() { return MAX_TIMERS - numTimers; };               // Returns the number of available timers
     int getNumRuns(int numTimer);                                                 // Returns the number of executed runs
-
+    timer_t timer[MAX_TIMERS];                                                    // Array of timer structures                                                 
                                                              
 };
 
 static inline unsigned long elapsed() { return millis(); }
+
+
+//*********************************//
+// Function   : LSTimer 
+// 
+// Description: Constructor
+//
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 template<typename T>
-LSTimer<T>::LSTimer() {
+LSTimer<T>::LSTimer() { // TODO 2025-Feb-07 Consider adding overridden function with size argument for better memory manager
     unsigned long current_millis = elapsed();
 
    for (int i = 0; i < MAX_TIMERS; i++) {
-        memset(&timer[i], 0, sizeof (timer_t));
-        timer[i].prev_millis = current_millis;
+        memset(&timer[i], 0, sizeof (timer_t)); //  Initialize each timer
+        timer[i].prev_millis = current_millis;  //  Set the start time for each timer
     }
 
     numTimers = 0;
 }
 
+//*********************************//
+// Function   : run 
+// 
+// Description: This function checks to see which timers should be run and runs them
+//
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 template<typename T>
 void LSTimer<T>::run() {
-    int i;
-    unsigned long current_millis,delay_millis;
+    int i;  // Timer index
+    unsigned long current_millis; //  Current time
+    unsigned long delay_millis;  //  
 
     // Get the current time
     current_millis = elapsed();
 
-    //  Iterate through all timers and determine if they should be triggered
-    for (i = 0; i < MAX_TIMERS; i++) { 
+    // Determine which timers should be called
+    for (i = 0; i < MAX_TIMERS; i++) {
 
-        timer[i].toBeCalled = DEFCALL_DONTRUN;
+        timer[i].toBeCalled = DEFCALL_DONTRUN;  // Default case is not to run
 
         if (timer[i].callback != NULL) {
 
-            // Check if it's time to process timer
-
-            (timer[i].numRuns==0 && timer[i].offsetEnabled) ? delay_millis=timer[i].offset: delay_millis=timer[i].delay;
+            if ((timer[i].numRuns == 0) && timer[i].offsetEnabled) {  // If offset is enabled, use offset as delay for first run
+              delay_millis = timer[i].offset;
+            } else {
+              delay_millis = timer[i].delay;
+            } 
             
+            // Check if it's time to process timer
             if ((current_millis - timer[i].prev_millis) >= delay_millis) {
 
-                // Update time
-                timer[i].prev_millis += delay_millis;
+                // Update the time the timer was triggered
+                timer[i].prev_millis += delay_millis;  //  TODO shouldn't this be the actual triggered time, e.g., current_millis (vs, idealized trigger time when current-prev = delay) (should also be moved to where function is actually called?)
 
                 // Check if the timer callback has to be executed
                 if (timer[i].enabled) {
 
-                    // RUN_FOREVER timers must always be executed
+                    //  Always executed RUN_FOREVER timers
                     if (timer[i].maxNumRuns == RUN_FOREVER) {
                         timer[i].toBeCalled = DEFCALL_RUNONLY;
                     }
                     // Other timers
                     else if (timer[i].numRuns < timer[i].maxNumRuns) {
                         timer[i].toBeCalled = DEFCALL_RUNONLY;
-                        timer[i].numRuns++;
 
                         // Delete timer after the last run
                         if (timer[i].numRuns >= timer[i].maxNumRuns) {
@@ -134,23 +159,47 @@ void LSTimer<T>::run() {
         }
     }
 
-    // Iterate through all timers and either: do nothing, call callback, or call callback and delete timer
-    for (i = 0; i < MAX_TIMERS; i++) { 
-        if (timer[i].toBeCalled == DEFCALL_DONTRUN)
-            continue;
-
-        if (timer[i].hasParam)
+    //  Run the timers that needs to be run
+    for (i = 0; i < MAX_TIMERS; i++) {
+      switch(timer[i].toBeCalled) {
+        case DEFCALL_DONTRUN:
+          break;
+        case DEFCALL_RUNONLY:
+          if (timer[i].hasParam) {
             (*(timer_callback_p)timer[i].callback)(timer[i].param);
-        else
+          } else {
             (*(timer_callback)timer[i].callback)();
+          }
+          if (timer[i].numRuns == (MAX_INT-1)) { // -1 ensures that even / odd remain consistent
+            timer[i].numRuns = 1;  // Reset to avoid overflow
+          } else {
+            timer[i].numRuns++;  //  Increment the number of times   
+          }
+          break;
+        case DEFCALL_RUNANDDEL:
+          if (timer[i].hasParam) {
+            (*(timer_callback_p)timer[i].callback)(timer[i].param);
+          } else {
+            (*(timer_callback)timer[i].callback)();
+          }
+          deleteTimer(i);
+          break;
 
-        if (timer[i].toBeCalled == DEFCALL_RUNANDDEL)
-            deleteTimer(i);
+      }
+
     }
 }
 
 
-// Find the first available slot
+//*********************************//
+// Function   : findFirstFreeSlot 
+// 
+// Description: This function finds the first available slotn
+//
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 template<typename T>
 int LSTimer<T>::findFirstFreeSlot() {
     // All slots are used
@@ -169,6 +218,22 @@ int LSTimer<T>::findFirstFreeSlot() {
     return -1;
 }
 
+
+//*********************************//
+// Function   : setupTimer 
+// 
+// Description: Set up timer
+//
+// Arguments :  unsigned long : d : delay (ms)
+//           :  unsigned long : o : offset (ms)
+//           :  boolean : on : whether offset is enabled
+//           :  boolean : h : Whether callback has parameters
+//           :  unsigned : n : Maximum number of runs 
+//           :  void* : f : callback Function
+//           :  T* : p : Callback function parameters
+// 
+// Return     : int : Timer index
+//*********************************//
 template<typename T>
 int LSTimer<T>::setupTimer(unsigned long d, unsigned long o, boolean on, boolean h, unsigned n, void* f, T* p) {
     int freeTimer;
@@ -198,36 +263,120 @@ int LSTimer<T>::setupTimer(unsigned long d, unsigned long o, boolean on, boolean
     return freeTimer;
 }
 
+
+//*********************************//
+// Function   : setInterval 
+// 
+// Description: This function sets up a timer to run forever every interval ms after a startDelay
+//
+// Arguments :  unsigned long : interval : Time between timer runs (ms)
+//           :  unsigned long : startDelay : Time to delay between start of timer and first run
+//           :  timer_callback : f : Function called when timer runs
+// 
+// Return     : int : Timer index
+//*********************************//
 template<typename T>
-int LSTimer<T>::setInterval(unsigned long d, unsigned long o, timer_callback f) {
-    return setupTimer(d, o, true, false, RUN_FOREVER, (void *)f, NULL);
+int LSTimer<T>::setInterval(unsigned long interval, unsigned long startDelay, timer_callback f) {
+    return setupTimer(interval, startDelay, true, false, RUN_FOREVER, (void *)f, NULL);
 }
 
+
+//*********************************//
+// Function   : setInterval 
+// 
+// Description: This function sets up a timer to run forever every interval ms after a startDelay with callback parameters
+//
+// Arguments :  unsigned long : interval : Time between timer runs (ms)
+//           :  unsigned long : startDelay : Time to delay between start of timer and first run
+//           :  timer_callback : f : Function called when timer runs
+//           :  T* : p : Function parameters
+// 
+// Return     : int : Timer index
+//*********************************//
 template<typename T>
-int LSTimer<T>::setInterval(unsigned long d, unsigned long o, timer_callback_p f, T* p) {
-  return setupTimer(d, o, true, true, RUN_FOREVER, (void *)f, p);
+int LSTimer<T>::setInterval(unsigned long interval, unsigned long startDelay, timer_callback_p f, T* p) {
+  return setupTimer(interval, // delay
+                    startDelay, // offset
+                    true, // offset enabled
+                    true, // has parameter
+                    RUN_FOREVER, //  Keep running
+                    (void *)f, //  Callback function
+                    p); // Callback function parameter
 }
 
+
+//*********************************//
+// Function   : setTimeout 
+// 
+// Description: This function sets up a timer to run forever every interval ms after a startDelay
+//
+// Arguments :  unsigned long : interval : Time between timer runs (ms)
+//           :  timer_callback : f : Function called when timer runs
+// 
+// Return     : int : Timer index
+//*********************************//
 template<typename T>
-int LSTimer<T>::setTimeout(unsigned long o, timer_callback f) {
-    return setupTimer(o, 0, false, false, RUN_ONCE, (void *)f, NULL);
+int LSTimer<T>::setTimeout(unsigned long interval, timer_callback f) {
+    return setupTimer(interval, 0, false, false, RUN_ONCE, (void *)f, NULL);
 }
 
+
+//*********************************//
+// Function   : setTimeout 
+// 
+// Description: This function sets up a timer to run forever every interval ms after a startDelay
+//
+// Arguments :  unsigned long : interval : Time between timer runs (ms)
+//           :  timer_callback : f : Function called when timer runs
+//           :  T* : p : Function parameters
+// 
+// Return     : int : Timer index
+//*********************************//
 template<typename T>
-int LSTimer<T>::setTimeout(unsigned long o, timer_callback_p f, T* p) {
-  return setupTimer(o, 0, false, true, RUN_ONCE, (void *)f, p);
+int LSTimer<T>::setTimeout(unsigned long interval, timer_callback_p f, T* p) {
+  return setupTimer(interval, 0, false, true, RUN_ONCE, (void *)f, p);
 }
 
+
+//*********************************//
+// Function   : setTimer 
+// 
+// Description: This function sets up a timer to run forever every interval ms after a startDelay
+//
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 template<typename T>
 int LSTimer<T>::setTimer(unsigned long d, unsigned long o, unsigned n, timer_callback f) {
   return setupTimer(d, o, true, false, n, (void *)f, NULL);
 }
 
+
+//*********************************//
+// Function   : setTimer 
+// 
+// Description: This function sets up a timer to run forever every interval ms after a startDelay
+//
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 template<typename T>
 int LSTimer<T>::setTimer(unsigned long d, unsigned long o, unsigned n, timer_callback_p f, T* p) {
   return setupTimer(d, o, true, true, n, (void *)f, p);
 }
 
+
+//*********************************//
+// Function   : startTimer 
+// 
+// Description: This function sets up a timer without any delay, offset, or callback to be used like a stopwatch.
+//
+// Arguments :  void
+// 
+// Return     : int : freeTimer : Index of first free timer
+//*********************************//
 template<typename T>
 int LSTimer<T>::startTimer() {
     int freeTimer;
@@ -251,19 +400,41 @@ int LSTimer<T>::startTimer() {
 
     return freeTimer;
 }
+
+
+//*********************************//
+// Function   : elapsedTime 
+// 
+// Description: Returns the time elapsed since the timer has been started
+//
+// Arguments :  int : timerId : Index of timer to determine how much time has elapsed
+// 
+// Return     : unsigned long : Time elasped since last run
+//*********************************//
 template<typename T>
 unsigned long LSTimer<T>::elapsedTime(int timerId) {
     if (timerId >= MAX_TIMERS) {
         return 0;
     }
 
-    unsigned long current_millis,diff_millis;
+    unsigned long current_millis, diff_millis;
 
-    // get current time
+    // Get current time
     current_millis = elapsed();
     diff_millis = current_millis - timer[timerId].prev_millis;
     return diff_millis;
 }
+
+
+//*********************************//
+// Function   : deleteTimer 
+// 
+// Description: This function sets up a timer to run forever every interval ms after a startDelay
+//
+// Arguments :  int : timerId : Index of timer to delete
+// 
+// Return     : void
+//*********************************//
 template<typename T>
 void LSTimer<T>::deleteTimer(int timerId) {
     if (timerId >= MAX_TIMERS) {
@@ -284,6 +455,17 @@ void LSTimer<T>::deleteTimer(int timerId) {
         numTimers--;
     }
 }
+
+
+//*********************************//
+// Function   : restartTimer 
+// 
+// Description: Restart the specified timer
+//
+// Arguments :  int : numTimer : Index of the timer to restart
+// 
+// Return     : void
+//*********************************//
 template<typename T>
 void LSTimer<T>::restartTimer(int numTimer) {
     if (numTimer >= MAX_TIMERS) {
@@ -294,6 +476,16 @@ void LSTimer<T>::restartTimer(int numTimer) {
     timer[numTimer].numRuns = 0;
 }
 
+
+//*********************************//
+// Function   : isEnabled 
+// 
+// Description: Returns whether the specified timer is enabled
+//
+// Arguments :  int : numTimer : Index of timer to check if enabled
+// 
+// Return     : boolean : true - timer enabled, false - timer disabled
+//*********************************//
 template<typename T>
 boolean LSTimer<T>::isEnabled(int numTimer) {
     if (numTimer >= MAX_TIMERS) {
@@ -303,6 +495,16 @@ boolean LSTimer<T>::isEnabled(int numTimer) {
     return timer[numTimer].enabled;
 }
 
+
+//*********************************//
+// Function   : enable 
+// 
+// Description: Enable the specified timer
+//
+// Arguments :  int : numTimer : Index of the timer to enable
+// 
+// Return     : void
+//*********************************//
 template<typename T>
 void LSTimer<T>::enable(int numTimer) {
     if (numTimer >= MAX_TIMERS) {
@@ -312,6 +514,16 @@ void LSTimer<T>::enable(int numTimer) {
     timer[numTimer].enabled = true;
 }
 
+
+//*********************************//
+// Function   : disable 
+// 
+// Description: Disables the specified timer
+//
+// Arguments :  int : numTimer : Index of timer to disable
+// 
+// Return     : void
+//*********************************//
 template<typename T>
 void LSTimer<T>::disable(int numTimer) {
     if (numTimer >= MAX_TIMERS) {
@@ -321,6 +533,16 @@ void LSTimer<T>::disable(int numTimer) {
     timer[numTimer].enabled = false;
 }
 
+
+//*********************************//
+// Function   : toggle 
+// 
+// Description: Toggles the specified timer between enabled and disabled.
+//
+// Arguments :  int : numTimer : Index of timer to toggle
+// 
+// Return     : void
+//*********************************//
 template<typename T>
 void LSTimer<T>::toggle(int numTimer) {
     if (numTimer >= MAX_TIMERS) {
@@ -330,13 +552,34 @@ void LSTimer<T>::toggle(int numTimer) {
     timer[numTimer].enabled = !timer[numTimer].enabled;
 }
 
+
+//*********************************//
+// Function   : getNumTimers 
+// 
+// Description: Return the number of timers.
+//
+// Arguments :  void
+// 
+// Return     : int : numTimers : Number of timers
+//*********************************//
 template<typename T>
 int LSTimer<T>::getNumTimers() {
     return numTimers;
 }
 
+
+//*********************************//
+// Function   : getNumRuns 
+// 
+// Description: Return the number of runs for the specified timer
+//
+// Arguments :  int : numTimer : Index of timer to get number of runs
+// 
+// Return     : int : numRuns : The number of times the timer has been activated.
+//*********************************//
 template<typename T>
 int LSTimer<T>::getNumRuns(int numTimer) {
     return timer[numTimer].numRuns;
 }
+
 #endif 
