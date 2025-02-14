@@ -1506,6 +1506,11 @@ void performJoystickCalibrationStep(int* args) {
   pointFloatType maxPoint;
   int magnetZDirection = js.getMagnetZDirection();
 
+  //Serial.print("Step started: ");   // TODO: Remove these print statements
+  //Serial.print(stepNumber);
+  //Serial.print(" numRuns: ");
+  //Serial.println(calibrationTimer.getNumRuns(calibrationTimerId[1]));
+
   // Turn on and set all leds to orange to indicate start of the process // TODO Jake update to non-neopixel LEDS
   if (calibrationTimer.getNumRuns(calibrationTimerId[1]) == 1) {  // Turn LLED's ON when timer is running for first time
     setLedState(LED_ACTION_ON, CONF_JOY_CALIB_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, 0, 0, CONF_LED_BRIGHTNESS);

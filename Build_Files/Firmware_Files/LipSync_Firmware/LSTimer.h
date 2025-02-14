@@ -141,6 +141,13 @@ void LSTimer<T>::run() {
                 // Check if the timer callback has to be executed
                 if (timer[i].enabled) {
 
+                    //  If a timer is triggered, increment the number of runs
+                    if (timer[i].numRuns == (MAX_INT-1)) { // -1 ensures that even / odd remain consistent
+                      timer[i].numRuns = 1;  // Reset to avoid overflow
+                    } else {
+                      timer[i].numRuns++;  //  Increment the number of times   
+                    }
+
                     //  Always executed RUN_FOREVER timers
                     if (timer[i].maxNumRuns == RUN_FOREVER) {
                         timer[i].toBeCalled = DEFCALL_RUNONLY;
@@ -149,9 +156,9 @@ void LSTimer<T>::run() {
                     else if (timer[i].numRuns < timer[i].maxNumRuns) {
                         timer[i].toBeCalled = DEFCALL_RUNONLY;
                     }
-                        // Delete timer after the last run
+                    // Delete timer after the last run
                     else if (timer[i].numRuns >= timer[i].maxNumRuns) {
-                            timer[i].toBeCalled = DEFCALL_RUNANDDEL;
+                        timer[i].toBeCalled = DEFCALL_RUNANDDEL;
                     }
                 }
             }
@@ -160,35 +167,17 @@ void LSTimer<T>::run() {
 
     //  Trigger the timers that needs to be run
     for (i = 0; i < MAX_TIMERS; i++) {
-      switch(timer[i].toBeCalled) {
-        case DEFCALL_DONTRUN:
-          break;
-        case DEFCALL_RUNONLY:
-            //  If a timer is triggered, increment the number of runs
-          if (timer[i].numRuns == (MAX_INT-1)) { // -1 ensures that even / odd remain consistent
-            timer[i].numRuns = 1;  // Reset to avoid overflow
-          } else {
-            timer[i].numRuns++;  //  Increment the number of times   
-          }
-          
-          if (timer[i].hasParam) {
-            (*(timer_callback_p)timer[i].callback)(timer[i].param);
-          } else {
-            (*(timer_callback)timer[i].callback)();
-          }
-          
-          break;
-
       
-        case DEFCALL_RUNANDDEL:
+      if (timer[i].toBeCalled != DEFCALL_DONTRUN){    // Check if timer should be run, if not equal to DONTRUN (either RUNONLY or RUNANDDEL)
           if (timer[i].hasParam) {
             (*(timer_callback_p)timer[i].callback)(timer[i].param);
           } else {
             (*(timer_callback)timer[i].callback)();
           }
-          deleteTimer(i);
-          break;
 
+          if (timer[i].toBeCalled == DEFCALL_RUNANDDEL){  // Check if timer should be deleted 
+            deleteTimer(i);
+          }
       }
 
     }
