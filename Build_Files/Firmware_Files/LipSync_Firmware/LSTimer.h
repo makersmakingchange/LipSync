@@ -148,11 +148,10 @@ void LSTimer<T>::run() {
                     // Other timers
                     else if (timer[i].numRuns < timer[i].maxNumRuns) {
                         timer[i].toBeCalled = DEFCALL_RUNONLY;
-
+                    }
                         // Delete timer after the last run
-                        if (timer[i].numRuns >= timer[i].maxNumRuns) {
+                    else if (timer[i].numRuns >= timer[i].maxNumRuns) {
                             timer[i].toBeCalled = DEFCALL_RUNANDDEL;
-                        }
                     }
                 }
             }
@@ -245,6 +244,7 @@ int LSTimer<T>::setupTimer(unsigned long d, unsigned long o, boolean on, boolean
 
     freeTimer = findFirstFreeSlot();
     if (freeTimer < 0) {
+        Serial.println("DEBUG: No free timers");
         return -1;
     }
 
