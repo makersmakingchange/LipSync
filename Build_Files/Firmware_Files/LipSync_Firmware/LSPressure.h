@@ -173,7 +173,11 @@ void LSPressure::begin()
   setPressureMode(PRESS_MODE_DIFF);         // Set the default pressure mode to differential mode
   setRefTolerance(PRESS_REF_TOLERANCE);     // Set the default tolerance value to update reference pressure 
   setThreshold(PRESS_SAP_DEFAULT_THRESHOLD,PRESS_SAP_DEFAULT_THRESHOLD); // Set the default sip and puff thresholds
- 
+
+  delay(5);
+  lps35hw.setDataRate(LPS35HW_RATE_25_HZ);  // Options: 1 Hz, 10Hz, 25Hz, 50Hz, 75Hz
+  lps22.setDataRate(LPS22_RATE_25_HZ);         // Options: 1-shot, 
+
   clear();      // Clear buffers and make sure no sip and puff action is set as previous actions
 
   delay(20);
