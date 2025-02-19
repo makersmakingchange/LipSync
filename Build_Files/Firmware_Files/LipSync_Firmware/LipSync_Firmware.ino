@@ -243,7 +243,7 @@ void setup() {
     //calibrationTimer.disable(1);
   }
 
-  if (!g_displayConnected || !g_mouthpiecePressureSensorConnected || !g_ambientPressureSensorConnected || ! g_joystickSensorConnected) {
+  if (!g_displayConnected || !g_mouthpiecePressureSensorConnected || !g_ambientPressureSensorConnected || !g_joystickSensorConnected) {
     errorCheck();
   }
 
@@ -1812,7 +1812,7 @@ void debugLoop() {
   //if (USB_DEBUG) { Serial.println("USBDEBUG: debugLoop"); }
   // Debug mode is off if the debug mode is #0
   if (g_debugMode == CONF_DEBUG_MODE_JOYSTICK) {  // Debug #1
-    js.update();                                // Request new values from joystick class
+    js.update();                                  // Request new values from joystick class
     pointFloatType debugJoystickArray[3];
     debugJoystickArray[0] = js.getXYRaw();                                       // Read the raw values
     debugJoystickArray[1] = { (float)js.getXYIn().x, (float)js.getXYIn().y };    // Read the filtered values
@@ -2225,7 +2225,7 @@ void setLedDefault() {
       {
         if (g_comMode == CONF_COM_MODE_USB) {
           led.setLedColor(CONF_LED_MICRO, LED_CLR_PURPLE, CONF_LED_BRIGHTNESS);  // Set micro LED to purple if it's in BLE MODE
-        } else if (g_comMode == CONF_COM_MODE_BLE && btmouse.isConnected()) {      // Set micro LED to blue if it's in BLE MODE
+        } else if (g_comMode == CONF_COM_MODE_BLE && btmouse.isConnected()) {    // Set micro LED to blue if it's in BLE MODE
           led.setLedColor(CONF_BT_LED_NUMBER, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
         }
         break;
