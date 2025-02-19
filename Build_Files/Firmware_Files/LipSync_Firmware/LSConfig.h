@@ -33,8 +33,8 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 // I2C Devices
 #define I2CADDR_DISPLAY 0x3D   // Display address (61)
-#define I2CADDR_LPS22 0x5C     // Modified LPS22 address (92)
-#define I2CADDR_LPS35HW  0x5D  // LPS35HW address (93)
+#define I2CADDR_LPS22   0x5C     // Modified LPS22 address (92)
+#define I2CADDR_LPS35HW 0x5D  // LPS35HW address (93)
 #define I2CADDR_TLV493D 0x5E   // 3D Hall Effect Sensor (94)
 
 
@@ -161,16 +161,16 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN1\":4,\"VN2\":0,\"VN3\":1,\"ID\":\"\",\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":3.0,\"PT\":3.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[-13.0,13.0],\"CA2\":[13.0,13.0],\"CA3\":[13.0,-13.0],\"CA4\":[-13.0,-13.0],\"SM\":1,\"DM\":0}"
 
 // Polling rates for each module
-#define CONF_JOYSTICK_POLL_RATE 50          // 50ms - Measure, 
-#define CONF_SCROLL_POLL_RATE 150           // 150ms
-#define CONF_PRESSURE_POLL_RATE 50          // 50ms
-#define CONF_INPUT_POLL_RATE 50             // 50ms
+#define CONF_JOYSTICK_POLL_RATE 20          // 20 ms 
+#define CONF_SCROLL_POLL_RATE 150           // 150 ms
+#define CONF_PRESSURE_POLL_RATE 50          // 50 ms
+#define CONF_INPUT_POLL_RATE 20             // 20 ms
 #define CONF_BT_FEEDBACK_POLL_RATE 1000     // 1s         
 
-#define CONF_DEBUG_POLL_RATE 100            // 100ms
-#define CONF_SCREEN_POLL_RATE 100           // 100ms
+#define CONF_DEBUG_POLL_RATE 100            // 100 ms
+#define CONF_SCREEN_POLL_RATE 20            // 20 ms
 
-#define CONF_BUTTON_PRESS_DELAY 150         // 150ms - 
+#define CONF_BUTTON_PRESS_DELAY 150         // 150 ms - Duration of single button press in gamepad mode
 
 // Hub Menu
 #define CONF_SPLASH_SCREEN_DURATION 10000   // 10 seconds - how long the splash screen stays on on startup
@@ -391,19 +391,19 @@ const accStruct accProperty[]{
 /* LIPSYNC INPUT AND OUTPUT MAPPING */
 
 // Sip and Puff Action Mapping
-//  {INPUT ACTION, OUTPUT, ACTION, minTime, maxTime}
+//  {INPUT ACTION, MOUSE MODE ACTION, GAMEPAD MODE ACTION, MENU MODE ACTION, minTime, maxTime}
 const inputActionStruct sapActionProperty[]{
   { PRESS_SAP_MAIN_STATE_NONE,        CONF_ACTION_NOTHING,      CONF_ACTION_NOTHING,    CONF_ACTION_NOTHING,             0,     0 },
   
   // Puff actions
   { PRESS_SAP_MAIN_STATE_PUFF,        CONF_ACTION_LEFT_CLICK,   CONF_ACTION_B1_PRESS,   CONF_ACTION_SELECT_MENU_ITEM,    0,  1000 },
   { PRESS_SAP_MAIN_STATE_PUFF,        CONF_ACTION_DRAG,         CONF_ACTION_B3_PRESS,   CONF_ACTION_NOTHING,          1000,  3000 },
-  { PRESS_SAP_MAIN_STATE_PUFF,        CONF_ACTION_START_MENU,   CONF_ACTION_START_MENU, CONF_ACTION_STOP_MENU,        3000,  5000 },
+  { PRESS_SAP_MAIN_STATE_PUFF,        CONF_ACTION_START_MENU,   CONF_ACTION_START_MENU, CONF_ACTION_STOP_MENU,        3000,  8000 },
 
   // Sip Actions
   { PRESS_SAP_MAIN_STATE_SIP,         CONF_ACTION_RIGHT_CLICK,  CONF_ACTION_B2_PRESS,   CONF_ACTION_NEXT_MENU_ITEM,       0, 1000 },
   { PRESS_SAP_MAIN_STATE_SIP,         CONF_ACTION_SCROLL,       CONF_ACTION_B4_PRESS,   CONF_ACTION_NOTHING,           1000, 3000 },  
-  { PRESS_SAP_MAIN_STATE_SIP,         CONF_ACTION_MIDDLE_CLICK, CONF_ACTION_B5_PRESS,   CONF_ACTION_NOTHING,           3000, 5000 }
+  { PRESS_SAP_MAIN_STATE_SIP,         CONF_ACTION_MIDDLE_CLICK, CONF_ACTION_B5_PRESS,   CONF_ACTION_NOTHING,           3000, 8000 }
 };
 
 // Buttons built in to hub: S1 = Next, S2 = Select
@@ -412,11 +412,11 @@ const inputActionStruct buttonActionProperty[]{
 
   { INPUT_MAIN_STATE_S2_PRESSED,      CONF_ACTION_LEFT_CLICK,   CONF_ACTION_B1_PRESS,   CONF_ACTION_SELECT_MENU_ITEM,     0,  1000 },
   { INPUT_MAIN_STATE_S2_PRESSED,      CONF_ACTION_DRAG,         CONF_ACTION_B3_PRESS,   CONF_ACTION_NOTHING,           1000,  3000 },  
-  { INPUT_MAIN_STATE_S2_PRESSED,      CONF_ACTION_START_MENU,   CONF_ACTION_START_MENU, CONF_ACTION_STOP_MENU,         3000,  5000 },
+  { INPUT_MAIN_STATE_S2_PRESSED,      CONF_ACTION_START_MENU,   CONF_ACTION_START_MENU, CONF_ACTION_STOP_MENU,         3000,  8000 },
 
   { INPUT_MAIN_STATE_S1_PRESSED,      CONF_ACTION_RIGHT_CLICK,  CONF_ACTION_B2_PRESS,   CONF_ACTION_NEXT_MENU_ITEM,       0,  1000 },
   { INPUT_MAIN_STATE_S1_PRESSED,      CONF_ACTION_SCROLL,       CONF_ACTION_B4_PRESS,   CONF_ACTION_NOTHING,           1000,  3000 }, 
-  { INPUT_MAIN_STATE_S1_PRESSED,      CONF_ACTION_MIDDLE_CLICK, CONF_ACTION_B5_PRESS,   CONF_ACTION_NOTHING,           3000,  5000 },
+  { INPUT_MAIN_STATE_S1_PRESSED,      CONF_ACTION_MIDDLE_CLICK, CONF_ACTION_B5_PRESS,   CONF_ACTION_NOTHING,           3000,  8000 },
 
   { INPUT_MAIN_STATE_S12_PRESSED,     CONF_ACTION_START_MENU,   CONF_ACTION_START_MENU, CONF_ACTION_STOP_MENU,            0,  1000 },
 };

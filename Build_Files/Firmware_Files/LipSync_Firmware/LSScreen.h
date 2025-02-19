@@ -57,13 +57,21 @@
 #define FACTORY_RESET_CONFIRM2_PAGE 551
 #define INFO_PAGE 56
 
-#define SCROLL_DELAY_MILLIS 100
+#define SCROLL_DELAY_MILLIS 100 // [ms] This controls the scroll speed of long menu items
 
 #define _MODE_MOUSE_USB 1
 #define _MODE_MOUSE_BT 2
 #define _MODE_GAMEPAD_USB 3
 
-const int TEXT_ROWS = 4;
+const int CHAR_PIXEL_HEIGHT_S1 = 8;    // The height of a character on the screen, in pixels, for size 1 text
+const int CHAR_PIXEL_WIDTH_S1 = 6;     // The width of a character on the screen, in pixels, for size 1 text
+
+const int CHAR_PIXEL_HEIGHT_S2 = CHAR_PIXEL_HEIGHT_S1 * 2;    // The height of a character on the screen, in pixels, for size 2 text
+const int CHAR_PIXEL_WIDTH_S2  = CHAR_PIXEL_WIDTH_S1 * 2;     // The width of a character on the screen, in pixels, for size 2 text
+
+const int TEXT_ROWS = CONF_SCREEN_HEIGHT / CHAR_PIXEL_HEIGHT_S2;
+
+int scrollPixelsPerLoop = 4;
 
 extern unsigned int g_usbAttempt;
 extern unsigned int g_usbConnectDelay;
@@ -864,7 +872,7 @@ void LSScreen::nextSelection() {
 // Return     : void
 //*********************************//
 void LSScreen::scrollLongText() {
-  int minPos = -12 * _selectedText.length();
+  int minPos = -CHAR_PIXEL_WIDTH_S2 * _selectedText.length();
 
   _display.setTextSize(2);                              // 2x scale text
   _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);  // Draw white text on solid black background
@@ -874,19 +882,22 @@ void LSScreen::scrollLongText() {
     _scrollDelayTimer = millis();
 
     // Clear previous text by writing over it with blank text
-    _display.setCursor(0, _selectedLine * 16);
+    _display.setCursor(0, _selectedLine * CHAR_PIXEL_HEIGHT_S2);
     _display.print("                                   ");
 
     // Display text in new position to simulate scrolling
-    _display.setCursor(_scrollPos, _selectedLine * 16);
+    _display.setCursor(_scrollPos, _selectedLine * CHAR_PIXEL_HEIGHT_S2);
     _display.print(_selectedText);
 
-    _display.setCursor(0, _selectedLine * 16);
+    _display.setCursor(0, _selectedLine * CHAR_PIXEL_HEIGHT_S2);
     _display.print(">");
     _display.display();
-    //displayCursor();  // TODO Remove?
-    _scrollPos = _scrollPos - 4;
-    if (_scrollPos < minPos) _scrollPos = _display.width();
+
+    _scrollPos = _scrollPos - scrollPixelsPerLoop;
+    
+    if (_scrollPos < minPos) {
+      _scrollPos = _display.width();
+    }
   }
 }
 

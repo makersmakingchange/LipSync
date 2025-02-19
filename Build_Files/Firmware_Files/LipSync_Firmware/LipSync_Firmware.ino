@@ -190,7 +190,7 @@ void setup() {
   pollTimerId[CONF_TIMER_INPUT] = pollTimer.setInterval(CONF_INPUT_POLL_RATE, 0, inputLoop);
   pollTimerId[CONF_TIMER_BLUETOOTH] = pollTimer.setInterval(CONF_BT_FEEDBACK_POLL_RATE, 0, btFeedbackLoop);
   pollTimerId[CONF_TIMER_DEBUG] = pollTimer.setInterval(CONF_DEBUG_POLL_RATE, 0, debugLoop);
-  pollTimerId[CONF_TIMER_SCROLL] = pollTimer.setInterval(CONF_JOYSTICK_POLL_RATE, CONF_SCROLL_POLL_RATE, joystickLoop);
+  pollTimerId[CONF_TIMER_SCROLL] = pollTimer.setInterval(CONF_SCROLL_POLL_RATE, 0, joystickLoop);
   pollTimerId[CONF_TIMER_SCREEN] = pollTimer.setInterval(CONF_SCREEN_POLL_RATE, 0, screenLoop);
 
   // If USB is not connected, try to reconnect
@@ -1505,6 +1505,11 @@ void performJoystickCalibrationStep(int* args) {
   String stepCommand = "CA," + String(stepNumber);  // Command to output calibration point via serial
   pointFloatType maxPoint;
   int magnetZDirection = js.getMagnetZDirection();
+
+  //Serial.print("Step started: ");   // TODO: Remove these print statements
+  //Serial.print(stepNumber);
+  //Serial.print(" numRuns: ");
+  //Serial.println(calibrationTimer.getNumRuns(calibrationTimerId[1]));
 
   // Turn on and set all leds to orange to indicate start of the process // TODO Jake update to non-neopixel LEDS
   if (calibrationTimer.getNumRuns(calibrationTimerId[1]) == 1) {  // Turn LLED's ON when timer is running for first time
