@@ -107,6 +107,7 @@ public:
   void connectionTimingPage(unsigned long, unsigned long);
   void resetPage();
   void safeModePage(int);
+  void print4LineString(String s1, String s2, String s3, String s4);
 
   bool showCenterResetComplete = false;
 
@@ -1640,6 +1641,7 @@ void LSScreen::connectionTimingPage(unsigned long before, unsigned long after) {
   _display.display();
 }
 
+
 //*********************************//
 // Function   : safeModePage
 //
@@ -1676,6 +1678,26 @@ void LSScreen::safeModePage(int safeModeReason) {
 
 
   _display.display();
+}
+
+//*********************************//
+// Function   : print4LineString
+//
+// Description: Format and display a page with 4 lines of Strings
+//
+// Arguments :  String s1, String s2, String s3, String s4 (four lines of text as Strings)
+//
+// Return     : void
+//*********************************//
+
+void LSScreen::print4LineString(String s1, String s2, String s3, String s4) {
+  setupDisplay();
+  _display.println(s1);
+  _display.println(s2);
+  _display.println(s3);
+  _display.println(s4);
+  _display.display();
+  //delay(1000);
 }
 
 #endif

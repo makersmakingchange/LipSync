@@ -368,6 +368,8 @@ void errorCheck(void) {
     screen.errorPageI2C();
   }
 
+  //screen.print4LineString("isReady" + String(!usbmouse.isReady()), "retry" + String(usbmouse.usbRetrying), "timedout" + String(usbmouse.timedOut), "gamepad" + String(!gamepad.isReady()));
+
   if ((g_operatingMode == CONF_OPERATING_MODE_MOUSE) && (g_comMode == CONF_COM_MODE_USB)
       && (!usbmouse.isReady() || usbmouse.usbRetrying || usbmouse.timedOut)) {
     g_errorCode = CONF_ERROR_USB;
@@ -517,7 +519,7 @@ void readyToUse(void) {
 
   if (readyToUseFirstTime && g_resetCenterComplete) {
 
-    if (g_errorCode == 0) {
+    if (g_errorCode == CONF_ERROR_NONE) {
       buzzer.playReadySound();
       screen.splashScreen2();
       readyToUseFirstTime = false;
@@ -870,7 +872,8 @@ void usbCheckConnection(void) {
 
     usbConnectTimerId[0] = usbConnectTimer.setTimeout(g_usbConnectDelay, usbCheckConnection);  // Keep retrying connection until USB connection is made
 
-  } else if (!usbmouse.isReady() && !gamepad.isReady()) {
+  } else if (((g_operatingMode == CONF_OPERATING_MODE_MOUSE) && (g_comMode == CONF_COM_MODE_USB) && (!usbmouse.isReady()))  // in usb mouse mode and usb mouse is not ready
+      || ((g_operatingMode == CONF_OPERATING_MODE_GAMEPAD) && !gamepad.isReady())){                                         // in usb gamepad mode and usb gamepad is not ready
 
     if (!screen.isMenuActive()) {
       screen.noUsbPage();
