@@ -106,6 +106,7 @@ public:
   void warningUSBDebugOn();
   void connectionTimingPage(unsigned long, unsigned long);
   void resetPage();
+  void safeModePage(int);
 
   bool showCenterResetComplete = false;
 
@@ -412,7 +413,7 @@ void LSScreen::splashScreen2() {
   _display.display();
 
   if (USB_DEBUG){
-    delay(2000);
+    delay(2000);  //TODO - 2025-FEB-21 Why is this delay here?
     warningUSBDebugOn();
   } else {
     _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
@@ -1635,6 +1636,44 @@ void LSScreen::connectionTimingPage(unsigned long before, unsigned long after) {
   _display.println("After beginComOpMode");
   _display.setTextSize(2);
   _display.println(after);
+
+  _display.display();
+}
+
+//*********************************//
+// Function   : safeModePage
+//
+// Description: Format and display an page showing that device is in safe boot mode
+//
+// Arguments :  int safeModeReason
+//
+// Return     : void
+//*********************************//
+
+void LSScreen::safeModePage(int safeModeReason) {
+  setupDisplay();
+
+  _display.println("");  // Blank top line
+  _display.println(" SAFE MODE");
+  switch(safeModeReason) {
+        case CONF_SAFE_MODE_REASON_INPUT:
+        {
+          _display.println("Hub");
+          break;
+        }
+        case CONF_SAFE_MODE_REASON_WATCHDOG:
+        {
+          _display.println("Watchdog");
+          break;
+        }
+        default:
+        {
+          _display.println("");
+          break;
+        }
+  }
+  _display.println("");
+
 
   _display.display();
 }

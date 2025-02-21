@@ -103,7 +103,7 @@ void LSInput::update() {
 
   // inputAllState = inputState[0] + 2 * inputState[1] + 4 * inputState[2];
  
-  // prev: none,waiting  current : none 
+  // prev: none, waiting  current : none 
   // prev: press x,started  current : press x 
   if((inputAllState == inputPrevState.mainState // current button states are the same as previous
       && inputPrevState.secondaryState != INPUT_SEC_STATE_RELEASED)) { // and last state was not a release

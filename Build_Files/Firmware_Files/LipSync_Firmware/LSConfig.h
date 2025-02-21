@@ -22,6 +22,7 @@
 // Debugging
 #define USB_DEBUG  0 // Set this to 0 for best performance
 #define SHOW_CONNECTION_TIME 0 // Set to 0 for production
+
 #define CONF_ENABLE_WATCHDOG 1 // Used to disable watchdog
 
 //***DO NOT CHANGE***//
@@ -34,10 +35,10 @@
 const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + String(CONF_LIPSYNC_VERSION_MINOR) + "." + String(CONF_LIPSYNC_VERSION_REV);
 
 // I2C Devices
-#define I2CADDR_DISPLAY 0x3D   // Display address (61)
-#define I2CADDR_LPS22   0x5C     // Modified LPS22 address (92)
+#define I2CADDR_DISPLAY 0x3D  // Display address (61)
+#define I2CADDR_LPS22   0x5C  // Modified LPS22 address (92)
 #define I2CADDR_LPS35HW 0x5D  // LPS35HW address (93)
-#define I2CADDR_TLV493D 0x5E   // 3D Hall Effect Sensor (94)
+#define I2CADDR_TLV493D 0x5E  // 3D Hall Effect Sensor (94)
 
 
 // Input pins
@@ -79,12 +80,11 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
                                           // 2 = Gamepad  
 
 // Communication mode values 
+#define CONF_COM_MODE_MIN  0
 #define CONF_COM_MODE_NONE 0 
 #define CONF_COM_MODE_USB  1
 #define CONF_COM_MODE_BLE  2
-
-#define CONF_COM_MODE_MIN 0
-#define CONF_COM_MODE_MAX 2
+#define CONF_COM_MODE_MAX  2
 
 #define CONF_COM_MODE_DEFAULT CONF_COM_MODE_USB
 
@@ -177,6 +177,11 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 #define CONF_WATCHDOG_TIMEOUT_SEC 30        // 30 second hardware watchdog
 
+
+// Safe Boot Mode
+#define CONF_SAFE_MODE_REASON_WATCHDOG 1
+#define CONF_SAFE_MODE_REASON_INPUT 2
+
 // Hub Menu
 #define CONF_SPLASH_SCREEN_DURATION 10000   // 10 seconds - how long the splash screen stays on on startup
 #define CONF_MENU_TIMEOUT  300000           // 300 seconds (5 minutes) - duration of inactivity after which the screen turns off 
@@ -238,9 +243,10 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 // Internal Test
 #define CONF_TEST_MODE_MIN 1
-#define CONF_TEST_MODE_MAX 2
 #define CONF_TEST_MODE_LED 1
 #define CONF_TEST_MODE_BUZZER 2
+#define CONF_TEST_MODE_WATCHDOG 3
+#define CONF_TEST_MODE_MAX 3
 
 
 // Sound Modes                                                                                              

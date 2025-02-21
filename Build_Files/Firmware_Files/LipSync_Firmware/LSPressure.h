@@ -71,8 +71,8 @@ class LSPressure {
     int getPressureMode();                              // Get Sip and Puff Pressure Mode : ABS or DIFF pressure
     void setPressureMode(int mode);                     // Set Sip and Puff Pressure Mode : ABS or DIFF pressure
     void setRefTolerance(float value);                  // Set reference pressure change tolerance value that is used to update the reference pressure 
-    float getOffsetPressure();                            // Get Offset pressure (sapPressureAbs- ambientPressure)
-    void setOffsetPressure();                             // Set Offset pressure offsetPressure = (sapPressureAbs- ambientPressure)
+    float getOffsetPressure();                          // Get Offset pressure (sapPressureAbs- ambientPressure)
+    void setOffsetPressure();                           // Set Offset pressure offsetPressure = (sapPressureAbs- ambientPressure)
     void setZeroPressure();                             // Zero the base reference pressure and update Offset pressure value 
     void setThreshold(float s, float p);                // Set sip and puff thresholds
     void setSipThreshold(float s);                      // Set sip threshold
@@ -80,9 +80,9 @@ class LSPressure {
     void update();                                      // Update the pressure buffer and sip and puff buffer with new readings 
     void updatePressure();                              // Update the pressure buffer with new readings 
     void updateState();                                 // Update the and puff buffer with new states 
-    float getSapPressureAbs();                            // Get last main pressure from pressure buffer
-    float getAmbientPressure();                             // Get last reference pressure from pressure buffer
-    float getSapPressure();                            // Get the Pressure Difference sapPressure = (sapPressureAbs- ambientPressure- offsetPressure)
+    float getSapPressureAbs();                          // Get last main pressure from pressure buffer
+    float getAmbientPressure();                         // Get last reference pressure from pressure buffer
+    float getSapPressure();                             // Get the Pressure Difference sapPressure = (sapPressureAbs- ambientPressure- offsetPressure)
     pressureStruct getAllPressure();                    // Get the latest pressure values 
     inputStateStruct getState();                        // Get the latest sip and puff state  
 
@@ -347,6 +347,7 @@ void LSPressure::setOffsetPressure()
 // Function   : setZeroPressure 
 // 
 // Description: Set the offset pressure value (hPa) and the reference pressure 
+//
 // Arguments :  void
 // 
 // Return     : void
@@ -361,8 +362,9 @@ void LSPressure::setZeroPressure()
   offsetPressure = (offsetPressure / PRESS_BUFF_SIZE);  // Set the offsetPressure equal to average offset values in pressure buffer  
 
   if (USB_DEBUG) {
-    Serial.print("Offset Pressure: ");
-    Serial.println(offsetPressure);
+    Serial.print("setZeroPressure(): Offset Pressure: ");
+    Serial.print(offsetPressure);
+    Serial.println(" hPa");
   }
 }
 

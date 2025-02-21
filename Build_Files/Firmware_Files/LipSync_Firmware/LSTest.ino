@@ -42,6 +42,11 @@ void activateTest(int inputTest) {
     case (CONF_TEST_MODE_BUZZER):
       testBuzzer();
       break;
+    
+    case (CONF_TEST_MODE_WATCHDOG):
+      testWatchdog();
+      break;
+
   } // end switch inputTest
   Serial.println("Test Complete");
 }
@@ -185,4 +190,36 @@ void testBuzzer() {
   // TODO test enable/disable sound
 
   Serial.println("SOUND TEST COMPLETE");
+}  // end testBuzzer()
+
+//***TEST WATCHDOG FUNCTION***//
+// Function   : testWatchdog
+//
+// Description: This function tests the watchdog
+//
+// Parameters : void
+//
+// Return     : void
+//****************************************//
+void testWatchdog() {
+
+  Serial.println("WATCHDOG TEST ACTIVATED");
+
+  Serial.println("TEST_MODE_WATCHDOG: Delaying longer than watchdog reset...");
+  Serial.print("TEST_MODE_WATCHDOG: CONF_WATCHDOG_TIMEOUT_SEC:");
+  Serial.println(CONF_WATCHDOG_TIMEOUT_SEC);
+
+  unsigned long watchdogTestStart = millis();
+  unsigned long currentTime = millis();
+
+  unsigned long watchdogTestTimeout = CONF_WATCHDOG_TIMEOUT_SEC*1000+5000;
+
+  while (currentTime - watchdogTestStart < watchdogTestTimeout) {
+    delay(1000);
+    Serial.println((currentTime-watchdogTestStart)/1000);
+    currentTime = millis();
+  }
+  Serial.println("TEST_MODE_WATCHDOG:TEST FAILED"); // Should never reach this if watchdog is enabled
+  
+  Serial.println("WATCHDOG TEST COMPLETE");
 }  // end testBuzzer()

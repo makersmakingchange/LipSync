@@ -2,7 +2,7 @@
 * File: LipSync_Firmware.ino
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.1rc (20 January 2025)
+* Version: v4.1rc (19 February 2025)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 - 2025 Neil Squire Society
@@ -18,7 +18,6 @@
 
 #include <String.h>
 #include <Wire.h>
-#include <nrf_wdt.h>
 #include "LSUtils.h"
 #include "LSConfig.h"
 #include "LSTimer.h"
@@ -33,6 +32,7 @@
 #include "LSMemory.h"
 #include "LSScreen.h"
 #include "LSBuzzer.h"
+#include "LSWatchdog.h"
 
 // Unique ID
 String g_deviceUID = "";  // Global variable for storing unique identifier for board
@@ -52,6 +52,9 @@ int g_debugMode;  // 0 = Debug mode is Off
 
 int g_errorCode = 0;  // Global variable for storing error code. 0 is no error. Additional errors defined in LSConfig.h
 
+bool g_watchdogReset = false;
+bool g_safeModeEnabled = false;
+int g_safeModeReason = 0;
 bool readyToUseFirstTime = true;
 
 bool g_btIsConnected = false;   // Bluetooth connection state
@@ -142,6 +145,8 @@ LSUSBGamepad gamepad;  // Create an instance of the USB gamepad object
 // Return     : void
 //*********************************//
 void setup() {
+  initGlobals();  //  Intialize global variables to default values
+  checkResetReason();  //  Check reason for reset and reset the reset-reason register
 
   beginMillis = millis();  // Intialize timer
 
@@ -155,16 +160,19 @@ void setup() {
 
   initLed();  // Initialize LED Feedback
 
-  ledWaitFeedback();  // Turn on all LEDS
-
   initBuzzer();  // Initialize Buzzer
 
   initInput();  // Initialize input buttons and input switches
+
+
+  ledWaitFeedback();  // Turn on all LEDS
 
   beforeComOpMillis = millis() - beginMillis;  // Note time before USB/BT connection
   beginComOpMode();                            // Initialize Operating Mode, Communication Mode, and start instance of mouse or gamepad
   afterComOpMillis = millis() - beginMillis;   // Note time after USB/BT connection
 
+
+  checkSafeMode();  // Check to see if we need to boot in safe mode.
 
   if (USB_DEBUG) {
     while (!Serial) {  //wait for serial connection to establish
@@ -243,14 +251,17 @@ void setup() {
     //calibrationTimer.disable(1);
   }
 
+  // If any devices are not connected, handle error
   if (!g_displayConnected || !g_mouthpiecePressureSensorConnected || !g_ambientPressureSensorConnected || !g_joystickSensorConnected) {
     errorCheck();
   }
 
+  toggleSafeMode(g_safeModeEnabled);
 
-  if (CONF_ENABLE_WATCHDOG) {
+  if (CONF_ENABLE_WATCHDOG && !g_watchdogReset && !g_safeModeEnabled) { 
     initWatchdog();  // Initialize hardware watchdog
   }
+
 
   if (USB_DEBUG) { Serial.println("USBDEBUG: Setup complete."); }
 
@@ -284,45 +295,37 @@ void loop() {
 }
 
 
-//*********************************//
-// Watchdog Functions
-//*********************************//
-
-//***INITIALIZE WATCHDOG FUNCTION***//
-// Function   : initWatchdog
+//***INITIALIZE GLOBALS FUNCTION***//
+// Function   : initGlobals
 //
-// Description: This function initializes the hardware watchdog
+// Description: This function initializes global variables to default values
 //
 // Parameters : void
 //
 // Return     : void
 //****************************************//
-void initWatchdog() {
-  if (USB_DEBUG) { Serial.println("USBDEBUG: initWatchdog()"); }
-  // Configure watchdog timer with a 10-second timeout
-  NRF_WDT->CONFIG = (WDT_CONFIG_HALT_Pause << WDT_CONFIG_HALT_Pos) |  // Keep running during halt
-                    (WDT_CONFIG_SLEEP_Run << WDT_CONFIG_SLEEP_Pos);   // Keep running in sleep mode
-  NRF_WDT->CRV = CONF_WATCHDOG_TIMEOUT_SEC * 32768;                   // Convert 10 seconds to watchdog cycles (1 cycle = 1/32.768kHz)
-  NRF_WDT->RREN |= WDT_RREN_RR0_Msk;                                  // Enable reload register 0
-  NRF_WDT->TASKS_START = 1;                                           // Start watchdog
+void initGlobals() {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: initGlobals()"); } //  Won't display as function called before serial established
+
+  g_ambientPressureSensorConnected = false;
+  g_joystickSensorConnected = false;
+  g_displayConnected = false;
+  g_usbIsConnected = false;
+  g_btIsConnected = false;
+  g_errorCode = 0;
+  g_debugMode = 0;
+  //g_lightMode = 1;  //  Currently unused
+  //g_soundMode = 1; //  Currently unused
+  g_operatingMode = 1;
+  g_comMode = 1;
+  //g_firstLoop = true;
+
+  g_watchdogReset = false;
+  g_safeModeEnabled = false;
+  g_safeModeReason = 0;
+
+
 }
-
-//***WATCHDOG LOOP FUNCTION***//
-// Function   : watchdogLoop
-//
-// Description: This function
-//
-// Parameters : void
-//
-// Return     : void
-//****************************************//
-void watchdogLoop(void) {
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: watchDogLoop()"); }
-
-  NRF_WDT->RR[0] = WDT_RR_RR_Reload;  // Feed (reset) the watchdog timer
-}
-
-
 
 
 //***ERROR CHECK FUNCTION***//
@@ -396,6 +399,105 @@ void errorScreen(void) {
     }
   }
 }
+
+
+//***CHECK SAFE MODE FUNCTION***//
+// Function   : checkSafeMode
+//
+// Description: Checks if both hub buttons are pressed on startup in order to enter safe boot mode.
+//
+// Parameters : void
+//
+// Return     : void
+//****************************************//
+void checkSafeMode(void) {
+
+  if (USB_DEBUG) { Serial.println("USBDEBUG: checkSafeMode()"); }
+  
+  // // Read Hub button values
+  // ib.update();  // update buttons
+  // delay(100);
+  // ib.update();
+  
+  // // Get the last state change
+  // buttonState = ib.getInputState();
+    
+  // // Evaluate Output Actions
+  // evaluateOutputAction(buttonState, buttonActionMaxTime, buttonActionSize, buttonActionPropertyStartup);
+
+  int buttonSelectState1 = !digitalRead(CONF_BUTTON1_PIN);
+  int buttonNextState1 =   !digitalRead(CONF_BUTTON2_PIN);
+
+  delay(50);
+
+  int buttonSelectState2 = !digitalRead(CONF_BUTTON1_PIN);
+  int buttonNextState2 =   !digitalRead(CONF_BUTTON2_PIN);
+
+  if (buttonSelectState1 == HIGH && buttonSelectState2 == HIGH && buttonNextState1 == HIGH && buttonNextState2 == HIGH) {
+    g_safeModeEnabled = true;
+    g_safeModeReason = CONF_SAFE_MODE_REASON_INPUT;  //  Both hub buttons pushed on startup
+    
+  } else if (g_watchdogReset) {
+    g_safeModeEnabled = true;
+    g_safeModeReason = CONF_SAFE_MODE_REASON_WATCHDOG;
+
+  } else {
+    g_safeModeEnabled = false;
+  }
+
+  
+}
+
+//***TOGGLE SAFE MODE FUNCTION***//
+// Function   : toggleSafeMode
+//
+// Description: Checks if both hub buttons are pressed on startup in order to enter safe boot mode.
+//
+// Parameters : bool : safeModeEnabled : Whether safe mode is enabled or disabled
+//
+// Return     : void
+//****************************************//
+void toggleSafeMode(bool safeModeEnabled) {
+  
+  if (safeModeEnabled) {
+    // Prevent mouse and gamepad outputs from being sent
+    
+    // Provide feedback based on reason for activating safe mode
+    switch(g_safeModeReason) {
+      case CONF_SAFE_MODE_REASON_INPUT:
+      {
+        if (USB_DEBUG) { Serial.println("USBDEBUG: SAFE MODE ENABLED - Hub Buttons"); }
+        break;
+      }
+      case CONF_SAFE_MODE_REASON_WATCHDOG:
+      {
+        if (USB_DEBUG) { Serial.println("USBDEBUG: SAFE MODE ENABLED - Watchdog"); }
+        break;
+      }
+      default:
+      {
+        if (USB_DEBUG) { Serial.println("USBDEBUG: SAFE MODE ENABLED"); }
+        break;
+      }
+
+      
+    }
+
+    // activate safe boot mode screen on display
+    screen.safeModePage(g_safeModeReason);
+    screen.update();
+   
+    // Disable poll timers?
+
+
+  } else {
+    // Allow mouse / gamepad output
+
+  }
+
+
+}
+
 
 
 //***READY TO USE FUNCTION***//
@@ -1045,7 +1147,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
   // Output action logic
   int tempActionIndex = 0;
 
-  // Handle input action when it's in hold state
+  // Handle input action when it's in hold state (scroll mode or drag mode)
   if ((actionState.secondaryState == INPUT_SEC_STATE_RELEASED) && (outputAction == CONF_ACTION_SCROLL || outputAction == CONF_ACTION_DRAG)) {
     setLedDefault();  // Set default led feedback
     // Set new state of current output action
@@ -2308,7 +2410,7 @@ void performLedAction(ledStateStruct* args) {
         break;
       }
 
-      /* case LED_ACTION_BLINKFAST:
+      /* case LED_ACTION_BLINKFAST:  // TODO 2025-Feb-21 Fix or remove blinkfast leds
     {
       blinkLedFast(args);
       break;
