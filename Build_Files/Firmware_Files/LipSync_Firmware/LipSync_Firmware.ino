@@ -1063,7 +1063,8 @@ void initSipAndPuff() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Sip and Puff"); }
   ps.begin();                                                             // Begin sip and puff
   getPressureMode(true, false);                                           // Get the pressure mode stored in flash memory ( 1 = Absolute , 2 = Differential )
-  getPressureThreshold(true, false);                                      // Get sip and puff pressure thresholds stored in flash memory
+  getSipPressureThreshold(true, false);                                   // Get sip  pressure thresholds stored in flash memory
+  getPuffPressureThreshold(true, false);                                  // Get  puff pressure thresholds stored in flash memory
   sapActionSize = sizeof(sapActionProperty) / sizeof(inputActionStruct);  // Size of total available sip and puff actions
   sapActionMaxTime = getActionMaxTime(sapActionSize, sapActionProperty);  // Maximum end action time
 }
