@@ -250,7 +250,6 @@ void LSScreen::begin() {
 
     g_displayConnected = false;
     //TODO Handle screen not initialized error
-    break;
   }
 
   setupDisplay();  // Clear screen
