@@ -75,7 +75,6 @@ class LSPressure {
     float getOffsetPressure();                          // Get Offset pressure: (sapPressureAbs- ambientPressure)
     void setOffsetPressure();                           // Set Offset pressure: offsetPressure = (sapPressureAbs- ambientPressure)
     void setZeroPressure();                             // Zero the base reference pressure and update Offset pressure value 
-    void setThreshold(float s, float p);                // Set sip and puff thresholds
     void setSipThreshold(float s);                      // Set sip threshold
     void setPuffThreshold(float p);                     // Set puff threshold
     void update();                                      // Update the pressure buffer and sip and puff buffer with new readings 
@@ -164,7 +163,10 @@ void LSPressure::begin()
   //setFilterMode(PRESS_FILTER_NONE);         // Set the default filter mode to none  //  TODO 2025-Feb-22 Currently unused
   setPressureMode(PRESS_MODE_DIFF);         // Set the default pressure mode to differential mode (i.e., mouthpiece and ambient)
   setRefTolerance(PRESS_REF_TOLERANCE);     // Set the default tolerance value to update reference pressure 
-  setThreshold(PRESS_SAP_DEFAULT_THRESHOLD, PRESS_SAP_DEFAULT_THRESHOLD); // Set the default sip and puff thresholds
+  
+  // Set default pressure thresholds
+  setSipThreshold(PRESS_SAP_DEFAULT_THRESHOLD);
+  setPuffThreshold(PRESS_SAP_DEFAULT_THRESHOLD);
 
   //delay(5);
   //_lps35hw.setDataRate(LPS35HW_RATE_25_HZ);  // Options: 1 Hz, 10Hz, 25Hz, 50Hz, 75Hz
@@ -374,21 +376,6 @@ void LSPressure::setZeroPressure()
   }
 }
 
-
-//*********************************//
-// Function   : setThreshold 
-// 
-// Description: Set the sip and puff pressure thresholds in hPa
-// Arguments :  s : float : Sip pressure threshold
-//              p : float : Puff pressure threshold
-// 
-// Return     : void
-//*********************************//
-void LSPressure::setThreshold(float s, float p) //TODO 2025-Feb-22 rename to setThresholds
-{
-  _sipThreshold = s;
-  _puffThreshold = p;
-}
 
 //*********************************//
 // Function   : setSipThreshold 
