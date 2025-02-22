@@ -36,7 +36,7 @@ class LSTimer {
     typedef void (*timer_callback)(void);                                         // Define a function pointer type for a callback function with no parameters.
     typedef void (*timer_callback_p)(T *);                                        // Define a function pointer type for a callback function with parameters.
     typedef struct {                                                              // Define timer structure
-      unsigned long prev_millis;                                                  // Last time the timer was triggered 
+      unsigned long previousTime;                                                 // Last time the timer was triggered 
       void* callback;                                                             // Pointer to the callback function
       T* param;                                                                   // Pointer to the function parameter
       boolean hasParam;                                                           // Check if callback takes a parameter
@@ -93,7 +93,7 @@ LSTimer<T>::LSTimer() { // TODO 2025-Feb-07 Consider adding overridden function 
 
    for (int i = 0; i < MAX_TIMERS; i++) {
         memset(&timer[i], 0, sizeof (timer_t)); //  Initialize each timer
-        timer[i].prev_millis = current_millis;  //  Set the start time for each timer
+        timer[i].previousTime = current_millis;  //  Set the start time for each timer
     }
 
     numTimers = 0;
@@ -131,10 +131,10 @@ void LSTimer<T>::run() {
             } 
             
             // Check if it's time to process timer
-            if ((current_millis - timer[i].prev_millis) >= delay_millis) {
+            if ((current_millis - timer[i].previousTime) >= delay_millis) {
 
                 // Update the time the timer was triggered
-                timer[i].prev_millis += delay_millis;  //  TODO shouldn't this be the actual triggered time, e.g., current_millis (vs, idealized trigger time when current-prev = delay) (should also be moved to where function is actually called?)
+                timer[i].previousTime += delay_millis;  //  TODO shouldn't this be the actual triggered time, e.g., current_millis (vs, idealized trigger time when current-prev = delay) (should also be moved to where function is actually called?)
 
                 // Check if the timer callback has to be executed
                 if (timer[i].enabled) {
@@ -248,7 +248,7 @@ int LSTimer<T>::setupTimer(unsigned long interval, unsigned long startDelay, boo
     timer[freeTimerIndex].enabled = true;
     timer[freeTimerIndex].startDelayTime = startDelay;
     timer[freeTimerIndex].startDelayEnabled = on;
-    timer[freeTimerIndex].prev_millis = millis();
+    timer[freeTimerIndex].previousTime = millis();
 
     numTimers++;
 
@@ -386,7 +386,7 @@ int LSTimer<T>::startTimer() {
     timer[freeTimerIndex].enabled = true;
     timer[freeTimerIndex].startDelayTime = 0;
     timer[freeTimerIndex].startDelayEnabled = false;
-    timer[freeTimerIndex].prev_millis = millis();
+    timer[freeTimerIndex].previousTime = millis();
 
     numTimers++;
 
@@ -413,7 +413,7 @@ unsigned long LSTimer<T>::elapsedTime(int timerId) {
 
     // Get current time
     current_millis = millis();
-    diff_millis = current_millis - timer[timerId].prev_millis;
+    diff_millis = current_millis - timer[timerId].previousTime;
     return diff_millis;
 }
 
@@ -445,7 +445,7 @@ int LSTimer<T>::deleteTimer(int timerId) {
     // Don't decrease the number of timers if the slot is already empty
     if (timer[timerId].callback != NULL) {
         memset(&timer[timerId], 0, sizeof (timer_t));
-        timer[timerId].prev_millis = millis();
+        timer[timerId].previousTime = millis();
 
         // update number of timers
         numTimers--;
@@ -471,7 +471,7 @@ void LSTimer<T>::restartTimer(int timerId) {
         return;
     }
 
-    timer[timerId].prev_millis = millis();
+    timer[timerId].previousTime = millis();
     timer[timerId].numRuns = 0;
 }
 
