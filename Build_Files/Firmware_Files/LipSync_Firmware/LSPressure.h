@@ -99,7 +99,6 @@ class LSPressure {
       float ambientPressure;                              // Reference Pressure reading (Ambient Absolute) [hPa]
       float offsetPressure;                               // Offset Pressure [hPa] (Difference between two sensors)
       float sapPressure;                                  // Calculated Pressure Difference sapPressure = (sapPressureAbs- ambientPressure- offsetPressure)
-      sensors_event_t pressure_event;                     // Onboard pressure event object 
       float refTolVal;                                    // The tolerance value in hPa used to check and update reference pressure 
       LSTimer <void> mainStateTimer;                      // Timer used to measure time for each sip and puff action. 
       int sapStateTimerId;                                // The id for the sap state timer
