@@ -108,6 +108,8 @@ public:
   void resetPage();
   void safeModePage(int);
   void print4LineString(String s1, String s2, String s3, String s4);
+  void disableTimeout();
+  void enableTimeout();
 
   bool showCenterResetComplete = false;
 
@@ -118,6 +120,7 @@ private:
   int _screenStateTimerId;          // The id for the sap state timer
 
   bool _isActive = false;
+  bool _menuTimeoutEnabled = true;
   int _currentMenu = 0;
   int _prevMenu = -1;
   int _currentSelection = 0;
@@ -247,6 +250,7 @@ void LSScreen::begin() {
 
     g_displayConnected = false;
     //TODO Handle screen not initialized error
+    break;
   }
 
   setupDisplay();  // Clear screen
@@ -292,7 +296,7 @@ void LSScreen::update() {
     scrollLongText();
   }
 
-  if (((millis() - _lastActivityMillis) > CONF_MENU_TIMEOUT) && _isActive) {
+  if (((millis() - _lastActivityMillis) > CONF_MENU_TIMEOUT) && _isActive && _menuTimeoutEnabled) {
     deactivateMenu();
   }
 }
@@ -1697,7 +1701,34 @@ void LSScreen::print4LineString(String s1, String s2, String s3, String s4) {
   _display.println(s3);
   _display.println(s4);
   _display.display();
-  //delay(1000);
+}
+
+//*********************************//
+// Function   : enableTimeout
+//
+// Description: Enables the display timeout
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
+
+void LSScreen::enableTimeout(void) {
+  _menuTimeoutEnabled = true;
+}
+
+//*********************************//
+// Function   : disableTimeout
+//
+// Description: Disables the display timeout
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
+
+void LSScreen::disableTimeout(void) {
+  _menuTimeoutEnabled = false;
 }
 
 #endif
