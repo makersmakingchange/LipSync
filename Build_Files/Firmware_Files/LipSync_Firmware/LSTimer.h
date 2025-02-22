@@ -77,8 +77,6 @@ class LSTimer {
                                                              
 };
 
-static inline unsigned long elapsed() { return millis(); }
-
 
 //*********************************//
 // Function   : LSTimer 
@@ -91,7 +89,7 @@ static inline unsigned long elapsed() { return millis(); }
 //*********************************//
 template<typename T>
 LSTimer<T>::LSTimer() { // TODO 2025-Feb-07 Consider adding overridden function with size argument for better memory manager
-    unsigned long current_millis = elapsed();
+    unsigned long current_millis = millis();
 
    for (int i = 0; i < MAX_TIMERS; i++) {
         memset(&timer[i], 0, sizeof (timer_t)); //  Initialize each timer
@@ -117,7 +115,7 @@ void LSTimer<T>::run() {
     unsigned long delay_millis;  //  
 
     // Get the current time
-    current_millis = elapsed();
+    current_millis = millis();
 
     // Determine which timers should be called
     for (i = 0; i < MAX_TIMERS; i++) {
@@ -233,7 +231,7 @@ int LSTimer<T>::setupTimer(unsigned long interval, unsigned long startDelay, boo
 
     freeTimerIndex = findFirstFreeSlot();
     if (freeTimerIndex < 0) {
-        Serial.println("DEBUG: No free timers");
+        Serial.println("ERROR: No free timers");
         return -1;
     }
 
@@ -250,7 +248,7 @@ int LSTimer<T>::setupTimer(unsigned long interval, unsigned long startDelay, boo
     timer[freeTimerIndex].enabled = true;
     timer[freeTimerIndex].startDelayTime = startDelay;
     timer[freeTimerIndex].startDelayEnabled = on;
-    timer[freeTimerIndex].prev_millis = elapsed();
+    timer[freeTimerIndex].prev_millis = millis();
 
     numTimers++;
 
@@ -388,7 +386,7 @@ int LSTimer<T>::startTimer() {
     timer[freeTimerIndex].enabled = true;
     timer[freeTimerIndex].startDelayTime = 0;
     timer[freeTimerIndex].startDelayEnabled = false;
-    timer[freeTimerIndex].prev_millis = elapsed();
+    timer[freeTimerIndex].prev_millis = millis();
 
     numTimers++;
 
@@ -414,7 +412,7 @@ unsigned long LSTimer<T>::elapsedTime(int timerId) {
     unsigned long current_millis, diff_millis;
 
     // Get current time
-    current_millis = elapsed();
+    current_millis = millis();
     diff_millis = current_millis - timer[timerId].prev_millis;
     return diff_millis;
 }
@@ -447,7 +445,7 @@ int LSTimer<T>::deleteTimer(int timerId) {
     // Don't decrease the number of timers if the slot is already empty
     if (timer[timerId].callback != NULL) {
         memset(&timer[timerId], 0, sizeof (timer_t));
-        timer[timerId].prev_millis = elapsed();
+        timer[timerId].prev_millis = millis();
 
         // update number of timers
         numTimers--;
@@ -473,7 +471,7 @@ void LSTimer<T>::restartTimer(int timerId) {
         return;
     }
 
-    timer[timerId].prev_millis = elapsed();
+    timer[timerId].prev_millis = millis();
     timer[timerId].numRuns = 0;
 }
 
