@@ -54,7 +54,7 @@ int g_errorCode = 0;  // Global variable for storing error code. 0 is no error. 
 
 bool g_watchdogReset = false;
 bool g_safeModeEnabled = false;
-int g_safeModeReason = 0;
+int  g_safeModeReason = 0;
 bool readyToUseFirstTime = true;
 
 bool g_btIsConnected = false;   // Bluetooth connection state
@@ -214,7 +214,7 @@ void setup() {
   pollTimerId[CONF_TIMER_WATCHDOG] = pollTimer.setInterval(CONF_WATCHDOG_POLL_RATE, 0, watchdogLoop);
 
 
-
+  pollTimer.disable(CONF_TIMER_USB); // TODO 2025-Feb-21 Disable usbConnectionLoop until implemented
   // If USB is not connected, try to reconnect
   if (g_comMode == CONF_COM_MODE_USB) {
     usbConnectTimerId[0] = usbConnectTimer.setTimeout(g_usbConnectDelay, usbCheckConnection);  // Call usbCheckConnection function when g_usbConnectDelay reached
@@ -247,8 +247,6 @@ void setup() {
   } else {
     pollTimer.disable(CONF_TIMER_JOYSTICK);
     pollTimer.disable(CONF_TIMER_SCROLL);
-    //calibrationTimer.disable(0);
-    //calibrationTimer.disable(1);
   }
 
   // If any devices are not connected, handle error
@@ -279,19 +277,24 @@ void setup() {
 //*********************************//
 void loop() {
   ledStateTimer.run();  // Timer for lights
-
+  
   usbConnectTimer.run();
+  
 
   if (g_joystickSensorConnected) {
     calibrationTimer.run();  // Timer for calibration measurements
   }
+  
 
   if (g_operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
-    actionTimer.run(); 
+    actionTimer.run();  
   }
+
   pollTimer.run();  // Timer for normal joystick functions
+  
 
   settingsEnabled = serialSettings(settingsEnabled);  // Process Serial API commands
+  //yield();
 }
 
 
@@ -416,22 +419,13 @@ void checkSafeMode(void) {
 
   if (USB_DEBUG) { Serial.println("USBDEBUG: checkSafeMode()"); }
   
-  // // Read Hub button values
-  // ib.update();  // update buttons
-  // delay(100);
-  // ib.update();
-  
-  // // Get the last state change
-  // buttonState = ib.getInputState();
-    
-  // // Evaluate Output Actions
-  // evaluateOutputAction(buttonState, buttonActionMaxTime, buttonActionSize, buttonActionPropertyStartup);
-
+  // Read Hub button values
   int buttonSelectState1 = !digitalRead(CONF_BUTTON1_PIN);
   int buttonNextState1 =   !digitalRead(CONF_BUTTON2_PIN);
 
   delay(50);
-
+  
+  // Read Hub button values again
   int buttonSelectState2 = !digitalRead(CONF_BUTTON1_PIN);
   int buttonNextState2 =   !digitalRead(CONF_BUTTON2_PIN);
 
@@ -439,7 +433,7 @@ void checkSafeMode(void) {
     g_safeModeEnabled = true;
     g_safeModeReason = CONF_SAFE_MODE_REASON_INPUT;  //  Both hub buttons pushed on startup
     
-  } else if (g_watchdogReset) {
+  } else if (g_watchdogReset && CONF_ENABLE_WATCHDOG) {
     g_safeModeEnabled = true;
     g_safeModeReason = CONF_SAFE_MODE_REASON_WATCHDOG;
 
@@ -482,15 +476,24 @@ void toggleSafeMode(bool safeModeEnabled) {
         break;
       }
 
-      
+            
     }
 
     // activate safe boot mode screen on display
     screen.safeModePage(g_safeModeReason);
+    screen.disableTimeout();
     screen.update();
-   
-    // Disable poll timers?
 
+      
+    // Disable poll timers
+    //pollTimer.disable(CONF_TIMER_SCREEN);
+    pollTimer.disable(CONF_TIMER_PRESSURE);
+    pollTimer.disable(CONF_TIMER_JOYSTICK);
+    pollTimer.disable(CONF_TIMER_SCROLL);
+    pollTimer.disable(CONF_TIMER_DEBUG);
+    pollTimer.disable(CONF_TIMER_BLUETOOTH);
+
+    //screen.restartConfirmPage();
 
   } else {
     // Allow mouse / gamepad output
@@ -826,18 +829,34 @@ void initCommunicationMode() {
 //****************************************//
 void usbConnectionLoop() {
   //if (USB_DEBUG) { Serial.println("USBDEBUG: usbConnectionLoop()"); }
+  
+  // Check if USB is connected
+  if (g_comMode == CONF_COM_MODE_USB) {
+    if (g_operatingMode == CONF_OPERATING_MODE_MOUSE) {
+      g_usbIsConnected = usbmouse.isConnected();
+    }
+    else if (g_operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
+      g_usbIsConnected = gamepad.isConnected();
+    }
+    else { // Bluetooth mouse mode
+      g_usbIsConnected = false;
+    }
+  }
 
-
-  g_usbIsConnected = usbmouse.isConnected();
+  /*  // TODO 2025-Feb-21 Integrate USB connection check
+  if (g_comMode == CONF_COM_MODE_USB) {
+    usbConnectTimerId[0] = usbConnectTimer.setTimeout(g_usbConnectDelay, usbCheckConnection);  // Call usbCheckConnection function when g_usbConnectDelay reached
+  }
+  */
 }
 
 
-//***USB RETRY CONNECTION FUNCTION***//
+//***USB CHECK CONNECTION FUNCTION***//
 // Function   : usbCheckConnection
 //
 // Description: This function checks if the USB connection is attempting to retry mounting, not ready, or timed out
 //              In this case an error screen is shown, and the function is called again after a set time.
-//              If the USB connection has not been made, it calls another insteance of usb.begin.
+//              If the USB connection has not been made, it calls another instance of usb.begin.
 //
 // Parameters : void
 //
@@ -912,24 +931,9 @@ void usbCheckConnection(void) {
 //****************************************//
 void initOperatingMode() {
 
-  //g_operatingMode = getOperatingMode(false,false); // retrieve operating mode from memory
-  g_operatingMode = mem.readInt(CONF_SETTINGS_FILE, "OM");
+  //g_operatingMode = getOperatingMode(false,false);
+  g_operatingMode = mem.readInt(CONF_SETTINGS_FILE, "OM"); // retrieve operating mode from memory
 
-  /*
-   if (g_operatingMode==CONF_OPERATING_MODE_MOUSE) {
-    usbmouse.begin();    
-  } 
-  else if (g_operatingMode==CONF_OPERATING_MODE_GAMEPAD) {
-    gamepad.begin();
-  }
-  else if (g_operatingMode==CONF_OPERATING_MODE_BTMOUSE) {
-    btmouse.begin();
-  }
-  else
-  {
-    
-  }
-  */
 }
 
 //***CHANGE OPERATING MODE FUNCTION***//
@@ -1008,11 +1012,15 @@ void beginComOpMode() {
 //****************************************//
 void initInput() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Input"); }
+  
+  // Hub Input Buttons
   ib.begin();                                                                      // Begin input buttons
-  is.begin();                                                                      // Begin input switches
   buttonActionSize = sizeof(buttonActionProperty) / sizeof(inputActionStruct);     // Size of total available input button actions
-  switchActionSize = sizeof(switchActionProperty) / sizeof(inputActionStruct);     // Size of total available input switch actions
   buttonActionMaxTime = getActionMaxTime(buttonActionSize, buttonActionProperty);  // Maximum button action end time
+
+  // Hub External Switch Inputs
+  is.begin();                                                                      // Begin input switches
+  switchActionSize = sizeof(switchActionProperty) / sizeof(inputActionStruct);     // Size of total available input switch actions
   switchActionMaxTime = getActionMaxTime(switchActionSize, switchActionProperty);  // Maximum switch action end time
 }
 
@@ -1036,14 +1044,10 @@ void inputLoop() {
   buttonState = ib.getInputState();
   switchState = is.getInputState();
 
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: got input states"); }
-
   // Evaluate Output Actions
   evaluateOutputAction(buttonState, buttonActionMaxTime, buttonActionSize, buttonActionProperty);
   evaluateOutputAction(switchState, switchActionMaxTime, switchActionSize, switchActionProperty);
 
-
-  //if (USB_DEBUG) { Serial.println("USBDEBUG: End of inputLoop"); }
 }
 
 //*********************************//
@@ -1062,9 +1066,9 @@ void inputLoop() {
 void initSipAndPuff() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Sip and Puff"); }
   ps.begin();                                                             // Begin sip and puff
-  getPressureMode(true, false);                                           // Get the pressure mode stored in flash memory ( 1 = Absolute , 2 = Differential )
-  getSipPressureThreshold(true, false);                                   // Get sip  pressure thresholds stored in flash memory
-  getPuffPressureThreshold(true, false);                                  // Get  puff pressure thresholds stored in flash memory
+  getPressureMode(false, false);                                           // Get the pressure mode stored in flash memory ( 1 = Absolute , 2 = Differential )
+  getSipPressureThreshold(false, false);                                   // Get sip  pressure thresholds stored in flash memory
+  getPuffPressureThreshold(false, false);                                  // Get puff pressure thresholds stored in flash memory
   sapActionSize = sizeof(sapActionProperty) / sizeof(inputActionStruct);  // Size of total available sip and puff actions
   sapActionMaxTime = getActionMaxTime(sapActionSize, sapActionProperty);  // Maximum end action time
 }
@@ -2445,6 +2449,7 @@ void softwareReset() {
 
   NVIC_SystemReset();
   delay(3000);
+  screen.clear();
 }
 
 void printlnToSerial(String toPrint) {
