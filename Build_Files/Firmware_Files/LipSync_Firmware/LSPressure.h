@@ -303,7 +303,12 @@ float LSPressure::measureOffsetPressure()
       _lps22.getEvent(&_lps22Pressure, &_lps22Temperature);
       tempAmbientPressure = _lps22Pressure.pressure;
       pressureReadingTime = millis();
-    } while (tempSapPressureAbs <= 0.00 || tempAmbientPressure <= 0.00 || (pressureReadingTime - pressureReadingStartTime < PRESS_SAP_SENSOR_TIMEOUT));
+      if (pressureReadingTime - pressureReadingStartTime > PRESS_SAP_SENSOR_TIMEOUT){
+        Serial.print("ERROR: Mouthpiece pressure sensor timeout");
+        // TODO 2025-Feb-24 Throw error
+        break;
+      }
+    } while (tempSapPressureAbs <= 0.00 || tempAmbientPressure <= 0.00 );
     
     tempOffsetPressure = tempSapPressureAbs - tempAmbientPressure;    // Calculate offset value which is the difference between main and reference pressure sensors
   } else if(_pressureMode == PRESS_MODE_ABS){// If pressure mode is absolute 
@@ -314,7 +319,12 @@ float LSPressure::measureOffsetPressure()
     {
       tempSapPressureAbs = _lps35hw.readPressure();
       pressureReadingTime = millis();
-    } while (tempSapPressureAbs <= 0.00 || (pressureReadingTime - pressureReadingStartTime < PRESS_SAP_SENSOR_TIMEOUT));
+      if (pressureReadingTime - pressureReadingStartTime > PRESS_SAP_SENSOR_TIMEOUT){
+        Serial.print("ERROR: Ambient pressure sensor timeout");
+        // TODO 2025-Feb-24 Throw error
+        break;
+      }
+    } while (tempSapPressureAbs <= 0.00 ));
 
     tempOffsetPressure = 0.00;  // Set offset value to zero
     _ambientPressure = tempSapPressureAbs;  // Set the reference value which is the main pressure reading when no sip or puff is performed 
