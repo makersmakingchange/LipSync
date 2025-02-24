@@ -68,9 +68,10 @@ class LSPressure {
     LSPressure();                                       // Constructor
     void begin();                                    
     void clear();  
+    void update();                                      // Update the pressure buffer and sip and puff buffer with new readings 
     void setFilterMode(int mode);                       // Set filter Mode: None or Average
-    int getPressureMode();                              // Get Sip and Puff Pressure Mode : ABS or DIFF pressure
     void setPressureMode(int mode);                     // Set Sip and Puff Pressure Mode : ABS or DIFF pressure
+    int getPressureMode();                              // Get Sip and Puff Pressure Mode : ABS or DIFF pressure
     void setRefTolerance(float value);                  // Set reference pressure change tolerance value that is used to update the reference pressure
     float getRefTolerance();                            // Get reference pressure change tolerance value that is used to update the reference pressure
     float getOffsetPressure();                          // Get Offset pressure: (sapPressureAbs- ambientPressure)
@@ -79,7 +80,6 @@ class LSPressure {
     float measureOffsetPressure();                      // Measure the offset pressure between pressure sensors: offsetPressure = (sapPressureAbs- ambientPressure)
     void setSipThreshold(float s);                      // Set sip threshold
     void setPuffThreshold(float p);                     // Set puff threshold
-    void update();                                      // Update the pressure buffer and sip and puff buffer with new readings 
     void updatePressure();                              // Update the pressure buffer with new readings 
     void updateState();                                 // Update the and puff buffer with new states 
     float getSapPressureAbs();                          // Get last main pressure from pressure buffer
@@ -164,7 +164,7 @@ void LSPressure::begin()
 
   //setFilterMode(PRESS_FILTER_NONE);         // Set the default filter mode to none  //  TODO 2025-Feb-22 Currently unused
   setPressureMode(PRESS_MODE_DIFF);         // Set the default pressure mode to differential mode (i.e., mouthpiece and ambient)
-  setRefTolerance(PRESS_REF_TOLERANCE);     // Set the default tolerance value to update reference pressure 
+  setRefTolerance(PRESS_REF_TOLERANCE);     // Set the default tolerance value to update reference pressure //TODO 2025-Feb-22 No longer used?
   
   // Set default pressure thresholds
   setSipThreshold(PRESS_SAP_DEFAULT_THRESHOLD);
@@ -183,7 +183,7 @@ void LSPressure::begin()
 //*********************************//
 // Function   : clear 
 // 
-// Description: Clear LSPressure class
+// Description: Clear pressure buffer and restart state timer
 // 
 // Arguments :  void
 // 
@@ -306,7 +306,6 @@ float LSPressure::measureOffsetPressure()
     } while (tempSapPressureAbs <= 0.00 || tempAmbientPressure <= 0.00 || (pressureReadingTime - pressureReadingStartTime < PRESS_SAP_SENSOR_TIMEOUT));
     
     tempOffsetPressure = tempSapPressureAbs - tempAmbientPressure;    // Calculate offset value which is the difference between main and reference pressure sensors
-  }   
   } else if(_pressureMode == PRESS_MODE_ABS){// If pressure mode is absolute 
     
     // Keep reading until we have a valid main pressure > 0.00
@@ -405,6 +404,7 @@ void LSPressure::setSipThreshold(float s)
 // Function   : setPuffThreshold 
 // 
 // Description: Set puff pressure threshold in hPa
+//
 // Arguments :  p : float : Puff pressure threshold
 // 
 // Return     : void
@@ -418,6 +418,7 @@ void LSPressure::setPuffThreshold(float p)
 // Function   : update 
 // 
 // Description: Update pressure buffer , and sip&puff buffer
+//
 // Arguments :  void
 // 
 // Return     : void
@@ -432,6 +433,7 @@ void LSPressure::update()
 // Function   : updatePressure 
 // 
 // Description: Update pressure buffer
+//
 // Arguments :  void
 // 
 // Return     : void
@@ -439,7 +441,7 @@ void LSPressure::update()
 void LSPressure::updatePressure()
 {
   
-  _sapPressureAbs = _lps35hw.readPressure();        // Update main pressure value 
+  _sapPressureAbs = _lps35hw.readPressure();        // Update mouthpiece pressure value 
 
   // If pressure mode is differential  
   if(_pressureMode == PRESS_MODE_DIFF) {
@@ -448,9 +450,9 @@ void LSPressure::updatePressure()
     
     // Update offset pressure value if reference pressure is changed using tolerance value 
     /*  // TODO 2025-Feb-22 If not used, delete
-    if(abs(ambientPressure-tempAmbientPressure)>=refTolVal && tempAmbientPressure > 0.00){ 
-        //offsetPressure+=ambientPressure-tempAmbientPressure;                // Add the reference pressure change to the offset value 
-        //ambientPressure=tempAmbientPressure; 
+    if(abs(ambientPressure - tempAmbientPressure) >= refTolVal && tempAmbientPressure > 0.00){ 
+        //offsetPressure += ambientPressure - tempAmbientPressure;                // Add the reference pressure change to the offset value 
+        //ambientPressure = tempAmbientPressure; 
       }  
       */  
     if(tempAmbientPressure > 0.00) { // If ambient pressure is valid, update the ambient pressure value 
@@ -462,16 +464,7 @@ void LSPressure::updatePressure()
   if(_sapPressureAbs > 0.00 && _ambientPressure > 0.00) {
     _sapPressure = _sapPressureAbs - _ambientPressure - _offsetPressure;              // Calculate the pressure difference 
     _pressureBuffer.pushElement({_sapPressureAbs, _ambientPressure, _sapPressure});   // Push new pressure values to pressure buffer 
-/*
-    Serial.print("sapAbs: ");
-    Serial.print(_sapPressureAbs);
-    Serial.print("\tambient: ");
-    Serial.print(_ambientPressure);
-    Serial.print("\tsapRel: ");
-    Serial.print(_sapPressure);
-    Serial.print("\toffset: ");
-    Serial.println(_offsetPressure);
-    */
+
   }
  
 }
@@ -480,6 +473,7 @@ void LSPressure::updatePressure()
 // Function   : updateState 
 // 
 // Description: Update the sip and puff state buffer
+//
 // Arguments :  void
 // 
 // Return     : void
@@ -488,7 +482,8 @@ void LSPressure::updateState()  //  TODO 2025-Feb-22 This code should be abstrac
 {
   _sapStateTimer.run();                       // Update main state timer
   _sapPrevState = _sapBuffer.getLastElement();  // Get the previous state
-    float pressureValue = getSapPressure();    // Get the current pressure difference 
+  
+  float pressureValue = getSapPressure();    // Get latest pressure value
 
   // check for sip and puff conditions
   if (pressureValue > _puffThreshold) {
