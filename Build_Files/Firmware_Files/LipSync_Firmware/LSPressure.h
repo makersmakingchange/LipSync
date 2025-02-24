@@ -50,6 +50,7 @@
 #define PRESS_SAP_SEC_STATE_RELEASED 2  // Released : Sip or puff was just released (On->Off)
 
 #define PRESS_SAP_ACTION_TIMEOUT 60000  // Reset timer
+#define PRESS_SAP_SENSOR_TIMEOUT 3000 // Timeout for sensor reading
 
 // Pressure structure 
 typedef struct {
@@ -73,8 +74,9 @@ class LSPressure {
     void setRefTolerance(float value);                  // Set reference pressure change tolerance value that is used to update the reference pressure
     float getRefTolerance();                            // Get reference pressure change tolerance value that is used to update the reference pressure
     float getOffsetPressure();                          // Get Offset pressure: (sapPressureAbs- ambientPressure)
-    void setOffsetPressure();                           // Set Offset pressure: offsetPressure = (sapPressureAbs- ambientPressure)
-    void setZeroPressure();                             // Zero the base reference pressure and update Offset pressure value 
+    void setOffsetPressure(float offsetPressure);       // Set Offset pressure: 
+    void updateOffsetPressure();                        // Zero the base reference pressure and update Offset pressure value 
+    float measureOffsetPressure();                      // Measure the offset pressure between pressure sensors: offsetPressure = (sapPressureAbs- ambientPressure)
     void setSipThreshold(float s);                      // Set sip threshold
     void setPuffThreshold(float p);                     // Set puff threshold
     void update();                                      // Update the pressure buffer and sip and puff buffer with new readings 
@@ -175,7 +177,7 @@ void LSPressure::begin()
   clear();      // Clear buffers and make sure no sip and puff action is set as previous actions
 
   delay(20);
-  setZeroPressure();    // Set the zero pressure 
+  updateOffsetPressure();    // Update the offset pressure between pressure sensors
 }
 
 //*********************************//
@@ -274,106 +276,115 @@ float LSPressure::getRefTolerance()
 }
 
 //*********************************//
-// Function   : getOffsetPressure 
+// Function   : measureOffsetPressure 
 // 
-// Description: Get the offset pressure value (hPa)
-//              It doesn't set offsetPressure
+// Description: Measure the offset pressure (hPa) between the mouthpiece sensor and ambient sensor
+//              
 // Arguments :  void
 // 
 // Return     : tempOffsetPressure : float : The offset pressure value in hPa
 //*********************************//
-float LSPressure::getOffsetPressure()  // TODO 2025-Feb-22 Rename this function to be more clear about purpose (e.g., updateOffsetPressure, measureOffsetPressure)
+float LSPressure::measureOffsetPressure()  
 {
   // Initialize variables used to calculate offset value  
   float tempSapPressureAbs = 0.00;
   float tempAmbientPressure = 0.00;
   float tempOffsetPressure = 0.00;
 
+  unsigned long pressureReadingStartTime = millis();
+  unsigned long pressureReadingTime = 0;
+
   // If pressure mode is differential  
   if(_pressureMode == PRESS_MODE_DIFF) {
     
-    do  // Keep reading until we have a valid main and reference pressure values > 0.0 //TODO 2025-Feb-22. Add timeout to avoid infinite loop
+    do  // Keep reading until we have a valid main and reference pressure values > 0.0 
     {     
-      tempSapPressureAbs = _lps35hw.readPressure();
+      tempSapPressureAbs = _lps35hw.readPressure();  //TODO replace with generic get function
       _lps22.getEvent(&_lps22Pressure, &_lps22Temperature);
       tempAmbientPressure = _lps22Pressure.pressure;
-    } while (tempSapPressureAbs <= 0.00 || tempAmbientPressure <= 0.00);
+      pressureReadingTime = millis();
+    } while (tempSapPressureAbs <= 0.00 || tempAmbientPressure <= 0.00 || (pressureReadingTime - pressureReadingStartTime < PRESS_SAP_SENSOR_TIMEOUT));
     
     tempOffsetPressure = tempSapPressureAbs - tempAmbientPressure;    // Calculate offset value which is the difference between main and reference pressure sensors
-    _ambientPressure = tempAmbientPressure;                            // Set the reference value 
   }   
-  else if(_pressureMode == PRESS_MODE_ABS){// If pressure mode is absolute 
+  } else if(_pressureMode == PRESS_MODE_ABS){// If pressure mode is absolute 
     
     // Keep reading until we have a valid main pressure > 0.00
-    do //TODO 2025-Feb-22. Add timeout to avoid infinite loop
+    pressureReadingStartTime = millis();
+    do 
     {
       tempSapPressureAbs = _lps35hw.readPressure();
-    } while (tempSapPressureAbs <= 0.00);
+      pressureReadingTime = millis();
+    } while (tempSapPressureAbs <= 0.00 || (pressureReadingTime - pressureReadingStartTime < PRESS_SAP_SENSOR_TIMEOUT));
 
-    tempOffsetPressure = 0.00;                                        // Set offset value to zero
-    _ambientPressure = tempSapPressureAbs;                             // Set the reference value which is the main pressure reading when no sip or puff is performed 
+    tempOffsetPressure = 0.00;  // Set offset value to zero
+    _ambientPressure = tempSapPressureAbs;  // Set the reference value which is the main pressure reading when no sip or puff is performed 
   }
   else
   {
     
   }
-/*
-  if (USB_DEBUG)
-  {
-    Serial.print("USBDEBUG: tempOffsetPresssure: ");
-    Serial.println(tempOffsetPressure);  
-  }  */
-
-  /*
-  Serial.print("sapAbs: ");
-  Serial.print(tempSapPressureAbs);
-  Serial.print("\tambient: ");
-  Serial.print(tempAmbientPressure);
-  Serial.print("\toffset: ");
-  Serial.println(tempOffsetPressure);
-  */
-    
 
   return tempOffsetPressure;                         // Return offset value
+}
+
+//*********************************//
+// Function   : getOffsetPressure 
+// 
+// Description: Return the offset pressure (hPa)
+
+// Arguments :  void
+// 
+// Return     : tempOffsetPressure : float : The offset pressure value in hPa
+//*********************************//
+float LSPressure::getOffsetPressure()  
+{
+  return _offsetPressure;  // Return offset value
 }
 
 //*********************************//
 // Function   : setOffsetPressure 
 // 
 // Description: Set the offset pressure value (hPa)
-//              It's same as getOffsetPressure, but it sets offsetPressure as well
+//              
 // Arguments :  void
 // 
 // Return     : void
 //*********************************//
-void LSPressure::setOffsetPressure()
+void LSPressure::setOffsetPressure(float offsetPressure)
 {
-  _offsetPressure = getOffsetPressure();
+  _offsetPressure = offsetPressure;
 }
 
 //*********************************//
-// Function   : setZeroPressure 
+// Function   : updateOffsetPressure 
 // 
-// Description: Set the offset pressure value (hPa) and the reference pressure 
+// Description: Measure and set the offset pressure value (hPa) 
 //
 // Arguments :  void
 // 
 // Return     : void
 //*********************************//
-void LSPressure::setZeroPressure()
+void LSPressure::updateOffsetPressure()
 {
-  _offsetPressure = 0.00;
+  float tempOffsetPressure = 0.00;
+
+  // Measure multiple readings
   for (int i = 0 ; i < PRESS_BUFF_SIZE ; i++)
   {        
-    _offsetPressure += getOffsetPressure();  
+    tempOffsetPressure += measureOffsetPressure();  
   }
-  _offsetPressure = (_offsetPressure / PRESS_BUFF_SIZE);  // Set the offsetPressure equal to average offset values in pressure buffer  
+
+  // Set the offsetPressure equal to average offset values in pressure buffer
+  tempOffsetPressure = (tempOffsetPressure / PRESS_BUFF_SIZE);    
 
   if (USB_DEBUG) {
-    Serial.print("setZeroPressure(): Offset Pressure: ");
-    Serial.print(_offsetPressure);
+    Serial.print("updateOffsetPressure(): Offset Pressure: ");
+    Serial.print(tempOffsetPressure);
     Serial.println(" hPa");
   }
+
+  setOffsetPressure(tempOffsetPressure);
 }
 
 
@@ -531,7 +542,7 @@ void LSPressure::updateState()  //  TODO 2025-Feb-22 This code should be abstrac
   // No action in 1 minute : reset timer
   //if(_sapPrevState.secondaryState==PRESS_SAP_SEC_STATE_WAITING && _sapStateTimer.elapsedTime(_sapStateTimerId)>PRESS_SAP_ACTION_TIMEOUT){  //TODO 2025-Feb-22 Remove?
   if(_sapStateTimer.elapsedTime(_sapStateTimerId) > PRESS_SAP_ACTION_TIMEOUT) {
-      setZeroPressure();                                   // Update pressure offset value   
+      updateOffsetPressure();   // Update pressure offset value   
       _sapStateTimer.restartTimer(_sapStateTimerId);    // Reset and start the timer      
   }
 }
