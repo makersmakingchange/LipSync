@@ -23,7 +23,7 @@
 #include <nrf_wdt.h>
 #include <hal/nrf_power.h>  //  Defines reset reasons for NRF52 (https://github.com/particle-iot/nrf5_sdk/blob/master/modules/nrfx/hal/nrf_power.h)
 volatile uint32_t *const RESETREAS = (uint32_t *)0x40000400;  //  Pointer to reset reason register on NR52
-const uint32_t WATCHDOG_RESET_MASK = POWER_RESETREAS_DOG_Msk; //  0x2;
+const uint32_t WATCHDOG_RESET_MASK = 0x2; //POWER_RESETREAS_DOG_Msk; //  0x2;
 extern bool g_watchdogReset;
 
 
@@ -42,13 +42,30 @@ extern bool g_watchdogReset;
 //****************************************//
 void checkResetReason() {
   // Check the internal register for why the device was reset 
-  const uint32_t LAST_REBOOT_REASON = *RESETREAS;
+  //const uint32_t LAST_REBOOT_REASON = *RESETREAS;
+  //uint32_t last_reboot_reason;
+  //last_reboot_reason = NRF_POWER->RESETREAS;
 
   // Clear any enabled reset reasons
-  *RESETREAS |= *RESETREAS;
+  //*RESETREAS |= *RESETREAS;
+
+
+  uint32_t lastRebootReason;
+
+	/* This doesn't run
+  #ifndef SOFTDEVICE_PRESENT
+		// Read reset reason
+		lastRebootReason = NRF_POWER->RESETREAS; // this should be used only when Softdevice NOT enabled, otherwise the board will reset
+		NRF_POWER->RESETREAS = 0xFFFFFFFF;
+	#endif
+  */
+	#ifdef SOFTDEVICE_PRESENT
+		sd_power_reset_reason_get(&lastRebootReason);// If reset caused by Watchdog the resetReason is 2, and if caused by power reset, the reason is 1
+		sd_power_reset_reason_clr(0xFFFFFFFF);
+	#endif
 
   // Check if last reset reason was the watchdog
-  if ((LAST_REBOOT_REASON & WATCHDOG_RESET_MASK) == WATCHDOG_RESET_MASK) {
+  if ((lastRebootReason & WATCHDOG_RESET_MASK) == WATCHDOG_RESET_MASK) {
     g_watchdogReset = true;
   }
 
