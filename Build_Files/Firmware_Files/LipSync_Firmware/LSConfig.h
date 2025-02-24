@@ -23,7 +23,7 @@
 #define USB_DEBUG  0 // Set this to 0 for best performance
 #define SHOW_CONNECTION_TIME 0 // Set to 0 for production
 
-#define CONF_ENABLE_WATCHDOG 1 // Used to disable watchdog
+#define CONF_ENABLE_WATCHDOG 0 // Set to 1 to enable hardware watchdog
 
 //***DO NOT CHANGE***//
 #define CONF_LIPSYNC_MODEL 1                // 1: Lipsync w/ Hub
