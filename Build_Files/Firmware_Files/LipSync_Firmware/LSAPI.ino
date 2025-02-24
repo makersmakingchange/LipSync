@@ -1075,7 +1075,7 @@ void setJoystickDeadZone(bool responseEnabled, bool apiEnabled, String optionalP
 void getJoystickValue(bool responseEnabled, bool apiEnabled) {
   js.update();      // Request new values from joystick class
   
-  int outputArraySize = 6; 
+  const int outputArraySize = 6; 
   float tempJoystickArray[outputArraySize];
   
   pointFloatType tempJoystickRaw = js.getXYRaw();                                 // Read the raw values
@@ -1127,10 +1127,10 @@ void getPressureValue(bool responseEnabled, bool apiEnabled) {
 
   ps.update();      // Request new values from pressure class
   
-  int outputArraySize = 3;   
+  const int outputArraySize = 3;   
   float tempSapPressure[outputArraySize];
-  tempSapPressure[0] = ps.getSapPressureAbs();    // Read the main pressure 
-  tempSapPressure[1] = ps.getAmbientPressure();   // Read the ref pressure
+  tempSapPressure[0] = ps.getSapPressureAbs();    // Read the mouthpiece pressure 
+  tempSapPressure[1] = ps.getAmbientPressure();   // Read the ambient pressure
   tempSapPressure[2] = ps.getSapPressure();       // Read the diff pressure
 
   
@@ -1248,7 +1248,7 @@ void setPressureMode(bool responseEnabled, bool apiEnabled, String optionalParam
 //***GET PRESSURE THRESHOLD FUNCTION***//
 // Function   : getPressureThreshold
 //
-// Description: This function returns pressure Threshold.
+// Description: This function returns the pressure thresholds.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
@@ -1259,11 +1259,21 @@ void setPressureMode(bool responseEnabled, bool apiEnabled, String optionalParam
 //*********************************//
 void getPressureThreshold(bool responseEnabled, bool apiEnabled) {
 
-  float tempPressureThreshold[2];
+  const int outputArraySize = 2;
+  float tempPressureThreshold[outputArraySize];
   tempPressureThreshold[0] = getSipPressureThreshold(false, false);
   tempPressureThreshold[1] = getPuffPressureThreshold(false, false);
 
-  printResponseFloatArray(responseEnabled, apiEnabled, true, 0, "DT,0", true, "", 2, ',', tempPressureThreshold);
+  printResponseFloatArray(responseEnabled, // Pass through whether response should be output to serial
+                          apiEnabled, // Pass through whether api response should be sent 
+                          true, // Success response status 
+                          0, //  Success response number
+                          "PT,0", // End-point command string
+                          true, // Output parameter
+                          "", // Response string prefix
+                          outputArraySize, // Size of response parameter
+                          ',', // Response parameter string delimiter
+                          tempPressureThreshold); // Response parameter
 }
 
 //***GET PRESSURE VALUE API FUNCTION***//
@@ -1284,7 +1294,7 @@ void getPressureThreshold(bool responseEnabled, bool apiEnabled, String optional
   }
 }
 
-//***GET PRESSURE THRESHOLD FUNCTION***//
+//***GET SIP PRESSURE THRESHOLD FUNCTION***//
 // Function   : getSipPressureThreshold
 //
 // Description: This function returns the current sip pressure threshold.
@@ -2472,6 +2482,9 @@ void printResponseFloat(bool responseEnabled,
 //               responseNumber : int : 0,1,2 (Different meanings depending on the responseStatus)
 //               responseCommand : String : The End-Point command which is returned as output.
 //               responseParameterEnabled : bool : Print the parameter if it's set to true, and skip the parameter if it's set to false.
+//               responsePrefix : String : 
+//               responseParameterSize : int : Number of responses in array
+//               responseParameterDelimiter : char : Delimter character to separate responses
 //               responseParameter : float[] : The response parameter printed as output.
 //
 // Return     : void
