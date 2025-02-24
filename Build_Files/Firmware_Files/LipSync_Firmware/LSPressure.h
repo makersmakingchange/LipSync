@@ -324,7 +324,7 @@ float LSPressure::measureOffsetPressure()
         // TODO 2025-Feb-24 Throw error
         break;
       }
-    } while (tempSapPressureAbs <= 0.00 ));
+    } while (tempSapPressureAbs <= 0.00);
 
     tempOffsetPressure = 0.00;  // Set offset value to zero
     _ambientPressure = tempSapPressureAbs;  // Set the reference value which is the main pressure reading when no sip or puff is performed 
