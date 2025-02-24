@@ -1168,12 +1168,14 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
   }
 
   // Code to switch between joystick controlled scroll and joystick controlled cursor movement
-  if (outputAction == CONF_ACTION_SCROLL) {
-    pollTimer.enable(CONF_TIMER_SCROLL);
-    pollTimer.disable(CONF_TIMER_JOYSTICK);
-  } else if (outputAction != CONF_ACTION_SCROLL) {
-    pollTimer.enable(CONF_TIMER_JOYSTICK);
-    pollTimer.disable(CONF_TIMER_SCROLL);
+  if(g_joystickSensorConnected){
+    if (outputAction == CONF_ACTION_SCROLL) {
+      pollTimer.enable(CONF_TIMER_SCROLL);
+      pollTimer.disable(CONF_TIMER_JOYSTICK);
+    } else if (outputAction != CONF_ACTION_SCROLL) {
+      pollTimer.enable(CONF_TIMER_JOYSTICK);
+      pollTimer.disable(CONF_TIMER_SCROLL);
+    }
   }
 
   // Loop over all possible outputs
