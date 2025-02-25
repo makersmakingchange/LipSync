@@ -175,8 +175,15 @@ void setup() {
   checkSafeMode();  // Check to see if we need to boot in safe mode.
 
   if (USB_DEBUG) {
+    unsigned long startSerialWaitTime = millis();
+    unsigned long currentSerialWaitTime = millis();
+    const unsigned long SERIAL_WAIT_TIMEOUT = 30000;
     while (!Serial) {  //wait for serial connection to establish
       delay(1);
+      currentSerialWaitTime = millis();
+      if (currentSerialWaitTime - startSerialWaitTime > SERIAL_WAIT_TIMEOUT){
+        break;
+      }
     }
     Serial.println("USBDEBUG: Serial Connected");
   }
