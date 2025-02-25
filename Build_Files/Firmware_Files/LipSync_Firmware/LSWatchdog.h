@@ -25,7 +25,7 @@
 volatile uint32_t *const RESETREAS = (uint32_t *)0x40000400;  //  Pointer to reset reason register on NR52
 const uint32_t WATCHDOG_RESET_MASK = 0x2; //POWER_RESETREAS_DOG_Msk; //  0x2;
 extern bool g_watchdogReset;
-
+extern uint32_t g_lastRebootReason;
 
 //*********************************//
 // Watchdog Functions
@@ -44,13 +44,12 @@ void checkResetReason() {
   // Check the internal register for why the device was reset 
   //const uint32_t LAST_REBOOT_REASON = *RESETREAS;
   //uint32_t last_reboot_reason;
-  //last_reboot_reason = NRF_POWER->RESETREAS;
+  g_lastRebootReason = NRF_POWER->RESETREAS;
 
   // Clear any enabled reset reasons
   //*RESETREAS |= *RESETREAS;
 
-
-  uint32_t lastRebootReason;
+  //uint32_t lastRebootReason;
 
 	/* This doesn't run
   #ifndef SOFTDEVICE_PRESENT
@@ -60,15 +59,20 @@ void checkResetReason() {
 	#endif
   */
 	#ifdef SOFTDEVICE_PRESENT
-		sd_power_reset_reason_get(&lastRebootReason);// If reset caused by Watchdog the resetReason is 2, and if caused by power reset, the reason is 1
-		sd_power_reset_reason_clr(0xFFFFFFFF);
+		//sd_power_reset_reason_get(&g_lastRebootReason);// If reset caused by Watchdog the resetReason is 2, and if caused by power reset, the reason is 1
+		//sd_power_reset_reason_clr(0xFFFFFFFF);
 	#endif
 
   // Check if last reset reason was the watchdog
-  if ((lastRebootReason & WATCHDOG_RESET_MASK) == WATCHDOG_RESET_MASK) {
+  if ((g_lastRebootReason & WATCHDOG_RESET_MASK) == WATCHDOG_RESET_MASK) {
     g_watchdogReset = true;
   }
 
+  #ifdef SOFTDEVICE_PRESENT
+		//sd_power_reset_reason_get(&lastRebootReason);// If reset caused by Watchdog the resetReason is 2, and if caused by power reset, the reason is 1
+		//sd_power_reset_reason_clr(g_lastRebootReason);
+    sd_power_reset_reason_clr(0xFFFFFFFF);
+	#endif
 
 }
 

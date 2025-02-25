@@ -52,6 +52,7 @@ int g_debugMode;  // 0 = Debug mode is Off
 
 int g_errorCode = 0;  // Global variable for storing error code. 0 is no error. Additional errors defined in LSConfig.h
 
+uint32_t g_lastRebootReason = 0;
 bool g_watchdogReset = false;
 bool g_safeModeEnabled = false;
 int  g_safeModeReason = 0;
@@ -267,7 +268,7 @@ void setup() {
     initWatchdog();  // Initialize hardware watchdog
   }
 
-
+  if (USB_DEBUG) { Serial.print("USBDEBUG: lastRebootReason: "); println(g_lastRebootReason); }
   if (USB_DEBUG) { Serial.println("USBDEBUG: Setup complete."); }
 
 }  // end setup
@@ -317,6 +318,7 @@ void loop() {
 void initGlobals() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: initGlobals()"); } //  Won't display as function called before serial established
 
+  g_lastRebootReason = 0;
   g_ambientPressureSensorConnected = false;
   g_joystickSensorConnected = false;
   g_displayConnected = false;
