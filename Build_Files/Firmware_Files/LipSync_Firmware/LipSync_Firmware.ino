@@ -1609,11 +1609,12 @@ void initJoystick() {
 // Return     : void
 //****************************************//
 void performJoystickCenter(int* args) {
-  if (USB_DEBUG) { Serial.println("USBDEBUG: performJoystickCenter()"); }
+  int stepNumber = (int)args;
+  if (USB_DEBUG) { Serial.print("USBDEBUG: performJoystickCenter("); Serial.print(stepNumber); Serial.println(")"); }
 
   g_resetCenterComplete = false;  // Reset the global flag
 
-  int stepNumber = (int)args;
+  
 
   // Duration of the center point readings (500 milliseconds)
   unsigned long readingDuration = CONF_JOY_INIT_READING_DELAY * CONF_JOY_INIT_READING_NUMBER;
