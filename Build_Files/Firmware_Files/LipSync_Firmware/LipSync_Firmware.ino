@@ -268,7 +268,7 @@ void setup() {
     initWatchdog();  // Initialize hardware watchdog
   }
 
-  if (USB_DEBUG) { Serial.print("USBDEBUG: lastRebootReason: "); println(g_lastRebootReason); }
+  if (USB_DEBUG) { Serial.print("USBDEBUG: lastRebootReason: "); Serial.println(g_lastRebootReason); }
   if (USB_DEBUG) { Serial.println("USBDEBUG: Setup complete."); }
 
 }  // end setup
