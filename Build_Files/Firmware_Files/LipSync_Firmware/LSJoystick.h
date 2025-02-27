@@ -152,11 +152,11 @@ LSJoystick::LSJoystick() {
 //*********************************//
 void LSJoystick::begin() {
 
-  _inputRadius = 0.0;                                                   // Initialize _inputRadius
+  _inputRadius = 0.0;                                                  // Initialize _inputRadius
   _skipInputChange = false;                                            // Initialize _skipInputChange
-  _operatingMode = getOperatingMode(false, false);
+  _operatingMode = getOperatingMode(false, false); // TODO 
 
-  Tlv493dSensor.begin();
+  Tlv493dSensor.begin();  // TODO 2025-Feb-25 This will likely hang if it fails. Ideally replace with something that returns error/success.
   setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_DEFAULT);      // Set default magnet direction.
   setDeadzone(JOY_OUTPUT_DEADZONE_STATUS,JOY_OUTPUT_DEADZONE_FACTOR);   // Set default deadzone status and deadzone factor.
   setOutputRange(JOY_OUTPUT_RANGE_LEVEL);                               // Set default output range level or speed level.
@@ -353,6 +353,8 @@ int LSJoystick::getOutputRange(){
 // Return     : void
 //*********************************//
 void LSJoystick::setOutputRange(int rangeLevel){
+
+  // When operating as a mouse, the following function sets the upper limit of cursor value output each update
   if (_operatingMode == CONF_OPERATING_MODE_MOUSE){
     // Calculate the output range value
     _rangeValue = (int)((0.125 * sq(rangeLevel)) + ( 0.3 * rangeLevel ) + 2);       // Polynomial 
@@ -361,6 +363,8 @@ void LSJoystick::setOutputRange(int rangeLevel){
     // _rangeValue = (int)((1.05 * exp(( 0.175 * rangeLevel) + 1.1)) - 1);           // Exponential   
     //Serial.print("_rangeValue:");
     //Serial.println(_rangeValue);
+
+    // When operating as gamepad, the output range is 127 and is not affected by rangeLevel
   } else if (_operatingMode == CONF_OPERATING_MODE_GAMEPAD){
     _rangeValue = JOY_OUTPUT_XY_MAX_GAMEPAD ;
   }
@@ -529,16 +533,17 @@ void LSJoystick::update() {
 
   Tlv493dSensor.updateData();
   // Get the new readings as a point
-  _rawPoint = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};   
+  _rawPoint = {Tlv493dSensor.getY(), Tlv493dSensor.getX()};  // TODO 2025-Feb-25 This should be abstracted to a dedicated function   
   
   _skipInputChange = canSkipInputChange(_rawPoint);
-  joystickRawBuffer.pushElement(_rawPoint);                  // Push raw points to joystickRawBuffer : DON'T MOVE THIS
+  joystickRawBuffer.pushElement(_rawPoint);                  // Add raw points to joystickRawBuffer : DON'T MOVE THIS
 
-  if(!_skipInputChange){
+
+  if(!_skipInputChange){  // If latest measurement has changed more than the change threshold, process and add to output buffer 
     _inputPoint = processInputReading(_rawPoint);            // Mapped and filtered input readings
-    joystickInputBuffer.pushElement(_inputPoint);            // Push new input point to joystickInputBuffer
+    joystickInputBuffer.pushElement(_inputPoint);            // Add new input point to joystickInputBuffer
     _outputPoint = processOutputResponse(_inputPoint);       // Process output by applying deadzone, speed control, and linearization
-    joystickOutputBuffer.pushElement(_outputPoint);          // Push new output point to joystickOutputBuffer    
+    joystickOutputBuffer.pushElement(_outputPoint);          // Add new output point to joystickOutputBuffer    
   } 
 }
 
@@ -629,13 +634,13 @@ int LSJoystick::applyDeadzone(int input){
   int output = input;
   // if Deadzone is not enabled 
   if(_deadzoneEnabled) { 
-    if(abs(input)<_deadzoneValue){                    // Output zero if input < _deadzoneValue
-      output=0;
+    if(abs(input) < _deadzoneValue){                    // Output zero if input < _deadzoneValue
+      output = 0;
     }
     else if(abs(input)>JOY_INPUT_XY_MAX-_deadzoneValue){
-      output=sgn(input) * JOY_INPUT_XY_MAX;           // Output JOY_INPUT_XY_MAX if input > JOY_INPUT_XY_MAX-_deadzoneValue
+      output = sgn(input) * JOY_INPUT_XY_MAX;           // Output JOY_INPUT_XY_MAX if input > JOY_INPUT_XY_MAX-_deadzoneValue
     } else{
-      output=input;                                  // Output the input
+      output = input;                                  // Output the input
     }
   }
   return output;
@@ -652,6 +657,8 @@ int LSJoystick::applyDeadzone(int input){
 //*********************************//
 bool LSJoystick::canSkipInputChange(pointFloatType inputPoint){      
   pointFloatType prevInputPoint = joystickRawBuffer.getLastElement();           // Get the previous point from buffer 
+
+  // If latest joystick measurement is less than JOY_INPUT_CHANGE_TOLERANCE (0.1 mT), then don't process 
   bool skipInputChange = abs(_rawPoint.x - prevInputPoint.x) < JOY_INPUT_CHANGE_TOLERANCE 
                  && abs(_rawPoint.y - prevInputPoint.y)  < JOY_INPUT_CHANGE_TOLERANCE;
   return skipInputChange;
@@ -668,9 +675,15 @@ bool LSJoystick::canSkipInputChange(pointFloatType inputPoint){
 //*********************************//
 pointIntType LSJoystick::linearizeOutput(pointIntType inputPoint){
   pointIntType outputPoint = {0,0};                                     // Initialize outputPoint
+  
   // Apply final mapping and speed control 
-  outputPoint.x = map(inputPoint.x,-1*JOY_INPUT_XY_MAX,JOY_INPUT_XY_MAX,-1*_rangeValue,_rangeValue);
-  outputPoint.y = map(inputPoint.y,-1*JOY_INPUT_XY_MAX,JOY_INPUT_XY_MAX,-1*_rangeValue,_rangeValue);
+  // Linearly interpolate the output point from the range of -1023 — 1023 to -rangeValue — rangeValue
+  // Range value depends on the operating mode (Mouse or Gamepad)
+  // Mouse, depending on _rangeLevel, ranges from 2 — 18
+  // Gamepad does not depend on _rangeLevel, and is always 128
+  outputPoint.x = map(inputPoint.x, -1*JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX, -1*_rangeValue, _rangeValue);
+  outputPoint.y = map(inputPoint.y, -1*JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX, -1*_rangeValue, _rangeValue);
+
   return outputPoint;  
 }
 
@@ -734,9 +747,9 @@ pointIntType LSJoystick::processInputReading(pointFloatType inputPoint) {
 //*********************************//
 pointIntType LSJoystick::processOutputResponse(pointIntType inputPoint){
   // Initialize outputPoint and deadzonedPoint
-  pointIntType outputPoint,deadzonedPoint = {0,0};
+  pointIntType outputPoint, deadzonedPoint = {0, 0};
   // Apply Deadzone
-  deadzonedPoint = {applyDeadzone(inputPoint.x),applyDeadzone(inputPoint.y)};
+  deadzonedPoint = {applyDeadzone(inputPoint.x), applyDeadzone(inputPoint.y)};
   // Apply Linearization
   outputPoint = linearizeOutput(deadzonedPoint);
   return outputPoint;
