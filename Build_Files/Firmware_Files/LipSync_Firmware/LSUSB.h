@@ -33,6 +33,7 @@
 #define GAMEPAD_DESCRIPTOR "LipSync Gamepad"
 
 extern unsigned int g_usbAttempt;
+extern void usbCheckConnection(void);
 
 
 // https://github.com/hathach/tinyusb/blob/master/examples/device/hid_generic_inout/src/usb_descriptors.c
@@ -234,6 +235,7 @@ void LSUSBMouse::mouseReport(int8_t b, int8_t x, int8_t y, int8_t wheel, int8_t 
       if ((millis() - timerTimeoutBegin) > CONF_USB_HID_TIMEOUT){
         timedOut = true;
         showTestPage=true;
+        usbCheckConnection();
         break;
       }
     }
