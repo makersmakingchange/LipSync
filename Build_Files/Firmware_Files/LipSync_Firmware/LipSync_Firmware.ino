@@ -103,6 +103,7 @@ unsigned int g_usbConnectDelay = CONF_USB_HID_INIT_DELAY;
 // Joystick module variables and structures
 int acceleration = 0;
 int scrollLevel = 0;
+int scrollNumRuns = 0;
 
 // Pressure module variables
 pressureStruct pressureValues = { 0.0, 0.0, 0.0 };
@@ -1261,6 +1262,7 @@ void cursorDrag(void) {
 //****************************************//
 void cursorScroll(void) {
   outputAction = CONF_ACTION_SCROLL;
+  scrollNumRuns = 0;
 }
 
 
@@ -1618,11 +1620,28 @@ void performJoystick(pointIntType inputPoint) {
 //****************************************//
 int scrollModifier(const int cursorValue, const int cursorMaxValue, const int scrollLevelValue) {
   int scrollOutput = 0;
+
   //int scrollMaxSpeed = round((1.0 * pow(CONF_SCROLL_MOVE_MAX, scrollLevelValue / 10.0)) + CONF_SCROLL_MOVE_BASE);
+  //int scrollMaxSpeed = round((1.0 * pow(CONF_SCROLL_MOVE_MAX, scrollLevelValue / CONF_SCROLL_LEVEL_MAX)) + CONF_SCROLL_MOVE_BASE);
   int scrollMaxSpeed = round((1.0 * CONF_SCROLL_MOVE_MAX * scrollLevelValue/CONF_SCROLL_LEVEL_MAX) + CONF_SCROLL_MOVE_BASE);
 
   scrollOutput = map(cursorValue, 0, cursorMaxValue, 0, scrollMaxSpeed);
   scrollOutput = -1 * constrain(scrollOutput, -1 * scrollMaxSpeed, scrollMaxSpeed);
+
+  if (scrollNumRuns % (CONF_SCROLL_MOVE_MAX-abs(scrollOutput)) == 0){
+    if (cursorValue < 0) {
+      scrollOutput = 1;
+    } else if (cursorValue > 0){
+      scrollOutput = -1;
+    } else { 
+      scrollOutput = 0;
+    }
+    scrollNumRuns = 0;
+  } else {
+    scrollOutput = 0;
+  }
+
+  scrollNumRuns++;
   return scrollOutput;
 }
 
