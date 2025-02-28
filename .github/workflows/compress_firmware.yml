@@ -1,0 +1,29 @@
+name: Compress Firmware Files
+
+on:
+  push:
+    paths:
+      - "Build_Files/Firmware_Files/LipSync_Firmware/**"
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  compress_and_commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Zip Firmware Files
+        run: |
+          cd Build_Files/Firmware_Files/LipSync_Firmware
+          zip -r ../LipSync_Firmware.zip ./
+
+      - name: Commit and Push ZIP
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add Build_Files/Firmware_Files/LipSync_Firmware.zip
+          git commit -m "Automated update: Compress firmware files"
+          git push
+        continue-on-error: true
