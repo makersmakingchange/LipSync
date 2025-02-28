@@ -2,6 +2,8 @@ name: Compress Firmware Files
 
 on:
   push:
+    branches:
+      - '**' # Runs on ALL branches
     paths:
       - "Build_Files/Firmware_Files/LipSync_Firmware/**"
   workflow_dispatch: # Allows manual triggering of the workflow
