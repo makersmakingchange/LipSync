@@ -627,6 +627,7 @@ void LSScreen::selectMenuItem() {
           _scrollSpeedLevel = getScrollLevel(false, false);
           _scrollSpeedLevel++;
           setScrollLevel(true, false, _scrollSpeedLevel);
+          _scrollSpeedLevel = getScrollLevel(false, false);
           _scrollSpMenuText[0] = "Speed: " + String(_scrollSpeedLevel) + " ";
           _display.setCursor(0, 0);
           _display.print(_scrollSpMenuText[0]);
@@ -636,6 +637,7 @@ void LSScreen::selectMenuItem() {
           _scrollSpeedLevel = getScrollLevel(false, false);
           _scrollSpeedLevel--;
           setScrollLevel(true, false, _scrollSpeedLevel);
+          _scrollSpeedLevel = getScrollLevel(false, false);
           _scrollSpMenuText[0] = "Speed: " + String(_scrollSpeedLevel) + " ";
           _display.setCursor(0, 0);
           _display.print(_scrollSpMenuText[0]);

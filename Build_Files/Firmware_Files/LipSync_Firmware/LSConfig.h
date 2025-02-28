@@ -162,7 +162,7 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 // Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 20          // 20 ms 
-#define CONF_SCROLL_POLL_RATE 100           // 160 ms
+#define CONF_SCROLL_POLL_RATE 140           // 140 ms
 #define CONF_PRESSURE_POLL_RATE 50          // 50 ms
 #define CONF_INPUT_POLL_RATE 20             // 20 ms
 #define CONF_BT_FEEDBACK_POLL_RATE 1000     // 1s         
