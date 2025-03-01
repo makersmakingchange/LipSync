@@ -74,7 +74,7 @@ _functionList getJoystickValueFunction =          {"JV", "0", "0", &getJoystickV
 _functionList runTestFunction =                   {"RT", "1", "",  &runTest};
 _functionList softResetFunction =                 {"SR", "1", "1", &softReset};
 _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSettings};
-_functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
+_functionList factoryResetFunction =              {"FR", "1", "1", &doFactoryReset};
 
 // Declare array of API functions
 _functionList apiFunction[39] = {
@@ -2202,10 +2202,10 @@ void resetSettings(bool responseEnabled, bool apiEnabled, String optionalParamet
   }
 }
 
-//***FACTORY RESET FUNCTION***//
-// Function   : factoryReset
+//***DO FACTORY RESET FUNCTION***//
+// Function   : doFactoryReset
 //
-// Description: This function performs factory reset.
+// Description: This function does a factory reset.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
@@ -2214,7 +2214,7 @@ void resetSettings(bool responseEnabled, bool apiEnabled, String optionalParamet
 //
 // Return     : void
 //***************************//
-void factoryReset(bool responseEnabled, bool apiEnabled) {
+void doFactoryReset(bool responseEnabled, bool apiEnabled) {
 
   // Set all LEDs to red to indicate factory reset process 
   setLedState(LED_ACTION_ON, LED_CLR_RED, CONF_LED_ALL, 0, 0, CONF_LED_BRIGHTNESS);                           
@@ -2242,9 +2242,9 @@ void factoryReset(bool responseEnabled, bool apiEnabled) {
 }
 
 //***FACTORY RESET API FUNCTION***//
-// Function   : factoryReset
+// Function   : doFactoryReset
 //
-// Description: This function is redefinition of main factoryReset function to match the types of API function arguments.
+// Description: This function is redefinition of main doFactoryReset function to match the types of API function arguments.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
@@ -2253,9 +2253,9 @@ void factoryReset(bool responseEnabled, bool apiEnabled) {
 //               optionalParameter : String : The input parameter string should contain one element with value of zero.
 //
 // Return     : void
-void factoryReset(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+void doFactoryReset(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   if (optionalParameter.length() == 1 && optionalParameter.toInt() == 1) {
-    factoryReset(responseEnabled, apiEnabled);
+    doFactoryReset(responseEnabled, apiEnabled);
   }
 }
 
