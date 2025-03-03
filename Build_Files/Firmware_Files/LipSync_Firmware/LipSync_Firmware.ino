@@ -259,8 +259,10 @@ void setup() {
 
   // If any devices are not connected, handle error
   if (!g_displayConnected || !g_mouthpiecePressureSensorConnected || !g_ambientPressureSensorConnected || !g_joystickSensorConnected) {
-    errorCheck();
+    hardwareErrorCheck();
   }
+
+  handleHardwareErrors();
 
   toggleSafeMode(g_safeModeEnabled);
 
@@ -340,6 +342,72 @@ void initGlobals() {
 }
 
 
+//***HARDWARE ERROR CHECK FUNCTION***//
+// Function   : hardwareErrorCheck
+//
+// Description: This function checks for errors with the LipSync hardware
+//
+// Parameters : void
+//
+// Return     : void
+//****************************************//
+void hardwareErrorCheck(void) {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: hardwareErrorCheck()"); }
+
+  // I2C Connection Errors (Display, Joystick, Mouthpiece Pressure, Ambient Pressure)
+  if (!g_displayConnected) {
+    // Display not connected / detected
+    buzzer.playErrorSound();
+    Serial.println("ERROR: Display not detected");
+    ledError(3);
+    g_safeModeEnabled = true;
+    g_safeModeReason = CONF_SAFE_MODE_REASON_HARDWARE;
+  }
+
+  if (!g_joystickSensorConnected && !g_mouthpiecePressureSensorConnected && !g_ambientPressureSensorConnected) {
+    // All joystick sensors not detected
+    buzzer.playErrorSound();
+    Serial.println("ERROR: No sensors detected in joystick. Check interface cable.");
+    g_safeModeEnabled = true;
+    g_safeModeReason = CONF_SAFE_MODE_REASON_HARDWARE;
+    
+  } else if (!g_joystickSensorConnected || !g_mouthpiecePressureSensorConnected || !g_ambientPressureSensorConnected) {
+    // One or more sensors but not all
+    
+    g_safeModeEnabled = true;
+    g_safeModeReason = CONF_SAFE_MODE_REASON_HARDWARE;
+    
+    buzzer.playErrorSound();
+    if (!g_joystickSensorConnected) {
+      Serial.println("ERROR: Joystick sensor not detected.");
+    }
+    if (!g_mouthpiecePressureSensorConnected) {
+      Serial.println("ERROR: Mouthpiece Pressure Sensor not detected.");
+    }
+    if (!g_ambientPressureSensorConnected) {
+      Serial.println("ERROR: Ambient Pressure Sensor not detected.");
+    }
+    
+  }
+
+
+}
+
+
+//***HANDLE HARDWARE ERRORS ***//
+// Function   : handleHardwareErrors
+//
+// Description: This function handles hardware errors
+//
+// Parameters : void
+//
+// Return     : void
+//****************************************//
+void handleHardwareErrors(void) {
+  
+}
+
+
 //***ERROR CHECK FUNCTION***//
 // Function   : errorCheck
 //
@@ -352,36 +420,6 @@ void initGlobals() {
 void errorCheck(void) {
   if (USB_DEBUG) { Serial.println("USBDEBUG: errorCheck()"); }
 
-  // I2C Connection Errors (Display, Joystick, Mouthpiece Pressure, Ambient Pressure)
-  if (!g_displayConnected) {
-    // Display not connected / detected
-    buzzer.playErrorSound();
-    Serial.println("ERROR: Display not detected");
-    ledError(3);
-  }
-
-  if (!g_joystickSensorConnected && !g_mouthpiecePressureSensorConnected && !g_ambientPressureSensorConnected) {
-    // All joystick sensors not detected
-    buzzer.playErrorSound();
-    Serial.println("ERROR: No sensors detected in joystick. Check interface cable.");
-    screen.errorPageCable();
-  } else if (!g_joystickSensorConnected || !g_mouthpiecePressureSensorConnected || !g_ambientPressureSensorConnected) {
-    // One or more sensors but not all
-    buzzer.playErrorSound();
-    if (!g_joystickSensorConnected) {
-      Serial.println("ERROR: Joystick sensor not detected.");
-    }
-    if (!g_mouthpiecePressureSensorConnected) {
-      Serial.println("ERROR: Mouthpiece Pressure Sensor not detected.");
-    }
-    if (!g_ambientPressureSensorConnected) {
-      Serial.println("ERROR: Ambient Pressure Sensor not detected.");
-    }
-    screen.errorPageI2C();
-  }
-
-  //screen.print4LineString("isReady" + String(!usbmouse.isReady()), "retry" + String(usbmouse.usbRetrying), "timedout" + String(usbmouse.timedOut), "gamepad" + String(!gamepad.isReady()));
-
   if ((g_operatingMode == CONF_OPERATING_MODE_MOUSE) && (g_comMode == CONF_COM_MODE_USB)
       && (!usbmouse.isReady() || usbmouse.usbRetrying || usbmouse.timedOut)) {
     g_errorCode = CONF_ERROR_USB;
@@ -390,6 +428,8 @@ void errorCheck(void) {
   } else {
     g_errorCode = CONF_ERROR_NONE;  // 0
   }
+
+  if (USB_DEBUG) { Serial.print("USBDEBUG: errorCode: "); Serial.println(g_errorCode); }
   // Add if cases for other errors
 }
 
