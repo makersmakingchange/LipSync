@@ -72,6 +72,7 @@ class LSJoystick {
     void setMagnetZDirection();                                           // Update the magnet Z direction variable.
     void setMagnetDirection(int magnetXDirection, int magnetYDirection);  // Set magnet direction based on orientation of magnet (z axis), X and Y direction variables.
     void setDeadzone(bool deadzoneEnabled,float deadzoneFactor);          // Enable or disable deadzone and set deadzone scale factor (0.12) 
+    void setUpperDeadzone(bool upperDeadzoneEnabled,float upperDeadzoneFactor);  // Enable or disable deadzone and set deadzone scale factor (0.12) 
     int getOutputRange();                                                 // Get the output range or speed levels.
     void setOutputRange(int rangeLevel);                                  // Set the output range or speed levels.
     int getMinimumRadius();                                               // Get the minimum input radius for square to circle mapping.
@@ -115,8 +116,11 @@ class LSJoystick {
     int _magnetXDirection;                                                // Direction of x ( if the board has flipped and has resulted in x axis being flipped )
     int _magnetYDirection;                                                // Direction of y ( if the board has flipped and has resulted in y axis being flipped )
     bool _deadzoneEnabled;                                                // Is deadzone enabled?
+    bool _upperDeadzoneEnabled;                                                // Is deadzone enabled?
     float _deadzoneFactor;                                                // Deadzone factor in percent of total value or max reading JOY_INPUT_XY_MAX
     int _deadzoneValue;                                                   // The calculated deadzone value based on deadzone factor and maximum value JOY_INPUT_XY_MAX.
+    float _upperDeadzoneFactor;                                           // Upper deadzone factor in percent of total value or max reading JOY_INPUT_XY_MAX
+    int _upperDeadzoneValue;                                              // The calculated upper deadzone value based on upper deadzone factor and maximum value JOY_INPUT_XY_MAX.
     int _rangeLevel;                                                      // The range level from 0 to 10 which is used as speed levels.
     int _rangeValue;                                                      // The calculated range value based on range level and an equation. This is maximum output value  for each range level.
     float _inputRadius;                                                   // The minimum radius of operating area calculated using calibration points.
@@ -328,6 +332,25 @@ void LSJoystick::setDeadzone(bool deadzoneEnabled,float deadzoneFactor){
   // Set the deadzone value if it's enabled. The deadzone value is zero if it's disabled.
   // deadzone value is the _deadzoneFactor multiplied by JOY_INPUT_XY_MAX.
   (_deadzoneEnabled) ? _deadzoneValue = round(JOY_INPUT_XY_MAX*_deadzoneFactor):_deadzoneValue=0;   
+}
+
+//*********************************//
+// Function   : setUpperDeadzone 
+// 
+// Description: Set the upper deadzone value based on deadzone status and upper deadzone factor.
+// 
+// Arguments :  deadzoneEnabled : bool  : is deadzone enabled?
+//              deadzoneFactor  : float : deadzoneFactor from 0.01 to 1.0
+// 
+// Return     : void
+//*********************************//
+void LSJoystick::setUpperDeadzone(bool upperDeadzoneEnabled,float upperDeadzoneFactor){
+  _upperDeadzoneEnabled = upperDeadzoneEnabled;
+  
+  _upperDeadzoneFactor = upperDeadzoneFactor;
+  // Set the deadzone value if it's enabled. The deadzone value is zero if it's disabled.
+  // deadzone value is the _deadzoneFactor multiplied by JOY_INPUT_XY_MAX.
+  (_deadzoneEnabled) ? _upperDeadzoneValue = round(JOY_INPUT_XY_MAX*_upperDeadzoneFactor):_upperDeadzoneValue=0;   
 }
 
 //*********************************//
@@ -632,7 +655,7 @@ int LSJoystick::applyDeadzone(int input){
     if(abs(input)<_deadzoneValue){                    // Output zero if input < _deadzoneValue
       output=0;
     }
-    else if(abs(input)>JOY_INPUT_XY_MAX-_deadzoneValue){
+    else if(abs(input)>JOY_INPUT_XY_MAX-_upperDeadzoneValue){
       output=sgn(input) * JOY_INPUT_XY_MAX;           // Output JOY_INPUT_XY_MAX if input > JOY_INPUT_XY_MAX-_deadzoneValue
     } else{
       output=input;                                  // Output the input

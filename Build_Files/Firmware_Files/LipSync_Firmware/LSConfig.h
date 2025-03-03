@@ -160,7 +160,7 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 // Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
-#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN1\":4,\"VN2\":0,\"VN3\":1,\"ID\":\"\",\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":3.0,\"PT\":3.0,\"AV\":0,\"DZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[-13.0,13.0],\"CA2\":[13.0,13.0],\"CA3\":[13.0,-13.0],\"CA4\":[-13.0,-13.0],\"SM\":1,\"DM\":0}"
+#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN1\":4,\"VN2\":0,\"VN3\":1,\"ID\":\"\",\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":3.0,\"PT\":3.0,\"AV\":0,\"DZ\":0.0,\"UZ\":0.0,\"CA0\":[0.0,0.0],\"CA1\":[-13.0,13.0],\"CA2\":[13.0,13.0],\"CA3\":[13.0,-13.0],\"CA4\":[-13.0,-13.0],\"SM\":1,\"DM\":0}"
 
 // Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 20          // 20 ms 
@@ -277,6 +277,7 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 // Joystick Deadzone Default settings
 #define CONF_JOY_DEADZONE_DEFAULT 0.12
+#define CONF_JOY_UPPER_DEADZONE_DEFAULT 0.10
 #define CONF_JOY_MIN_DEADZONE 0.01
 #define CONF_JOY_MAX_DEADZONE 1.0
 

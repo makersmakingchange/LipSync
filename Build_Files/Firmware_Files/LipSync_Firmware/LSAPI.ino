@@ -43,6 +43,8 @@ _functionList setJoystickCalibrationFunction =    {"CA", "1", "1", &setJoystickC
 
 _functionList getJoystickDeadZoneFunction =       {"DZ", "0", "0", &getJoystickDeadZone};
 _functionList setJoystickDeadZoneFunction =       {"DZ", "1", "",  &setJoystickDeadZone};
+_functionList getJoystickUpperDeadZoneFunction =  {"UZ", "0", "0", &getJoystickUpperDeadZone};
+_functionList setJoystickUpperDeadZoneFunction =  {"UZ", "1", "",  &setJoystickUpperDeadZone};
 _functionList getJoystickAccelerationFunction =   {"AV", "0", "0", &getJoystickAcceleration};
 _functionList setJoystickAccelerationFunction =   {"AV", "1", "0", &setJoystickAcceleration};
 
@@ -77,7 +79,7 @@ _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSetting
 _functionList factoryResetFunction =              {"FR", "1", "1", &factoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[39] = {
+_functionList apiFunction[41] = {
   getModelNumberFunction,
   getVersionNumberFunction,
   getDeviceIDFunction,
@@ -91,6 +93,8 @@ _functionList apiFunction[39] = {
   setJoystickCalibrationFunction,
   getJoystickDeadZoneFunction,
   setJoystickDeadZoneFunction,
+  getJoystickUpperDeadZoneFunction,
+  setJoystickUpperDeadZoneFunction,
   getCursorSpeedFunction,
   setCursorSpeedFunction,
   getScrollLevelFunction,
@@ -1060,6 +1064,90 @@ void setJoystickDeadZone(bool responseEnabled, bool apiEnabled, float inputDeadZ
 void setJoystickDeadZone(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   setJoystickDeadZone(responseEnabled, apiEnabled, optionalParameter.toFloat());
 }
+
+//*** GET JOYSTICK UPPER DEADZONE FUNCTION***//
+// Function   : getJoystickUpperDeadZone
+//
+// Description: This function retrieves the joystick upper deadzone for max output.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : void
+//*********************************//
+float getJoystickUpperDeadZone(bool responseEnabled, bool apiEnabled) {
+  String upperDeadZoneCommand = "UZ";
+  float tempUpperDeadzone;
+  tempUpperDeadzone = mem.readFloat(CONF_SETTINGS_FILE, upperDeadZoneCommand);
+
+  if ((tempUpperDeadzone <= CONF_JOY_MIN_DEADZONE) || (tempUpperDeadzone >= CONF_JOY_MAX_DEADZONE)) {
+    tempUpperDeadzone = CONF_JOY_UPPER_DEADZONE_DEFAULT;
+    mem.writeFloat(CONF_SETTINGS_FILE, upperDeadZoneCommand, tempUpperDeadzone);
+  }
+  js.setUpperDeadzone(true, tempUpperDeadzone);
+  printResponseFloat(responseEnabled, apiEnabled, true, 0, "UZ,0", true, tempUpperDeadzone);
+  return tempUpperDeadzone;
+}
+//***GET JOYSTICK UPPER DEADZONE API FUNCTION***//
+// Function   : getJoystickDeadZone
+//
+// Description: This function is redefinition of main getJoystickUpperDeadZone function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void getJoystickUpperDeadZone(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
+    getJoystickUpperDeadZone(responseEnabled, apiEnabled);
+  }
+}
+
+//*** SET JOYSTICK UPPER DEADZONE FUNCTION***//
+// Function   : setJoystickUpperDeadZone
+//
+// Description: This function starts the joystick deadzone.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               inputUpperDeadZone : float : The new upper deadzone value.
+//
+// Return     : void
+//*********************************//
+void setJoystickUpperDeadZone(bool responseEnabled, bool apiEnabled, float inputUpperDeadZone) {
+  String upperDeadZoneCommand = "UZ";
+  if ((inputUpperDeadZone > CONF_JOY_MIN_DEADZONE) && (inputUpperDeadZone < CONF_JOY_MAX_DEADZONE)) {
+    mem.writeFloat(CONF_SETTINGS_FILE, upperDeadZoneCommand, inputUpperDeadZone);
+    js.setUpperDeadzone(true, inputUpperDeadZone);
+    printResponseFloat(responseEnabled, apiEnabled, true, 0, "UZ,1", true, inputUpperDeadZone);
+  }
+  else {
+    printResponseFloat(responseEnabled, apiEnabled, false, 3, "UZ,1", true, inputUpperDeadZone);
+  }
+}
+//***SET JOYSTICK UPPER DEADZONE API FUNCTION***//
+// Function   : setJoystickUpperDeadZone
+//
+// Description: This function is redefinition of main setJoystickUpperDeadZone function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void setJoystickUpperDeadZone(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  setJoystickUpperDeadZone(responseEnabled, apiEnabled, optionalParameter.toFloat());
+}
+
 //***GET JOYSTICK VALUE FUNCTION***//
 // Function   : getJoystickValue
 //
@@ -2226,6 +2314,7 @@ void factoryReset(bool responseEnabled, bool apiEnabled) {
   setOperatingMode(false, false, CONF_COM_MODE_DEFAULT);
   setDebugMode(false, false, CONF_DEBUG_MODE_DEFAULT);
   setJoystickDeadZone(false, false, CONF_JOY_DEADZONE_DEFAULT);
+  setJoystickUpperDeadZone(false, false, CONF_JOY_UPPER_DEADZONE_DEFAULT);
   setSipPressureThreshold(false, false, CONF_SIP_THRESHOLD);
   setPuffPressureThreshold(false, false, CONF_PUFF_THRESHOLD);
   setCursorSpeed(false, false, CONF_JOY_CURSOR_SPEED_LEVEL_DEFAULT);  
