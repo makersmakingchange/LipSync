@@ -180,9 +180,11 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 // Safe Boot Mode
 #define CONF_SAFE_MODE_REASON_WATCHDOG 1
 #define CONF_SAFE_MODE_REASON_INPUT 2
+#define CONF_SAFE_MODE_REASON_HARDWARE 3
 
 // Hub Menu
 #define CONF_SPLASH_SCREEN_DURATION 10000   // 10 seconds - how long the splash screen stays on on startup
+#define CONF_SAFEMODE_MENU_TIMEOUT 3000 // 3 seconds between screens
 #define CONF_MENU_TIMEOUT  300000           // 300 seconds (5 minutes) - duration of inactivity after which the screen turns off 
 #define CONF_MENU_CONTROL_MIN 0
 #define CONF_MENU_CONTROL_OPEN 1
