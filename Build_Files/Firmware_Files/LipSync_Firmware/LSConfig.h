@@ -66,15 +66,14 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_BUZZER_PIN 10
 
 // Operating Mode Values
+#define CONF_OPERATING_MODE_MIN 0
 #define CONF_OPERATING_MODE_NONE 0
 #define CONF_OPERATING_MODE_MOUSE 1
 #define CONF_OPERATING_MODE_GAMEPAD 2
+#define CONF_OPERATING_MODE_SAFE 3
+#define CONF_OPERATING_MODE_MAX 3
 
-
-#define CONF_OPERATING_MODE_MIN 0
-#define CONF_OPERATING_MODE_MAX 2
-
-#define CONF_OPERATING_MODE_DEFAULT 1 // Default mode = Mouse
+#define CONF_OPERATING_MODE_DEFAULT CONF_OPERATING_MODE_MOUSE  // Default mode = Mouse
                                           // 0 = Operating Mode null
                                           // 1 = Mouse
                                           // 2 = Gamepad  
