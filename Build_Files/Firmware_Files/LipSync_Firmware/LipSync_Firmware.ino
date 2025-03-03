@@ -39,7 +39,7 @@ String g_deviceUID = "";  // Global variable for storing unique identifier for b
 
 // Communication mode and debug mode variables
 int g_comMode;        // 0 = None , 1 = USB , 2 = Wireless
-int g_operatingMode;  // 0 = None, 1 = Mouse, 2 = Wireless, 3 = Gamepad, 4=Menu
+int g_operatingMode;  // 0 = None, 1 = Mouse, 2 = Gamepad, 3 = Safe
 int g_soundMode;      // 0 = None, 1 = Basic, 2 = Advanced // TODO 2025-Feb-05 Currently not used - buzzer.begin sets sound mode from memory
 int g_lightMode;      // 0 = None, 1 = Basic, 2 = Advanced
 
@@ -448,6 +448,10 @@ void checkSafeMode(void) {
 
   } else {
     g_safeModeEnabled = false;
+  }
+
+  if (g_safeModeEnabled) {
+    g_operatingMode = CONF_OPERATING_MODE_SAFE; // Change operating mode to safe mode
   }
 
   
@@ -994,6 +998,9 @@ void beginComOpMode() {
     case CONF_OPERATING_MODE_GAMEPAD:  // USB Gamepad
       gamepad.begin();
       break;
+    case CONF_OPERATING_MODE_SAFE: // Safe mode
+      Serial.print("USBDEBUG: beginComOpMode: Safe Mode");
+      break;
       // default:
   }
 
@@ -1194,6 +1201,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
         && actionState.secondaryState == INPUT_SEC_STATE_RELEASED
         && actionState.elapsedTime >= actionProperty[actionIndex].inputActionStartTime
         && actionState.elapsedTime < actionProperty[actionIndex].inputActionEndTime) {
+      
       // Get action index
       if (screen.isMenuActive()) {
         tempActionIndex = actionProperty[actionIndex].menuOutputActionNumber;
@@ -1204,6 +1212,9 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
             break;
           case CONF_OPERATING_MODE_GAMEPAD:
             tempActionIndex = actionProperty[actionIndex].gamepadOutputActionNumber;
+            break;
+          case CONF_OPERATING_MODE_SAFE:
+            tempActionIndex = actionProperty[actionIndex].safeModeOutputActionNumber;
             break;
         }
       }
@@ -1241,6 +1252,9 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
             break;
           case CONF_OPERATING_MODE_GAMEPAD:
             tempActionIndex = actionProperty[actionIndex].gamepadOutputActionNumber;
+            break;
+          case CONF_OPERATING_MODE_SAFE:
+            tempActionIndex = actionProperty[actionIndex].safeModeOutputActionNumber;
             break;
         }
       }
@@ -2361,6 +2375,11 @@ void setLedDefault() {
       {
         led.setLedColor(CONF_LED_MICRO, LED_CLR_YELLOW, CONF_LED_BRIGHTNESS);
         break;
+      }
+    case CONF_OPERATING_MODE_SAFE:
+      {
+       led.setLedColor(CONF_LED_ALL, LED_CLR_RED, CONF_LED_BRIGHTNESS);
+       break;
       }
   }
 }
