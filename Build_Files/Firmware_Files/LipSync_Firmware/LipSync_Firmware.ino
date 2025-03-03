@@ -1454,7 +1454,7 @@ void performOutputAction(int action) {
       }
     case CONF_ACTION_FACTORY_RESET:
       {
-        factoryReset(true, false);  // Perform Factory Reset
+        doFactoryReset(true, false);  // Perform Factory Reset
         break;
       }
   }
@@ -2510,7 +2510,7 @@ void performLedAction(ledStateStruct* args) {
 //******************************************//
 void softwareReset() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: softwareReset()"); }
-  screen.resetPage();
+  screen.restartPage();
   buzzer.playShutdownSound();
 
   releaseOutputAction();
