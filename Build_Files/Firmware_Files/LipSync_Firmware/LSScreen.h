@@ -47,15 +47,16 @@
 
 // More Menus
 #define SOUND_MENU 51
-#define SIP_PUFF_MENU 52
-#define SIP_THRESH_MENU 521
-#define PUFF_THRESH_MENU 522
-#define FULL_CALIB_PAGE 53
-#define FULL_CALIB_CONFIRM_PAGE 531
-#define RESTART_PAGE 54
-#define FACTORY_RESET_PAGE 55
-#define FACTORY_RESET_CONFIRM2_PAGE 551
-#define INFO_PAGE 56
+#define SCROLL_SP_MENU 52
+#define SIP_PUFF_MENU 53
+#define SIP_THRESH_MENU 531
+#define PUFF_THRESH_MENU 532
+#define FULL_CALIB_PAGE 54
+#define FULL_CALIB_CONFIRM_PAGE 541
+#define RESTART_PAGE 55
+#define FACTORY_RESET_PAGE 56
+#define FACTORY_RESET_CONFIRM2_PAGE 561
+#define INFO_PAGE 57
 
 #define SCROLL_DELAY_MILLIS 100 // [ms] This controls the scroll speed of long menu items //TODO 2025-Feb-28 Make this user adjustable
 
@@ -133,6 +134,7 @@ private:
   int _communicationMode;
   int _tempCommunicationMode;
   int _cursorSpeedLevel;
+  int _scrollSpeedLevel;
   bool _soundOn = true;
   int _soundMode;
 
@@ -168,6 +170,7 @@ private:
   void confirmModeChange();
   void changeMode();
   void cursorSpeedMenu();
+  void scrollSpeedMenu();
   void bluetoothMenu();
   void moreMenu();
   void fullCalibrationPage();
@@ -189,8 +192,9 @@ private:
   String _modeMenuText[4] = { "MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back" };
   String _modeConfirmText[4] = { "Change", "mode?", "Confirm", "... Back" };
   String _cursorSpMenuText[4] = { "Speed: ", "Increase", "Decrease", "... Back" };
-  String _moreMenuText[6] = {    "Sound",    "Sip & Puff",    "Full Calibration",    "Restart LipSync",    "Factory Reset",    "... Back",  };
+  String _moreMenuText[7] = {    "Sound",    "Scroll Speed",    "Sip & Puff",    "Full Calibration",    "Restart LipSync",    "Factory Reset",    "... Back",  };
   String _soundMenuText[4] = { "Sound:", "<>", "Turn <>", "... Back" };
+  String _scrollSpMenuText[4] = { "Speed: ", "Increase", "Decrease", "... Back" };
   String _sipPuffThreshMenuText[4] = { "Sip Threshold", "Puff Threshold", "... Back" };
   String _adjustSipThreshMenuText[4] = { "Sip: ", "Increase", "Decrease", "... Back" };
   String _adjustPuffThreshMenuText[4] = { "Puff: ", "Increase", "Decrease", "... Back" };
@@ -208,6 +212,7 @@ private:
   const int _cursorSpMenuLen = 3;
   const int _moreMenuLen = 6;
   const int _soundMenuLen = 2;
+  const int _scrollSpMenuLen = 3;
   const int _sipPuffThreshMenuLen = 3;
   const int _adjustSipThreshMenuLen = 3;
   const int _adjustPuffThreshMenuLen = 3;
@@ -589,19 +594,21 @@ void LSScreen::selectMenuItem() {
         case 0: // Sound
           soundMenu();
           break;
-        case 1: // Sip puff
+        case 1:
+          scrollSpeedMenu();
+        case 2: // Sip puff
           sipPuffThreshMenu();
           break;
-        case 2: // Full Calibration
+        case 3: // Full Calibration
           fullCalibrationConfirmPage();
           break;
-        case 3: // Restart
+        case 4: // Restart
           restartConfirmPage();
           break;
-        case 4: // Factory Reset
+        case 5: // Factory Reset
           factoryResetConfirm1Page();
           break;
-        case 5: // Back
+        case 6: // Back
           mainMenu();
           break;
       }
@@ -625,6 +632,36 @@ void LSScreen::selectMenuItem() {
           _currentMenu = MAIN_MENU;
           mainMenu();
       }
+      break;
+
+    case SCROLL_SP_MENU:
+      switch (_currentSelection) {
+        case 0:  // Increase
+          _scrollSpeedLevel = getScrollLevel(false, false);
+          _scrollSpeedLevel++;
+          setScrollLevel(true, false, _scrollSpeedLevel);
+          _scrollSpeedLevel = getScrollLevel(false, false);
+          _scrollSpMenuText[0] = "Speed: " + String(_scrollSpeedLevel) + " ";
+          _display.setCursor(0, 0);
+          _display.print(_scrollSpMenuText[0]);
+          _display.display();
+          break;
+        case 1:  // Decrease
+          _scrollSpeedLevel = getScrollLevel(false, false);
+          _scrollSpeedLevel--;
+          setScrollLevel(true, false, _scrollSpeedLevel);
+          _scrollSpeedLevel = getScrollLevel(false, false);
+          _scrollSpMenuText[0] = "Speed: " + String(_scrollSpeedLevel) + " ";
+          _display.setCursor(0, 0);
+          _display.print(_scrollSpMenuText[0]);
+          _display.display();
+          break;
+        case 2:  // Back
+          _currentMenu = MAIN_MENU;
+          mainMenu();
+          break;
+      }
+
       break;
 
     case SIP_PUFF_MENU:
@@ -1123,6 +1160,29 @@ void LSScreen::cursorSpeedMenu(void) {
   _currentSelection = 0;
 
   displayMenu();  //  Print items in current menu
+}
+
+//*********************************//
+// Function   : scrollSpeedMenu
+//
+// Description: Format and display Cursor Speed Menu
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
+void LSScreen::scrollSpeedMenu(void) {
+  _currentMenu = SCROLL_SP_MENU;
+  _scrollSpeedLevel = getScrollLevel(true, false);
+
+  _scrollSpMenuText[0] = "Speed: " + String(_scrollSpeedLevel);
+
+  _currentMenuLength = _scrollSpMenuLen;
+  _currentMenuText = _scrollSpMenuText;
+  _cursorStart = 1;
+  _currentSelection = 0;
+
+  displayMenu();
 }
 
 //*********************************//

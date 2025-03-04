@@ -163,7 +163,7 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 // Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 20          // 20 ms 
-#define CONF_SCROLL_POLL_RATE 150           // 150 ms
+#define CONF_SCROLL_POLL_RATE 20           // 140 ms
 #define CONF_PRESSURE_POLL_RATE 50          // 50 ms
 #define CONF_INPUT_POLL_RATE 20             // 20 ms
 #define CONF_BT_FEEDBACK_POLL_RATE 1000     // 1s         
@@ -335,7 +335,7 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_SCROLL_LEVEL_MIN 1
 #define CONF_SCROLL_LEVEL_MAX 10
 #define CONF_SCROLL_MOVE_MIN  1
-#define CONF_SCROLL_MOVE_MAX  10
+#define CONF_SCROLL_MOVE_MAX  16
 #define CONF_SCROLL_MOVE_BASE 1
 
 // Joystick cursor acceleration change 

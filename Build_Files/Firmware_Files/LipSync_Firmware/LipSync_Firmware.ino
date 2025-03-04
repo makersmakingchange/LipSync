@@ -107,7 +107,8 @@ unsigned int g_usbConnectDelay = CONF_USB_HID_INIT_DELAY;
 
 // Joystick module variables and structures
 int acceleration = 0;
-int scrollLevel = 0;
+int g_scrollLevel = 0;
+int g_scrollNumRuns = 0;
 
 int outputAction;
 bool canOutputAction = true;
@@ -1555,6 +1556,7 @@ void cursorDrag(void) {
 //****************************************//
 void cursorScroll(void) {
   outputAction = CONF_ACTION_SCROLL;
+  g_scrollNumRuns = 0;
 }
 
 
@@ -1648,7 +1650,7 @@ void initJoystick() {
   js.setMagnetDirection(JOY_DIRECTION_DEFAULT, JOY_DIRECTION_INVERSE);  // Set x and y magnet direction
   getJoystickDeadZone(true, false);                                     // Get joystick deadzone stored in flash memory
   getCursorSpeed(true, false);                                          // Get joystick cursor speed stored in flash memory
-  scrollLevel = getScrollLevel(true, false);                            // Get scroll level stored in flash memory
+  g_scrollLevel = getScrollLevel(true, false);                            // Get scroll level stored in flash memory
   setJoystickInitialization(true, false);                               // Perform joystick center initialization
   getJoystickCalibration(true, false);                                  // Get joystick calibration points stored in flash memory
 }
@@ -1900,13 +1902,13 @@ void joystickLoop() {
 void performJoystick(pointIntType inputPoint) {
   if (g_operatingMode == CONF_OPERATING_MODE_MOUSE) {
     // 0 = None , 1 = USB , 2 = Wireless
-    if (g_comMode == CONF_COM_MODE_USB) {
-      //(outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : usbmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration)); // TODO Implement acceleration
-      (outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y), js.getMinimumRadius(), scrollLevel)) : usbmouse.move(inputPoint.x, inputPoint.y);
+    if (comMode == CONF_COM_MODE_USB) {
+      //(outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),g_scrollLevel)) : usbmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration)); // TODO Implement acceleration
+      (outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y), js.getMinimumRadius(), g_scrollLevel)) : usbmouse.move(inputPoint.x, inputPoint.y);
 
-    } else if (g_comMode == CONF_COM_MODE_BLE) {
-      //(outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),scrollLevel)) : btmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration)); // TODO Implement acceleration
-      (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y), js.getMinimumRadius(), scrollLevel)) : btmouse.move(inputPoint.x, inputPoint.y);
+    } else if (comMode == CONF_COM_MODE_BLE) {
+      //(outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),g_scrollLevel)) : btmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration)); // TODO Implement acceleration
+      (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y), js.getMinimumRadius(), g_scrollLevel)) : btmouse.move(inputPoint.x, inputPoint.y);
     }
   } else if (g_operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
     // Gamepad is USB only, if wireless gamepad functionality is added, add that here
@@ -1929,10 +1931,28 @@ void performJoystick(pointIntType inputPoint) {
 //****************************************//
 int scrollModifier(const int cursorValue, const int cursorMaxValue, const int scrollLevelValue) {
   int scrollOutput = 0;
-  int scrollMaxSpeed = round((1.0 * pow(CONF_SCROLL_MOVE_MAX, scrollLevelValue / 10.0)) + CONF_SCROLL_MOVE_BASE);
+
+  //int scrollMaxSpeed = round((1.0 * pow(CONF_SCROLL_MOVE_MAX, scrollLevelValue / 10.0)) + CONF_SCROLL_MOVE_BASE);
+  //int scrollMaxSpeed = round((1.0 * pow(CONF_SCROLL_MOVE_MAX, scrollLevelValue / CONF_SCROLL_LEVEL_MAX)) + CONF_SCROLL_MOVE_BASE);
+  int scrollMaxSpeed = round((1.0 * CONF_SCROLL_MOVE_MAX * scrollLevelValue/CONF_SCROLL_LEVEL_MAX) + CONF_SCROLL_MOVE_BASE);
 
   scrollOutput = map(cursorValue, 0, cursorMaxValue, 0, scrollMaxSpeed);
   scrollOutput = -1 * constrain(scrollOutput, -1 * scrollMaxSpeed, scrollMaxSpeed);
+
+  if (g_scrollNumRuns % (CONF_SCROLL_MOVE_MAX-abs(scrollOutput)) == 0){
+    if (cursorValue < 0) {
+      scrollOutput = 1;
+    } else if (cursorValue > 0){
+      scrollOutput = -1;
+    } else { 
+      scrollOutput = 0;
+    }
+    g_scrollNumRuns = 0;
+  } else {
+    scrollOutput = 0;
+  }
+
+  g_scrollNumRuns++;
   return scrollOutput;
 }
 
