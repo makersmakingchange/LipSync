@@ -1902,11 +1902,11 @@ void joystickLoop() {
 void performJoystick(pointIntType inputPoint) {
   if (g_operatingMode == CONF_OPERATING_MODE_MOUSE) {
     // 0 = None , 1 = USB , 2 = Wireless
-    if (comMode == CONF_COM_MODE_USB) {
+    if (g_comMode == CONF_COM_MODE_USB) {
       //(outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),g_scrollLevel)) : usbmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration)); // TODO Implement acceleration
       (outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y), js.getMinimumRadius(), g_scrollLevel)) : usbmouse.move(inputPoint.x, inputPoint.y);
 
-    } else if (comMode == CONF_COM_MODE_BLE) {
+    } else if (g_comMode == CONF_COM_MODE_BLE) {
       //(outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),g_scrollLevel)) : btmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration)); // TODO Implement acceleration
       (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y), js.getMinimumRadius(), g_scrollLevel)) : btmouse.move(inputPoint.x, inputPoint.y);
     }
@@ -1939,7 +1939,7 @@ int scrollModifier(const int cursorValue, const int cursorMaxValue, const int sc
   scrollOutput = map(cursorValue, 0, cursorMaxValue, 0, scrollMaxSpeed);
   scrollOutput = -1 * constrain(scrollOutput, -1 * scrollMaxSpeed, scrollMaxSpeed);
 
-  if (g_scrollNumRuns % (CONF_SCROLL_MOVE_MAX-abs(scrollOutput)) == 0){
+  if (g_scrollNumRuns % (CONF_SCROLL_MOVE_MAX - abs(scrollOutput)) == 0){
     if (cursorValue < 0) {
       scrollOutput = 1;
     } else if (cursorValue > 0){
