@@ -202,7 +202,7 @@ private:
   String _factoryResetConfirm1Text[4] = { "Reset to", "defaults?", "Confirm", "... Back" };
   String _factoryResetConfirm2Text[4] = { "Are you", "sure?", "Confirm", "... Back" };
   String _fullCalibrationConfirmText[4] = { "Are you", "sure?", "Confirm", "... Back" };
-  String _safeModeMenuText[2] = {"Restart", "Factory Reset"};
+  String _safeModeMenuText[4] = {"SAFE MODE", "Options:", "Restart", "Factory Reset"};
 
   // Number of selectable options in each menu
   const int _mainMenuLen = 5;
@@ -1869,7 +1869,7 @@ void LSScreen::safeModeMenu(void) {
   _currentMenu = SAFEMODE_MENU;
   _currentMenuLength = _safeModeMenuLen;
   _currentMenuText = _safeModeMenuText;
-  _cursorStart = 0;
+  _cursorStart = 2;
   _currentSelection = 0;
 
   displayMenu();  //  Print items in current menu
