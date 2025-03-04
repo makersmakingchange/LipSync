@@ -727,7 +727,7 @@ void setScrollLevel(bool responseEnabled, bool apiEnabled, int inputScrollLevel)
     }
     performLedAction(ledCurrentState);
     isValidLevel = true;
-    scrollLevel = tempScrollLevel;
+    g_scrollLevel = tempScrollLevel;
   }
   else {
     // Invalid inputScrollLevel
