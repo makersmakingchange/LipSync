@@ -263,7 +263,7 @@ void setup() {
     hardwareErrorCheck();
   }
 
-  handleHardwareErrors();
+  //handleHardwareErrors(); // Currently not implemented
 
   toggleSafeMode(g_safeModeEnabled);
 
@@ -547,10 +547,8 @@ void toggleSafeMode(bool safeModeEnabled) {
     pollTimer.disable(CONF_TIMER_DEBUG);
     pollTimer.disable(CONF_TIMER_BLUETOOTH);
 
-    //screen.restartConfirmPage();
-
-  } else {
-    // Allow mouse / gamepad output
+    } else {
+    
 
   }
 
