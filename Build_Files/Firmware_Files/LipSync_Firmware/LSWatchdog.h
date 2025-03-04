@@ -22,7 +22,7 @@
 
 #include <nrf_wdt.h>
 #include <hal/nrf_power.h>  //  Defines reset reasons for NRF52 (https://github.com/particle-iot/nrf5_sdk/blob/master/modules/nrfx/hal/nrf_power.h)
-//volatile uint32_t *const RESETREAS = (uint32_t *)0x40000400;  //  Pointer to reset reason register on NR52
+
 const uint32_t WATCHDOG_RESET_MASK = 0x2; //POWER_RESETREAS_DOG_Msk; //  0x2;
 extern bool g_watchdogReset;
 extern uint32_t g_lastRebootReason;
@@ -44,7 +44,7 @@ void checkResetReason() {
   // Check the internal register for why the device was reset 
    
   // Determine last reset reason
-  g_lastRebootReason = nrf_power_resetreas_get(NRF_POWER);
+    g_lastRebootReason = readResetReason(); // from Adafruit_nRF52_Arduino/cores/NRF/wiring.c
 
   	
   // Check why the device was reset
@@ -59,9 +59,6 @@ void checkResetReason() {
   } else {
     if(USB_DEBUG) { Serial.println("Other reset"); }
   }
-
-  // Clear last reset reason
-  nrf_power_resetreas_clear(NRF_POWER, g_lastRebootReason);
 
 }
 
