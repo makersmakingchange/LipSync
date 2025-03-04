@@ -415,6 +415,9 @@ void LSScreen::splashScreen2() {
       //_display.print("USB"); _display.setTextSize(1); _display.print(" "); _display.setTextSize(2); _display.print("Gamepad"); // text size changed for space so it would all fit on one line
       //drawCentreString("Gamepad", 48);
       break;
+    case CONF_OPERATING_MODE_SAFE:
+      // Currently bypassed since safe mode menus are called directly
+      break;
     default:
       _display.println("Error");
   }
@@ -1614,37 +1617,31 @@ void LSScreen::hardwareErrorPage() {
   
   setupDisplay();
 
-  _display.println("HARDWARE");
-  _display.println("ERROR");
+  _display.println("ERROR:");
 
-  if (!g_joystickSensorConnected) {
-    _display.println("JOYSTICK");
+  if (!g_joystickSensorConnected && !g_mouthpiecePressureSensorConnected && !g_ambientPressureSensorConnected) {
+    _display.println(" CABLE");
+    _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::errorPageCable, this);
   } else {
-    _display.println("");
-  }
-
-  if (!g_mouthpiecePressureSensorConnected) {
-    _display.println("PRESSURE");
-  } else {
-    _display.println("");
-  }
-
-  if (!g_ambientPressureSensorConnected) {
-    _display.println("AMBIENT");
-  } else {
-    _display.println("");
+      _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::errorPageI2C, this);
+      if (!g_joystickSensorConnected)
+        _display.println(" JOYSTICK");
+      if (!g_mouthpiecePressureSensorConnected)
+        _display.println(" PRESSURE");
+      if (!g_ambientPressureSensorConnected)
+        _display.println(" AMBIENT");
   }
 
   _display.display();
   
-  _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::errorPageI2C, this);
+  
 }
 
 
 //*********************************//
 // Function   : errorPageI2C
 //
-// Description: Format and display an error page for i2C sensor
+// Description: Format and display an error page when an i2C sensor is not detected
 //
 // Arguments :  void
 //
@@ -1654,26 +1651,11 @@ void LSScreen::errorPageI2C() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::errorPageI2C()"); }
 
   setupDisplay();
-  _display.println("ERROR: I2C");
-
-  if (!g_joystickSensorConnected) {
-    _display.println("JOYSTICK");
-  } else {
-    _display.println("");
-  }
-
-  if (!g_mouthpiecePressureSensorConnected) {
-    _display.println("PRESSURE");
-  } else {
-    _display.println("");
-  }
-
-  if (!g_ambientPressureSensorConnected) {
-    _display.println("AMBIENT");
-  } else {
-    _display.println("");
-  }
-
+  _display.println("ERROR: ");
+  _display.println("Sensor not");
+  _display.println("detected.");
+  _display.println("Contact Maker.");
+  
   _display.display();
 
   _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::safeModeMenu, this);
@@ -1816,7 +1798,7 @@ void LSScreen::connectionTimingPage(unsigned long before, unsigned long after) {
 
 void LSScreen::safeModePage(int safeModeReason) {
   if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::safeModePage()"); }
-  
+
   _isActive = true;
   setupDisplay();
 
@@ -1858,7 +1840,7 @@ void LSScreen::safeModePage(int safeModeReason) {
 //
 // Description: Format and display an page showing that device is in safe boot mode
 //
-// Arguments :  int safeModeReason
+// Arguments :  void
 //
 // Return     : void
 //*********************************//
