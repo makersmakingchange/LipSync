@@ -803,7 +803,7 @@ pointIntType LSJoystick::processInputReading(pointFloatType inputPoint) {
 //*********************************//
 pointIntType LSJoystick::processOutputResponse(pointIntType inputPoint){
   // Initialize outputPoint and deadzonedPoint
-  pointIntType outputPoint,deadzonedPoint,limitPoint = {0,0};
+  pointIntType outputPoint,deadzonedPoint = {0,0};
 
   float inputPointMagnitude = magnitudePoint(inputPoint);
   float inputPointAngle = atan2(inputPoint.y, inputPoint.x); 
