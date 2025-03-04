@@ -1479,6 +1479,7 @@ void LSScreen::fullCalibrationConfirmPage(void) {
 //*********************************//
 void LSScreen::restartConfirmPage(void) {
   if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::restartConfirmPage()"); }
+ 
   _currentMenu = RESTART_PAGE;
   _currentMenuLength = _restartConfirmLen;
   _currentMenuText = _restartConfirmText;
@@ -1500,6 +1501,7 @@ void LSScreen::restartConfirmPage(void) {
 //*********************************//
 void LSScreen::factoryResetConfirm1Page(void) {
   if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::factoryResetConfirm1Page()"); }
+
   _currentMenu = FACTORY_RESET_PAGE;
   _currentMenuLength = _factoryResetConfirm1Len;
   _currentMenuText = _factoryResetConfirm1Text;
@@ -1520,6 +1522,7 @@ void LSScreen::factoryResetConfirm1Page(void) {
 //*********************************//
 void LSScreen::factoryResetConfirm2Page(void) {
   if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::factoryResetConfirm2Page()"); }
+
   setupDisplay();
   _display.println("This will");
   _display.println("erase all");
@@ -1588,8 +1591,8 @@ void LSScreen::testPage(unsigned int usbConnectDelay) {
 //*********************************//
 void LSScreen::noUsbPage(void) {
   if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::noUsbPage()"); }
-  setupDisplay();
 
+  setupDisplay();
   _display.println("No USB");
   _display.println("Use menu");
   _display.println("to change");
@@ -1649,8 +1652,8 @@ void LSScreen::hardwareErrorPage() {
 //*********************************//
 void LSScreen::errorPageI2C() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::errorPageI2C()"); }
-  setupDisplay();
 
+  setupDisplay();
   _display.println("ERROR: I2C");
 
   if (!g_joystickSensorConnected) {
@@ -1715,8 +1718,8 @@ void LSScreen::errorPageCable() {
 //*********************************//
 void LSScreen::warningUSBDebugOn(void) {
   if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::warningUSBDebugOn()"); }
-  setupDisplay();
 
+  setupDisplay();
   _display.println("Warning:");
   _display.println("USB_DEBUG=1");
   _display.println("Set to 0");
@@ -1738,8 +1741,8 @@ void LSScreen::warningUSBDebugOn(void) {
 
 void LSScreen::restartPage() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::restartPage()"); }
-  setupDisplay();
 
+  setupDisplay();
   _display.println("");
   _display.println("RESTARTING...");
   _display.println("");
@@ -1762,8 +1765,8 @@ void LSScreen::restartPage() {
 
 void LSScreen::factoryResetPage() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::factoryResetPage()"); }
-  setupDisplay();
 
+  setupDisplay();
   _display.println("FACTORY");
   _display.println("RESET...");
   _display.println("");
@@ -1813,6 +1816,7 @@ void LSScreen::connectionTimingPage(unsigned long before, unsigned long after) {
 
 void LSScreen::safeModePage(int safeModeReason) {
   if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::safeModePage()"); }
+  
   _isActive = true;
   setupDisplay();
 
@@ -1882,6 +1886,7 @@ void LSScreen::safeModeMenu(void) {
 //*********************************//
 
 void LSScreen::print4LineString(String s1, String s2, String s3, String s4) {
+
   setupDisplay();
   _display.println(s1);
   _display.println(s2);
