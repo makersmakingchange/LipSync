@@ -1040,7 +1040,7 @@ void getJoystickDeadZone(bool responseEnabled, bool apiEnabled, String optionalP
 //*********************************//
 void setJoystickDeadZone(bool responseEnabled, bool apiEnabled, float inputDeadZone) {
   String deadZoneCommand = "DZ";
-  if ((inputDeadZone > CONF_JOY_MIN_DEADZONE) && (inputDeadZone < CONF_JOY_MAX_DEADZONE)) {
+  if ((inputDeadZone > CONF_JOY_MIN_DEADZONE) && (inputDeadZone <= CONF_JOY_MAX_DEADZONE)) {
     mem.writeFloat(CONF_SETTINGS_FILE, deadZoneCommand, inputDeadZone);
     js.setDeadzone(true, inputDeadZone);
     printResponseFloat(responseEnabled, apiEnabled, true, 0, "DZ,1", true, inputDeadZone);
@@ -1123,7 +1123,7 @@ void getJoystickUpperDeadZone(bool responseEnabled, bool apiEnabled, String opti
 //*********************************//
 void setJoystickUpperDeadZone(bool responseEnabled, bool apiEnabled, float inputUpperDeadZone) {
   String upperDeadZoneCommand = "UZ";
-  if ((inputUpperDeadZone > CONF_JOY_MIN_DEADZONE) && (inputUpperDeadZone < CONF_JOY_MAX_DEADZONE)) {
+  if ((inputUpperDeadZone > CONF_JOY_MIN_DEADZONE) && (inputUpperDeadZone <= CONF_JOY_MAX_DEADZONE)) {
     mem.writeFloat(CONF_SETTINGS_FILE, upperDeadZoneCommand, inputUpperDeadZone);
     js.setUpperDeadzone(true, inputUpperDeadZone);
     printResponseFloat(responseEnabled, apiEnabled, true, 0, "UZ,1", true, inputUpperDeadZone);

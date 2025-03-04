@@ -695,8 +695,8 @@ pointIntType LSJoystick::applyRadialDeadzone(pointIntType inputPoint, float inpu
   // if upper deadzone is enabled, values above upper deadzone equal max input
   if (_upperDeadzoneEnabled){
     if(inputPointMagnitude > (JOY_INPUT_XY_MAX - _upperDeadzoneValue)){      // If magnitude is greater than JOY_INPUT_XY_MAX - upper deadzone
-      outputPoint.x = sgn(inputPoint.x) * abs(cos(inputPointAngle) * JOY_INPUT_XY_MAX);   // Set x value of output point equal to x value on circle of radius JOY_INPUT_XY_MAX at angle of input point
-      outputPoint.y = sgn(inputPoint.y) * abs(sin(inputPointAngle) * JOY_INPUT_XY_MAX);   // Set x value of output point equal to x value on circle of radius JOY_INPUT_XY_MAX at angle of input point
+      outputPoint.x = sgn(inputPoint.x) * abs(round(cos(inputPointAngle) * JOY_INPUT_XY_MAX));   // Set x value of output point equal to x value on circle of radius JOY_INPUT_XY_MAX at angle of input point
+      outputPoint.y = sgn(inputPoint.y) * abs(round(sin(inputPointAngle) * JOY_INPUT_XY_MAX));   // Set y value of output point equal to y value on circle of radius JOY_INPUT_XY_MAX at angle of input point
     } 
   }
   

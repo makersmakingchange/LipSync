@@ -277,9 +277,9 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 // Joystick Deadzone Default settings
 #define CONF_JOY_DEADZONE_DEFAULT 0.12
-#define CONF_JOY_UPPER_DEADZONE_DEFAULT 0.10
+#define CONF_JOY_UPPER_DEADZONE_DEFAULT 0.12
 #define CONF_JOY_MIN_DEADZONE 0.01
-#define CONF_JOY_MAX_DEADZONE 1.0
+#define CONF_JOY_MAX_DEADZONE 0.5
 
 // Joystick full calibration points and related LED feedback settings
 #define CONF_JOY_CALIB_CORNER_DEFAULT 13.0
