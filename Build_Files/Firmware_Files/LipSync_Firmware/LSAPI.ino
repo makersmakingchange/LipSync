@@ -824,7 +824,7 @@ void decreaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
     CONF_JOY_SPEED_DEC_LED_NUMBER, 
     CONF_JOY_SPEED_LIMIT_LED_BLINK, 
     CONF_JOY_SPEED_LIMIT_LED_DELAY, 
-    led.getLedBrightness()));   // Blink 3 times
+    led.getLedBrightness());   // Blink 3 times
   }
   
     
