@@ -780,7 +780,7 @@ void increaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
     CONF_JOY_SPEED_INC_LED_NUMBER, 
     CONF_JOY_SPEED_CHANGE_LED_BLINK, 
     CONF_JOY_SPEED_CHANGE_LED_DELAY, 
-    CONF_LED_BRIGHTNESS);   // Blink once
+    led.getLedBrightness());   // Blink once
   } 
   else{
     setLedState(LED_ACTION_BLINK, 
@@ -788,7 +788,7 @@ void increaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
     CONF_JOY_SPEED_INC_LED_NUMBER, 
     CONF_JOY_SPEED_LIMIT_LED_BLINK, 
     CONF_JOY_SPEED_LIMIT_LED_DELAY, 
-    CONF_LED_BRIGHTNESS);   // Blink 3 times
+    led.getLedBrightness());   // Blink 3 times
   }
 
   setCursorSpeed(responseEnabled, apiEnabled, tempCursorSpeedLevel);
@@ -816,7 +816,7 @@ void decreaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
     CONF_JOY_SPEED_DEC_LED_NUMBER, 
     CONF_JOY_SPEED_CHANGE_LED_BLINK, 
     CONF_JOY_SPEED_CHANGE_LED_DELAY, 
-    CONF_LED_BRIGHTNESS);   // Blink once
+    led.getLedBrightness());   // Blink once
   } 
   else{
     setLedState(LED_ACTION_BLINK, 
@@ -824,7 +824,7 @@ void decreaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
     CONF_JOY_SPEED_DEC_LED_NUMBER, 
     CONF_JOY_SPEED_LIMIT_LED_BLINK, 
     CONF_JOY_SPEED_LIMIT_LED_DELAY, 
-    CONF_LED_BRIGHTNESS);   // Blink 3 times
+    led.getLedBrightness()));   // Blink 3 times
   }
   
     
@@ -1723,7 +1723,7 @@ void setCommunicationModeLed(int inputCommunicationMode) {
     } else if (inputCommunicationMode==CONF_COM_MODE_BLE) {
       modeLedColor = LED_CLR_BLUE;
     }
-    setLedState(LED_ACTION_BLINK, modeLedColor, CONF_COM_MODE_LED_NUMBER, CONF_COM_MODE_LED_BLINK, CONF_COM_MODE_LED_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
+    setLedState(LED_ACTION_BLINK, modeLedColor, CONF_COM_MODE_LED_NUMBER, CONF_COM_MODE_LED_BLINK, CONF_COM_MODE_LED_BLINK_DELAY,led.getLedBrightness());    
     performLedAction(ledCurrentState);   
 }
 //***SET COMMUNICATION MODE API FUNCTION***//
@@ -2312,7 +2312,7 @@ void resetSettings(bool responseEnabled, bool apiEnabled, String optionalParamet
 void doFactoryReset(bool responseEnabled, bool apiEnabled) {
 
   // Set all LEDs to red to indicate factory reset process 
-  setLedState(LED_ACTION_ON, LED_CLR_RED, CONF_LED_ALL, 0, 0, CONF_LED_BRIGHTNESS);                           
+  setLedState(LED_ACTION_ON, LED_CLR_RED, CONF_LED_ALL, 0, 0, CONF_LED_BRIGHTNESS_MAX);                           
   performLedAction(ledCurrentState);  
 
   // Factory reset process 
@@ -2330,7 +2330,7 @@ void doFactoryReset(bool responseEnabled, bool apiEnabled) {
   printResponseInt(responseEnabled, apiEnabled, true, 0, "FR,1", true, 1);
 
   // Clear all LEDs to indicate factory reset process is finished 
-  setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);                           
+  setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS_MAX);                           
   performLedAction(ledCurrentState);  
 
   softwareReset();
