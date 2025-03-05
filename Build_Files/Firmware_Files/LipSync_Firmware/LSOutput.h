@@ -91,17 +91,19 @@ public:
   void clearLedAll();
   void clearLed(int ledNumber);
   uint32_t getLedColor(int ledNumber);
-  uint8_t getLedBrightness();
+  int getLedBrightness();                   // get brightness value from 0 to 255
   void setLedBrightness(int ledBrightness);
+  int getLedBrightnessLevel();              // get brightness level from 1-10
+  void setLedBrightnessLevel(int ledBrightnessLevel);
   void setLedColor(int ledNumber, int ledColorNumber, int ledBrightness);
   void show();
   void setLightModeLevel(int lightModeLevel);
   int getLightModeLevel();
 
 private:
-  int _ledBrightness = 255;
-  int _lightModeLevel = 1;  
-
+  int _ledBrightness;
+  int _ledBrightnessLevel;
+  int _lightModeLevel;
 };
 
 //*********************************//
@@ -195,9 +197,9 @@ uint32_t LSOutput::getLedColor(int ledNumber) {
 // 
 // Arguments :  void
 // 
-// Return     : void
+// Return     : int : _ledBrightness : the led brightness from 0 to 255
 //*********************************//
-uint8_t LSOutput::getLedBrightness() {
+int LSOutput::getLedBrightness() {
   //  return (ledPixels.getBrightness());
   return _ledBrightness;
 }
@@ -214,7 +216,47 @@ uint8_t LSOutput::getLedBrightness() {
 // Return     : void
 //*********************************//
 void LSOutput::setLedBrightness(int ledBrightness) {
-  _ledBrightness = ledBrightness;
+  _ledBrightness = constrain(ledBrightness, 0, CONF_LED_BRIGHTNESS_MAX);
+}
+
+//***GET RGB LED BRIGHTNESS LEVEL FUNCTION***//
+//*********************************//
+// Function   : getLedBrightnessLevel 
+// 
+// Description: Get the brightness of the LEDs
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+int LSOutput::getLedBrightnessLevel() {
+
+  return _ledBrightnessLevel;
+}
+
+
+//***SET RGB LED BRIGHTNESS LEVEL FUNCTION***//
+//*********************************//
+// Function   : setLedBrightnessLevel 
+// 
+// Description: Set the brightness of the LEDs
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSOutput::setLedBrightnessLevel(int ledBrightnessLevel) {
+  _ledBrightnessLevel = constrain(ledBrightnessLevel, CONF_LED_BRIGHTNESS_LEVEL_MIN, CONF_LED_BRIGHTNESS_LEVEL_MAX);
+
+  int ledBrightness;
+
+  if (_ledBrightnessLevel == CONF_LED_BRIGHTNESS_LEVEL_MIN){
+    ledBrightness = 0;
+  } else {
+    ledBrightness = pow((1/(CONF_LED_BRIGHTNESS_LEVEL_MAX + 1 - _ledBrightnessLevel)), 2.2) * CONF_LED_BRIGHTNESS_MAX;
+  }
+
+  setLedBrightness(ledBrightness);
 }
 
 //*********************************//

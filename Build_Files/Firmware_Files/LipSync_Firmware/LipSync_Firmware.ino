@@ -2161,6 +2161,9 @@ void initLed() {
   led.begin();
   *ledCurrentState = { 0, 0, 0, 0, 0, 0 };  // Initialize pointer ledAction, ledColorNumber, ledBlinkNumber, ledBlinkTime, ledBrightness
   turnLedAllOff();
+
+  led.setLightModeLevel(getLightMode(false, false));
+  led.setLedBrightnessLevel(getLightBrightnessLevel(false, false)); 
 }
 
 
