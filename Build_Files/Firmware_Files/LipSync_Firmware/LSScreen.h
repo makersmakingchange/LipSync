@@ -1684,7 +1684,7 @@ void LSScreen::errorPageCable() {
 
   _display.display();
 
-  _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::safeModeMenu, this);
+  _screenStateTimerId = _screenStateTimer.setTimeout(2*CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::safeModeMenu, this);
 
 
 }
