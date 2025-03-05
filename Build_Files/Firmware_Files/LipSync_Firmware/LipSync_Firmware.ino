@@ -516,23 +516,23 @@ void toggleSafeMode(bool safeModeEnabled) {
     switch(g_safeModeReason) {
       case CONF_SAFE_MODE_REASON_INPUT:
       {
-        if (USB_DEBUG) { Serial.println("USBDEBUG: SAFE MODE ENABLED - Hub Buttons"); }
+        Serial.println("WARNING: SAFE MODE ENABLED - Hub Buttons"); 
         break;
       }
       case CONF_SAFE_MODE_REASON_WATCHDOG:
       {
-        if (USB_DEBUG) { Serial.println("USBDEBUG: SAFE MODE ENABLED - Watchdog"); }
+        Serial.println("WARNING: SAFE MODE ENABLED - Watchdog"); 
         break;
       }
       default:
       {
-        if (USB_DEBUG) { Serial.println("USBDEBUG: SAFE MODE ENABLED"); }
+        Serial.println("WARNING: SAFE MODE ENABLED"); 
         break;
       }
          
     }
 
-    g_operatingMode = CONF_OPERATING_MODE_SAFE; // Set working operating mode to safe mode to prevent unwanted input
+    g_operatingMode = CONF_OPERATING_MODE_SAFE; // Set working operating mode to safe mode to prevent unwanted input in case of hardware error
 
     // activate safe boot mode screen on display
     screen.safeModePage(g_safeModeReason);
