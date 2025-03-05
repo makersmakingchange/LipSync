@@ -529,9 +529,10 @@ void toggleSafeMode(bool safeModeEnabled) {
         if (USB_DEBUG) { Serial.println("USBDEBUG: SAFE MODE ENABLED"); }
         break;
       }
-
-            
+         
     }
+
+    g_operatingMode = CONF_OPERATING_MODE_SAFE; // Set working operating mode to safe mode to prevent unwanted input
 
     // activate safe boot mode screen on display
     screen.safeModePage(g_safeModeReason);
