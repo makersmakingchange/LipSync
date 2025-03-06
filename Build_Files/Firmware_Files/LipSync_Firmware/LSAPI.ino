@@ -839,7 +839,7 @@ void decreaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
 //***GET JOYSTICK INITIALIZATION FUNCTION***//
 // Function   : getJoystickInitialization
 //
-// Description: This function retrieves the FSR Neutral values from joystick Initialization.
+// Description: This function retrieves the neutral values from joystick initialization.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
@@ -909,7 +909,7 @@ void setJoystickInitialization(bool responseEnabled, bool apiEnabled, String opt
 //*** GET JOYSTICK CALIBRATION FUNCTION***//
 // Function   : getJoystickCalibration
 //
-// Description: This function retrieves FSR maximum values from joystick Calibration.
+// Description: This function retrieves calibration values from joystick Calibration.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
