@@ -96,7 +96,6 @@ class LSJoystick {
     LSCircularBuffer <pointIntType> joystickInputBuffer;                  // Create a buffer of type pointIntType to push mapped and filtered readings 
     LSCircularBuffer <pointIntType> joystickOutputBuffer;                 // Create a buffer of type pointIntType to push mapped readings 
     LSCircularBuffer <pointFloatType> joystickCenterBuffer;               // Create a buffer of type pointFloatType to push center input readings     
-    int applyDeadzone(int input);                                         // Apply deadzone to the input based on deadzoneValue and JOY_INPUT_XY_MAX.
     bool canSkipInputChange(pointFloatType inputPoint);                  // Check if the output change can be skipped (Low-Pass Filter)
     pointIntType applyRadialDeadzone(pointIntType inputPoint, float inputPointMagnitude, float inputPointAngle);    // Apply radial deadzone to the input based on deadzoneValue and upperDeadzoneValue
     pointIntType processInputReading(pointFloatType inputPoint);          // Process the input readings and map the input reading from square to circle. (-1024 to 1024 output )
@@ -651,33 +650,6 @@ pointIntType LSJoystick::getXYOut() {
 //********Private******************//
 //*********************************//
 
-//*********************************//
-// Function   : applyDeadzone 
-// 
-// Description: Apply the deadzone to the output value 
-// 
-// Arguments :  input : int : Output without deadzone
-// 
-// Return     : output : int : Output with deadzone applied
-//*********************************//
-int LSJoystick::applyDeadzone(int input){
-
-  // Output the input if Deadzone is not enabled 
-  int output = input;
-  
-  // if Deadzone is not enabled 
-  if(_innerDeadzoneEnabled) { 
-    if(abs(input) < _innerDeadzoneValue){                    // Output zero if input < _innerDeadzoneValue
-      output = 0;
-    }
-    else if(abs(input) > JOY_INPUT_XY_MAX - _innerDeadzoneValue){
-      output = sgn(input) * JOY_INPUT_XY_MAX;           // Output JOY_INPUT_XY_MAX if input > JOY_INPUT_XY_MAX-_innerDeadzoneValue
-    } else{
-      output = input;                                  // Output the input
-    }
-  }
-  return output;
-}
 
 //*********************************//
 // Function   : applyRadialDeadzone 
