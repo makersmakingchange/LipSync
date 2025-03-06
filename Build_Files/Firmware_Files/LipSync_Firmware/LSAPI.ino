@@ -81,7 +81,7 @@ _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSetting
 _functionList factoryResetFunction =              {"FR", "1", "1", &doFactoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[41] = {
+_functionList apiFunction[43] = {
   getModelNumberFunction,
   getVersionNumberFunction,
   getDeviceIDFunction,

@@ -1900,15 +1900,20 @@ void joystickLoop() {
 // Return     : void
 //****************************************//
 void performJoystick(pointIntType inputPoint) {
+  pointIntType mouseMovePoint = {0,0};
+  int maxMouse = js.getMouseSpeedRange();
+  mouseMovePoint.x = map(inputPoint.x+0.5, -CONF_JOY_OUTPUT_XY_MAX, CONF_JOY_OUTPUT_XY_MAX ,-maxMouse, maxMouse);
+  mouseMovePoint.y = map(inputPoint.y+0.5, -CONF_JOY_OUTPUT_XY_MAX, CONF_JOY_OUTPUT_XY_MAX ,-maxMouse, maxMouse);
+  
   if (g_operatingMode == CONF_OPERATING_MODE_MOUSE) {
     // 0 = None , 1 = USB , 2 = Wireless
     if (g_comMode == CONF_COM_MODE_USB) {
       //(outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),g_scrollLevel)) : usbmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration)); // TODO Implement acceleration
-      (outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y), js.getMinimumRadius(), g_scrollLevel)) : usbmouse.move(inputPoint.x, inputPoint.y);
+      (outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y), CONF_JOY_OUTPUT_XY_MAX, g_scrollLevel)) : usbmouse.move(mouseMovePoint.x, mouseMovePoint.y);
 
     } else if (g_comMode == CONF_COM_MODE_BLE) {
       //(outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),g_scrollLevel)) : btmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration)); // TODO Implement acceleration
-      (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y), js.getMinimumRadius(), g_scrollLevel)) : btmouse.move(inputPoint.x, inputPoint.y);
+      (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y), CONF_JOY_OUTPUT_XY_MAX, g_scrollLevel)) : btmouse.move(mouseMovePoint.x, mouseMovePoint.y);
     }
   } else if (g_operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
     // Gamepad is USB only, if wireless gamepad functionality is added, add that here
@@ -1936,8 +1941,16 @@ int scrollModifier(const int cursorValue, const int cursorMaxValue, const int sc
   //int scrollMaxSpeed = round((1.0 * pow(CONF_SCROLL_MOVE_MAX, scrollLevelValue / CONF_SCROLL_LEVEL_MAX)) + CONF_SCROLL_MOVE_BASE);
   int scrollMaxSpeed = round((1.0 * CONF_SCROLL_MOVE_MAX * scrollLevelValue/CONF_SCROLL_LEVEL_MAX) + CONF_SCROLL_MOVE_BASE);
 
-  scrollOutput = map(cursorValue, 0, cursorMaxValue, 0, scrollMaxSpeed);
+  //scrollOutput = map(cursorValue, 0, cursorMaxValue, 0, scrollMaxSpeed);
+  //scrollOutput = -1 * constrain(scrollOutput, -1 * scrollMaxSpeed, scrollMaxSpeed);
+
+  scrollOutput = round(float(cursorValue) * float(scrollMaxSpeed) / float(cursorMaxValue));
   scrollOutput = -1 * constrain(scrollOutput, -1 * scrollMaxSpeed, scrollMaxSpeed);
+
+
+  //Serial.print(cursorValue);  Serial.print("\t");
+  //Serial.print(cursorMaxValue); Serial.print("\t");
+  //Serial.println(scrollOutput);  
 
   if (g_scrollNumRuns % (CONF_SCROLL_MOVE_MAX - abs(scrollOutput)) == 0){
     if (cursorValue < 0) {

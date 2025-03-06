@@ -75,6 +75,7 @@ class LSJoystick {
     void setUpperDeadzone(bool upperDeadzoneEnabled,float upperDeadzoneFactor);  // Enable or disable deadzone and set deadzone scale factor (0.12) 
     int getOutputRange();                                                 // Get the output range or speed levels.
     void setOutputRange(int rangeLevel);                                  // Set the output range or speed levels.
+    int getMouseSpeedRange();
     int getMinimumRadius();                                               // Get the minimum input radius for square to circle mapping.
     void setMinimumRadius();                                              // Set or update the minimum input radius for square to circle mapping.
     pointFloatType getInputCenter();                                      // Get the updated center compensation point.
@@ -396,6 +397,19 @@ void LSJoystick::setOutputRange(int rangeLevel){
     _rangeValue = JOY_OUTPUT_XY_MAX_GAMEPAD ;
   }
   _rangeLevel = rangeLevel;
+}
+
+//*********************************//
+// Function   : getMouseSpeedRange
+// 
+// Description: Get the output range level based on mouse speed level.
+// 
+// Arguments :  void
+// 
+// Return     : int : _rangeValue;
+//*********************************//
+int LSJoystick::getMouseSpeedRange(){
+  return _rangeValue;
 }
 
 //*********************************//
@@ -744,8 +758,8 @@ pointIntType LSJoystick::linearizeOutput(pointIntType inputPoint, float inputPoi
   linearizedInputMagnitude = constrain(linearizedInputMagnitude, 0, JOY_INPUT_XY_MAX);
 
   // Map input magnitude (between 0 and 1024) to output magnitudes (between 0 and _rangeValue)
-  float outputMagnitude = mapIntToFloat(linearizedInputMagnitude, 0, JOY_INPUT_XY_MAX, 0, _rangeValue);
-  outputMagnitude = constrain(outputMagnitude, 0, _rangeValue);
+  float outputMagnitude = mapIntToFloat(linearizedInputMagnitude, 0, JOY_INPUT_XY_MAX, 0, CONF_JOY_OUTPUT_XY_MAX);
+  outputMagnitude = constrain(outputMagnitude, 0, CONF_JOY_OUTPUT_XY_MAX);
 
   // Use output magnitude and input point angle to calculate x and y points
   outputPoint.x = sgn(inputPoint.x) * abs(round(cos(inputPointAngle) * outputMagnitude));
