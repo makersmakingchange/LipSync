@@ -64,6 +64,8 @@ _functionList getSoundModeFunction =              {"SM", "0", "0", &getSoundMode
 _functionList setSoundModeFunction =              {"SM", "1", "",  &setSoundMode};
 _functionList getLightModeFunction =              {"LM", "0", "0", &getLightMode};
 _functionList setLightModeFunction =              {"LM", "1", "",  &setLightMode};
+_functionList getLightBrightnessLevelFunction =   {"LL", "0", "0", &getLightBrightnessLevel};
+_functionList setLightBrightnessLevelFunction =   {"LL", "1", "",  &setLightBrightnessLevel};
 
 _functionList controlHubMenuFunction =            {"CH", "1", "",  &controlHubMenu};
 
@@ -77,7 +79,7 @@ _functionList resetSettingsFunction =             {"RS", "1", "1", &resetSetting
 _functionList factoryResetFunction =              {"FR", "1", "1", &doFactoryReset};
 
 // Declare array of API functions
-_functionList apiFunction[39] = {
+_functionList apiFunction[41] = {
   getModelNumberFunction,
   getVersionNumberFunction,
   getDeviceIDFunction,
@@ -110,6 +112,8 @@ _functionList apiFunction[39] = {
   setSoundModeFunction,
   getLightModeFunction,
   setLightModeFunction,
+  getLightBrightnessLevelFunction,
+  setLightBrightnessLevelFunction,
   controlHubMenuFunction,
   getDebugModeFunction,
   setDebugModeFunction,
@@ -776,7 +780,7 @@ void increaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
     CONF_JOY_SPEED_INC_LED_NUMBER, 
     CONF_JOY_SPEED_CHANGE_LED_BLINK, 
     CONF_JOY_SPEED_CHANGE_LED_DELAY, 
-    CONF_LED_BRIGHTNESS);   // Blink once
+    led.getLedBrightness());   // Blink once
   } 
   else{
     setLedState(LED_ACTION_BLINK, 
@@ -784,7 +788,7 @@ void increaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
     CONF_JOY_SPEED_INC_LED_NUMBER, 
     CONF_JOY_SPEED_LIMIT_LED_BLINK, 
     CONF_JOY_SPEED_LIMIT_LED_DELAY, 
-    CONF_LED_BRIGHTNESS);   // Blink 3 times
+    led.getLedBrightness());   // Blink 3 times
   }
 
   setCursorSpeed(responseEnabled, apiEnabled, tempCursorSpeedLevel);
@@ -812,7 +816,7 @@ void decreaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
     CONF_JOY_SPEED_DEC_LED_NUMBER, 
     CONF_JOY_SPEED_CHANGE_LED_BLINK, 
     CONF_JOY_SPEED_CHANGE_LED_DELAY, 
-    CONF_LED_BRIGHTNESS);   // Blink once
+    led.getLedBrightness());   // Blink once
   } 
   else{
     setLedState(LED_ACTION_BLINK, 
@@ -820,7 +824,7 @@ void decreaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
     CONF_JOY_SPEED_DEC_LED_NUMBER, 
     CONF_JOY_SPEED_LIMIT_LED_BLINK, 
     CONF_JOY_SPEED_LIMIT_LED_DELAY, 
-    CONF_LED_BRIGHTNESS);   // Blink 3 times
+    led.getLedBrightness());   // Blink 3 times
   }
   
     
@@ -1719,7 +1723,7 @@ void setCommunicationModeLed(int inputCommunicationMode) {
     } else if (inputCommunicationMode==CONF_COM_MODE_BLE) {
       modeLedColor = LED_CLR_BLUE;
     }
-    setLedState(LED_ACTION_BLINK, modeLedColor, CONF_COM_MODE_LED_NUMBER, CONF_COM_MODE_LED_BLINK, CONF_COM_MODE_LED_BLINK_DELAY,CONF_LED_BRIGHTNESS);    
+    setLedState(LED_ACTION_BLINK, modeLedColor, CONF_COM_MODE_LED_NUMBER, CONF_COM_MODE_LED_BLINK, CONF_COM_MODE_LED_BLINK_DELAY,led.getLedBrightness());    
     performLedAction(ledCurrentState);   
 }
 //***SET COMMUNICATION MODE API FUNCTION***//
@@ -1814,7 +1818,7 @@ void getSoundMode(bool responseEnabled, bool apiEnabled, String optionalParamete
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               inputDebugStategMode : int : The new debug mode state ( true = ON , false = OFF )
+//               inputSoundMode : int : The new sound mode state.
 //
 // Return     : void
 //*********************************//
@@ -1904,7 +1908,7 @@ void getLightMode(bool responseEnabled, bool apiEnabled, String optionalParamete
 //                                        The serial printing is ignored if it's set to false.
 //               apiEnabled : bool : The api response is sent if it's set to true.
 //                                   Manual response is sent if it's set to false.
-//               inputLightMode : int : The new debug mode state ( true = ON , false = OFF )
+//               inputLightMode : int : The new light mode state 
 //
 // Return     : void
 //*********************************//
@@ -1938,6 +1942,107 @@ void setLightMode(bool responseEnabled, bool apiEnabled, int inputLightMode) {
 // Return     : void
 void setLightMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   setLightMode(responseEnabled, apiEnabled, optionalParameter.toInt());
+}
+
+// *********************************************************************************
+
+//***GET LIGHT BRIGHTNESS LEVEL FUNCTION***//
+// Function   : getLightBrightnessLevel
+//
+// Description: This function retrieves the level of the light brightness.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : tempLightLevel : int : The current light brightness level (0-10)
+//*********************************//
+int getLightBrightnessLevel(bool responseEnabled, bool apiEnabled) {
+  String commandKey = "LL";
+  int tempLightLevel;
+  tempLightLevel = mem.readInt(CONF_SETTINGS_FILE, commandKey);
+
+  if ((tempLightLevel < CONF_LED_BRIGHTNESS_LEVEL_MIN) || (tempLightLevel > CONF_LED_BRIGHTNESS_LEVEL_MAX)) {
+    tempLightLevel = CONF_LED_BRIGHTNESS_LEVEL_DEFAULT;
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempLightLevel);
+  }
+
+  printResponseInt(responseEnabled, apiEnabled, true, 0, "LL,0", true, tempLightLevel);
+
+  return tempLightLevel;
+}
+
+//***GET LIGHT BRIGHTNESS LEVEL API FUNCTION***//
+// Function   : getLightBrightnessLevel
+//
+// Description: This function is redefinition of main getLightBrightnessLevel function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void getLightBrightnessLevel(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
+    getLightBrightnessLevel(responseEnabled, apiEnabled);
+  }
+}
+
+//***SET LIGHT BRIGHTNESS LEVEL FUNCTION***//
+// Function   : setLightBrightnessLevel
+//
+// Description: This function sets the level of the light brightness.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               inputLightLevel : int : The new light brightness level (0-10)
+//
+// Return     : void
+//*********************************//
+void setLightBrightnessLevel(bool responseEnabled, bool apiEnabled, int inputLightLevel) {
+  String commandKey = "LL";
+
+  if ((inputLightLevel >= CONF_LED_BRIGHTNESS_LEVEL_MIN) && (inputLightLevel <= CONF_LED_BRIGHTNESS_LEVEL_MAX)) {
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputLightLevel);
+    led.setLedBrightnessLevel(inputLightLevel);
+    printResponseInt(responseEnabled, apiEnabled, true, 0, "LL,1", true, inputLightLevel);
+  }
+  else {
+    printResponseInt(responseEnabled, apiEnabled, false, 3, "LL,1", true, inputLightLevel);
+
+  }
+
+  //TODO: Add LED blink
+  setLedState(LED_ACTION_BLINK,
+            LED_CLR_RED, 
+            CONF_LED_ALL, 
+            1,                     // number of blinks
+            1000,                     // blink time
+            led.getLedBrightness());  // brightness
+  // Perform led action
+  performLedAction(ledCurrentState);
+
+}
+
+//***SET LIGHT BRIGHTNESS LEVEL API FUNCTION***//
+// Function   : setLightBrightnessLevel
+//
+// Description: This function is redefinition of main setLightBrightnessLevel function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of the input light level.
+//
+// Return     : void
+void setLightBrightnessLevel(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  setLightBrightnessLevel(responseEnabled, apiEnabled, optionalParameter.toInt());
 }
 
 // *********************************************************************************
@@ -2217,7 +2322,7 @@ void resetSettings(bool responseEnabled, bool apiEnabled, String optionalParamet
 void doFactoryReset(bool responseEnabled, bool apiEnabled) {
 
   // Set all LEDs to red to indicate factory reset process 
-  setLedState(LED_ACTION_ON, LED_CLR_RED, CONF_LED_ALL, 0, 0, CONF_LED_BRIGHTNESS);                           
+  setLedState(LED_ACTION_ON, LED_CLR_RED, CONF_LED_ALL, 0, 0, CONF_LED_BRIGHTNESS_MAX);                           
   performLedAction(ledCurrentState);  
 
   // Factory reset process 
@@ -2230,11 +2335,12 @@ void doFactoryReset(bool responseEnabled, bool apiEnabled) {
   setPuffPressureThreshold(false, false, CONF_PUFF_THRESHOLD);
   setCursorSpeed(false, false, CONF_JOY_CURSOR_SPEED_LEVEL_DEFAULT);  
   setScrollLevel(false, false, CONF_SCROLL_LEVEL_DEFAULT);
+  setLightBrightnessLevel(false, false, CONF_LED_BRIGHTNESS_LEVEL_DEFAULT);
   setJoystickAcceleration(false, false, CONF_JOY_ACCELERATION_LEVEL_DEFAULT);
   printResponseInt(responseEnabled, apiEnabled, true, 0, "FR,1", true, 1);
 
   // Clear all LEDs to indicate factory reset process is finished 
-  setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS);                           
+  setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS_MAX);                           
   performLedAction(ledCurrentState);  
 
   softwareReset();

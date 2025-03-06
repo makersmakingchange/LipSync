@@ -47,16 +47,17 @@
 
 // More Menus
 #define SOUND_MENU 51
-#define SCROLL_SP_MENU 52
-#define SIP_PUFF_MENU 53
-#define SIP_THRESH_MENU 531
-#define PUFF_THRESH_MENU 532
-#define FULL_CALIB_PAGE 54
-#define FULL_CALIB_CONFIRM_PAGE 541
-#define RESTART_PAGE 55
-#define FACTORY_RESET_PAGE 56
-#define FACTORY_RESET_CONFIRM2_PAGE 561
-#define INFO_PAGE 57
+#define LIGHT_BRIGHT_MENU 52
+#define SCROLL_SP_MENU 53
+#define SIP_PUFF_MENU 54
+#define SIP_THRESH_MENU 541
+#define PUFF_THRESH_MENU 542
+#define FULL_CALIB_PAGE 55
+#define FULL_CALIB_CONFIRM_PAGE 551
+#define RESTART_PAGE 56
+#define FACTORY_RESET_PAGE 57
+#define FACTORY_RESET_CONFIRM2_PAGE 571
+#define INFO_PAGE 58
 
 #define SCROLL_DELAY_MILLIS 100 // [ms] This controls the scroll speed of long menu items //TODO 2025-Feb-28 Make this user adjustable
 
@@ -135,6 +136,7 @@ private:
   int _tempCommunicationMode;
   int _cursorSpeedLevel;
   int _scrollSpeedLevel;
+  int _lightBrightLevel;
   bool _soundOn = true;
   int _soundMode;
 
@@ -177,6 +179,7 @@ private:
   void fullCalibrationConfirmPage();
   void centerReset();
   void soundMenu();
+  void lightBrightMenu();
   void sipPuffThreshMenu();
   void adjustSipThreshMenu();
   void adjustPuffThreshMenu();
@@ -192,8 +195,9 @@ private:
   String _modeMenuText[4] = { "MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back" };
   String _modeConfirmText[4] = { "Change", "mode?", "Confirm", "... Back" };
   String _cursorSpMenuText[4] = { "Speed: ", "Increase", "Decrease", "... Back" };
-  String _moreMenuText[7] = {    "Sound",    "Scroll Speed",    "Sip & Puff",    "Full Calibration",    "Restart LipSync",    "Factory Reset",    "... Back",  };
+  String _moreMenuText[8] = {  "Sound",  "Light Brightness", "Scroll Speed",   "Sip & Puff",  "Full Calibration",   "Restart LipSync",  "Factory Reset",  "... Back",  };
   String _soundMenuText[4] = { "Sound:", "<>", "Turn <>", "... Back" };
+  String _lightBrightMenuText[4] = { "Lights: ", "Increase", "Decrease", "... Back" };
   String _scrollSpMenuText[4] = { "Speed: ", "Increase", "Decrease", "... Back" };
   String _sipPuffThreshMenuText[4] = { "Sip Threshold", "Puff Threshold", "... Back" };
   String _adjustSipThreshMenuText[4] = { "Sip: ", "Increase", "Decrease", "... Back" };
@@ -210,8 +214,9 @@ private:
   const int _calibMenuLen = 2;
   const int _modeMenuLen = 4;
   const int _cursorSpMenuLen = 3;
-  const int _moreMenuLen = 6;
+  const int _moreMenuLen = 8;
   const int _soundMenuLen = 2;
+  const int _lightBrightMenuLen = 3;
   const int _scrollSpMenuLen = 3;
   const int _sipPuffThreshMenuLen = 3;
   const int _adjustSipThreshMenuLen = 3;
@@ -598,20 +603,24 @@ void LSScreen::selectMenuItem() {
           soundMenu();
           break;
         case 1:
+          lightBrightMenu();
+          break;
+        case 2:
           scrollSpeedMenu();
-        case 2: // Sip puff
+          break;
+        case 3: // Sip puff
           sipPuffThreshMenu();
           break;
-        case 3: // Full Calibration
+        case 4: // Full Calibration
           fullCalibrationConfirmPage();
           break;
-        case 4: // Restart
+        case 5: // Restart
           restartConfirmPage();
           break;
-        case 5: // Factory Reset
+        case 6: // Factory Reset
           factoryResetConfirm1Page();
           break;
-        case 6: // Back
+        case 7: // Back
           mainMenu();
           break;
       }
@@ -635,6 +644,36 @@ void LSScreen::selectMenuItem() {
           _currentMenu = MAIN_MENU;
           mainMenu();
       }
+      break;
+
+    case LIGHT_BRIGHT_MENU:
+      switch (_currentSelection) {
+        case 0:  // Increase
+          _lightBrightLevel = getLightBrightnessLevel(false, false);
+          _lightBrightLevel++;
+          setLightBrightnessLevel(false, false, _lightBrightLevel);                         
+          _lightBrightLevel = getLightBrightnessLevel(false, false);
+          _lightBrightMenuText[0] = "Lights: " + String(_lightBrightLevel) + " ";
+          _display.setCursor(0, 0);
+          _display.print(_lightBrightMenuText[0]);
+          _display.display();
+          break;
+        case 1:  // Decrease
+          _lightBrightLevel = getLightBrightnessLevel(false, false);
+          _lightBrightLevel--;
+          setLightBrightnessLevel(false, false, _lightBrightLevel);                    
+          _lightBrightLevel = getLightBrightnessLevel(false, false);
+          _lightBrightMenuText[0] = "Lights: " + String(_lightBrightLevel) + " ";
+          _display.setCursor(0, 0);
+          _display.print(_lightBrightMenuText[0]);
+          _display.display();
+          break;
+        case 2:  // Back
+          _currentMenu = MAIN_MENU;
+          mainMenu();
+          break;
+      }
+
       break;
 
     case SCROLL_SP_MENU:
@@ -1372,6 +1411,29 @@ void LSScreen::soundMenu(void) {
   _currentMenuLength = _soundMenuLen;
   _currentMenuText = _soundMenuText;
   _cursorStart = 2;
+  _currentSelection = 0;
+
+  displayMenu();  //  Print items in current menu
+}
+
+//*********************************//
+// Function   : lightBrightnessMenu
+//
+// Description: Format and display light brightness menu
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
+void LSScreen::lightBrightMenu(void) {
+  _currentMenu = LIGHT_BRIGHT_MENU;
+  _lightBrightLevel = getLightBrightnessLevel(false, false);
+
+  _lightBrightMenuText[0] = "Lights: " + String(_lightBrightLevel);
+
+  _currentMenuLength = _lightBrightMenuLen;
+  _currentMenuText = _lightBrightMenuText;
+  _cursorStart = 1;
   _currentSelection = 0;
 
   displayMenu();  //  Print items in current menu

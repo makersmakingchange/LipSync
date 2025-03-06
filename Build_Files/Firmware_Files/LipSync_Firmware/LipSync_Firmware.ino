@@ -1267,7 +1267,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
                   ledActionProperty[tempActionIndex].ledNumber,
                   CONF_INPUT_LED_BLINK,
                   CONF_INPUT_LED_DELAY,
-                  CONF_LED_BRIGHTNESS);
+                  led.getLedBrightness());
       outputAction = tempActionIndex;
 
       // Perform led action
@@ -1307,7 +1307,7 @@ void evaluateOutputAction(inputStateStruct actionState, unsigned long actionMaxE
                   ledActionProperty[tempActionIndex].ledNumber,
                   0,                     // number of blinks
                   0,                     // blink time
-                  CONF_LED_BRIGHTNESS);  // brightness
+                  led.getLedBrightness());  // brightness
       // Perform led action
       performLedAction(ledCurrentState);
 
@@ -1685,7 +1685,7 @@ void performJoystickCenter(int* args) {
   if (stepNumber == 0)  // STEP 0: Joystick Compensation Center Point
   {
     if (ledActionEnabled) {
-      setLedState(LED_ACTION_BLINK, CONF_JOY_INIT_STEP_BLINK_COLOR, CONF_JOY_INIT_LED_NUMBER, CONF_JOY_INIT_STEP_BLINK, CONF_JOY_INIT_STEP_BLINK_DELAY, CONF_LED_BRIGHTNESS);
+      setLedState(LED_ACTION_BLINK, CONF_JOY_INIT_STEP_BLINK_COLOR, CONF_JOY_INIT_LED_NUMBER, CONF_JOY_INIT_STEP_BLINK, CONF_JOY_INIT_STEP_BLINK_DELAY, led.getLedBrightness());
       performLedAction(ledCurrentState);  // LED Feedback to show start of performJoystickCalibrationStep
     }
     // Start timer to get 5 reading every 100 ms
@@ -1726,7 +1726,7 @@ void performJoystickCenterStep(int* args) {
 
   // Turn on and set the second led to orange to indicate start of the process
   if (calibrationTimer.getNumRuns(calibrationTimerId[1]) == 1 && ledActionEnabled) {  // Turn LED's ON when timer is running for first time
-    setLedState(LED_ACTION_ON, CONF_JOY_INIT_LED_COLOR, CONF_JOY_INIT_LED_NUMBER, 0, 0, CONF_LED_BRIGHTNESS);
+    setLedState(LED_ACTION_ON, CONF_JOY_INIT_LED_COLOR, CONF_JOY_INIT_LED_NUMBER, 0, 0, led.getLedBrightness());
     performLedAction(ledCurrentState);
   }
   // Push new center values to be evaluated at the end of the process
@@ -1734,7 +1734,7 @@ void performJoystickCenterStep(int* args) {
 
   // Turn off the second led to orange to indicate end of the process
   if (calibrationTimer.getNumRuns(calibrationTimerId[1]) == CONF_JOY_INIT_READING_NUMBER && ledActionEnabled) {  // Turn LED's OFF when timer is running for last time
-    setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_INIT_LED_NUMBER, 0, 0, CONF_LED_BRIGHTNESS);
+    setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_INIT_LED_NUMBER, 0, 0, led.getLedBrightness());
     performLedAction(ledCurrentState);
   }
 }
@@ -1764,14 +1764,14 @@ void performJoystickCalibration(int* args) {
 
   if (stepNumber == 0) {                     // STEP 0: Calibration started
     pollTimer.disable(CONF_TIMER_JOYSTICK);  // Temporarily disable joystick data polling timer
-    setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_START_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY, CONF_LED_BRIGHTNESS);
+    setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_START_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY, led.getLedBrightness());
     performLedAction(ledCurrentState);
     ++stepNumber;
     calibrationTimerId[0] = calibrationTimer.setTimeout(currentReadingStart, performJoystickCalibration, (int*)stepNumber);  // Start next step
   } else if (stepNumber < 5) {                                                                                               // STEP 1-4: Joystick Calibration Corner Points
     screen.fullCalibrationPrompt(stepNumber);
     buzzer.calibCornerTone();
-    setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_STEP_BLINK_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY, CONF_LED_BRIGHTNESS);
+    setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_STEP_BLINK_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY, led.getLedBrightness());
     performLedAction(ledCurrentState);  // LED Feedback to show start of performJoystickCalibrationStep
     js.zeroInputMax(stepNumber);        // Clear the existing calibration value
 
@@ -1790,7 +1790,7 @@ void performJoystickCalibration(int* args) {
 
   else  // STEP 6: Calibration ended
   {
-    setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_START_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY, CONF_LED_BRIGHTNESS);  // Turn off Led's
+    setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_START_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY, led.getLedBrightness());  // Turn off Led's
     performLedAction(ledCurrentState);
     js.setMinimumRadius();  // Update the minimum cursor operating radius
     setLedDefault();
@@ -1825,7 +1825,7 @@ void performJoystickCalibrationStep(int* args) {
 
   // Turn on and set all leds to orange to indicate start of the process // TODO Jake update to non-neopixel LEDS
   if (calibrationTimer.getNumRuns(calibrationTimerId[1]) == 1) {  // Turn LLED's ON when timer is running for first time
-    setLedState(LED_ACTION_ON, CONF_JOY_CALIB_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, 0, 0, CONF_LED_BRIGHTNESS);
+    setLedState(LED_ACTION_ON, CONF_JOY_CALIB_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, 0, 0, led.getLedBrightness());
     performLedAction(ledCurrentState);
   }
 
@@ -1856,7 +1856,7 @@ void performJoystickCalibrationStep(int* args) {
   // Turn off all the LEDs to orange to indicate end of the process
   if (calibrationTimer.getNumRuns(calibrationTimerId[1]) == CONF_JOY_CALIB_READING_NUMBER) {  // Turn LED's OFF when timer is running for last time
     mem.writePoint(CONF_SETTINGS_FILE, stepKey, maxPoint);                                    // Store the point in Flash Memory
-    setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0, CONF_LED_BRIGHTNESS);
+    setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0, led.getLedBrightness());
     performLedAction(ledCurrentState);
     printResponseFloatPoint(true, true, true, 0, stepCommand, true, maxPoint);
     if (g_calibrationError) {
@@ -2160,6 +2160,9 @@ void initLed() {
   led.begin();
   *ledCurrentState = { 0, 0, 0, 0, 0, 0 };  // Initialize pointer ledAction, ledColorNumber, ledBlinkNumber, ledBlinkTime, ledBrightness
   turnLedAllOff();
+
+  led.setLightModeLevel(getLightMode(false, false));
+  led.setLedBrightnessLevel(getLightBrightnessLevel(false, false)); 
 }
 
 
@@ -2174,7 +2177,7 @@ void initLed() {
 //****************************************//
 void ledWaitFeedback() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: All LEDS on"); }
-  setLedState(LED_ACTION_ON, LED_CLR_RED, CONF_LED_ALL, 0, 0, CONF_LED_BRIGHTNESS);  // Turn on all LEDS
+  setLedState(LED_ACTION_ON, LED_CLR_RED, CONF_LED_ALL, 0, 0, led.getLedBrightness());  // Turn on all LEDS
   performLedAction(ledCurrentState);
 }
 
@@ -2189,8 +2192,8 @@ void ledWaitFeedback() {
 //****************************************//
 void ledReadyFeedback() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: ledReadyFeedback"); }
-  setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_LED_ALL, 0, 0, CONF_LED_BRIGHTNESS);    // Turn off all LEDS
-  setLedState(LED_ACTION_ON, LED_CLR_GREEN, CONF_LED_MICRO, 0, 0, CONF_LED_BRIGHTNESS);  // Turn micro LED green
+  setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_LED_ALL, 0, 0, led.getLedBrightness());    // Turn off all LEDS
+  setLedState(LED_ACTION_ON, LED_CLR_GREEN, CONF_LED_MICRO, 0, 0, led.getLedBrightness());  // Turn micro LED green
   performLedAction(ledCurrentState);
 }
 
@@ -2424,20 +2427,20 @@ void setLedDefault() {
     case CONF_OPERATING_MODE_MOUSE:
       {
         if (g_comMode == CONF_COM_MODE_USB) {
-          led.setLedColor(CONF_LED_MICRO, LED_CLR_PURPLE, CONF_LED_BRIGHTNESS);  // Set micro LED to purple if it's in BLE MODE
+          led.setLedColor(CONF_LED_MICRO, LED_CLR_PURPLE, led.getLedBrightness());  // Set micro LED to purple if it's in BLE MODE
         } else if (g_comMode == CONF_COM_MODE_BLE && btmouse.isConnected()) {    // Set micro LED to blue if it's in BLE MODE
-          led.setLedColor(CONF_BT_LED_NUMBER, LED_CLR_BLUE, CONF_LED_BRIGHTNESS);
+          led.setLedColor(CONF_BT_LED_NUMBER, LED_CLR_BLUE, led.getLedBrightness());
         }
         break;
       }
     case CONF_OPERATING_MODE_GAMEPAD:
       {
-        led.setLedColor(CONF_LED_MICRO, LED_CLR_YELLOW, CONF_LED_BRIGHTNESS);
+        led.setLedColor(CONF_LED_MICRO, LED_CLR_YELLOW, led.getLedBrightness());
         break;
       }
     case CONF_OPERATING_MODE_SAFE:
       {
-       led.setLedColor(CONF_LED_ALL, LED_CLR_RED, CONF_LED_BRIGHTNESS);
+       led.setLedColor(CONF_LED_ALL, LED_CLR_RED, led.getLedBrightness());
        break;
       }
   }
