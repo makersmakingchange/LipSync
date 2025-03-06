@@ -129,7 +129,7 @@ class LSJoystick {
     int _rangeValue;                                                      // The calculated range value based on range level and an equation. This is maximum output value  for each range level.
     float _inputRadius;                                                   // The minimum radius of operating area calculated using calibration points.
     bool _skipInputChange;                                                // The flag to low-pass filter the input changes 
-    int _operatingMode;                                                   // Operating mode, gamepad or mouse
+    int _operatingMode;                                                   // Operating mode, gamepad or mouse  //TODO 2025-Mar-06 Remove - Joystick class should be independent of operating mode
 
 };
 
@@ -797,8 +797,10 @@ pointIntType LSJoystick::processOutputResponse(pointIntType inputPoint){
 
   // Apply Deadzone
   deadzonedPoint = applyRadialDeadzone(inputPoint, inputPointMagnitude, inputPointAngle);
+
   // Apply Linearization
   outputPoint = linearizeOutput(deadzonedPoint, inputPointMagnitude, inputPointAngle);
+
   return outputPoint;
 }
 
