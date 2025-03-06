@@ -28,11 +28,11 @@
 #define MOUSE_RIGHT 2
 #define MOUSE_MIDDLE 4
 #define MOUSE_ALL (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)
-#define MOUSE_DESCRIPTOR "LipSync Mouse"
+#define MOUSE_DESCRIPTOR "LipSync Mouse" // TODO 2025-Feb-21 Unused due to Tiny USB library hang
 
-#define GAMEPAD_DESCRIPTOR "LipSync Gamepad"
+#define GAMEPAD_DESCRIPTOR "LipSync Gamepad" // TODO 2025-Feb-21 Unused due to Tiny USB library hang
 
-extern unsigned int g_usbAttempt;
+extern unsigned int g_usbAttempt;  // global variable to keep track of USB connection attempts
 
 
 // https://github.com/hathach/tinyusb/blob/master/examples/device/hid_generic_inout/src/usb_descriptors.c
@@ -63,6 +63,7 @@ class LSUSBMouse {
     inline void release(uint8_t b = MOUSE_LEFT);   // release LEFT by default
     inline bool isPressed(uint8_t b = MOUSE_LEFT); // check LEFT by default
 	  inline bool isReady(void);
+    inline bool isConnected(void);
     bool usbRetrying = false;
     bool showTestPage = false;
     bool timedOut = false;
@@ -155,6 +156,7 @@ class LSUSBGamepad {
     inline void yAxis(uint8_t a);
     inline void move(uint8_t x,uint8_t y);
     inline bool isReady(void);
+    inline bool isConnected(void);
     bool usbRetrying = false;
   protected:
     HID_GamepadReport_Data_t _report;
@@ -194,16 +196,16 @@ void LSUSBMouse::begin(void)
     usbTimeoutMillis = CONF_USB_HID_TIMEOUT;    // the first time the usb tried to connect, use the default timeout
   }
   
-  while( !USBDevice.mounted() ) {
+  while( !USBDevice.mounted() ) { //  Wait for USB device to mount
     delay(1);
 
-    if ((millis() - timerHidTimeoutBegin) > usbTimeoutMillis){
+    if ((millis() - timerHidTimeoutBegin) > usbTimeoutMillis) { 
       usbRetrying = true;
       break;
     } 
   }
 
-  if (USBDevice.mounted()) {
+  if (USBDevice.mounted()) { // If USB device mounts, send blank report
     usbRetrying = false;
     g_usbAttempt = 0;
     move(0,0);
@@ -211,6 +213,10 @@ void LSUSBMouse::begin(void)
   
 }
 
+
+bool LSUSBMouse::isConnected(void) {
+  return this->usb_hid.ready() && !USBDevice.suspended();
+}
 
 
 void LSUSBMouse::end(void)
@@ -233,7 +239,7 @@ void LSUSBMouse::mouseReport(int8_t b, int8_t x, int8_t y, int8_t wheel, int8_t 
       delay(1);
       if ((millis() - timerTimeoutBegin) > CONF_USB_HID_TIMEOUT){
         timedOut = true;
-        showTestPage=true;
+        showTestPage = true;
         break;
       }
     }
@@ -583,4 +589,12 @@ bool LSUSBGamepad::isReady(void)
 	if (usb_hid.ready()) 
 	  return true;
 	return false;
+}
+
+bool LSUSBGamepad::isConnected(void) {
+  	if (usb_hid.ready()) { 
+	    return true;
+    } else {
+      return false;
+    }	
 }

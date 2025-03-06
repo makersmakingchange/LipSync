@@ -37,10 +37,10 @@
 #define MODE_MENU 3
 #define CURSOR_SP_MENU 4
 #define MORE_MENU 5
+#define SAFEMODE_MENU 6
 
 // Calibration pages
 #define CENTER_RESET_PAGE 21
-//#define FULL_CALIB_PAGE             22
 
 // Mode pages
 #define CONFIRM_MODE_CHANGE 31
@@ -58,7 +58,7 @@
 #define FACTORY_RESET_CONFIRM2_PAGE 561
 #define INFO_PAGE 57
 
-#define SCROLL_DELAY_MILLIS 100 // [ms] This controls the scroll speed of long menu items
+#define SCROLL_DELAY_MILLIS 100 // [ms] This controls the scroll speed of long menu items //TODO 2025-Feb-28 Make this user adjustable
 
 #define _MODE_MOUSE_USB 1
 #define _MODE_MOUSE_BT 2
@@ -74,16 +74,10 @@ const int TEXT_ROWS = CONF_SCREEN_HEIGHT / CHAR_PIXEL_HEIGHT_S2;
 
 int scrollPixelsPerLoop = 4;
 
-extern unsigned int g_usbAttempt;
-extern unsigned int g_usbConnectDelay;
-
-extern bool displayConnected;                   // Display connection state
-extern bool joystickSensorConnected;            // Joystick sensor connection state
-extern bool mouthpiecePressureSensorConnected;  // Mouthpiece pressure sensor connection state
-extern bool ambientPressureSensorConnected;     // Ambient pressure sensor connection state
-
-extern unsigned long beforeComOpMillis;
-extern unsigned long afterComOpMillis;
+extern bool g_displayConnected;                   // Display connection state
+extern bool g_joystickSensorConnected;            // Joystick sensor connection state
+extern bool g_mouthpiecePressureSensorConnected;  // Mouthpiece pressure sensor connection state
+extern bool g_ambientPressureSensorConnected;     // Ambient pressure sensor connection state
 
 class LSScreen {
 
@@ -106,21 +100,30 @@ public:
   void centerResetPage();
   void centerResetCompletePage();
   void fullCalibrationPrompt(int stepNum);
-  void testPage();
+  void testPage(unsigned int usbConnectDelay);
   void noUsbPage();
   void errorPageI2C();
   void errorPageCable();
-  void connectionTimingPage();
+  void warningUSBDebugOn();
+  void connectionTimingPage(unsigned long, unsigned long);
+  void restartPage();
+  void safeModePage(int);
+  void safeModeMenu();
+  void print4LineString(String s1, String s2, String s3, String s4);
+  void disableTimeout();
+  void enableTimeout();
 
   bool showCenterResetComplete = false;
 
 private:
   Adafruit_SSD1306 _display = Adafruit_SSD1306(CONF_SCREEN_WIDTH, CONF_SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-  LSTimer<void> _screenStateTimer;  // Timer
-  int _screenStateTimerId;          // The id for the sap state timer
+  LSTimer<void> _screenStateTimer;  // Timer with a callback function
+  int _screenStateTimerId;          // Timer ID for screen
+  int _screenTimeoutTimerId;        // Timer ID to trigger next screen based on time
 
   bool _isActive = false;
+  bool _menuTimeoutEnabled = true;
   int _currentMenu = 0;
   int _prevMenu = -1;
   int _currentSelection = 0;
@@ -180,6 +183,8 @@ private:
   void restartConfirmPage();
   void factoryResetConfirm1Page();
   void factoryResetConfirm2Page();
+  void factoryResetPage();
+  void hardwareErrorPage();
 
   String _mainMenuText[5] = { "Exit Menu", "Center Reset", "Mode", "Cursor Speed", "More" };
   String _exitConfirmText[4] = { "Exit", "settings?", "Confirm", "... Back" };
@@ -187,15 +192,7 @@ private:
   String _modeMenuText[4] = { "MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back" };
   String _modeConfirmText[4] = { "Change", "mode?", "Confirm", "... Back" };
   String _cursorSpMenuText[4] = { "Speed: ", "Increase", "Decrease", "... Back" };
-  String _moreMenuText[7] = {
-    "Sound",
-    "Scroll Speed",
-    "Sip & Puff",
-    "Full Calibration",
-    "Restart LipSync",
-    "Factory Reset",
-    "... Back",
-  };
+  String _moreMenuText[7] = {    "Sound",    "Scroll Speed",    "Sip & Puff",    "Full Calibration",    "Restart LipSync",    "Factory Reset",    "... Back",  };
   String _soundMenuText[4] = { "Sound:", "<>", "Turn <>", "... Back" };
   String _scrollSpMenuText[4] = { "Speed: ", "Increase", "Decrease", "... Back" };
   String _sipPuffThreshMenuText[4] = { "Sip Threshold", "Puff Threshold", "... Back" };
@@ -205,6 +202,7 @@ private:
   String _factoryResetConfirm1Text[4] = { "Reset to", "defaults?", "Confirm", "... Back" };
   String _factoryResetConfirm2Text[4] = { "Are you", "sure?", "Confirm", "... Back" };
   String _fullCalibrationConfirmText[4] = { "Are you", "sure?", "Confirm", "... Back" };
+  String _safeModeMenuText[4] = {"SAFE MODE", "Options:", "Restart", "Factory Reset"};
 
   // Number of selectable options in each menu
   const int _mainMenuLen = 5;
@@ -222,6 +220,7 @@ private:
   const int _factoryResetConfirm1Len = 2;
   const int _factoryResetConfirm2Len = 2;
   const int _fullCalibrationConfirmLen = 2;
+  const int _safeModeMenuLen = 2;
 };
 
 
@@ -248,11 +247,13 @@ LSScreen::LSScreen() {
 //*********************************//
 void LSScreen::begin() {
 
-  if (!_display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-    Serial.println(F("SSD1306 allocation failed"));
+  if (_display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+    g_displayConnected = true;
+  } else {
+    Serial.println(F("ERROR: Display SSD1306 allocation failed"));
 
-    for (;;)
-      ;  // Don't proceed, loop forever  // TODO Implement watchdog to throw error instead of infinite loop
+    g_displayConnected = false;
+    //TODO Handle screen not initialized error
   }
 
   setupDisplay();  // Clear screen
@@ -298,7 +299,7 @@ void LSScreen::update() {
     scrollLongText();
   }
 
-  if (((millis() - _lastActivityMillis) > CONF_MENU_TIMEOUT) && _isActive) {
+  if (((millis() - _lastActivityMillis) > CONF_MENU_TIMEOUT) && _isActive && _menuTimeoutEnabled) {
     deactivateMenu();
   }
 }
@@ -316,6 +317,7 @@ void LSScreen::activateMenu() {
   _lastActivityMillis = millis();
   _isActive = true;
   _operatingMode = getOperatingMode(false, false);
+  
   mainMenu();
 }
 
@@ -413,13 +415,22 @@ void LSScreen::splashScreen2() {
       //_display.print("USB"); _display.setTextSize(1); _display.print(" "); _display.setTextSize(2); _display.print("Gamepad"); // text size changed for space so it would all fit on one line
       //drawCentreString("Gamepad", 48);
       break;
+    case CONF_OPERATING_MODE_SAFE:
+      // Currently bypassed since safe mode menus are called directly
+      break;
     default:
       _display.println("Error");
   }
 
   _display.display();
 
-  _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
+  if (USB_DEBUG){
+    //delay(2000);  //TODO - 2025-FEB-21 Why is this delay here?
+    warningUSBDebugOn();
+  } else {
+    _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
+  }
+
   _lastActivityMillis = millis();
 }
 
@@ -446,14 +457,15 @@ void LSScreen::nextMenuItem() {
     _display.print(_selectedText);
   }
 
-  _currentSelection++;
-  if (_currentSelection >= _currentMenuLength) {
+  _currentSelection++;  // Increment current selection by one 
+  
+  if (_currentSelection >= _currentMenuLength) { // if 
     _currentSelection = 0;
     _countMenuScroll = 0;
-    displayMenu();
+    displayMenu();  //  Print items in current menu
   } else if (_currentSelection + _cursorStart > TEXT_ROWS - 1) {
     _countMenuScroll++;
-    displayMenu();
+    displayMenu();  //  Print items in current menu
   }
 
   displayCursor();
@@ -476,6 +488,7 @@ void LSScreen::selectMenuItem() {
   _countMenuScroll = 0;
   switch (_currentMenu) {
     case MAIN_MENU:
+      _prevMenu = MAIN_MENU;
       _currentMenu = _currentSelection + 1;
       switch (_currentMenu) {
         case MAIN_MENU:
@@ -577,34 +590,36 @@ void LSScreen::selectMenuItem() {
           break;
       }
       break;
-    case MORE_MENU: // TODO: base these numbers on the menu number constants above. More menu = 5 and all submenus start with 5
-      if (_currentSelection == 0) {
-        _currentMenu = SOUND_MENU;
-        soundMenu();
-      } else if (_currentSelection == 1) {
-        _currentMenu = SCROLL_SP_MENU;
-        scrollSpeedMenu();        
-      } else if (_currentSelection == 2) {
-        _currentMenu = SIP_PUFF_MENU;
-        sipPuffThreshMenu();
-      } else if (_currentSelection == 3) {
-        _currentMenu = FULL_CALIB_CONFIRM_PAGE;
-        fullCalibrationConfirmPage();
-      } else if (_currentSelection == 4) {
-        _currentMenu = RESTART_PAGE;
-        restartConfirmPage();
-      } else if (_currentSelection == 5) {
-        _currentMenu = FACTORY_RESET_PAGE;
-        factoryResetConfirm1Page();
-      } else if (_currentSelection == 6) {
-        _currentMenu = MAIN_MENU;
-        mainMenu();
+    case MORE_MENU:
+      _prevMenu = MORE_MENU;
+
+      switch(_currentSelection) {
+        case 0: // Sound
+          soundMenu();
+          break;
+        case 1:
+          scrollSpeedMenu();
+        case 2: // Sip puff
+          sipPuffThreshMenu();
+          break;
+        case 3: // Full Calibration
+          fullCalibrationConfirmPage();
+          break;
+        case 4: // Restart
+          restartConfirmPage();
+          break;
+        case 5: // Factory Reset
+          factoryResetConfirm1Page();
+          break;
+        case 6: // Back
+          mainMenu();
+          break;
       }
       break;
+
     case SOUND_MENU:
       switch (_currentSelection) {
-        case 0:
-          // do function for turning sound on/off
+        case 0:  // Toggle sound mode
           if (_soundMode == CONF_SOUND_MODE_OFF) {
             buzzerSoundOn();
             _soundMode = CONF_SOUND_MODE_BASIC;
@@ -616,11 +631,12 @@ void LSScreen::selectMenuItem() {
           }
           soundMenu();
           break;
-        case 1:
+        case 1:  // Back
           _currentMenu = MAIN_MENU;
           mainMenu();
       }
       break;
+
     case SCROLL_SP_MENU:
       switch (_currentSelection) {
         case 0:  // Increase
@@ -650,6 +666,7 @@ void LSScreen::selectMenuItem() {
       }
 
       break;
+
     case SIP_PUFF_MENU:
       switch (_currentSelection) {
         case 0:  // Sip
@@ -664,11 +681,12 @@ void LSScreen::selectMenuItem() {
           break;
       }
       break;
+
     case SIP_THRESH_MENU:
       switch (_currentSelection) {
         case 0:  // Increase
           _sipPressThresh = getSipPressureThreshold(false, false);
-          _sipPressThresh++;  // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
+          _sipPressThresh++;  // Increase sip threshold by 1 ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
           setSipPressureThreshold(false, false, _sipPressThresh);
           _sipPressThresh = getSipPressureThreshold(false, false);          
           _adjustSipThreshMenuText[0] = "Sip: " + String(_sipPressThresh) + " ";
@@ -678,7 +696,7 @@ void LSScreen::selectMenuItem() {
           break;
         case 1:  // Decrease
           _sipPressThresh = getSipPressureThreshold(false, false);
-          _sipPressThresh--;  // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
+          _sipPressThresh--;  // Decrease sip threshold by 1 ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
           setSipPressureThreshold(false, false, _sipPressThresh);
           _sipPressThresh = getSipPressureThreshold(false, false);
           _adjustSipThreshMenuText[0] = "Sip: " + String(_sipPressThresh) + " ";
@@ -692,11 +710,12 @@ void LSScreen::selectMenuItem() {
           break;
       }
       break;
+
     case PUFF_THRESH_MENU:
       switch (_currentSelection) {
         case 0:  // Increase
           _puffPressThresh = getPuffPressureThreshold(false, false);
-          _puffPressThresh++;  // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
+          _puffPressThresh++;  //  Increase puff threshold by one ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?
           setPuffPressureThreshold(false, false, _puffPressThresh);
           _puffPressThresh = getPuffPressureThreshold(false, false);
           _adjustPuffThreshMenuText[0] = "Puff: " + String(_puffPressThresh) + " ";
@@ -706,7 +725,7 @@ void LSScreen::selectMenuItem() {
           break;
         case 1:  // Decrease
           _puffPressThresh = getPuffPressureThreshold(false, false);
-          _puffPressThresh--;  // ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?       
+          _puffPressThresh--;  // Decrease puff threshold by one ** TODO: CHANGE THIS, What values are we expecting? By how much to increase?       
           setPuffPressureThreshold(false, false, _puffPressThresh);
           _puffPressThresh = getPuffPressureThreshold(false, false);          
           _adjustPuffThreshMenuText[0] = "Puff: " + String(_puffPressThresh) + " ";
@@ -720,6 +739,7 @@ void LSScreen::selectMenuItem() {
           break;
       }
       break;
+
     case FULL_CALIB_CONFIRM_PAGE:
       switch (_currentSelection) {
         case 0:  // Perform full calibration
@@ -732,15 +752,26 @@ void LSScreen::selectMenuItem() {
           break;
       }
       break;
+
     case RESTART_PAGE:
       switch (_currentSelection) {
-        case 0:  // Perform factory reset
-          softwareReset();
+        case 0:  // Perform restart
+          softwareReset(); // Call a software reset
           break;
         case 1:  // Back
-          _currentMenu = MAIN_MENU;
-          mainMenu();
-          break;
+          if (_prevMenu = MORE_MENU) {        
+            moreMenu();
+            break;
+          } else if (_prevMenu = SAFEMODE_MENU) {
+            safeModeMenu();
+            break;
+          } else {
+            break;
+          }
+          
+          //_currentMenu = MAIN_MENU;
+          //mainMenu();
+          
       }
       break;
     case FACTORY_RESET_PAGE:
@@ -750,27 +781,43 @@ void LSScreen::selectMenuItem() {
           factoryResetConfirm2Page();
           break;
         case 1:  // Back
-          _currentMenu = MAIN_MENU;
-          mainMenu();
+          if(_prevMenu == MORE_MENU) {
+            moreMenu();
+          }
+          else if (_prevMenu = SAFEMODE_MENU ) {
+            safeModeMenu();
+          } 
           break;
       }
       break;
     case FACTORY_RESET_CONFIRM2_PAGE:
       switch (_currentSelection) {
         case 0:  // Perform factory reset
-          setupDisplay();
-          _display.println("Resetting");
-          _display.display();
-          factoryReset(false, false);
+          restartPage();
+          doFactoryReset(false, false);
           break;
         case 1:  // Back
-          _currentMenu = MAIN_MENU;
-          mainMenu();
+          if(_prevMenu == MORE_MENU) {
+            moreMenu();
+          }
+          else if (_prevMenu = SAFEMODE_MENU ) {
+            safeModeMenu();
+          } 
           break;
       }
       break;
-  }
-}
+    case SAFEMODE_MENU:
+      _prevMenu = SAFEMODE_MENU;
+      switch(_currentSelection) {
+        case 0: // Restart
+          softwareReset();
+          break;
+        case 1: 
+          factoryResetConfirm2Page();
+          break;
+      }
+  } // switch (_currentMenu)
+} // selectMenuItem
 
 
 //****************************************//
@@ -832,7 +879,7 @@ void LSScreen::displayMenu() {
 //*********************************//
 // Function   : displayCursor
 //
-// Description: TODO description
+// Description: Displays the selection cursor next to selected menu item
 //
 // Arguments :  void
 //
@@ -874,30 +921,6 @@ void LSScreen::displayCursor() {
     _scrollOn = false;
   }
 }
-
-/*
-void LSScreen::nextSelection() {
-  if (_scrollOn){
-    _display.setCursor(0, _selectedLine *16);
-    _display.print("                                   ");
-    _display.setCursor(12, _selectedLine *16);
-    _display.print(_selectedText);
-  }
-
-  _currentSelection++;
-  if (_currentSelection >= _currentMenuLength) {   
-    _currentSelection = 0;
-    _countMenuScroll = 0;
-    displayMenu();
-  } else if (_currentSelection + _cursorStart > TEXT_ROWS-1){
-    _countMenuScroll++;
-    displayMenu();
-  } 
-
-  displayCursor();
-
-}
-*/
 
 
 //*********************************//
@@ -978,7 +1001,7 @@ void LSScreen::mainMenu(void) {
   _cursorStart = 0;
   _currentSelection = 0;
 
-  displayMenu();
+  displayMenu();  //  Print items in current menu
   //}
 }
 
@@ -998,7 +1021,7 @@ void LSScreen::exitConfirmMenu() {
   _currentMenuLength = 2;
   _cursorStart = 2;
   _currentSelection = 0;
-  displayMenu();
+  displayMenu();  //  Print items in current menu
 }
 
 void LSScreen::calibMenu(void) {
@@ -1009,7 +1032,7 @@ void LSScreen::calibMenu(void) {
     _cursorStart = 0;
     _currentSelection = 0;
 
-    displayMenu();
+    displayMenu();  //  Print items in current menu
   }
 }
 
@@ -1031,7 +1054,7 @@ void LSScreen::modeMenu(void) {
   _cursorStart = 0;
   _currentSelection = 0;
 
-  displayMenu();
+  displayMenu();  //  Print items in current menu
 
   modeMenuHighlight();
 }
@@ -1080,7 +1103,7 @@ void LSScreen::confirmModeChange() {
   _currentMenuLength = 2;
   _cursorStart = 2;
   _currentSelection = 0;
-  displayMenu();
+  displayMenu();  //  Print items in current menu
 }
 
 
@@ -1139,7 +1162,7 @@ void LSScreen::cursorSpeedMenu(void) {
   _cursorStart = 1;
   _currentSelection = 0;
 
-  displayMenu();
+  displayMenu();  //  Print items in current menu
 }
 
 //*********************************//
@@ -1182,7 +1205,7 @@ void LSScreen::moreMenu() {
   _cursorStart = 0;
   _currentSelection = 0;
 
-  displayMenu();
+  displayMenu();  //  Print items in current menu
 }
 
 // ----- CALIBRATION PAGES ----- //
@@ -1351,7 +1374,7 @@ void LSScreen::soundMenu(void) {
   _cursorStart = 2;
   _currentSelection = 0;
 
-  displayMenu();
+  displayMenu();  //  Print items in current menu
 }
 
 //*********************************//
@@ -1371,7 +1394,7 @@ void LSScreen::sipPuffThreshMenu(void) {
   _cursorStart = 0;
   _currentSelection = 0;
 
-  displayMenu();
+  displayMenu();  //  Print items in current menu
 }
 
 //*********************************//
@@ -1394,7 +1417,7 @@ void LSScreen::adjustSipThreshMenu(void) {
   _cursorStart = 1;
   _currentSelection = 0;
 
-  displayMenu();
+  displayMenu();  //  Print items in current menu
 }
 
 //*********************************//
@@ -1417,7 +1440,7 @@ void LSScreen::adjustPuffThreshMenu(void) {
   _cursorStart = 1;
   _currentSelection = 0;
 
-  displayMenu();
+  displayMenu();  //  Print items in current menu
 }
 
 //*********************************//
@@ -1436,7 +1459,7 @@ void LSScreen::fullCalibrationConfirmPage(void) {
   _display.println("may cause");
   _display.println("drift.");
   _display.display();
-  delay(3000);
+  delay(3000);  //TODO 2025-Feb-28 Assess removal of delay
 
 
   _currentMenu = FULL_CALIB_CONFIRM_PAGE;
@@ -1445,7 +1468,7 @@ void LSScreen::fullCalibrationConfirmPage(void) {
   _cursorStart = 2;
   _currentSelection = 0;
 
-  displayMenu();
+  displayMenu();  //  Print items in current menu
 }
 
 //*********************************//
@@ -1458,13 +1481,15 @@ void LSScreen::fullCalibrationConfirmPage(void) {
 // Return     : void
 //*********************************//
 void LSScreen::restartConfirmPage(void) {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::restartConfirmPage()"); }
+ 
   _currentMenu = RESTART_PAGE;
   _currentMenuLength = _restartConfirmLen;
   _currentMenuText = _restartConfirmText;
   _cursorStart = 2;
   _currentSelection = 0;
 
-  displayMenu();
+  displayMenu();  //  Print items in current menu
 }
 
 
@@ -1478,13 +1503,15 @@ void LSScreen::restartConfirmPage(void) {
 // Return     : void
 //*********************************//
 void LSScreen::factoryResetConfirm1Page(void) {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::factoryResetConfirm1Page()"); }
+
   _currentMenu = FACTORY_RESET_PAGE;
   _currentMenuLength = _factoryResetConfirm1Len;
   _currentMenuText = _factoryResetConfirm1Text;
   _cursorStart = 2;
   _currentSelection = 0;
 
-  displayMenu();
+  displayMenu();  //  Print items in current menu
 }
 
 //*********************************//
@@ -1497,13 +1524,16 @@ void LSScreen::factoryResetConfirm1Page(void) {
 // Return     : void
 //*********************************//
 void LSScreen::factoryResetConfirm2Page(void) {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::factoryResetConfirm2Page()"); }
+
   setupDisplay();
   _display.println("This will");
   _display.println("erase all");
   _display.println("custom");
   _display.println("settings");
   _display.display();
-  delay(2000);
+  delay(2000); // TODO 2025-Feb-28 replace with timer.
+
 
   _currentMenu = FACTORY_RESET_CONFIRM2_PAGE;
   _currentMenuLength = _factoryResetConfirm2Len;
@@ -1511,7 +1541,7 @@ void LSScreen::factoryResetConfirm2Page(void) {
   _cursorStart = 2;
   _currentSelection = 0;
 
-  displayMenu();
+  displayMenu();  //  Print items in current menu
 }
 
 //*********************************//
@@ -1523,7 +1553,9 @@ void LSScreen::factoryResetConfirm2Page(void) {
 //
 // Return     : void
 //*********************************//
-void LSScreen::testPage(void) {
+void LSScreen::testPage(unsigned int usbConnectDelay) {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::testPage()"); }
+
   setupDisplay();
   _testScreenAttempt++;
 
@@ -1547,7 +1579,7 @@ void LSScreen::testPage(void) {
   _display.print("Attempt:");
   _display.println(_testScreenAttempt);
 
-  _display.println(g_usbConnectDelay);
+  _display.println(usbConnectDelay);
   _display.display();
 }
 
@@ -1561,8 +1593,9 @@ void LSScreen::testPage(void) {
 // Return     : void
 //*********************************//
 void LSScreen::noUsbPage(void) {
-  setupDisplay();
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::noUsbPage()"); }
 
+  setupDisplay();
   _display.println("No USB");
   _display.println("Use menu");
   _display.println("to change");
@@ -1571,38 +1604,61 @@ void LSScreen::noUsbPage(void) {
 }
 
 //*********************************//
+// Function   : hardwareErrorPage
+//
+// Description: Format and display a hardware error page
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
+void LSScreen::hardwareErrorPage() {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::hardwareErrorPage()"); }
+  
+  setupDisplay();
+
+  _display.println("ERROR:");
+
+  if (!g_joystickSensorConnected && !g_mouthpiecePressureSensorConnected && !g_ambientPressureSensorConnected) {
+    _display.println(" CABLE");
+    _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::errorPageCable, this);
+  } else {
+      _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::errorPageI2C, this);
+      if (!g_joystickSensorConnected)
+        _display.println(" JOYSTICK");
+      if (!g_mouthpiecePressureSensorConnected)
+        _display.println(" PRESSURE");
+      if (!g_ambientPressureSensorConnected)
+        _display.println(" AMBIENT");
+  }
+
+  _display.display();
+  
+  
+}
+
+
+//*********************************//
 // Function   : errorPageI2C
 //
-// Description: Format and display an error page
+// Description: Format and display an error page when an i2C sensor is not detected
 //
 // Arguments :  void
 //
 // Return     : void
 //*********************************//
 void LSScreen::errorPageI2C() {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::errorPageI2C()"); }
+
   setupDisplay();
-
-  _display.println("ERROR: I2C");
-
-  if (!joystickSensorConnected) {
-    _display.println("JOYSTICK");
-  } else {
-    _display.println("");
-  }
-
-  if (!mouthpiecePressureSensorConnected) {
-    _display.println("PRESSURE");
-  } else {
-    _display.println("");
-  }
-
-  if (!ambientPressureSensorConnected) {
-    _display.println("AMBIENT");
-  } else {
-    _display.println("");
-  }
-
+  _display.println("ERROR: ");
+  _display.println("Sensor not");
+  _display.println("detected.");
+  _display.println("Contact Maker.");
+  
   _display.display();
+
+  _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::safeModeMenu, this);
 }
 
 //*********************************//
@@ -1615,17 +1671,91 @@ void LSScreen::errorPageI2C() {
 // Return     : void
 //*********************************//
 void LSScreen::errorPageCable() {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::errorPageCable()"); }
   // Joystick sensor, ambient pressure sensor and mouthpiece pressure sensor not detected
   // Likely a cable issue
 
   setupDisplay();
 
   _display.println("ERROR: ");
-  _display.println("Joystick not");
+  _display.println("No joystick");
   _display.println("detected.");
   _display.println("Try cable.");
 
   _display.display();
+
+  _screenStateTimerId = _screenStateTimer.setTimeout(2*CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::safeModeMenu, this);
+
+
+}
+
+//*********************************//
+// Function   : warningUSBDebugOn
+//
+// Description: Format and display an error page when USB_DEBUG is set to 1 (on)
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
+void LSScreen::warningUSBDebugOn(void) {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::warningUSBDebugOn()"); }
+
+  setupDisplay();
+  _display.println("Warning:");
+  _display.println("USB_DEBUG=1");
+  _display.println("Set to 0");
+  _display.println("for user.");
+  _display.display();
+
+  _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SPLASH_SCREEN_DURATION, clearSplashScreen);
+}
+
+//*********************************//
+// Function   : restartPage
+//
+// Description: Format and display an page showing the device is going to be reset
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
+
+void LSScreen::restartPage() {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::restartPage()"); }
+
+  setupDisplay();
+  _display.println("");
+  _display.println("RESTARTING...");
+  _display.println("");
+
+  _display.display();
+
+  const int RESTART_TIMEOUT = 3000;
+  _screenStateTimerId = _screenStateTimer.setTimeout(RESTART_TIMEOUT, clearSplashScreen);
+}
+
+//*********************************//
+// Function   : factoryResetPage
+//
+// Description: Format and display an page showing the device is going to be reset
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
+
+void LSScreen::factoryResetPage() {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::factoryResetPage()"); }
+
+  setupDisplay();
+  _display.println("FACTORY");
+  _display.println("RESET...");
+  _display.println("");
+
+  _display.display();
+  const int RESET_TIMEOUT = 3000;
+  _screenStateTimerId = _screenStateTimer.setTimeout(RESET_TIMEOUT, clearSplashScreen);
 }
 
 //*********************************//
@@ -1638,19 +1768,145 @@ void LSScreen::errorPageCable() {
 // Return     : void
 //*********************************//
 
-void LSScreen::connectionTimingPage() {
+void LSScreen::connectionTimingPage(unsigned long before, unsigned long after) {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::connectionTimingPage()"); }
+
   setupDisplay();
   _display.setTextSize(1);
   _display.println("Before beginComOpMode");
   _display.setTextSize(2);
-  _display.println(beforeComOpMillis);
+  _display.println(before);
 
   _display.setTextSize(1);
   _display.println("After beginComOpMode");
   _display.setTextSize(2);
-  _display.println(afterComOpMillis);
+  _display.println(after);
 
   _display.display();
+}
+
+
+//*********************************//
+// Function   : safeModePage
+//
+// Description: Format and display an page showing that device is in safe boot mode
+//
+// Arguments :  int safeModeReason
+//
+// Return     : void
+//*********************************//
+
+void LSScreen::safeModePage(int safeModeReason) {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::safeModePage()"); }
+
+  _isActive = true;
+  setupDisplay();
+
+  _display.println("SAFE MODE: ");
+ 
+  switch(safeModeReason) {
+        case CONF_SAFE_MODE_REASON_INPUT:
+        {
+          _display.println(" Hub");
+          _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::safeModeMenu, this);
+          
+          break;
+        }
+        case CONF_SAFE_MODE_REASON_WATCHDOG:
+        {
+          _display.println(" Watchdog");
+          _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::safeModeMenu, this);
+          break;
+        }
+        case CONF_SAFE_MODE_REASON_HARDWARE:
+        {
+          _display.println(" Hardware");
+          _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::hardwareErrorPage, this);         
+          break;
+        }
+        default:
+        {
+          _display.println("");
+          break;
+        }
+  }
+  _display.println("");
+
+  _display.display();
+}
+
+//*********************************//
+// Function   : safeModeMenu
+//
+// Description: Format and display an page showing that device is in safe boot mode
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
+
+void LSScreen::safeModeMenu(void) {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::safeModeMenu()"); }
+
+  _currentMenu = SAFEMODE_MENU;
+  _currentMenuLength = _safeModeMenuLen;
+  _currentMenuText = _safeModeMenuText;
+  _cursorStart = 2;
+  _currentSelection = 0;
+
+  displayMenu();  //  Print items in current menu
+}
+
+//*********************************//
+// Function   : print4LineString
+//
+// Description: Format and display a page with 4 lines of Strings
+//
+// Arguments :  String s1, String s2, String s3, String s4 (four lines of text as Strings)
+//
+// Return     : void
+//*********************************//
+
+void LSScreen::print4LineString(String s1, String s2, String s3, String s4) {
+
+  setupDisplay();
+  _display.println(s1);
+  _display.println(s2);
+  _display.println(s3);
+  _display.println(s4);
+  _display.display();
+}
+
+//*********************************//
+// Function   : enableTimeout
+//
+// Description: Enables the display timeout
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
+
+void LSScreen::enableTimeout(void) {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::enableTimeout()"); }
+  
+  _menuTimeoutEnabled = true;
+}
+
+//*********************************//
+// Function   : disableTimeout
+//
+// Description: Disables the display timeout
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
+
+void LSScreen::disableTimeout(void) {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::disableTimeout()"); }
+
+  _menuTimeoutEnabled = false;
 }
 
 #endif
