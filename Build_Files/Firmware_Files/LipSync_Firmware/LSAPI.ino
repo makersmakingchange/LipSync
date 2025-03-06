@@ -2017,6 +2017,16 @@ void setLightBrightnessLevel(bool responseEnabled, bool apiEnabled, int inputLig
 
   }
 
+  //TODO: Add LED blink
+  setLedState(LED_ACTION_BLINK,
+            LED_CLR_RED, 
+            CONF_LED_ALL, 
+            1,                     // number of blinks
+            1000,                     // blink time
+            led.getLedBrightness());  // brightness
+  // Perform led action
+  performLedAction(ledCurrentState);
+
 }
 
 //***SET LIGHT BRIGHTNESS LEVEL API FUNCTION***//

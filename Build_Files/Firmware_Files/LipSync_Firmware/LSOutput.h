@@ -254,7 +254,7 @@ void LSOutput::setLedBrightnessLevel(int ledBrightnessLevel) {
   if (_ledBrightnessLevel == CONF_LED_BRIGHTNESS_LEVEL_MIN){
     ledBrightness = 0;
   } else {
-    ledBrightness = round(pow((1/(CONF_LED_BRIGHTNESS_LEVEL_MAX + 1 - float(_ledBrightnessLevel))), 2) * CONF_LED_BRIGHTNESS_MAX);
+    ledBrightness = round(pow((float(_ledBrightnessLevel)/CONF_LED_BRIGHTNESS_LEVEL_MAX), 2.2) * CONF_LED_BRIGHTNESS_MAX);
   }
 
   setLedBrightness(ledBrightness);
