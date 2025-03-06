@@ -122,7 +122,7 @@ class LSJoystick {
     bool _deadzoneEnabled;                                                // Is deadzone enabled?
     bool _upperDeadzoneEnabled;                                                // Is deadzone enabled?
     float _deadzoneFactor;                                                // Deadzone factor in percent of total value or max reading JOY_INPUT_XY_MAX
-    int _deadzoneValue;                                                   // The calculated deadzone value based on deadzone factor and maximum value JOY_INPUT_XY_MAX.
+    int _innerDeadzoneValue;                                                   // The calculated deadzone value based on deadzone factor and maximum value JOY_INPUT_XY_MAX.
     float _upperDeadzoneFactor;                                           // Upper deadzone factor in percent of total value or max reading JOY_INPUT_XY_MAX
     int _upperDeadzoneValue;                                              // The calculated upper deadzone value based on upper deadzone factor and maximum value JOY_INPUT_XY_MAX.
     int _rangeLevel;                                                      // The range level from 0 to 10 which is used as speed levels.
@@ -163,6 +163,7 @@ void LSJoystick::begin() {
   _inputRadius = 0.0;                                                  // Initialize _inputRadius
   _skipInputChange = false;                                            // Initialize _skipInputChange
   _operatingMode = getOperatingMode(false, false); // TODO 
+  _operatingMode = getOperatingMode(false, false); //TODO 2025-Mar-06 Remove - Joystick class should be independent of operating mode
 
   Tlv493dSensor.begin();  // TODO 2025-Feb-25 This will likely hang if it fails. Ideally replace with something that returns error/success.
   setMagnetDirection(JOY_DIRECTION_DEFAULT,JOY_DIRECTION_DEFAULT);      // Set default magnet direction.
@@ -335,7 +336,11 @@ void LSJoystick::setDeadzone(bool deadzoneEnabled,float deadzoneFactor){
   _deadzoneFactor = deadzoneFactor;
   // Set the deadzone value if it's enabled. The deadzone value is zero if it's disabled.
   // deadzone value is the _deadzoneFactor multiplied by JOY_INPUT_XY_MAX.
-  (_deadzoneEnabled) ? _deadzoneValue = round(JOY_INPUT_XY_MAX*_deadzoneFactor):_deadzoneValue=0;   
+  if (_deadzoneEnabled) {
+    _innerDeadzoneValue = round(JOY_INPUT_XY_MAX * _deadzoneFactor);
+  } else {
+    _innerDeadzoneValue = 0; 
+  }    
 }
 
 //*********************************//
@@ -662,11 +667,11 @@ int LSJoystick::applyDeadzone(int input){
   
   // if Deadzone is not enabled 
   if(_deadzoneEnabled) { 
-    if(abs(input) < _deadzoneValue){                    // Output zero if input < _deadzoneValue
+    if(abs(input) < _innerDeadzoneValue){                    // Output zero if input < _innerDeadzoneValue
       output = 0;
     }
-    else if(abs(input) > JOY_INPUT_XY_MAX - _deadzoneValue){
-      output = sgn(input) * JOY_INPUT_XY_MAX;           // Output JOY_INPUT_XY_MAX if input > JOY_INPUT_XY_MAX-_deadzoneValue
+    else if(abs(input) > JOY_INPUT_XY_MAX - _innerDeadzoneValue){
+      output = sgn(input) * JOY_INPUT_XY_MAX;           // Output JOY_INPUT_XY_MAX if input > JOY_INPUT_XY_MAX-_innerDeadzoneValue
     } else{
       output = input;                                  // Output the input
     }
@@ -693,7 +698,7 @@ pointIntType LSJoystick::applyRadialDeadzone(pointIntType inputPoint, float inpu
 
   // if lower deadzone is enabled, values below deadzone equal 0
   if(_deadzoneEnabled) { 
-    if(inputPointMagnitude < _deadzoneValue){                    // Output zero if input < _deadzoneValue
+    if(inputPointMagnitude < _innerDeadzoneValue){                    // Output zero if input < _innerDeadzoneValue
       outputPoint = {0,0};
     }
   } 
@@ -740,7 +745,7 @@ pointIntType LSJoystick::linearizeOutput(pointIntType inputPoint, float inputPoi
   pointIntType outputPoint = {0,0};                                     // Initialize outputPoint
 
   // Map the input magnitudes between the lower and upper deadzones to between 0 and the maximum value
-  int linearizedInputMagnitude = mapRoundInt(round(inputPointMagnitude), _deadzoneValue, (JOY_INPUT_XY_MAX - _upperDeadzoneValue), 0, JOY_INPUT_XY_MAX);
+  int linearizedInputMagnitude = mapRoundInt(round(inputPointMagnitude), _innerDeadzoneValue, (JOY_INPUT_XY_MAX - _upperDeadzoneValue), 0, JOY_INPUT_XY_MAX);
   linearizedInputMagnitude = constrain(linearizedInputMagnitude, 0, JOY_INPUT_XY_MAX);
 
   // Map input magnitude (between 0 and 1024) to output magnitudes (between 0 and _rangeValue)
