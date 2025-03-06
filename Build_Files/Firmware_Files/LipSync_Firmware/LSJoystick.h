@@ -121,7 +121,7 @@ class LSJoystick {
     int _magnetYDirection;                                                // Direction of y ( if the board has flipped and has resulted in y axis being flipped )
     bool _innerDeadzoneEnabled;                                           // Is inner deadzone enabled?
     bool _outerDeadzoneEnabled;                                           // Is outer deadzone enabled?
-    float _innerDeadzoneFactor;                                                // Deadzone factor in percent of total value or max reading JOY_INPUT_XY_MAX
+    float _innerDeadzoneFactor;                                           // Deadzone factor in percent of total value or max reading JOY_INPUT_XY_MAX
     int _innerDeadzoneValue;                                              // The calculated deadzone value based on deadzone factor and maximum value JOY_INPUT_XY_MAX.
     float _outerDeadzoneFactor;                                           // Upper deadzone factor in percent of total value or max reading JOY_INPUT_XY_MAX
     int _outerDeadzoneValue;                                              // The calculated upper deadzone value based on upper deadzone factor and maximum value JOY_INPUT_XY_MAX.
