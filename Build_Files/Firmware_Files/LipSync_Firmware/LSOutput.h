@@ -343,9 +343,9 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
       }
     case CONF_LED_MICRO:
       {
-        analogWrite(LED_RED, 255 - r);
-        analogWrite(LED_GREEN, 255 - g);
-        analogWrite(LED_BLUE, 255 - b);
+        analogWrite(LED_RED,   (255 - r*ledBrightness/255) );
+        analogWrite(LED_GREEN, (255 - g*ledBrightness/255) );
+        analogWrite(LED_BLUE,  (255 - b*ledBrightness/255) );
         break;
       }
 

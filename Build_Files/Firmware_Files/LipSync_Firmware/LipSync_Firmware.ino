@@ -42,7 +42,6 @@ int g_comMode;        // 0 = None , 1 = USB , 2 = Wireless
 int g_operatingMode;  // 0 = None, 1 = Mouse, 2 = Gamepad, 3 = Safe
 int g_soundMode;      // 0 = None, 1 = Basic, 2 = Advanced // TODO 2025-Feb-05 Currently not used - buzzer.begin sets sound mode from memory
 int g_lightMode;      // 0 = None, 1 = Basic, 2 = Advanced
-int g_lightBrightness;
 
 int g_debugMode;  // 0 = Debug mode is Off
                   // 1 = Joystick debug mode is On
