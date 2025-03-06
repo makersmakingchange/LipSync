@@ -44,22 +44,9 @@ uint32_t g_lastRebootReason = 32;
 
 void setup() {
   
-  // Get the reset reason from the power register
-  // Somewhere mentioned that the NRF_POWER->RESETREAS method  should only be used when softDevice is NOT enabled, otherwise it will cause a reset
-  //g_lastRebootReasonSoftDevice = NRF_POWER->RESETREAS;  // Access reset reason register directly. 
+  uint32_t getErrorCode = 0;
 
-  // Alternative method for getting RESETREASON when a soft device is enabled
-  bool preSerialSoftDeviceEnabled = false;
-
-  #ifdef SOFTDEVICE_PRESENT
-    preSerialSoftDeviceEnabled = true;
-  #endif
-
-  int errorCode = 0;
-  errorCode = sd_power_reset_reason_get(&g_lastRebootReasonSoftDevice);  // Get the reset reason // 2025-Feb-25 -> This throws an error as Soft Device not enabled
-  
-  
-  g_lastRebootReason = NRF_POWER->RESETREAS;  // Access reset reason register directly. // (May cause a reset)
+  g_lastRebootReason = readResetReason(); // from Adafruit_nRF52_Arduino/cores/NRF/wiring.c
 
 
   Serial.begin(115200);
@@ -100,16 +87,16 @@ void setup() {
   }
 
 
-  Serial.print("preSerialSoftDeviceEnabled: ");
-  Serial.println(preSerialSoftDeviceEnabled);
+  //Serial.print("preSerialSoftDeviceEnabled: ");
+  //Serial.println(preSerialSoftDeviceEnabled);
 
 
   // Output error code 
-  Serial.print("sd_power_reset_reason_get: ");
-  Serial.println(errorCode);
+  Serial.print("getErrorCode: ");
+  Serial.println(getErrorCode);
 
-  Serial.print("g_lastRebootReasonSoftDevice: \t \t");
-  printBits(g_lastRebootReasonSoftDevice);
+  //Serial.print("g_lastRebootReasonSoftDevice: \t \t");
+  //printBits(g_lastRebootReasonSoftDevice);
 
   
   Serial.print("g_lastRebootReason: \t \t \t");
@@ -118,28 +105,16 @@ void setup() {
  
   // Determine if the watchdog reset bit is on, and if so, print a message to serial.
   Serial.print("Reset reason: ");
-  if ((g_lastRebootReasonSoftDevice & NRF_POWER_RESETREAS_RESETPIN_MASK) == NRF_POWER_RESETREAS_RESETPIN_MASK) { 
+  if ((g_lastRebootReason & NRF_POWER_RESETREAS_RESETPIN_MASK) == NRF_POWER_RESETREAS_RESETPIN_MASK) { 
     Serial.println("Reset Pin Reset");
-  } else if ((g_lastRebootReasonSoftDevice & NRF_POWER_RESETREAS_DOG_MASK) == NRF_POWER_RESETREAS_DOG_MASK) {
+  } else if ((g_lastRebootReason & NRF_POWER_RESETREAS_DOG_MASK) == NRF_POWER_RESETREAS_DOG_MASK) {
     Serial.println("Watchdog Reset");
-  } else if ((g_lastRebootReasonSoftDevice & NRF_POWER_RESETREAS_SREQ_MASK) == NRF_POWER_RESETREAS_SREQ_MASK) {
+  } else if ((g_lastRebootReason & NRF_POWER_RESETREAS_SREQ_MASK) == NRF_POWER_RESETREAS_SREQ_MASK) {
     Serial.println("Software Reset");
   } else {
     Serial.println("Other reset");
   }
 
-  // Clear the RESETREAS register
-  //NRF_POWER->RESETREAS = RESET_REASON_CLEAR;  //  Directly write to register
-  //sd_power_reset_reason_clr(g_lastRebootReasonSoftDevice); // Alternative method to reset reason when using softDevice
-
-  sd_power_reset_reason_get(&g_lastRebootReasonSoftDevice);
-  Serial.print("Clear1: \t \t \t \t");
-  //printBits(NRF_POWER->RESETREAS); // Directly access to register
-  printBits(g_lastRebootReasonSoftDevice);  // Output 
- 
-  
-  //Serial.print("Clear2: \t \t");
-  //printBits(NRF_POWER->RESETREAS);
 
   // Initiatialize the watchdog timer. This starts a countdown clock that will reset the device unless 
   // watchdogLoop() is called to reset the timer.
