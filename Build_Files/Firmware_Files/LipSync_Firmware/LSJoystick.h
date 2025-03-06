@@ -21,8 +21,9 @@
 #define _LSJOYSTICK_H
 
 #include <Tlv493d.h>                    // Infinion TLV493 magnetic sensor
-
 #include <Arduino.h>
+#include "LSCircularBuffer.h"           // LSCircularBuffer
+#include "LSUtils.h"                    // pointIntType
 
 #define JOY_RAW_BUFF_SIZE 10            // The size of joystickRawBuffer
 #define JOY_INPUT_BUFF_SIZE 5           // The size of joystickInputBuffer
@@ -161,7 +162,6 @@ void LSJoystick::begin() {
 
   _inputRadius = 0.0;                                                  // Initialize _inputRadius
   _skipInputChange = false;                                            // Initialize _skipInputChange
-  _operatingMode = getOperatingMode(false, false); // TODO 
   _operatingMode = getOperatingMode(false, false); //TODO 2025-Mar-06 Remove - Joystick class should be independent of operating mode
 
   Tlv493dSensor.begin();  // TODO 2025-Feb-25 This will likely hang if it fails. Ideally replace with something that returns error/success.
@@ -306,7 +306,7 @@ void LSJoystick::setMagnetZDirection() {
 // 
 // Return     : void
 //*********************************//
-void LSJoystick::setMagnetDirection(int magnetXDirection,int magnetYDirection) {
+void LSJoystick::setMagnetDirection(int magnetXDirection, int magnetYDirection) {
 
   // Set new x,y, and z magnet directions
   setMagnetXDirection(magnetXDirection);
@@ -329,7 +329,7 @@ void LSJoystick::setMagnetDirection(int magnetXDirection,int magnetYDirection) {
 // 
 // Return     : void
 //*********************************//
-void LSJoystick::setDeadzone(bool deadzoneEnabled,float deadzoneFactor){
+void LSJoystick::setDeadzone(bool deadzoneEnabled, float deadzoneFactor){
   _innerDeadzoneEnabled = deadzoneEnabled;
   
   _innerDeadzoneFactor = deadzoneFactor;
@@ -352,7 +352,7 @@ void LSJoystick::setDeadzone(bool deadzoneEnabled,float deadzoneFactor){
 // 
 // Return     : void
 //*********************************//
-void LSJoystick::setUpperDeadzone(bool upperDeadzoneEnabled,float upperDeadzoneFactor){
+void LSJoystick::setUpperDeadzone(bool upperDeadzoneEnabled, float upperDeadzoneFactor){
   _outerDeadzoneEnabled = upperDeadzoneEnabled;
   
   _outerDeadzoneFactor = upperDeadzoneFactor;
@@ -427,12 +427,13 @@ int LSJoystick::getMinimumRadius(){
 void LSJoystick::setMinimumRadius(){
   float tempRadius = 0.0;
   pointFloatType tempPoint = {JOY_RAW_XY_MAX,JOY_RAW_XY_MAX};
-  _inputRadius = magnitudePoint(tempPoint,magnetInputCalibration[0])/sqrt(2.0);
+  _inputRadius = magnitudePoint(tempPoint, magnetInputCalibration[0]) / sqrt(2.0);
+
   // Loop through calibration points and calculate the smallest magnitude from center point
   for (int i = 1; i < JOY_CALIBR_ARRAY_SIZE; i++) {
     tempRadius = (sqrt(sq(magnetInputCalibration[i].x - magnetInputCalibration[0].x) + sq(magnetInputCalibration[i].y - magnetInputCalibration[0].y))/sqrt(2.0));
     // Make sure the calibration point is valid and initial value of _inputRadius is charged 
-    if(magnitudePoint(magnetInputCalibration[i])> 0.0 && (tempRadius<_inputRadius)) {  // Set smallest magnitude as radius
+    if(magnitudePoint(magnetInputCalibration[i]) > 0.0 && (tempRadius < _inputRadius)) {  // Set smallest magnitude as radius
       _inputRadius = tempRadius; 
     }
   }
@@ -465,15 +466,15 @@ pointFloatType LSJoystick::getInputCenter() {
 void LSJoystick::evaluateInputCenter() {
   float centerX = 0.0;
   float centerY = 0.0;
-  pointFloatType centerPoint = {centerX,centerY};
+  pointFloatType centerPoint = {centerX, centerY};
   for(int centerIndex = 0; centerIndex < JOY_CENTER_BUFF_SIZE; centerIndex++){
     centerPoint = joystickCenterBuffer.getElement(centerIndex);
-    centerX+=centerPoint.x;
-    centerY+=centerPoint.y;
+    centerX += centerPoint.x;
+    centerY += centerPoint.y;
   }
-  centerX=centerX/JOY_CENTER_BUFF_SIZE;
-  centerY=centerY/JOY_CENTER_BUFF_SIZE;
-  magnetInputCalibration[0] = {centerX,centerY};
+  centerX=centerX / JOY_CENTER_BUFF_SIZE;
+  centerY=centerY / JOY_CENTER_BUFF_SIZE;
+  magnetInputCalibration[0] = {centerX, centerY};
 }
 
 
@@ -512,9 +513,9 @@ pointFloatType LSJoystick::getInputMax(int quad) {
 
   // Update the calibration point and minimum radius 
   // Make sure it's a valid quadrant and if new point has larger magnitude from center ( calibration timer loop )
-  if((quad >= 0) && 
+  if( (quad >= 0) && 
   (quad < JOY_CALIBR_ARRAY_SIZE) && 
-  magnitudePoint(tempCalibrationPoint,magnetInputCalibration[0])>magnitudePoint(magnetInputCalibration[quad],magnetInputCalibration[0])){           // The point with larger magnitude is sent as output 
+  magnitudePoint(tempCalibrationPoint, magnetInputCalibration[0]) > magnitudePoint(magnetInputCalibration[quad], magnetInputCalibration[0])){           // The point with larger magnitude is sent as output 
     magnetInputCalibration[quad] = tempCalibrationPoint;
   }
   
@@ -532,7 +533,7 @@ pointFloatType LSJoystick::getInputMax(int quad) {
 // 
 // Return     : void
 //*********************************//
-void LSJoystick::setInputMax(int quad,pointFloatType inputPoint) {
+void LSJoystick::setInputMax(int quad, pointFloatType inputPoint) {
  // Update the calibration point 
   magnetInputCalibration[quad] = inputPoint;
 }
@@ -548,7 +549,7 @@ void LSJoystick::setInputMax(int quad,pointFloatType inputPoint) {
 //*********************************//
 void LSJoystick::zeroInputMax(int quad) {
  // Reset or zer the calibration point 
-  magnetInputCalibration[quad] = {0,0};
+  magnetInputCalibration[quad] = {0, 0};
 }
 
 //*********************************//
@@ -660,7 +661,7 @@ pointIntType LSJoystick::getXYOut() {
 // 
 // Return     : outputPoint : pointIntType : Output with deadzone applied
 //*********************************//
-pointIntType LSJoystick::applyRadialDeadzone(pointIntType inputPoint, float inputPointMagnitude, float inputPointAngle){
+pointIntType LSJoystick::applyRadialDeadzone(pointIntType inputPoint, float inputPointMagnitude, float inputPointAngle) {
 
   // Output the input if Deadzone is not enabled 
   pointIntType outputPoint = {0,0};
@@ -670,14 +671,14 @@ pointIntType LSJoystick::applyRadialDeadzone(pointIntType inputPoint, float inpu
 
   // if lower deadzone is enabled, values below deadzone equal 0
   if(_innerDeadzoneEnabled) { 
-    if(inputPointMagnitude < _innerDeadzoneValue){                    // Output zero if input < _innerDeadzoneValue
+    if(inputPointMagnitude < _innerDeadzoneValue){  // Output zero if input < _innerDeadzoneValue
       outputPoint = {0,0};
     }
   } 
 
   // if upper deadzone is enabled, values above upper deadzone equal max input
-  if (_outerDeadzoneEnabled){
-    if(inputPointMagnitude > (JOY_INPUT_XY_MAX - _outerDeadzoneValue)){      // If magnitude is greater than JOY_INPUT_XY_MAX - upper deadzone
+  if (_outerDeadzoneEnabled) {
+    if(inputPointMagnitude > (JOY_INPUT_XY_MAX - _outerDeadzoneValue)) {      // If magnitude is greater than JOY_INPUT_XY_MAX - upper deadzone
       outputPoint.x = sgn(inputPoint.x) * abs(round(cos(inputPointAngle) * JOY_INPUT_XY_MAX));   // Set x value of output point equal to x value on circle of radius JOY_INPUT_XY_MAX at angle of input point
       outputPoint.y = sgn(inputPoint.y) * abs(round(sin(inputPointAngle) * JOY_INPUT_XY_MAX));   // Set y value of output point equal to y value on circle of radius JOY_INPUT_XY_MAX at angle of input point
     } 
@@ -695,12 +696,13 @@ pointIntType LSJoystick::applyRadialDeadzone(pointIntType inputPoint, float inpu
 // 
 // Return     : skipInputChange : bool : skip processing if it's true
 //*********************************//
-bool LSJoystick::canSkipInputChange(pointFloatType inputPoint){      
+bool LSJoystick::canSkipInputChange(pointFloatType inputPoint) {      
   pointFloatType prevInputPoint = joystickRawBuffer.getLastElement();           // Get the previous point from buffer 
 
   // If latest joystick measurement is less than JOY_INPUT_CHANGE_TOLERANCE (0.1 mT), then don't process 
   bool skipInputChange = abs(_rawPoint.x - prevInputPoint.x) < JOY_INPUT_CHANGE_TOLERANCE 
-                 && abs(_rawPoint.y - prevInputPoint.y)  < JOY_INPUT_CHANGE_TOLERANCE;
+                      && abs(_rawPoint.y - prevInputPoint.y) < JOY_INPUT_CHANGE_TOLERANCE;
+
   return skipInputChange;
 }
 
@@ -749,16 +751,16 @@ pointIntType LSJoystick::processInputReading(pointFloatType inputPoint) {
   
   if ((sq(inputPoint.x) + sq(inputPoint.y)) >= sq(JOY_INPUT_DEADZONE)) {
     // Center the input point
-    centeredPoint = {(inputPoint.x - magnetInputCalibration[0].x)*_joystickXDirection, 
-                    (inputPoint.y - magnetInputCalibration[0].y)*_joystickYDirection};
+    centeredPoint = {(inputPoint.x - magnetInputCalibration[0].x) * _joystickXDirection, 
+                     (inputPoint.y - magnetInputCalibration[0].y) * _joystickYDirection};
   }
 
 
   float thetaVal = atan2(centeredPoint.y, centeredPoint.x);         // Get the angle of the point
 
   // Find the limiting point on perimeter of circle
-  limitPoint.x = sgn(centeredPoint.x) * abs(cos(thetaVal)*_inputRadius);
-  limitPoint.y = sgn(centeredPoint.y) * abs(sin(thetaVal)*_inputRadius);
+  limitPoint.x = sgn(centeredPoint.x) * abs(cos(thetaVal) * _inputRadius);
+  limitPoint.y = sgn(centeredPoint.y) * abs(sin(thetaVal) * _inputRadius);
 
   // Compare the magnitude of two points from center
   // Output point on perimeter of circle if it's outside
@@ -788,7 +790,7 @@ pointIntType LSJoystick::processInputReading(pointFloatType inputPoint) {
 //*********************************//
 pointIntType LSJoystick::processOutputResponse(pointIntType inputPoint){
   // Initialize outputPoint and deadzonedPoint
-  pointIntType outputPoint,deadzonedPoint = {0,0};
+  pointIntType outputPoint, deadzonedPoint = {0,0};
 
   float inputPointMagnitude = magnitudePoint(inputPoint);
   float inputPointAngle = atan2(inputPoint.y, inputPoint.x); 
