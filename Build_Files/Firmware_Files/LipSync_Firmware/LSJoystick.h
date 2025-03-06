@@ -72,8 +72,8 @@ class LSJoystick {
     int getMagnetZDirection();                                            // Get the Z direction of the magnet.
     void setMagnetZDirection();                                           // Update the magnet Z direction variable.
     void setMagnetDirection(int magnetXDirection, int magnetYDirection);  // Set magnet direction based on orientation of magnet (z axis), X and Y direction variables.
-    void setDeadzone(bool deadzoneEnabled,float deadzoneFactor);          // Enable or disable deadzone and set deadzone scale factor (0.12) 
-    void setUpperDeadzone(bool upperDeadzoneEnabled,float upperDeadzoneFactor);  // Enable or disable deadzone and set deadzone scale factor (0.12) 
+    void setInnerDeadzone(bool deadzoneEnabled,float deadzoneFactor);          // Enable or disable deadzone and set deadzone scale factor (0.12) 
+    void setOuterDeadzone(bool upperDeadzoneEnabled,float upperDeadzoneFactor);  // Enable or disable deadzone and set deadzone scale factor (0.12) 
     int getOutputRange();                                                 // Get the output range or speed levels.
     void setOutputRange(int rangeLevel);                                  // Set the output range or speed levels.
     int getMinimumRadius();                                               // Get the minimum input radius for square to circle mapping.
@@ -321,7 +321,7 @@ void LSJoystick::setMagnetDirection(int magnetXDirection, int magnetYDirection) 
 
 
 //*********************************//
-// Function   : setDeadzone 
+// Function   : setInnerDeadzone 
 // 
 // Description: Set the deadzone value based on deadzone status and deadzone factor.
 // 
@@ -330,7 +330,7 @@ void LSJoystick::setMagnetDirection(int magnetXDirection, int magnetYDirection) 
 // 
 // Return     : void
 //*********************************//
-void LSJoystick::setDeadzone(bool deadzoneEnabled, float deadzoneFactor){
+void LSJoystick::setInnerDeadzone(bool deadzoneEnabled, float deadzoneFactor){
   _innerDeadzoneEnabled = deadzoneEnabled;
   
   _innerDeadzoneFactor = deadzoneFactor;
@@ -344,7 +344,7 @@ void LSJoystick::setDeadzone(bool deadzoneEnabled, float deadzoneFactor){
 }
 
 //*********************************//
-// Function   : setUpperDeadzone 
+// Function   : setOuterDeadzone 
 // 
 // Description: Set the upper deadzone value based on deadzone status and upper deadzone factor.
 // 
@@ -353,7 +353,7 @@ void LSJoystick::setDeadzone(bool deadzoneEnabled, float deadzoneFactor){
 // 
 // Return     : void
 //*********************************//
-void LSJoystick::setUpperDeadzone(bool upperDeadzoneEnabled, float upperDeadzoneFactor){
+void LSJoystick::setOuterDeadzone(bool upperDeadzoneEnabled, float upperDeadzoneFactor){
   _outerDeadzoneEnabled = upperDeadzoneEnabled;
   
   _outerDeadzoneFactor = upperDeadzoneFactor;

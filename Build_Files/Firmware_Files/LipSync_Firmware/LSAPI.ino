@@ -1008,7 +1008,7 @@ float getJoystickInnerDeadzone(bool responseEnabled, bool apiEnabled) {
     tempDeadzone = CONF_JOY_DEADZONE_INNER_DEFAULT;
     mem.writeFloat(CONF_SETTINGS_FILE, deadzoneCommand, tempDeadzone);
   }
-  js.setDeadzone(true, tempDeadzone);
+  js.setInnerDeadzone(true, tempDeadzone);
   printResponseFloat(responseEnabled, apiEnabled, true, 0, "IZ,0", true, tempDeadzone);
   return tempDeadzone;
 }
@@ -1046,7 +1046,7 @@ void setJoystickInnerDeadzone(bool responseEnabled, bool apiEnabled, float input
   String deadzoneCommand = "IZ";
   if ((inputDeadzone > CONF_JOY_DEADZONE_MIN) && (inputDeadzone <= CONF_JOY_DEADZONE_MAX)) {
     mem.writeFloat(CONF_SETTINGS_FILE, deadzoneCommand, inputDeadzone);
-    js.setDeadzone(true, inputDeadzone);
+    js.setInnerDeadzone(true, inputDeadzone);
     printResponseFloat(responseEnabled, apiEnabled, true, 0, "IZ,1", true, inputDeadzone);
   }
   else {
@@ -1090,7 +1090,7 @@ float getJoystickOuterDeadzone(bool responseEnabled, bool apiEnabled) {
     tempOuterDeadzone = CONF_JOY_DEADZONE_OUTER_DEFAULT;
     mem.writeFloat(CONF_SETTINGS_FILE, outerDeadzoneCommand, tempOuterDeadzone);
   }
-  js.setUpperDeadzone(true, tempOuterDeadzone);
+  js.setOuterDeadzone(true, tempOuterDeadzone);
   printResponseFloat(responseEnabled, apiEnabled, true, 0, "OZ,0", true, tempOuterDeadzone);
   return tempOuterDeadzone;
 }
@@ -1129,7 +1129,7 @@ void setJoystickOuterDeadzone(bool responseEnabled, bool apiEnabled, float input
   String outerDeadzoneCommand = "OZ";
   if ((inputUpperDeadZone > CONF_JOY_DEADZONE_MIN) && (inputUpperDeadZone <= CONF_JOY_DEADZONE_MAX)) {
     mem.writeFloat(CONF_SETTINGS_FILE, outerDeadzoneCommand, inputUpperDeadZone);
-    js.setUpperDeadzone(true, inputUpperDeadZone);
+    js.setOuterDeadzone(true, inputUpperDeadZone);
     printResponseFloat(responseEnabled, apiEnabled, true, 0, "OZ,1", true, inputUpperDeadZone);
   }
   else {
