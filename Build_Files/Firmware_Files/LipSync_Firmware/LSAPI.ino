@@ -579,7 +579,7 @@ int getCursorSpeed(bool responseEnabled, bool apiEnabled) {
     }
     
   }
-  js.setOutputRange(tempCursorSpeedLevel);
+  setCursorSpeedMax(tempCursorSpeedLevel);
   printResponseInt(responseEnabled, apiEnabled, true, 0, "SS,0", true, tempCursorSpeedLevel);
 
   return tempCursorSpeedLevel;
@@ -636,7 +636,7 @@ void setCursorSpeed(bool responseEnabled, bool apiEnabled, int inputSpeedLevel) 
     isValidSpeed = false;
   }
 
-  js.setOutputRange(tempCursorSpeedLevel);
+  setCursorSpeedMax(tempCursorSpeedLevel);
 
   int responseCode = 0;
   (isValidSpeed) ? responseCode = 0 : responseCode = 3;
@@ -682,7 +682,7 @@ int getScrollLevel(bool responseEnabled, bool apiEnabled) {
     }
     
   }
-  //js.setOutputRange(tempScrollLevel);
+  //js.setCursorSpeedMax(tempScrollLevel);
   printResponseInt(responseEnabled, apiEnabled, true, 0, "SL,0", true, tempScrollLevel);
 
   return tempScrollLevel;
@@ -740,7 +740,7 @@ void setScrollLevel(bool responseEnabled, bool apiEnabled, int inputScrollLevel)
     isValidLevel = false;
   }
 
-  //js.setOutputRange(tempScrollLevel);
+  //js.setCursorSpeedMax(tempScrollLevel);
   int responseCode = 0;
   (isValidLevel) ? responseCode = 0 : responseCode = 3;
   printResponseInt(responseEnabled, apiEnabled, isValidLevel, responseCode, "SL,1", true, tempScrollLevel);
@@ -775,7 +775,7 @@ void setScrollLevel(bool responseEnabled, bool apiEnabled, String optionalParame
 // Return     : void
 //*********************************//
 void increaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
-  int tempCursorSpeedLevel = js.getOutputRange();
+  int tempCursorSpeedLevel = getCursorSpeedLevel();
 
   tempCursorSpeedLevel++;
   if(tempCursorSpeedLevel <= CONF_JOY_CURSOR_SPEED_LEVEL_MAX) {  // Check validity of input
@@ -811,7 +811,7 @@ void increaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
 // Return     : void
 //*********************************//
 void decreaseCursorSpeed(bool responseEnabled, bool apiEnabled) {
-  int tempCursorSpeedLevel = js.getOutputRange();
+  int tempCursorSpeedLevel = getCursorSpeedLevel();
 
   tempCursorSpeedLevel--;
   if(tempCursorSpeedLevel >= CONF_JOY_CURSOR_SPEED_LEVEL_MIN) {

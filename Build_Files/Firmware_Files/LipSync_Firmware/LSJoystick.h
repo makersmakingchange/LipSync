@@ -75,8 +75,6 @@ class LSJoystick {
     void setInnerDeadzone(bool deadzoneEnabled,float deadzoneFactor);     // Enable or disable deadzone and set deadzone scale factor (0-100), default 0.12
     float getInnerDeadzoneFactor(void);                                   // Get the inner deadzone factor ()
     void setOuterDeadzone(bool upperDeadzoneEnabled,float outerDeadzoneFactor);  // Enable or disable deadzone and set deadzone scale factor  Default 0.95 
-    int getOutputRange();                                                 // Get the output range or speed levels.
-    void setOutputRange(int rangeLevel);                                  // Set the output range or speed levels.
     int getMouseSpeedRange();                                             // Get the maximum cursor change
     int getMinimumRadius();                                               // Get the minimum input radius for square to circle mapping.
     void setMinimumRadius();                                              // Set or update the minimum input radius for square to circle mapping.
@@ -130,12 +128,8 @@ class LSJoystick {
     int _innerDeadzoneValue;                                              // The calculated deadzone value based on deadzone factor and maximum value JOY_INPUT_XY_MAX.
     float _outerDeadzoneFactor;                                           // Upper deadzone factor in percent of total value or max reading JOY_INPUT_XY_MAX
     int _outerDeadzoneValue;                                              // The calculated upper deadzone value based on upper deadzone factor and maximum value JOY_INPUT_XY_MAX.
-    int _rangeLevel;                                                      // The range level from 0 to 10 which is used as speed levels.
-    int _rangeValue;                                                      // The calculated range value based on range level and an equation. This is maximum output value for each range level. (Cursor or gamepad)
     float _inputRadius;                                                   // The minimum radius of operating area calculated using calibration points.
     bool _skipInputChange;                                                // The flag to low-pass filter the input changes 
-    int _operatingMode;                                                   // Operating mode, gamepad or mouse  //TODO 2025-Mar-06 Remove - Joystick class should be independent of operating mode
-
 };
 
 //*********************************//
@@ -167,13 +161,11 @@ void LSJoystick::begin() {
 
   _inputRadius = 0.0;                                                  // Initialize _inputRadius
   _skipInputChange = false;                                            // Initialize _skipInputChange
-  _operatingMode = getOperatingMode(false, false); //TODO 2025-Mar-06 Remove - Joystick class should be independent of operating mode
 
   _Tlv493dSensor.begin();  // TODO 2025-Feb-25 This will likely hang if it fails. Ideally replace with something that returns error/success.
   setMagnetDirection(JOY_DIRECTION_DEFAULT, JOY_DIRECTION_DEFAULT);      // Set default magnet direction.
   setInnerDeadzone(JOY_OUTPUT_DEADZONE_STATUS, JOY_OUTPUT_DEADZONE_FACTOR);   // Set default deadzone status and deadzone factor.
   setOuterDeadzone(JOY_OUTPUT_DEADZONE_STATUS, 1.0 - JOY_OUTPUT_DEADZONE_FACTOR);   // Set default deadzone status and deadzone factor.
-  setOutputRange(JOY_OUTPUT_RANGE_LEVEL);                               // Set default output range level or speed level.
   clear();                                                              // Clear calibration array and _joystickOutputBuffer.
 }
 
@@ -385,59 +377,6 @@ void LSJoystick::setOuterDeadzone(bool outerDeadzoneEnabled, float outerDeadzone
 
 }
 
-//*********************************//
-// Function   : getOutputRange
-// 
-// Description: Get the output range level or speed level ( 0 to 10 )
-// 
-// Arguments :  
-// 
-// Return     : range level : int : range level or speed level ( 0 to 10 )
-//*********************************//
-int LSJoystick::getOutputRange(){
-  return _rangeLevel;
-}
-
-//*********************************//
-// Function   : setOutputRange 
-// 
-// Description: Set the output range value based on range level or speed level ( 0 to 10 )
-// 
-// Arguments :  rangeLevel : int : range level or speed level ( 0 to 10 )
-// 
-// Return     : void
-//*********************************//
-void LSJoystick::setOutputRange(int rangeLevel){
-
-  // When operating as a mouse, the following function sets the upper limit of cursor value output each update
-  if (_operatingMode == CONF_OPERATING_MODE_MOUSE){
-    // Calculate the output range value
-    _rangeValue = (int)((0.125 * sq(rangeLevel)) + ( 0.3 * rangeLevel ) + 2);       // Polynomial 
-    // [0:2; 1:2; 2:3; 3:4; 4:5; 5:7; 6:8; 7:10; 8:12; 9:15; 10:18]
-    
-    // _rangeValue = (int)((1.05 * exp(( 0.175 * rangeLevel) + 1.1)) - 1);           // Exponential   
-    //Serial.print("_rangeValue:");
-    //Serial.println(_rangeValue);
-
-    // When operating as gamepad, the output range is 127 and is not affected by rangeLevel
-  } else if (_operatingMode == CONF_OPERATING_MODE_GAMEPAD){
-    _rangeValue = JOY_OUTPUT_XY_MAX_GAMEPAD ;
-  }
-  _rangeLevel = rangeLevel;
-}
-
-//*********************************//
-// Function   : getMouseSpeedRange
-// 
-// Description: Get the output range level based on mouse speed level.
-// 
-// Arguments :  void
-// 
-// Return     : int : _rangeValue;
-//*********************************//
-int LSJoystick::getMouseSpeedRange(){
-  return _rangeValue;
-}
 
 //*********************************//
 // Function   : getMinimumRadius 
@@ -806,11 +745,11 @@ pointIntType LSJoystick::scaleOutput(pointIntType inputPoint, float inputMagnitu
   
   pointIntType outputPoint = {0,0};  // Initialize outputPoint
 
-  // Map input magnitude (between 0 and 1024) to output magnitudes (between 0 and _rangeValue)
+  // Map input magnitude (between 0 and 1024) to output magnitudes (between 0 and CONF_JOY_OUTPUT_XY_MAX)
   float outputMagnitude = mapIntToFloat(inputMagnitude, 0, JOY_INPUT_XY_MAX, 0, CONF_JOY_OUTPUT_XY_MAX);
   outputMagnitude = constrain(outputMagnitude, 0, CONF_JOY_OUTPUT_XY_MAX);
 
-  outputPoint = pointIntFromMagnitudeAngle(outputMagnitude,inputAngle);
+  outputPoint = pointIntFromMagnitudeAngle(outputMagnitude, inputAngle);
    
   return outputPoint;  
 }

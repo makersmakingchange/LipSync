@@ -109,6 +109,8 @@ unsigned int g_usbConnectDelay = CONF_USB_HID_INIT_DELAY;
 int acceleration = 0;
 int g_scrollLevel = 0;
 int g_scrollNumRuns = 0;
+int g_cursorSpeedLevel = 5;
+int g_cursorSpeedMax = 0;
 
 int outputAction;
 bool canOutputAction = true;
@@ -1903,9 +1905,9 @@ void performJoystick(pointIntType inputPoint) {
   pointIntType outputPoint = {0,0};
   
   if (g_operatingMode == CONF_OPERATING_MODE_MOUSE) {
-    int maxMouse = js.getMouseSpeedRange();
-    outputPoint.x = js.mapRoundInt(inputPoint.x, -CONF_JOY_OUTPUT_XY_MAX, CONF_JOY_OUTPUT_XY_MAX ,-maxMouse, maxMouse);
-    outputPoint.y = js.mapRoundInt(inputPoint.y, -CONF_JOY_OUTPUT_XY_MAX, CONF_JOY_OUTPUT_XY_MAX ,-maxMouse, maxMouse);
+    int maxCursorSpeed = getMouseSpeedRange();
+    outputPoint.x = js.mapRoundInt(inputPoint.x, -CONF_JOY_OUTPUT_XY_MAX, CONF_JOY_OUTPUT_XY_MAX ,-maxCursorSpeed, maxCursorSpeed);
+    outputPoint.y = js.mapRoundInt(inputPoint.y, -CONF_JOY_OUTPUT_XY_MAX, CONF_JOY_OUTPUT_XY_MAX ,-maxCursorSpeed, maxCursorSpeed);
     // 0 = None , 1 = USB , 2 = Wireless
     if (g_comMode == CONF_COM_MODE_USB) {
       //(outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),g_scrollLevel)) : usbmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration)); // TODO Implement acceleration
@@ -2568,4 +2570,59 @@ void printlnToSerial(String toPrint) {
 
 void printToSerial(String toPrint) {
   Serial.print(toPrint);
+}
+
+
+//*********************************//
+// Function   : getCursorSpeedLevel
+// 
+// Description: Get the output range level or speed level ( 0 to 10 )
+// 
+// Arguments :  
+// 
+// Return     : range level : int : range level or speed level ( 0 to 10 )
+//*********************************//
+int getCursorSpeedLevel(){
+  return g_cursorSpeedLevel;
+}
+
+//*********************************//
+// Function   : setCursorSpeedMax 
+// 
+// Description: Set the output range value based on range level or speed level ( 0 to 10 )
+// 
+// Arguments :  speedLevel : int : range level or speed level ( 0 to 10 )
+// 
+// Return     : void
+//*********************************//
+void setCursorSpeedMax(int speedLevel){ 
+
+  // When operating as a mouse, the following function sets the upper limit of cursor value output each update
+  if (g_operatingMode == CONF_OPERATING_MODE_MOUSE){
+    // Calculate the output range value
+    g_cursorSpeedMax = (int)((0.125 * sq(speedLevel)) + ( 0.3 * speedLevel ) + 2);       // Polynomial 
+    // [0:2; 1:2; 2:3; 3:4; 4:5; 5:7; 6:8; 7:10; 8:12; 9:15; 10:18]
+    
+    // _rangeValue = (int)((1.05 * exp(( 0.175 * speedLevel) + 1.1)) - 1);           // Exponential   
+    //Serial.print("_rangeValue:");
+    //Serial.println(_rangeValue);
+
+    // When operating as gamepad, the output range is 127 and is not affected by speedLevel
+  } else if (g_operatingMode == CONF_OPERATING_MODE_GAMEPAD){
+    g_cursorSpeedMax = JOY_OUTPUT_XY_MAX_GAMEPAD ;
+  }
+  g_cursorSpeedLevel = speedLevel;
+}
+
+//*********************************//
+// Function   : getMouseSpeedRange
+// 
+// Description: Get the output range level based on mouse speed level.
+// 
+// Arguments :  void
+// 
+// Return     : int : _rangeValue;
+//*********************************//
+int getMouseSpeedRange(){
+  return g_cursorSpeedMax;
 }
