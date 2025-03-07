@@ -92,6 +92,7 @@ class LSJoystick {
     pointFloatType getXYRaw();                                            // Get the raw x and y values.
     pointIntType getXYIn();                                               // Get the mapped and filtered x and y values.
     pointIntType getXYOut();                                              // Get the output x and y values.
+    int mapRoundInt(int input, int inputStart, int inputEnd, int outputStart, int outputEnd);       // Custom map function that rounds the results instead of truncating
 
   private:
     Tlv493d _Tlv493dSensor = Tlv493d();                                   // Create an object of Tlv493d class
@@ -106,7 +107,6 @@ class LSJoystick {
     pointIntType scaleOutput(pointIntType inputPoint, float inputMagnitude, float inputAngle);                    // Scales the output from -1024 1024 to operating mode requirements of gamepad or curosor
     pointIntType processOutputResponse(pointIntType inputPoint);          // Process the output (Including linearizeOutput methods and speed control)
     int mapFloatInt(float input, float inputStart, float inputEnd, int outputStart, int outputEnd); // Custom map function to map float to int.
-    int mapRoundInt(int input, int inputStart, int inputEnd, int outputStart, int outputEnd);       // Custom map function that rounds the results instead of truncating
     float mapIntToFloat(int input, int inputStart, int inputEnd, int outputStart, int outputEnd);    // Custom map function that takes integers and outputs a float
     pointFloatType absPoint(pointFloatType inputPoint);                   // Get the absolute value of the point.
     float magnitudePoint(pointFloatType inputPoint);                      // Magnitude of a point from er (0,0)
