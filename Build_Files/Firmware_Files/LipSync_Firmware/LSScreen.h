@@ -798,10 +798,10 @@ void LSScreen::selectMenuItem() {
           softwareReset(); // Call a software reset
           break;
         case 1:  // Back
-          if (_prevMenu = MORE_MENU) {        
+          if (_prevMenu == MORE_MENU) {        
             moreMenu();
             break;
-          } else if (_prevMenu = SAFEMODE_MENU) {
+          } else if (_prevMenu == SAFEMODE_MENU) {
             safeModeMenu();
             break;
           } else {
@@ -823,7 +823,7 @@ void LSScreen::selectMenuItem() {
           if(_prevMenu == MORE_MENU) {
             moreMenu();
           }
-          else if (_prevMenu = SAFEMODE_MENU ) {
+          else if (_prevMenu == SAFEMODE_MENU ) {
             safeModeMenu();
           } 
           break;
@@ -839,7 +839,7 @@ void LSScreen::selectMenuItem() {
           if(_prevMenu == MORE_MENU) {
             moreMenu();
           }
-          else if (_prevMenu = SAFEMODE_MENU ) {
+          else if (_prevMenu == SAFEMODE_MENU ) {
             safeModeMenu();
           } 
           break;
