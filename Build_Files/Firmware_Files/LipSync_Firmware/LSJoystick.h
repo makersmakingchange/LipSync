@@ -72,8 +72,9 @@ class LSJoystick {
     int getMagnetZDirection();                                            // Get the Z direction of the magnet.
     void setMagnetZDirection();                                           // Update the magnet Z direction variable.
     void setMagnetDirection(int magnetXDirection, int magnetYDirection);  // Set magnet direction based on orientation of magnet (z axis), X and Y direction variables.
-    void setInnerDeadzone(bool deadzoneEnabled,float deadzoneFactor);          // Enable or disable deadzone and set deadzone scale factor (0.12) 
-    void setOuterDeadzone(bool upperDeadzoneEnabled,float upperDeadzoneFactor);  // Enable or disable deadzone and set deadzone scale factor (0.12) 
+    void setInnerDeadzone(bool deadzoneEnabled,float deadzoneFactor);     // Enable or disable deadzone and set deadzone scale factor (0-100), default 0.12
+    float getInnerDeadzoneFactor(void);                                   // Get the inner deadzone factor ()
+    void setOuterDeadzone(bool upperDeadzoneEnabled,float outerDeadzoneFactor);  // Enable or disable deadzone and set deadzone scale factor  Default 0.95 
     int getOutputRange();                                                 // Get the output range or speed levels.
     void setOutputRange(int rangeLevel);                                  // Set the output range or speed levels.
     int getMouseSpeedRange();
@@ -93,25 +94,26 @@ class LSJoystick {
     pointIntType getXYOut();                                              // Get the output x and y values.
 
   private:
-    Tlv493d _Tlv493dSensor = Tlv493d();                                    // Create an object of Tlv493d class
-    LSCircularBuffer <pointFloatType> _joystickRawBuffer;                  // Create a buffer of type pointFloatType to push raw readings 
-    LSCircularBuffer <pointIntType> _joystickInputBuffer;                  // Create a buffer of type pointIntType to push mapped and filtered readings 
-    LSCircularBuffer <pointIntType> _joystickOutputBuffer;                 // Create a buffer of type pointIntType to push mapped readings 
-    LSCircularBuffer <pointFloatType> _joystickCenterBuffer;               // Create a buffer of type pointFloatType to push center input readings     
-    bool canSkipInputChange(pointFloatType inputPoint);                  // Check if the output change can be skipped (Low-Pass Filter)
+    Tlv493d _Tlv493dSensor = Tlv493d();                                   // Create an object of Tlv493d class
+    LSCircularBuffer <pointFloatType> _joystickRawBuffer;                 // Create a buffer of type pointFloatType to push raw readings 
+    LSCircularBuffer <pointIntType> _joystickInputBuffer;                 // Create a buffer of type pointIntType to push mapped and filtered readings 
+    LSCircularBuffer <pointIntType> _joystickOutputBuffer;                // Create a buffer of type pointIntType to push mapped readings 
+    LSCircularBuffer <pointFloatType> _joystickCenterBuffer;              // Create a buffer of type pointFloatType to push center input readings     
+    bool canSkipInputChange(pointFloatType inputPoint);                   // Check if the output change can be skipped (Low-Pass Filter)
     pointIntType applyRadialDeadzone(pointIntType inputPoint, float inputPointMagnitude, float inputPointAngle);    // Apply radial deadzone to the input based on deadzoneValue and upperDeadzoneValue
     pointIntType processInputReading(pointFloatType inputPoint);          // Process the input readings and map the input reading from square to circle. (-1024 to 1024 output )
-    pointIntType linearizeOutput(pointIntType inputPoint, float inputPointMagnitude, float inputPointAngle);                // Linearize the output.
+    pointIntType linearizeOutput(pointIntType inputPoint);                // Linearize the output.
+    pointIntType scaleOutput(pointIntType inputPoint);                    // Scales the output from -1024 1024 to operating mode requirements of gamepad or curosor
     pointIntType processOutputResponse(pointIntType inputPoint);          // Process the output (Including linearizeOutput methods and speed control)
     int mapFloatInt(float input, float inputStart, float inputEnd, int outputStart, int outputEnd); // Custom map function to map float to int.
     int mapRoundInt(int input, int inputStart, int inputEnd, int outputStart, int outputEnd);       // Custom map function that rounds the results instead of truncating
     float mapIntToFloat(int input, int inputStart, int inputEnd, int outputStart, int outputEnd);    // Custom map function that takes integers and outputs a float
     pointFloatType absPoint(pointFloatType inputPoint);                   // Get the absolute value of the point.
     float magnitudePoint(pointFloatType inputPoint);                      // Magnitude of a point from er (0,0)
-    float magnitudePoint(pointIntType inputPoint);                      // Magnitude of a point from er (0,0)
+    float magnitudePoint(pointIntType inputPoint);                        // Magnitude of a point from er (0,0)
     float magnitudePoint(pointFloatType inputPoint, pointFloatType offsetPoint); // Magnitude of a point from offset center point / Compensation point
     int sgn(float val);                                                   // Get the sign of the value.
-    pointFloatType _magnetInputCalibration[JOY_CALIBR_ARRAY_SIZE];         // Array of calibration points.
+    pointFloatType _magnetInputCalibration[JOY_CALIBR_ARRAY_SIZE];        // Array of calibration points.
     pointFloatType _rawPoint;                                             // Raw x and y values used for debugging purposes.
     pointIntType _inputPoint;                                             // Mapped and filtered x and y values
     pointIntType _outputPoint;                                            // Output x and y values
@@ -127,7 +129,7 @@ class LSJoystick {
     float _outerDeadzoneFactor;                                           // Upper deadzone factor in percent of total value or max reading JOY_INPUT_XY_MAX
     int _outerDeadzoneValue;                                              // The calculated upper deadzone value based on upper deadzone factor and maximum value JOY_INPUT_XY_MAX.
     int _rangeLevel;                                                      // The range level from 0 to 10 which is used as speed levels.
-    int _rangeValue;                                                      // The calculated range value based on range level and an equation. This is maximum output value  for each range level.
+    int _rangeValue;                                                      // The calculated range value based on range level and an equation. This is maximum output value for each range level. (Cursor or gamepad)
     float _inputRadius;                                                   // The minimum radius of operating area calculated using calibration points.
     bool _skipInputChange;                                                // The flag to low-pass filter the input changes 
     int _operatingMode;                                                   // Operating mode, gamepad or mouse  //TODO 2025-Mar-06 Remove - Joystick class should be independent of operating mode
@@ -331,10 +333,10 @@ void LSJoystick::setMagnetDirection(int magnetXDirection, int magnetYDirection) 
 // 
 // Return     : void
 //*********************************//
-void LSJoystick::setInnerDeadzone(bool deadzoneEnabled, float deadzoneFactor){
-  _innerDeadzoneEnabled = deadzoneEnabled;
-  
-  _innerDeadzoneFactor = deadzoneFactor;
+void LSJoystick::setInnerDeadzone(bool innerDeadzoneEnabled, float innerDeadzoneFactor){
+  _innerDeadzoneEnabled = innerDeadzoneEnabled;
+  _innerDeadzoneFactor = innerDeadzoneFactor;
+
   // Set the deadzone value if it's enabled. The deadzone value is zero if it's disabled.
   // deadzone value is the _innerDeadzoneFactor multiplied by JOY_INPUT_XY_MAX.
   if (_innerDeadzoneEnabled) {
@@ -342,6 +344,19 @@ void LSJoystick::setInnerDeadzone(bool deadzoneEnabled, float deadzoneFactor){
   } else {
     _innerDeadzoneValue = 0; 
   }    
+}
+
+//*********************************//
+// Function   : getInnerDeadzoneFactor 
+// 
+// Description: Get the inner deadzone factor.
+// 
+// Arguments :  void
+// 
+// Return     : deadzoneFactor  : float : deadzoneFactor from 0.01 to 1.0
+//*********************************//
+float LSJoystick::getInnerDeadzoneFactor(void){
+  return _innerDeadzoneFactor;  
 }
 
 //*********************************//
@@ -354,13 +369,18 @@ void LSJoystick::setInnerDeadzone(bool deadzoneEnabled, float deadzoneFactor){
 // 
 // Return     : void
 //*********************************//
-void LSJoystick::setOuterDeadzone(bool upperDeadzoneEnabled, float upperDeadzoneFactor){
-  _outerDeadzoneEnabled = upperDeadzoneEnabled;
-  
-  _outerDeadzoneFactor = upperDeadzoneFactor;
+void LSJoystick::setOuterDeadzone(bool outerDeadzoneEnabled, float outerDeadzoneFactor){
+  _outerDeadzoneEnabled = outerDeadzoneEnabled;
+  _outerDeadzoneFactor = outerDeadzoneFactor;
+
   // Set the deadzone value if it's enabled. The deadzone value is zero if it's disabled.
-  // deadzone value is the _innerDeadzoneFactor multiplied by JOY_INPUT_XY_MAX.
-  (_outerDeadzoneEnabled) ? _outerDeadzoneValue = round(JOY_INPUT_XY_MAX*_outerDeadzoneFactor):_outerDeadzoneValue=0;   
+  // deadzone value is the _outerDeadzoneFactor multiplied by JOY_INPUT_XY_MAX.
+  if (_outerDeadzoneEnabled) {
+    _outerDeadzoneValue = round(JOY_INPUT_XY_MAX * _outerDeadzoneFactor);
+  } else {
+    _outerDeadzoneValue = JOY_INPUT_XY_MAX; 
+  } 
+
 }
 
 //*********************************//
@@ -441,12 +461,12 @@ int LSJoystick::getMinimumRadius(){
 //*********************************//
 void LSJoystick::setMinimumRadius(){
   float tempRadius = 0.0;
-  pointFloatType tempPoint = {JOY_RAW_XY_MAX,JOY_RAW_XY_MAX};
+  pointFloatType tempPoint = {JOY_RAW_XY_MAX, JOY_RAW_XY_MAX};
   _inputRadius = magnitudePoint(tempPoint, _magnetInputCalibration[0]) / sqrt(2.0);
 
   // Loop through calibration points and calculate the smallest magnitude from center point
   for (int i = 1; i < JOY_CALIBR_ARRAY_SIZE; i++) {
-    tempRadius = (sqrt(sq(_magnetInputCalibration[i].x - _magnetInputCalibration[0].x) + sq(_magnetInputCalibration[i].y - _magnetInputCalibration[0].y))/sqrt(2.0));
+    tempRadius = (sqrt(sq(_magnetInputCalibration[i].x - _magnetInputCalibration[0].x) + sq(_magnetInputCalibration[i].y - _magnetInputCalibration[0].y)) / sqrt(2.0));
     // Make sure the calibration point is valid and initial value of _inputRadius is charged 
     if(magnitudePoint(_magnetInputCalibration[i]) > 0.0 && (tempRadius < _inputRadius)) {  // Set smallest magnitude as radius
       _inputRadius = tempRadius; 
@@ -487,8 +507,8 @@ void LSJoystick::evaluateInputCenter() {
     centerX += centerPoint.x;
     centerY += centerPoint.y;
   }
-  centerX=centerX / JOY_CENTER_BUFF_SIZE;
-  centerY=centerY / JOY_CENTER_BUFF_SIZE;
+  centerX = centerX / JOY_CENTER_BUFF_SIZE;
+  centerY = centerY / JOY_CENTER_BUFF_SIZE;
   _magnetInputCalibration[0] = {centerX, centerY};
 }
 
@@ -528,6 +548,8 @@ pointFloatType LSJoystick::getInputMax(int quad) {
 
   // Update the calibration point and minimum radius 
   // Make sure it's a valid quadrant and if new point has larger magnitude from center ( calibration timer loop )
+
+
   if( (quad >= 0) && 
   (quad < JOY_CALIBR_ARRAY_SIZE) && 
   magnitudePoint(tempCalibrationPoint, _magnetInputCalibration[0]) > magnitudePoint(_magnetInputCalibration[quad], _magnetInputCalibration[0])){           // The point with larger magnitude is sent as output 
@@ -563,7 +585,7 @@ void LSJoystick::setInputMax(int quad, pointFloatType inputPoint) {
 // Return     : void
 //*********************************//
 void LSJoystick::zeroInputMax(int quad) {
- // Reset or zer the calibration point 
+ // Reset or zero the calibration point 
   _magnetInputCalibration[quad] = {0, 0};
 }
 
@@ -587,9 +609,9 @@ void LSJoystick::update() {
 
 
   if(!_skipInputChange){  // If latest measurement has changed more than the change threshold, process and add to output buffer 
-    _inputPoint = processInputReading(_rawPoint);            // Mapped and filtered input readings
+    _inputPoint = processInputReading(_rawPoint);             // Filtered and scaled input readings
     _joystickInputBuffer.pushElement(_inputPoint);            // Add new input point to _joystickInputBuffer
-    _outputPoint = processOutputResponse(_inputPoint);       // Process output by applying deadzone, speed control, and linearization
+    _outputPoint = processOutputResponse(_inputPoint);        // Process output by applying deadzone, speed control, and linearization
     _joystickOutputBuffer.pushElement(_outputPoint);          // Add new output point to _joystickOutputBuffer    
   } 
 }
@@ -672,34 +694,60 @@ pointIntType LSJoystick::getXYOut() {
 // 
 // Description: Apply the radial deadzone to the output value 
 // 
-// Arguments :  inputPoint : pointIntType : Output without deadzone
+// Arguments :  inputPoint : pointIntType : Input point coordinates
+//              inputPointMagnitude : float : Magnitude of input point
+//              inputPointAngle : float : Angle of input point
 // 
 // Return     : outputPoint : pointIntType : Output with deadzone applied
 //*********************************//
 pointIntType LSJoystick::applyRadialDeadzone(pointIntType inputPoint, float inputPointMagnitude, float inputPointAngle) {
 
-  // Output the input if Deadzone is not enabled 
+ 
   pointIntType outputPoint = {0,0};
 
-  // if Deadzone is not enabled, if it is enabled it will be overwritten
-  outputPoint = inputPoint;   
+   // Output the input if Deadzone is not enabled
+   // if Deadzone is not enabled, if it is enabled it will be overwritten
+  outputPoint = inputPoint;  
 
-  // if lower deadzone is enabled, values below deadzone equal 0
+  int innerDeadzoneValue; 
+  int outerDeadzoneValue; 
+
   if(_innerDeadzoneEnabled) { 
-    if(inputPointMagnitude < _innerDeadzoneValue){  // Output zero if input < _innerDeadzoneValue
-      outputPoint = {0,0};
-    }
+    innerDeadzoneValue = _innerDeadzoneValue;
+  }
+  else {
+    innerDeadzoneValue = 0;
   } 
 
-  // if upper deadzone is enabled, values above upper deadzone equal max input
   if (_outerDeadzoneEnabled) {
-    if(inputPointMagnitude > (JOY_INPUT_XY_MAX - _outerDeadzoneValue)) {      // If magnitude is greater than JOY_INPUT_XY_MAX - upper deadzone
-      outputPoint.x = sgn(inputPoint.x) * abs(round(cos(inputPointAngle) * JOY_INPUT_XY_MAX));   // Set x value of output point equal to x value on circle of radius JOY_INPUT_XY_MAX at angle of input point
-      outputPoint.y = sgn(inputPoint.y) * abs(round(sin(inputPointAngle) * JOY_INPUT_XY_MAX));   // Set y value of output point equal to y value on circle of radius JOY_INPUT_XY_MAX at angle of input point
-    } 
+    outerDeadzoneValue = _outerDeadzoneValue;
+  } else {
+    outerDeadzoneValue = JOY_INPUT_XY_MAX;
   }
-  
-  return outputPoint;
+
+  float deadzoneScalingFactor = (inputPointMagnitude - innerDeadzoneValue) / (outerDeadzoneValue - innerDeadzoneValue);
+
+  // Apply deadzone
+
+  if (inputPointMagnitude <= innerDeadzoneValue) {
+    // No output
+    outputPoint = {0,0};
+  } else if (inputPointMagnitude >= outerDeadzoneValue) {
+    // Set x,y value of output point on circle of radius JOY_INPUT_XY_MAX at angle of input point
+    outputPoint.x = sgn(inputPoint.x) * abs(round(cos(inputPointAngle) * JOY_INPUT_XY_MAX));   
+    outputPoint.y = sgn(inputPoint.y) * abs(round(sin(inputPointAngle) * JOY_INPUT_XY_MAX));   
+  } else { // (innerDeadzoneValue < inputPointMagnitude < outerDeadzoneValue)
+    // Map the input magnitudes between the lower and outer deadzones to between 0 and the maximum value
+    outputPoint.x = (inputPoint.x / inputPointMagnitude ) * deadzoneScalingFactor;
+    outputPoint.y = (inputPoint.y / inputPointMagnitude ) * deadzoneScalingFactor;
+    outputPoint.x = constrain(outputPoint.x, -JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX);
+    outputPoint.y = constrain(outputPoint.y, -JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX);
+
+    int linearizedInputMagnitude = mapRoundInt(round(inputPointMagnitude), _innerDeadzoneValue, (JOY_INPUT_XY_MAX - _outerDeadzoneValue), 0, JOY_INPUT_XY_MAX);
+    linearizedInputMagnitude = constrain(linearizedInputMagnitude, 0, JOY_INPUT_XY_MAX);
+  }
+
+ return outputPoint;
 }
 
 //*********************************//
@@ -721,29 +769,67 @@ bool LSJoystick::canSkipInputChange(pointFloatType inputPoint) {
   return skipInputChange;
 }
 
+
 //*********************************//
 // Function   : linearizeOutput 
 // 
-// Description: Linearize Output value
+// Description: Linearize raw joystick readings
 // 
-// Arguments :  inputPoint : pointIntType : Output without linearization
+// Arguments :  inputPoint : pointIntType : Input points 
 // 
 // Return     : outputPoint : pointIntType : Output with linearization and speed control applied
 //*********************************//
-pointIntType LSJoystick::linearizeOutput(pointIntType inputPoint, float inputPointMagnitude, float inputPointAngle){                              
-  pointIntType outputPoint = {0,0};                                     // Initialize outputPoint
+pointIntType LSJoystick::linearizeOutput(pointIntType inputPoint){                              
+  
+  // Linearize the input joystick values 
+  pointIntType linearizedPoint = {0,0};
 
-  // Map the input magnitudes between the lower and upper deadzones to between 0 and the maximum value
-  int linearizedInputMagnitude = mapRoundInt(round(inputPointMagnitude), _innerDeadzoneValue, (JOY_INPUT_XY_MAX - _outerDeadzoneValue), 0, JOY_INPUT_XY_MAX);
-  linearizedInputMagnitude = constrain(linearizedInputMagnitude, 0, JOY_INPUT_XY_MAX);
+  linearizedPoint = inputPoint; //TODO 2025-Mar-07 Replace with linearization 
+    
+  return linearizedPoint;  
+}
+
+//*********************************//
+// Function   : scaleOutput 
+// 
+// Description: Scales output value to +- _rangeValue
+// 
+// Arguments :  inputPoint : pointIntType : Output without linearization
+//              inputPointMagnitude : float : Magnitude of input point
+//              inputPointAngle : float : Angle of input point
+// 
+// Return     : outputPoint : pointIntType : Output with linearization and speed control applied
+//*********************************//
+pointIntType LSJoystick::scaleOutput(pointIntType inputPoint){                              
+  
+  pointIntType outputPoint = {0,0};  // Initialize outputPoint
+
+  // // Map the input magnitudes between the lower and upper deadzones to between 0 and the maximum value
+  // int linearizedInputMagnitude = mapRoundInt(round(inputPointMagnitude), _innerDeadzoneValue, (JOY_INPUT_XY_MAX - _outerDeadzoneValue), 0, JOY_INPUT_XY_MAX);
+  // linearizedInputMagnitude = constrain(linearizedInputMagnitude, 0, JOY_INPUT_XY_MAX);
+
+  // // Map input magnitude (between 0 and 1024) to output magnitudes (between 0 and _rangeValue)
+  // float outputMagnitude = mapIntToFloat(linearizedInputMagnitude, 0, JOY_INPUT_XY_MAX, 0, _rangeValue);
+  // outputMagnitude = constrain(outputMagnitude, 0, _rangeValue);
+
 
   // Map input magnitude (between 0 and 1024) to output magnitudes (between 0 and _rangeValue)
   float outputMagnitude = mapIntToFloat(linearizedInputMagnitude, 0, JOY_INPUT_XY_MAX, 0, CONF_JOY_OUTPUT_XY_MAX);
   outputMagnitude = constrain(outputMagnitude, 0, CONF_JOY_OUTPUT_XY_MAX);
 
-  // Use output magnitude and input point angle to calculate x and y points
-  outputPoint.x = sgn(inputPoint.x) * abs(round(cos(inputPointAngle) * outputMagnitude));
-  outputPoint.y = sgn(inputPoint.y) * abs(round(sin(inputPointAngle) * outputMagnitude));
+
+  
+  if (inputPoint.x == 0) {
+    outputPoint.x = 0;
+  } else {
+    outputPoint.x = mapRoundInt(inputPoint.x, -JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX, -_rangeValue, _rangeValue);
+  }
+
+  if (inputPoint.y == 0) {
+    outputPoint.y = 0; 
+  } else {
+    outputPoint.y = mapRoundInt(inputPoint.y, -JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX, -_rangeValue, _rangeValue);
+  }
 
   return outputPoint;  
 }
@@ -763,13 +849,13 @@ pointIntType LSJoystick::processInputReading(pointFloatType inputPoint) {
   pointFloatType limitPoint = {0.00, 0.00};
   pointFloatType centeredPoint = {0.00, 0.00};
   pointIntType outputPoint = {0,0};
+  pointFloatType center = _magnetInputCalibration[0];
   
-  if ((sq(inputPoint.x) + sq(inputPoint.y)) >= sq(JOY_INPUT_DEADZONE)) {
+  if ((sq(inputPoint.x) + sq(inputPoint.y)) >= sq(JOY_INPUT_DEADZONE)) {  //  TODO 2025-Mar-07 Look at this constant / fixed input deadzone
     // Center the input point
-    centeredPoint = {(inputPoint.x - _magnetInputCalibration[0].x) * _joystickXDirection, 
-                     (inputPoint.y - _magnetInputCalibration[0].y) * _joystickYDirection};
+    centeredPoint = {(inputPoint.x - center[0].x) * _joystickXDirection, 
+                     (inputPoint.y - center[0].y) * _joystickYDirection};
   }
-
 
   float thetaVal = atan2(centeredPoint.y, centeredPoint.x);         // Get the angle of the point
 
@@ -786,7 +872,7 @@ pointIntType LSJoystick::processInputReading(pointFloatType inputPoint) {
 //    Serial.print(",");  
 //    Serial.println(centeredPoint.y); 
   }
-    // Map the centered point to int ( -1024 to 1024 )
+    // Scale the centered point to int ( -1024 to 1024 )
     outputPoint.x = mapFloatInt(centeredPoint.x, -1*_inputRadius, _inputRadius, -1*JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX);
     outputPoint.y = mapFloatInt(centeredPoint.y, -1*_inputRadius, _inputRadius, -1*JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX);
  
@@ -804,17 +890,21 @@ pointIntType LSJoystick::processInputReading(pointFloatType inputPoint) {
 // Return     : outputPoint : pointIntType : Processed Output with mapped reading 
 //*********************************//
 pointIntType LSJoystick::processOutputResponse(pointIntType inputPoint){
+  
   // Initialize outputPoint and deadzonedPoint
-  pointIntType outputPoint, deadzonedPoint = {0,0};
+  pointIntType outputPoint, deadzonedPoint, linearizedPoint = {0,0};
 
-  float inputPointMagnitude = magnitudePoint(inputPoint);
-  float inputPointAngle = atan2(inputPoint.y, inputPoint.x); 
+  // Apply linearization
+  linearizedPoint = linearizeOutput(inputPoint);
 
+  float linearizedPointMagnitude = magnitudePoint(linearizedPoint);
+  float linearizedPointAngle = atan2(linearizedPoint.y, linearizedPoint.x); 
+  
   // Apply Deadzone
-  deadzonedPoint = applyRadialDeadzone(inputPoint, inputPointMagnitude, inputPointAngle);
+  deadzonedPoint = applyRadialDeadzone(inputPoint, linearizedPointMagnitude, linearizedPointAngle);
 
-  // Apply Linearization
-  outputPoint = linearizeOutput(deadzonedPoint, inputPointMagnitude, inputPointAngle);
+  // Apply Scaling to output device range
+  outputPoint = scaleOutput(deadzonedPoint);
 
   return outputPoint;
 }
