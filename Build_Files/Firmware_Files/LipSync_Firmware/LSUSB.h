@@ -33,6 +33,7 @@
 #define GAMEPAD_DESCRIPTOR "LipSync Gamepad" // TODO 2025-Feb-21 Unused due to Tiny USB library hang
 
 extern unsigned int g_usbAttempt;  // global variable to keep track of USB connection attempts
+extern void usbCheckConnection(void);
 
 
 // https://github.com/hathach/tinyusb/blob/master/examples/device/hid_generic_inout/src/usb_descriptors.c
@@ -239,7 +240,8 @@ void LSUSBMouse::mouseReport(int8_t b, int8_t x, int8_t y, int8_t wheel, int8_t 
       delay(1);
       if ((millis() - timerTimeoutBegin) > CONF_USB_HID_TIMEOUT){
         timedOut = true;
-        showTestPage = true;
+        showTestPage=true;
+        usbCheckConnection();
         break;
       }
     }
