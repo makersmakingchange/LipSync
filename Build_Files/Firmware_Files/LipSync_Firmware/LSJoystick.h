@@ -330,10 +330,10 @@ void LSJoystick::setMagnetDirection(int magnetXDirection, int magnetYDirection) 
 // 
 // Return     : void
 //*********************************//
-void LSJoystick::setInnerDeadzone(bool deadzoneEnabled, float innerDeadzoneFactor){
+void LSJoystick::setInnerDeadzone(bool innerDeadzoneEnabled, float innerDeadzoneFactor){
   _innerDeadzoneEnabled = innerDeadzoneEnabled;
   
-  _innerDeadzoneFactor = deadzoneFactor;
+  _innerDeadzoneFactor = innerDeadzoneFactor;
   // Set the deadzone value if it's enabled. The deadzone value is zero if it's disabled.
   // deadzone value is the _innerDeadzoneFactor multiplied by JOY_INPUT_XY_MAX.
   if (_innerDeadzoneEnabled) {
@@ -353,8 +353,8 @@ void LSJoystick::setInnerDeadzone(bool deadzoneEnabled, float innerDeadzoneFacto
 // 
 // Return     : void
 //*********************************//
-void LSJoystick::setOuterDeadzone(bool upperDeadzoneEnabled, float outerDeadzoneFactor){
-  _outerDeadzoneEnabled = upperDeadzoneEnabled;
+void LSJoystick::setOuterDeadzone(bool outerDeadzoneEnabled, float outerDeadzoneFactor){
+  _outerDeadzoneEnabled = outerDeadzoneEnabled;
   
   _outerDeadzoneFactor = outerDeadzoneFactor;
   // Set the deadzone value if it's enabled. The deadzone value is zero if it's disabled.
