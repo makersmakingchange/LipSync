@@ -103,7 +103,7 @@ class LSJoystick {
     pointIntType applyRadialDeadzone(pointIntType inputPoint, float inputPointMagnitude, float inputPointAngle);    // Apply radial deadzone to the input based on deadzoneValue and upperDeadzoneValue
     pointIntType processInputReading(pointFloatType inputPoint);          // Process the input readings and map the input reading from square to circle. (-1024 to 1024 output )
     pointIntType linearizeOutput(pointIntType inputPoint);                // Linearize the output.
-    pointIntType scaleOutput(pointIntType inputPoint);                    // Scales the output from -1024 1024 to operating mode requirements of gamepad or curosor
+    pointIntType scaleOutput(pointIntType inputPoint, float inputMagnitude, float inputAngle);                    // Scales the output from -1024 1024 to operating mode requirements of gamepad or curosor
     pointIntType processOutputResponse(pointIntType inputPoint);          // Process the output (Including linearizeOutput methods and speed control)
     int mapFloatInt(float input, float inputStart, float inputEnd, int outputStart, int outputEnd); // Custom map function to map float to int.
     int mapRoundInt(int input, int inputStart, int inputEnd, int outputStart, int outputEnd);       // Custom map function that rounds the results instead of truncating
@@ -802,18 +802,15 @@ pointIntType LSJoystick::linearizeOutput(pointIntType inputPoint){
 // 
 // Return     : outputPoint : pointIntType : Scaled output point
 //*********************************//
-pointIntType LSJoystick::scaleOutput(pointIntType inputPoint){                              
+pointIntType LSJoystick::scaleOutput(pointIntType inputPoint, float inputMagnitude, float inputAngle){                              
   
   pointIntType outputPoint = {0,0};  // Initialize outputPoint
-
-  float inputMagnitude = magnitudePoint(inputPoint);
-  float linearizedPointAngle = atan2(inputPoint.y, inputPoint.x); 
 
   // Map input magnitude (between 0 and 1024) to output magnitudes (between 0 and _rangeValue)
   float outputMagnitude = mapIntToFloat(inputMagnitude, 0, JOY_INPUT_XY_MAX, 0, CONF_JOY_OUTPUT_XY_MAX);
   outputMagnitude = constrain(outputMagnitude, 0, CONF_JOY_OUTPUT_XY_MAX);
 
-  outputPoint = pointIntFromMagnitudeAngle(outputMagnitude,linearizedPointAngle);
+  outputPoint = pointIntFromMagnitudeAngle(outputMagnitude,inputAngle);
    
   return outputPoint;  
 }
@@ -882,13 +879,14 @@ pointIntType LSJoystick::processOutputResponse(pointIntType inputPoint){
   linearizedPoint = linearizeOutput(inputPoint);
 
   float linearizedPointMagnitude = magnitudePoint(linearizedPoint);
-  float linearizedPointAngle = atan2(linearizedPoint.y, linearizedPoint.x); 
+  float inputAngle = atan2(linearizedPoint.y, linearizedPoint.x); 
   
   // Apply Deadzone
-  deadzonedPoint = applyRadialDeadzone(linearizedPoint, linearizedPointMagnitude, linearizedPointAngle);
+  deadzonedPoint = applyRadialDeadzone(linearizedPoint, linearizedPointMagnitude, inputAngle);
+  float deadzonedPointMagnitude = magnitudePoint(linearizedPoint);
 
   // Apply Scaling to output device range
-  outputPoint = scaleOutput(deadzonedPoint);
+  outputPoint = scaleOutput(deadzonedPoint, deadzonedPointMagnitude, inputAngle);
   
 
   return outputPoint;
