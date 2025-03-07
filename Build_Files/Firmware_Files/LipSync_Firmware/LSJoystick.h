@@ -53,7 +53,7 @@
 
 #define JOY_OUTPUT_DEADZONE_STATUS true // The default output deadzone state (True = enable , False = disable)
 
-#define JOY_OUTPUT_DEADZONE_FACTOR 0.05 // The default output deadzone factor (%5 of JOY_INPUT_XY_MAX)
+#define JOY_OUTPUT_DEADZONE_FACTOR 0.05 // The default output deadzone factor (5% of JOY_INPUT_XY_MAX)
 
 #define JOY_OUTPUT_RANGE_LEVEL 5        // The default output mouse cursor range level or output movement upper range 
 
@@ -743,13 +743,10 @@ pointIntType LSJoystick::applyRadialDeadzone(pointIntType inputPoint, float inpu
 
   } else { // (innerDeadzoneValue < inputPointMagnitude < outerDeadzoneValue)
     // Map the input magnitudes between the lower and outer deadzones to between 0 and the maximum value
-    outputPoint.x = (inputPoint.x / inputPointMagnitude ) * deadzoneScalingFactor;
-    outputPoint.y = (inputPoint.y / inputPointMagnitude ) * deadzoneScalingFactor;
-    outputPoint.x = constrain(outputPoint.x, -JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX);
-    outputPoint.y = constrain(outputPoint.y, -JOY_INPUT_XY_MAX, JOY_INPUT_XY_MAX);
+    
+    int outputMagnitude = mapRoundInt(inputPointMagnitude, _innerDeadzoneValue, _outerDeadzoneValue, 0, JOY_INPUT_XY_MAX);
+    outputPoint = pointIntFromMagnitudeAngle(outputMagnitude, inputPointAngle);
 
-    int linearizedInputMagnitude = mapRoundInt(round(inputPointMagnitude), _innerDeadzoneValue, (JOY_INPUT_XY_MAX - _outerDeadzoneValue), 0, JOY_INPUT_XY_MAX);
-    linearizedInputMagnitude = constrain(linearizedInputMagnitude, 0, JOY_INPUT_XY_MAX);
   }
 
  return outputPoint;
@@ -803,31 +800,21 @@ pointIntType LSJoystick::linearizeOutput(pointIntType inputPoint){
 //              inputPointMagnitude : float : Magnitude of input point
 //              inputPointAngle : float : Angle of input point
 // 
-// Return     : outputPoint : pointIntType : Output with linearization and speed control applied
+// Return     : outputPoint : pointIntType : Scaled output point
 //*********************************//
 pointIntType LSJoystick::scaleOutput(pointIntType inputPoint){                              
   
   pointIntType outputPoint = {0,0};  // Initialize outputPoint
 
-  // // Map the input magnitudes between the lower and upper deadzones to between 0 and the maximum value
-  // int linearizedInputMagnitude = mapRoundInt(round(inputPointMagnitude), _innerDeadzoneValue, (JOY_INPUT_XY_MAX - _outerDeadzoneValue), 0, JOY_INPUT_XY_MAX);
-  // linearizedInputMagnitude = constrain(linearizedInputMagnitude, 0, JOY_INPUT_XY_MAX);
-
-  // // Map input magnitude (between 0 and 1024) to output magnitudes (between 0 and _rangeValue)
-  // float outputMagnitude = mapIntToFloat(linearizedInputMagnitude, 0, JOY_INPUT_XY_MAX, 0, _rangeValue);
-  // outputMagnitude = constrain(outputMagnitude, 0, _rangeValue);
-
-  float linearizedInputMagnitude = magnitudePoint(inputPoint);
+  float inputMagnitude = magnitudePoint(inputPoint);
   float linearizedPointAngle = atan2(inputPoint.y, inputPoint.x); 
 
   // Map input magnitude (between 0 and 1024) to output magnitudes (between 0 and _rangeValue)
-  float outputMagnitude = mapIntToFloat(linearizedInputMagnitude, 0, JOY_INPUT_XY_MAX, 0, CONF_JOY_OUTPUT_XY_MAX);
+  float outputMagnitude = mapIntToFloat(inputMagnitude, 0, JOY_INPUT_XY_MAX, 0, CONF_JOY_OUTPUT_XY_MAX);
   outputMagnitude = constrain(outputMagnitude, 0, CONF_JOY_OUTPUT_XY_MAX);
 
   outputPoint = pointIntFromMagnitudeAngle(outputMagnitude,linearizedPointAngle);
-
-
-    
+   
   return outputPoint;  
 }
 
@@ -1050,7 +1037,7 @@ int LSJoystick::sgn(float val) {
 pointIntType LSJoystick::pointIntFromMagnitudeAngle(float inputMagnitude, float inputPointAngle) {
   pointIntType outputPoint= {0,0};
   outputPoint.x = inputMagnitude * cos(inputPointAngle);   
-  outputPoint.y = inputMagnitude * cos(inputPointAngle); 
+  outputPoint.y = inputMagnitude * sin(inputPointAngle); 
   return outputPoint;
 }
 
@@ -1068,7 +1055,7 @@ pointIntType LSJoystick::pointIntFromMagnitudeAngle(float inputMagnitude, float 
 pointFloatType LSJoystick::pointFloatFromMagnitudeAngle(float inputMagnitude, float inputPointAngle) {
   pointFloatType outputPoint= {0,0};
   outputPoint.x = inputMagnitude * cos(inputPointAngle);   
-  outputPoint.y = inputMagnitude * cos(inputPointAngle); 
+  outputPoint.y = inputMagnitude * sin(inputPointAngle); 
   return outputPoint;
 }
 
