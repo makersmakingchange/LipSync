@@ -359,7 +359,12 @@ void LSJoystick::setOuterDeadzone(bool upperDeadzoneEnabled, float upperDeadzone
   _outerDeadzoneFactor = upperDeadzoneFactor;
   // Set the deadzone value if it's enabled. The deadzone value is zero if it's disabled.
   // deadzone value is the _innerDeadzoneFactor multiplied by JOY_INPUT_XY_MAX.
-  (_outerDeadzoneEnabled) ? _outerDeadzoneValue = round(JOY_INPUT_XY_MAX*_outerDeadzoneFactor):_outerDeadzoneValue=0;   
+  if (_outerDeadzoneEnabled) {
+    _outerDeadzoneValue = round(JOY_INPUT_XY_MAX * _outerDeadzoneFactor);
+  } else {
+  _outerDeadzoneValue = 0; 
+  } 
+   
 }
 
 //*********************************//
