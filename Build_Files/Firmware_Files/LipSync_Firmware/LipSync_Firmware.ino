@@ -1906,8 +1906,6 @@ void performJoystick(pointIntType inputPoint) {
     int maxMouse = js.getMouseSpeedRange();
     outputPoint.x = js.mapRoundInt(inputPoint.x, -CONF_JOY_OUTPUT_XY_MAX, CONF_JOY_OUTPUT_XY_MAX ,-maxMouse, maxMouse);
     outputPoint.y = js.mapRoundInt(inputPoint.y, -CONF_JOY_OUTPUT_XY_MAX, CONF_JOY_OUTPUT_XY_MAX ,-maxMouse, maxMouse);
-    //Serial.print(inputPoint.x); Serial.print("\t");
-    //Serial.println(outputPoint.x);
     // 0 = None , 1 = USB , 2 = Wireless
     if (g_comMode == CONF_COM_MODE_USB) {
       //(outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),g_scrollLevel)) : usbmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration)); // TODO Implement acceleration
@@ -1919,7 +1917,6 @@ void performJoystick(pointIntType inputPoint) {
     }
   } else if (g_operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
     // Gamepad is USB only, if wireless gamepad functionality is added, add that here
-    //Serial.print("X: \t"); Serial.print(inputPoint.x); Serial.print("\t Y: \t"); Serial.println(inputPoint.y);
     outputPoint.x = js.mapRoundInt(inputPoint.x, -CONF_JOY_OUTPUT_XY_MAX, CONF_JOY_OUTPUT_XY_MAX ,-CONF_JOY_OUTPUT_XY_MAX_GAMEPAD, CONF_JOY_OUTPUT_XY_MAX_GAMEPAD);
     outputPoint.y = js.mapRoundInt(inputPoint.y, -CONF_JOY_OUTPUT_XY_MAX, CONF_JOY_OUTPUT_XY_MAX ,-CONF_JOY_OUTPUT_XY_MAX_GAMEPAD, CONF_JOY_OUTPUT_XY_MAX_GAMEPAD);
     gamepad.move(outputPoint.x, outputPoint.y);
