@@ -327,7 +327,8 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_JOY_SPEED_LIMIT_LED_BLINK 3
 #define CONF_JOY_SPEED_LIMIT_LED_COLOR LED_CLR_RED // Out of range limit speed color
 
-#define CONF_JOY_OUTPUT_XY_MAX  127
+#define CONF_JOY_OUTPUT_XY_MAX  1024
+#define CONF_JOY_OUTPUT_XY_MAX_GAMEPAD  127
 
 // Scroll level change and related LED feedback settings 
 #define CONF_SCROLL_CHANGE_LED_DELAY  150
