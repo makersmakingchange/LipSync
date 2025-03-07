@@ -284,10 +284,10 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_STARTUP_LED_STEP_TIME 500      // Time for each color
 
 // Joystick Deadzone Default settings
-#define CONF_JOY_DEADZONE_MIN 0.01
-#define CONF_JOY_DEADZONE_INNER_DEFAULT 0.12
-#define CONF_JOY_DEADZONE_OUTER_DEFAULT 0.12
-#define CONF_JOY_DEADZONE_MAX 0.5
+#define CONF_JOY_DEADZONE_MIN 0.0
+#define CONF_JOY_DEADZONE_INNER_DEFAULT 0.05
+#define CONF_JOY_DEADZONE_OUTER_DEFAULT 0.95
+#define CONF_JOY_DEADZONE_MAX 1.0
 
 // Joystick full calibration points and related LED feedback settings
 #define CONF_JOY_CALIB_CORNER_DEFAULT 13.0
