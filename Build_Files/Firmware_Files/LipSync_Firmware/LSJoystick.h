@@ -727,7 +727,7 @@ pointIntType LSJoystick::applyRadialDeadzone(pointIntType inputPoint, float inpu
     outerDeadzoneValue = JOY_INPUT_XY_MAX;
   }
 
-  float deadzoneScalingFactor = (inputPointMagnitude - innerDeadzoneValue) / (outerDeadzoneValue - innerDeadzoneValue);
+  //float deadzoneScalingFactor = (inputPointMagnitude - innerDeadzoneValue) / (outerDeadzoneValue - innerDeadzoneValue);
 
   // Apply deadzone
 
@@ -885,7 +885,7 @@ pointIntType LSJoystick::processOutputResponse(pointIntType inputPoint){
   float linearizedPointAngle = atan2(linearizedPoint.y, linearizedPoint.x); 
   
   // Apply Deadzone
-  deadzonedPoint = applyRadialDeadzone(inputPoint, linearizedPointMagnitude, linearizedPointAngle);
+  deadzonedPoint = applyRadialDeadzone(linearizedPoint, linearizedPointMagnitude, linearizedPointAngle);
 
   // Apply Scaling to output device range
   outputPoint = scaleOutput(deadzonedPoint);
