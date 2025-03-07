@@ -73,7 +73,7 @@ class LSJoystick {
     void setMagnetZDirection();                                           // Update the magnet Z direction variable.
     void setMagnetDirection(int magnetXDirection, int magnetYDirection);  // Set magnet direction based on orientation of magnet (z axis), X and Y direction variables.
     void setInnerDeadzone(bool deadzoneEnabled,float deadzoneFactor);          // Enable or disable deadzone and set deadzone scale factor (0.12) 
-    void setOuterDeadzone(bool upperDeadzoneEnabled,float upperDeadzoneFactor);  // Enable or disable deadzone and set deadzone scale factor (0.12) 
+    void setOuterDeadzone(bool upperDeadzoneEnabled,float outerDeadzoneFactor);  // Enable or disable deadzone and set deadzone scale factor (0.12) 
     int getOutputRange();                                                 // Get the output range or speed levels.
     void setOutputRange(int rangeLevel);                                  // Set the output range or speed levels.
     int getMinimumRadius();                                               // Get the minimum input radius for square to circle mapping.
@@ -330,8 +330,8 @@ void LSJoystick::setMagnetDirection(int magnetXDirection, int magnetYDirection) 
 // 
 // Return     : void
 //*********************************//
-void LSJoystick::setInnerDeadzone(bool deadzoneEnabled, float deadzoneFactor){
-  _innerDeadzoneEnabled = deadzoneEnabled;
+void LSJoystick::setInnerDeadzone(bool deadzoneEnabled, float innerDeadzoneFactor){
+  _innerDeadzoneEnabled = innerDeadzoneEnabled;
   
   _innerDeadzoneFactor = deadzoneFactor;
   // Set the deadzone value if it's enabled. The deadzone value is zero if it's disabled.
@@ -353,18 +353,18 @@ void LSJoystick::setInnerDeadzone(bool deadzoneEnabled, float deadzoneFactor){
 // 
 // Return     : void
 //*********************************//
-void LSJoystick::setOuterDeadzone(bool upperDeadzoneEnabled, float upperDeadzoneFactor){
+void LSJoystick::setOuterDeadzone(bool upperDeadzoneEnabled, float outerDeadzoneFactor){
   _outerDeadzoneEnabled = upperDeadzoneEnabled;
   
-  _outerDeadzoneFactor = upperDeadzoneFactor;
+  _outerDeadzoneFactor = outerDeadzoneFactor;
   // Set the deadzone value if it's enabled. The deadzone value is zero if it's disabled.
-  // deadzone value is the _innerDeadzoneFactor multiplied by JOY_INPUT_XY_MAX.
+  // deadzone value is the _outerDeadzoneFactor multiplied by JOY_INPUT_XY_MAX.
   if (_outerDeadzoneEnabled) {
     _outerDeadzoneValue = round(JOY_INPUT_XY_MAX * _outerDeadzoneFactor);
   } else {
-  _outerDeadzoneValue = 0; 
+    _outerDeadzoneValue = 0; 
   } 
-   
+
 }
 
 //*********************************//
@@ -478,8 +478,8 @@ void LSJoystick::evaluateInputCenter() {
     centerX += centerPoint.x;
     centerY += centerPoint.y;
   }
-  centerX=centerX / JOY_CENTER_BUFF_SIZE;
-  centerY=centerY / JOY_CENTER_BUFF_SIZE;
+  centerX = centerX / JOY_CENTER_BUFF_SIZE;
+  centerY = centerY / JOY_CENTER_BUFF_SIZE;
   _magnetInputCalibration[0] = {centerX, centerY};
 }
 
@@ -519,6 +519,8 @@ pointFloatType LSJoystick::getInputMax(int quad) {
 
   // Update the calibration point and minimum radius 
   // Make sure it's a valid quadrant and if new point has larger magnitude from center ( calibration timer loop )
+
+
   if( (quad >= 0) && 
   (quad < JOY_CALIBR_ARRAY_SIZE) && 
   magnitudePoint(tempCalibrationPoint, _magnetInputCalibration[0]) > magnitudePoint(_magnetInputCalibration[quad], _magnetInputCalibration[0])){           // The point with larger magnitude is sent as output 
@@ -554,7 +556,7 @@ void LSJoystick::setInputMax(int quad, pointFloatType inputPoint) {
 // Return     : void
 //*********************************//
 void LSJoystick::zeroInputMax(int quad) {
- // Reset or zer the calibration point 
+ // Reset or zero the calibration point 
   _magnetInputCalibration[quad] = {0, 0};
 }
 
@@ -760,7 +762,6 @@ pointIntType LSJoystick::processInputReading(pointFloatType inputPoint) {
     centeredPoint = {(inputPoint.x - _magnetInputCalibration[0].x) * _joystickXDirection, 
                      (inputPoint.y - _magnetInputCalibration[0].y) * _joystickYDirection};
   }
-
 
   float thetaVal = atan2(centeredPoint.y, centeredPoint.x);         // Get the angle of the point
 
