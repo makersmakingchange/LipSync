@@ -1647,7 +1647,8 @@ void initJoystick() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: initJoystick()"); }
   js.begin();                                                           // Begin joystick
   js.setMagnetDirection(JOY_DIRECTION_DEFAULT, JOY_DIRECTION_INVERSE);  // Set x and y magnet direction
-  getJoystickDeadZone(true, false);                                     // Get joystick deadzone stored in flash memory
+  getJoystickInnerDeadzone(true, false);                               // Get joystick deadzone stored in flash memory
+  getJoystickOuterDeadzone(true, false);                                     // Get joystick deadzone stored in flash memory
   getCursorSpeed(true, false);                                          // Get joystick cursor speed stored in flash memory
   g_scrollLevel = getScrollLevel(true, false);                            // Get scroll level stored in flash memory
   setJoystickInitialization(true, false);                               // Perform joystick center initialization
