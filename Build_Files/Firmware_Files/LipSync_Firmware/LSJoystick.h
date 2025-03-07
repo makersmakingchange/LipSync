@@ -883,7 +883,7 @@ pointIntType LSJoystick::processOutputResponse(pointIntType inputPoint){
   
   // Apply Deadzone
   deadzonedPoint = applyRadialDeadzone(linearizedPoint, linearizedPointMagnitude, inputAngle);
-  float deadzonedPointMagnitude = magnitudePoint(linearizedPoint);
+  float deadzonedPointMagnitude = magnitudePoint(deadzonedPoint);
 
   // Apply Scaling to output device range
   outputPoint = scaleOutput(deadzonedPoint, deadzonedPointMagnitude, inputAngle);
@@ -1034,8 +1034,8 @@ int LSJoystick::sgn(float val) {
 //*********************************//
 pointIntType LSJoystick::pointIntFromMagnitudeAngle(float inputMagnitude, float inputPointAngle) {
   pointIntType outputPoint= {0,0};
-  outputPoint.x = inputMagnitude * cos(inputPointAngle);   
-  outputPoint.y = inputMagnitude * sin(inputPointAngle); 
+  outputPoint.x = round(inputMagnitude * cos(inputPointAngle));   
+  outputPoint.y = round(inputMagnitude * sin(inputPointAngle)); 
   return outputPoint;
 }
 

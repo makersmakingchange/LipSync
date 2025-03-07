@@ -1906,6 +1906,8 @@ void performJoystick(pointIntType inputPoint) {
     int maxMouse = js.getMouseSpeedRange();
     outputPoint.x = js.mapRoundInt(inputPoint.x, -CONF_JOY_OUTPUT_XY_MAX, CONF_JOY_OUTPUT_XY_MAX ,-maxMouse, maxMouse);
     outputPoint.y = js.mapRoundInt(inputPoint.y, -CONF_JOY_OUTPUT_XY_MAX, CONF_JOY_OUTPUT_XY_MAX ,-maxMouse, maxMouse);
+    //Serial.print(inputPoint.x); Serial.print("\t");
+    //Serial.println(outputPoint.x);
     // 0 = None , 1 = USB , 2 = Wireless
     if (g_comMode == CONF_COM_MODE_USB) {
       //(outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),g_scrollLevel)) : usbmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration)); // TODO Implement acceleration
