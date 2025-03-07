@@ -408,6 +408,7 @@ int LSJoystick::getOutputRange(){
 // Return     : void
 //*********************************//
 void LSJoystick::setOutputRange(int rangeLevel){
+  if (USB_DEBUG) { Serial.print("USBDEBUG: setOutputRange("); Serial.print(rangeLevel); Serial.println(")"); }
 
   // When operating as a mouse, the following function sets the upper limit of cursor value output each update
   if (_operatingMode == CONF_OPERATING_MODE_MOUSE){
