@@ -1900,19 +1900,26 @@ void joystickLoop() {
 // Return     : void
 //****************************************//
 void performJoystick(pointIntType inputPoint) {
+  pointIntType outputPoint = {0,0};
+  
   if (g_operatingMode == CONF_OPERATING_MODE_MOUSE) {
+    int maxMouse = js.getMouseSpeedRange();
+    outputPoint.x = map(inputPoint.x+0.5, -CONF_JOY_OUTPUT_XY_MAX, CONF_JOY_OUTPUT_XY_MAX ,-maxMouse, maxMouse);
+    outputPoint.y = map(inputPoint.y+0.5, -CONF_JOY_OUTPUT_XY_MAX, CONF_JOY_OUTPUT_XY_MAX ,-maxMouse, maxMouse);
     // 0 = None , 1 = USB , 2 = Wireless
     if (g_comMode == CONF_COM_MODE_USB) {
       //(outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),g_scrollLevel)) : usbmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration)); // TODO Implement acceleration
-      (outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y), js.getMinimumRadius(), g_scrollLevel)) : usbmouse.move(inputPoint.x, inputPoint.y);
+      (outputAction == CONF_ACTION_SCROLL) ? usbmouse.scroll(scrollModifier(round(inputPoint.y), CONF_JOY_OUTPUT_XY_MAX, g_scrollLevel)) : usbmouse.move(outputPoint.x, outputPoint.y);
 
     } else if (g_comMode == CONF_COM_MODE_BLE) {
       //(outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y),js.getMinimumRadius(),g_scrollLevel)) : btmouse.move(accelerationModifier(round(inputPoint.x),js.getMinimumRadius(),acceleration), accelerationModifier(round(-inputPoint.y),js.getMinimumRadius(),acceleration)); // TODO Implement acceleration
-      (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y), js.getMinimumRadius(), g_scrollLevel)) : btmouse.move(inputPoint.x, inputPoint.y);
+      (outputAction == CONF_ACTION_SCROLL) ? btmouse.scroll(scrollModifier(round(inputPoint.y), CONF_JOY_OUTPUT_XY_MAX, g_scrollLevel)) : btmouse.move(outputPoint.x, outputPoint.y);
     }
   } else if (g_operatingMode == CONF_OPERATING_MODE_GAMEPAD) {
     // Gamepad is USB only, if wireless gamepad functionality is added, add that here
     //Serial.print("X: \t"); Serial.print(inputPoint.x); Serial.print("\t Y: \t"); Serial.println(inputPoint.y);
+    outputPoint.x = map(inputPoint.x+0.5, -CONF_JOY_OUTPUT_XY_MAX, CONF_JOY_OUTPUT_XY_MAX ,-CONF_JOY_OUTPUT_XY_MAX_GAMEPAD, CONF_JOY_OUTPUT_XY_MAX_GAMEPAD);
+    outputPoint.y = map(inputPoint.y+0.5, -CONF_JOY_OUTPUT_XY_MAX, CONF_JOY_OUTPUT_XY_MAX ,-CONF_JOY_OUTPUT_XY_MAX_GAMEPAD, CONF_JOY_OUTPUT_XY_MAX_GAMEPAD);
     gamepad.move(inputPoint.x, inputPoint.y);
     gamepad.send();
   }
@@ -1934,10 +1941,18 @@ int scrollModifier(const int cursorValue, const int cursorMaxValue, const int sc
 
   //int scrollMaxSpeed = round((1.0 * pow(CONF_SCROLL_MOVE_MAX, scrollLevelValue / 10.0)) + CONF_SCROLL_MOVE_BASE);
   //int scrollMaxSpeed = round((1.0 * pow(CONF_SCROLL_MOVE_MAX, scrollLevelValue / CONF_SCROLL_LEVEL_MAX)) + CONF_SCROLL_MOVE_BASE);
-  int scrollMaxSpeed = round((1.0 * CONF_SCROLL_MOVE_MAX * scrollLevelValue/CONF_SCROLL_LEVEL_MAX) + CONF_SCROLL_MOVE_BASE);
+  int scrollMaxSpeed = round((1.0 * CONF_SCROLL_MOVE_MAX * scrollLevelValue/CONF_SCROLL_LEVEL_MAX) + CONF_SCROLL_MOVE_BASE); // Max scroll speed at a given scroll level
 
-  scrollOutput = map(cursorValue, 0, cursorMaxValue, 0, scrollMaxSpeed);
+  //scrollOutput = map(cursorValue, 0, cursorMaxValue, 0, scrollMaxSpeed);
+  //scrollOutput = -1 * constrain(scrollOutput, -1 * scrollMaxSpeed, scrollMaxSpeed);
+
+  scrollOutput = round(float(cursorValue) * float(scrollMaxSpeed) / float(cursorMaxValue));     // Actual scroll output based on amount of joystick movement
   scrollOutput = -1 * constrain(scrollOutput, -1 * scrollMaxSpeed, scrollMaxSpeed);
+
+
+  //Serial.print(cursorValue);  Serial.print("\t");
+  //Serial.print(cursorMaxValue); Serial.print("\t");
+  //Serial.println(scrollOutput);  
 
   if (g_scrollNumRuns % (CONF_SCROLL_MOVE_MAX - abs(scrollOutput)) == 0){
     if (cursorValue < 0) {

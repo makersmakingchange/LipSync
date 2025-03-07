@@ -77,6 +77,7 @@ class LSJoystick {
     void setOuterDeadzone(bool upperDeadzoneEnabled,float outerDeadzoneFactor);  // Enable or disable deadzone and set deadzone scale factor  Default 0.95 
     int getOutputRange();                                                 // Get the output range or speed levels.
     void setOutputRange(int rangeLevel);                                  // Set the output range or speed levels.
+    int getMouseSpeedRange();
     int getMinimumRadius();                                               // Get the minimum input radius for square to circle mapping.
     void setMinimumRadius();                                              // Set or update the minimum input radius for square to circle mapping.
     pointFloatType getInputCenter();                                      // Get the updated center compensation point.
@@ -421,6 +422,19 @@ void LSJoystick::setOutputRange(int rangeLevel){
     _rangeValue = JOY_OUTPUT_XY_MAX_GAMEPAD ;
   }
   _rangeLevel = rangeLevel;
+}
+
+//*********************************//
+// Function   : getMouseSpeedRange
+// 
+// Description: Get the output range level based on mouse speed level.
+// 
+// Arguments :  void
+// 
+// Return     : int : _rangeValue;
+//*********************************//
+int LSJoystick::getMouseSpeedRange(){
+  return _rangeValue;
 }
 
 //*********************************//
@@ -798,9 +812,11 @@ pointIntType LSJoystick::scaleOutput(pointIntType inputPoint){
   // float outputMagnitude = mapIntToFloat(linearizedInputMagnitude, 0, JOY_INPUT_XY_MAX, 0, _rangeValue);
   // outputMagnitude = constrain(outputMagnitude, 0, _rangeValue);
 
-  // // Use output magnitude and input point angle to calculate x and y points
-  // outputPoint.x = sgn(inputPoint.x) * abs(round(cos(inputPointAngle) * outputMagnitude));
-  // outputPoint.y = sgn(inputPoint.y) * abs(round(sin(inputPointAngle) * outputMagnitude));
+
+  // Map input magnitude (between 0 and 1024) to output magnitudes (between 0 and _rangeValue)
+  float outputMagnitude = mapIntToFloat(linearizedInputMagnitude, 0, JOY_INPUT_XY_MAX, 0, CONF_JOY_OUTPUT_XY_MAX);
+  outputMagnitude = constrain(outputMagnitude, 0, CONF_JOY_OUTPUT_XY_MAX);
+
 
   
   if (inputPoint.x == 0) {

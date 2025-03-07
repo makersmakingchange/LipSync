@@ -163,7 +163,7 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 // Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 20          // 20 ms 
-#define CONF_SCROLL_POLL_RATE 20           // 140 ms
+#define CONF_SCROLL_POLL_RATE 30            // 30 ms
 #define CONF_PRESSURE_POLL_RATE 50          // 50 ms
 #define CONF_INPUT_POLL_RATE 20             // 20 ms
 #define CONF_BT_FEEDBACK_POLL_RATE 1000     // 1s         
@@ -326,6 +326,9 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 #define CONF_JOY_SPEED_LIMIT_LED_DELAY 50
 #define CONF_JOY_SPEED_LIMIT_LED_BLINK 3
 #define CONF_JOY_SPEED_LIMIT_LED_COLOR LED_CLR_RED // Out of range limit speed color
+
+#define CONF_JOY_OUTPUT_XY_MAX  1024
+#define CONF_JOY_OUTPUT_XY_MAX_GAMEPAD  127
 
 // Scroll level change and related LED feedback settings 
 #define CONF_SCROLL_CHANGE_LED_DELAY  150
