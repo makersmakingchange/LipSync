@@ -377,60 +377,6 @@ void LSJoystick::setOuterDeadzone(bool outerDeadzoneEnabled, float outerDeadzone
 
 }
 
-//*********************************//
-// Function   : getOutputRange
-// 
-// Description: Get the output range level or speed level ( 0 to 10 )
-// 
-// Arguments :  
-// 
-// Return     : range level : int : range level or speed level ( 0 to 10 )
-//*********************************//
-int LSJoystick::getOutputRange(){
-  return _rangeLevel;
-}
-
-//*********************************//
-// Function   : setOutputRange 
-// 
-// Description: Set the output range value based on range level or speed level ( 0 to 10 )
-// 
-// Arguments :  rangeLevel : int : range level or speed level ( 0 to 10 )
-// 
-// Return     : void
-//*********************************//
-void LSJoystick::setOutputRange(int rangeLevel){
-  if (USB_DEBUG) { Serial.print("USBDEBUG: setOutputRange("); Serial.print(rangeLevel); Serial.println(")"); }
-
-  // When operating as a mouse, the following function sets the upper limit of cursor value output each update
-  if (_operatingMode == CONF_OPERATING_MODE_MOUSE){
-    // Calculate the output range value
-    _rangeValue = (int)((0.125 * sq(rangeLevel)) + ( 0.3 * rangeLevel ) + 2);       // Polynomial 
-    // [0:2; 1:2; 2:3; 3:4; 4:5; 5:7; 6:8; 7:10; 8:12; 9:15; 10:18]
-    
-    // _rangeValue = (int)((1.05 * exp(( 0.175 * rangeLevel) + 1.1)) - 1);           // Exponential   
-    //Serial.print("_rangeValue:");
-    //Serial.println(_rangeValue);
-
-    // When operating as gamepad, the output range is 127 and is not affected by rangeLevel
-  } else if (_operatingMode == CONF_OPERATING_MODE_GAMEPAD){
-    _rangeValue = JOY_OUTPUT_XY_MAX_GAMEPAD ;
-  }
-  _rangeLevel = rangeLevel;
-}
-
-//*********************************//
-// Function   : getMouseSpeedRange
-// 
-// Description: Get the output range level based on mouse speed level.
-// 
-// Arguments :  void
-// 
-// Return     : int : _rangeValue;
-//*********************************//
-int LSJoystick::getMouseSpeedRange(){
-  return _rangeValue;
-}
 
 //*********************************//
 // Function   : getMinimumRadius 
