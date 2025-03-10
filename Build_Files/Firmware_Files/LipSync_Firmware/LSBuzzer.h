@@ -2,10 +2,10 @@
 * File: LSBuzzer.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.1 (29 April 2024)
+* Version: v4.1rc (10 March 2025)
   License: GPL v3.0 or later
 
-  Copyright (C) 2024 Neil Squire Society
+  Copyright (C) 2024 - 2025 Neil Squire Society
   This program is free software: you can redistribute it and/or modify it under the terms of
   the GNU General Public License as published by the Free Software Foundation,
   either version 3 of the License, or (at your option) any later version.
@@ -16,11 +16,11 @@
   If not, see <http://www.gnu.org/licenses/>
 */
 
-//Header definition
+// Header definition
 #ifndef _LSBUZZER_H
 #define _LSBUZZER_H
 
-//Notes
+// Notes
 #define NOTE_B0  31
 #define NOTE_C1  33
 #define NOTE_CS1 35
@@ -112,66 +112,209 @@
 #define NOTE_DS8 4978
 
 class LSBuzzer {
-  private:
-    boolean _buzzerOn = true;     // TODO: do we need this variable or is just soundModeLevel enough?
-    int _soundModeLevel;
-
   public: 
     LSBuzzer();
     void begin();
     void update();
     void clear();
-    void startup();
+    void playStartupSound();
+    void playReadySound();
+    void playErrorSound();
+    void playShutdownSound();
     void enable();
     void disable();
     void setSoundModeLevel(int inputSoundMode);
     void calibCornerTone();
     void calibCenterTone();
+
+  private:
+    boolean _buzzerOn = true; // Sound feedback is on by default
+    int _soundModeLevel; // Levels that correspond to volume
 };
 
+//*********************************//
+// Function   : LSBuzzer 
+// 
+// Description: Construct LSBuzzer
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 LSBuzzer::LSBuzzer() {
 }
 
+//*********************************//
+// Function   : begin function 
+// 
+// Description: Initialize LSBuzzer with default settings 
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSBuzzer::begin(){
   pinMode(CONF_BUZZER_PIN, OUTPUT);
   // Read sound mode level from memory
   _soundModeLevel = getSoundMode(false, false);
 }
 
+//*********************************//
+// Function   : update
+// 
+// Description: Updates buzzer (currently not implemented)
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSBuzzer::update(){
   
 }
 
+//*********************************//
+// Function   : clear function 
+// 
+// Description: Clears buzzer (currently no implemented) 
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSBuzzer::clear(){
-  
+  // No current implementation  
 }
 
+//*********************************//
+// Function   : enable
+// 
+// Description: Enable sounds feedback
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSBuzzer::enable(){
   _buzzerOn = true;
 }
 
+//*********************************//
+// Function   : disable
+// 
+// Description: Disable sound feedback
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSBuzzer::disable(){
   _buzzerOn = false;
 }
 
+//*********************************//
+// Function   : setSoundModeLevel
+// 
+// Description: Set sound level
+// 
+// Arguments :  inputSoundMode : int : desired sound level
+// 
+// Return     : void
+//*********************************//
 void LSBuzzer::setSoundModeLevel(int inputSoundMode){
   _soundModeLevel = inputSoundMode;
 }
 
-void LSBuzzer::startup(){
+//*********************************//
+// Function   : playStartupSound 
+// 
+// Description: Sound to play to indicate LipSync startup.
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSBuzzer::playStartupSound(){ 
   if (_buzzerOn && (_soundModeLevel != CONF_SOUND_MODE_OFF)){
-    tone(CONF_BUZZER_PIN, NOTE_F5, 500);
-    delay(500);                             // TODO: add timer instead of delay
-    tone(CONF_BUZZER_PIN, NOTE_C6, 500);
+    tone(CONF_BUZZER_PIN, NOTE_F5, 200);
   }
 }
 
+//*********************************//
+// Function   : playReadySound 
+// 
+// Description: Sound to play to indicate that LipSync is ready to use.
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSBuzzer::playReadySound(){ 
+  if (_buzzerOn && (_soundModeLevel != CONF_SOUND_MODE_OFF)){
+    tone(CONF_BUZZER_PIN, NOTE_F5, 500);
+    delay(500);  // TODO: add timer instead of delay
+    tone(CONF_BUZZER_PIN, NOTE_C6, 250);
+  }
+}
+
+//*********************************//
+// Function   : playErrorSound 
+// 
+// Description: Sound to play to indicate LipSync error.
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSBuzzer::playErrorSound(){
+    tone(CONF_BUZZER_PIN, NOTE_G4, 500);
+    delay(500);
+    tone(CONF_BUZZER_PIN, NOTE_C4, 500);       
+}
+
+//*********************************//
+// Function   : playShutdownSound 
+// 
+// Description: Sound to play to indicate LipSync shutdown.
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSBuzzer::playShutdownSound(){
+  if (_buzzerOn && (_soundModeLevel != CONF_SOUND_MODE_OFF)) {
+    tone(CONF_BUZZER_PIN, NOTE_C6, 500);
+    delay(250);
+    tone(CONF_BUZZER_PIN, NOTE_G5, 500);       
+    delay(250);
+    tone(CONF_BUZZER_PIN, NOTE_C5, 300);
+    delay(500);  
+  } 
+}
+
+//*********************************//
+// Function   : calibCornerTone 
+// 
+// Description: Sound to play to indicate corner during full calibration. 
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSBuzzer::calibCornerTone(){
   if (_buzzerOn && (_soundModeLevel != CONF_SOUND_MODE_OFF)){
     tone(CONF_BUZZER_PIN, NOTE_A4, 300);
   }
 }
 
+//*********************************//
+// Function   : calibCenterTone 
+// 
+// Description: Sound to play to indicate center during full calibration. 
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSBuzzer::calibCenterTone(){
   if (_buzzerOn && (_soundModeLevel != CONF_SOUND_MODE_OFF)){
     tone(CONF_BUZZER_PIN, NOTE_A6, 500);

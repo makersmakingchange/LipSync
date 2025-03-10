@@ -1,0 +1,8 @@
+name: Run Compress Workflow
+on:
+  push:
+    branches:
+      - v4.1
+jobs:
+  call-compress-workflow:
+    uses: makersmakingchange/LipSync/.github/workflows/compress_firmware.yml@main

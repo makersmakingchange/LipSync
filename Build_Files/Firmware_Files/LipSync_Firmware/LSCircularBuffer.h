@@ -2,10 +2,10 @@
 * File: LSCircularBuffer.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.1 (29 April 2024)
+* Version: v4.1rc (10 March 2025)
   License: GPL v3.0 or later
 
-  Copyright (C) 2024 Neil Squire Society
+  Copyright (C) 2024 - 2025 Neil Squire Society
   This program is free software: you can redistribute it and/or modify it under the terms of
   the GNU General Public License as published by the Free Software Foundation,
   either version 3 of the License, or (at your option) any later version.
@@ -17,23 +17,25 @@
 
   * Based on: CircularBuffer.h
 */
-//Header definition
+
+// Header definition
 #ifndef _LSCIRCULARBUFFER_H
 #define _LSCIRCULARBUFFER_H
 
 
-//The definition of the CircularBuffer class.
+// The definition of the CircularBuffer class.
 template<typename T>
 class LSCircularBuffer {
   public:
     LSCircularBuffer();
     ~LSCircularBuffer();
-    T getElement( uint16_t );                       //Zero is the push location of new element 
+    T getElement( uint16_t );  // Zero is the push location of new element 
     void begin( uint16_t inputSize );
     void pushElement(const T elementVal);
     void updateLastElement(const T elementVal);
     T getLastElement( void ); 
     uint16_t getLength( void );
+
   private:
     uint16_t cBufferSize;
     T *cBufferData;
@@ -73,7 +75,6 @@ template<typename T>
 LSCircularBuffer<T>::~LSCircularBuffer()
 {
   delete[] cBufferData;
-
 }
 
 //*********************************//
@@ -91,8 +92,7 @@ void LSCircularBuffer<T>::begin(uint16_t inputSize)
   cBufferData = new T[inputSize];
   cBufferLastPtr = 0;
   cBufferElementsUsed = 0;  
-  cBufferSize = inputSize;
-  
+  cBufferSize = inputSize; 
 }
 
 //*********************************//
@@ -108,15 +108,14 @@ void LSCircularBuffer<T>::begin(uint16_t inputSize)
 template<typename T>
 T LSCircularBuffer<T>::getElement( uint16_t elementNum )
 {
-  //Translate elementNum into terms of cBufferLastPtr.
+  // Translate elementNum into terms of cBufferLastPtr.
   int16_t virtualElementNum;
   virtualElementNum = cBufferLastPtr - elementNum;
-  if( virtualElementNum < 0 )
-  {
+  if( virtualElementNum < 0 ) {
     virtualElementNum += cBufferSize;
   }
   
-  //Output the value
+  // Output the value
   return cBufferData[virtualElementNum];
 }
 
@@ -133,21 +132,19 @@ T LSCircularBuffer<T>::getElement( uint16_t elementNum )
 template<typename T>
 void LSCircularBuffer<T>::pushElement(const T elementVal )
 {
-  //inc. the pointer
+  // inc. the pointer
   cBufferLastPtr++;
 
-  //deal with roll
-  if( cBufferLastPtr >= cBufferSize )
-  {
+  // deal with roll
+  if( cBufferLastPtr >= cBufferSize ) {
     cBufferLastPtr = 0;
   }
 
-  //write data
+  // Write data
   cBufferData[cBufferLastPtr] = elementVal;
 
-  //increase length up to cBufferSize
-  if( cBufferElementsUsed < cBufferSize )
-  {
+  // Increase length up to cBufferSize
+  if( cBufferElementsUsed < cBufferSize ) {
     cBufferElementsUsed++;
   }
 }
@@ -163,7 +160,7 @@ void LSCircularBuffer<T>::pushElement(const T elementVal )
 //*********************************//
 template<typename T>
 void LSCircularBuffer<T>::updateLastElement(const T elementVal){
-   //write data
+  // Write data
   cBufferData[cBufferLastPtr] = elementVal; 
 }
 
@@ -179,7 +176,7 @@ void LSCircularBuffer<T>::updateLastElement(const T elementVal){
 template<typename T>
 T LSCircularBuffer<T>::getLastElement( void )
 {
-  //Output the value of last element
+  // Output the value of last element
   return cBufferData[cBufferLastPtr];
 }
 

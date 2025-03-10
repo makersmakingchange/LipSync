@@ -2,10 +2,10 @@
 * File: LSUtils.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.1 (29 April 2024)
+* Version: v4.1rc (10 March 2025)
   License: GPL v3.0 or later
 
-  Copyright (C) 2024 Neil Squire Society
+  Copyright (C) 2024 - 2025 Neil Squire Society
   This program is free software: you can redistribute it and/or modify it under the terms of
   the GNU General Public License as published by the Free Software Foundation,
   either version 3 of the License, or (at your option) any later version.
@@ -17,23 +17,23 @@
 */
 
 
-//Header definition
+// Header definition
 #ifndef _LSUTILS_H
 #define _LSUTILS_H
 
-//Struct of float point
+// Struct of float point
 typedef struct {
   float x;
   float y;
 } pointFloatType;
 
-//Struct of int point
+// Struct of int point
 typedef struct {
   int x;
   int y;
 } pointIntType;
 
-//LED action structure ( Led actions for each output action )
+// LED action structure ( Led actions for each output action )
 typedef struct
 {
   uint8_t ledOutputActionNumber;
@@ -43,10 +43,10 @@ typedef struct
   uint8_t ledEndAction;
 } ledActionStruct;
 
-//LED state structure ( Led state which is sent to perform led action )
+// LED state structure ( Led state which is sent to perform led action )
 typedef struct
 {
-  int ledAction; //none = 0, off = 1, on = 2, blink = 3
+  int ledAction; // none = 0, off = 1, on = 2, blink = 3
   int ledColorNumber;
   int ledNumber; // LED index / which LED
   int ledBlinkNumber; // number of blinks
@@ -54,25 +54,26 @@ typedef struct
   int ledBrightness;
 } ledStateStruct;
 
-//Input(sip and puff, switches ,buttons) actions relation with output actions structure
+// Input(sip and puff, switches ,buttons) actions relation with output actions structure
 typedef struct
 {
   uint8_t inputActionState;
   uint8_t mouseOutputActionNumber;
   uint8_t gamepadOutputActionNumber;
   uint8_t menuOutputActionNumber;
+  uint8_t safeModeOutputActionNumber;
   unsigned long inputActionStartTime;
   unsigned long inputActionEndTime;
 } inputActionStruct;
 
-//Input (sip and puff, switches ,buttons) states structure
+// Input (sip and puff, switches ,buttons) states structure
 typedef struct {
-  int mainState;                 //button1 + 2*button2 + 4*button3  or none : 0 ,sip : 1, puff : 2
-  int secondaryState;            //waiting = 0, started = 1, released = 2
-  unsigned long elapsedTime;     //in ms
+  int mainState;                 // button1 + 2*button2 + 4*button3  or none : 0 ,sip : 1, puff : 2
+  int secondaryState;            // waiting = 0, started = 1, released = 2
+  unsigned long elapsedTime;     // in ms
 } inputStateStruct;
 
-//acceleration structure
+// acceleration structure
 typedef struct
 {
   uint8_t accNumber;
