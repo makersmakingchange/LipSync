@@ -2,7 +2,7 @@
 * File: LSBLE.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.1rc (20 January 2025)
+* Version: v4.1rc (10 March 2025)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 - 2025 Neil Squire Society
