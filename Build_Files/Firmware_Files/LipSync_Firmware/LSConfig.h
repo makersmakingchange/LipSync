@@ -356,6 +356,14 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 
 // Sip and Puff Default settings
+#define CONF_SP_MODE_MIN 0
+#define CONF_SP_MODE_DISABLED 1 // Disable sip and puff
+#define CONF_SP_MODE_BASIC 2 // Standard sip and puff mode
+#define CONF_SP_MODE_ADVANCED 3 // TBD
+#define CONF_SP_MODE_MAX 3
+#define CONF_SP_MODE_DEFAULT CONF_SP_MODE_BASIC
+#define CONF_SP_DISABLE_CURSOR false
+
 #define CONF_SIP_THRESHOLD 3.0                    // hPa
 #define CONF_PUFF_THRESHOLD 3.0                   // hPa
 #define CONF_PRESS_MIN_THRESHOLD 2.0              // hPa

@@ -56,6 +56,8 @@ _functionList setScrollLevelFunction =            {"SL", "1", "",  &setScrollLev
 _functionList getPressureValueFunction =          {"PV", "0", "0", &getPressureValue};
 _functionList getPressureModeFunction =           {"PM", "0", "0", &getPressureMode};
 _functionList setPressureModeFunction =           {"PM", "1", "",  &setPressureMode};
+_functionList getSipPuffModeFunction =            {"SP", "0", "0", &getSipPuffMode};
+_functionList setSipPuffModeFunction =            {"SP", "1", "",  &setSipPuffMode};
 _functionList getPressureThresholdFunction =      {"DT", "0", "0", &getPressureThreshold};
 _functionList getSipPressureThresholdFunction =   {"ST", "0", "0", &getSipPressureThreshold};
 _functionList setSipPressureThresholdFunction =   {"ST", "1", "",  &setSipPressureThreshold};
@@ -104,6 +106,8 @@ _functionList apiFunction[] = { //Let compiler determine number of functions
   getJoystickValueFunction,
   getPressureModeFunction,
   setPressureModeFunction,
+  getSipPuffModeFunction,
+  setSipPuffModeFunction,
   getPressureValueFunction,
   getPressureThresholdFunction,
   getSipPressureThresholdFunction,
@@ -1335,6 +1339,94 @@ void setPressureMode(bool responseEnabled, bool apiEnabled, int inputPressureMod
 // Return     : void
 void setPressureMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
   setPressureMode(responseEnabled, apiEnabled, optionalParameter.toInt());
+}
+
+//***GET SIP PUFF MODE FUNCTION***//
+// Function   : getSipPuffMode
+//
+// Description: This function retrieves the sip puff mode.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//
+// Return     : operatingState : intol : The current state of operating mode.
+//*********************************//
+int getSipPuffMode(bool responseEnabled, bool apiEnabled) {
+  String commandKey = "SP";
+  int tempSipPuffMode;
+  tempSipPuffMode = mem.readInt(CONF_SETTINGS_FILE, commandKey);
+
+  if ((tempSipPuffMode < CONF_SP_MODE_MIN) || (tempSipPuffMode > CONF_SP_MODE_MAX)) {
+    tempSipPuffMode = CONF_SP_MODE_DEFAULT;
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempSipPuffMode);
+  }
+
+  printResponseInt(responseEnabled, apiEnabled, true, 0, "SP,0", true, tempSipPuffMode);
+
+  return tempSipPuffMode;
+}
+//***GET SIP PUFF MODE API FUNCTION***//
+// Function   : getSipPuffMode
+//
+// Description: This function is redefinition of main getSipPuffMode function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void getSipPuffMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
+    getSipPuffMode(responseEnabled, apiEnabled);
+  }
+}
+
+//***SET SIP PUFF MODE FUNCTION***//
+// Function   : setSipPuffMode
+//
+// Description: This function sets the sip puff mode.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               inputOperatingMode : int : The new operating mode state 
+//
+// Return     : void
+//*********************************//
+void setSipPuffMode(bool responseEnabled, bool apiEnabled, int inputSipPuffMode) {
+  String commandKey = "SP";
+
+  if ((inputSipPuffMode >= CONF_OPERATING_MODE_MIN) && (inputSipPuffMode <= CONF_OPERATING_MODE_MAX)) {   
+    mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputSipPuffMode);
+    printResponseInt(responseEnabled, apiEnabled, true, 0, "OM,1", true, inputSipPuffMode);
+    g_sipPuffMode = inputSipPuffMode;
+  }
+  else {
+    printResponseInt(responseEnabled, apiEnabled, false, 3, "OM,1", true, inputSipPuffMode);
+  }
+  
+}
+
+
+//***SET SIP PUFF MODE API FUNCTION***//
+// Function   : setSipPuffMode
+//
+// Description: This function is redefinition of main setSipPuffMode function to match the types of API function arguments.
+//
+// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
+//                                        The serial printing is ignored if it's set to false.
+//               apiEnabled : bool : The api response is sent if it's set to true.
+//                                   Manual response is sent if it's set to false.
+//               optionalParameter : String : The input parameter string should contain one element with value of zero.
+//
+// Return     : void
+void setSipPuffMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
+  setSipPuffMode(responseEnabled, apiEnabled, optionalParameter.toInt());
 }
 
 //***GET PRESSURE THRESHOLD FUNCTION***//

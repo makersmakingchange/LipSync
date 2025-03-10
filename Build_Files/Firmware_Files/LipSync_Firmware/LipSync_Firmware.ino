@@ -42,6 +42,7 @@ int g_comMode;        // 0 = None , 1 = USB , 2 = Wireless
 int g_operatingMode;  // 0 = None, 1 = Mouse, 2 = Gamepad, 3 = Safe
 int g_soundMode;      // 0 = None, 1 = Basic, 2 = Advanced // TODO 2025-Feb-05 Currently not used - buzzer.begin sets sound mode from memory
 int g_lightMode;      // 0 = None, 1 = Basic, 2 = Advanced
+int g_sipPuffMode; // 0 = disabled, 1 = Basic, 2 = Advanced
 
 int g_debugMode;  // 0 = Debug mode is Off
                   // 1 = Joystick debug mode is On
@@ -334,6 +335,7 @@ void initGlobals() {
   g_operatingMode = 1;
   g_comMode = 1;
   //g_firstLoop = true;
+  g_sipPuffMode = 1; 
 
   g_watchdogReset = false;
   g_safeModeEnabled = false;
@@ -1162,15 +1164,22 @@ unsigned long getActionMaxTime(int actionSize, const inputActionStruct actionPro
 //****************************************//
 void pressureLoop() {
   //if (USB_DEBUG) { Serial.println("USBDEBUG: pressureLoop()"); }
-  ps.update();  // Request new pressure difference from sensor and push it to array
-
-  //pressureValues = ps.getAllPressure();  // Read the pressure object (can be last value from array, average or other algorithms)
-
-  // Get the last state change
-  sapActionState = ps.getState();
+  
 
   // Output action logic
-  evaluateOutputAction(sapActionState, sapActionMaxTime, sapActionSize, sapActionProperty);
+  switch(g_sipPuffMode) {
+    case CONF_SP_MODE_BASIC:
+    case CONF_SP_MODE_ADVANCED:
+      ps.update();  // Request new pressure difference from sensor and push it to array
+      //pressureValues = ps.getAllPressure();  // Read the pressure object (can be last value from array, average or other algorithms)
+      sapActionState = ps.getState(); // Get the last state change
+      evaluateOutputAction(sapActionState, sapActionMaxTime, sapActionSize, sapActionProperty);  // Evaluate pressure actions
+      break;
+    case CONF_SP_MODE_DISABLED:
+      // do nothing
+      break;
+  }
+  
 }
 
 //***RELEASE OUTPUT FUNCTION***//
@@ -2560,10 +2569,3 @@ void softwareReset() {
   screen.clear();
 }
 
-void printlnToSerial(String toPrint) {
-  Serial.println(toPrint);
-}
-
-void printToSerial(String toPrint) {
-  Serial.print(toPrint);
-}

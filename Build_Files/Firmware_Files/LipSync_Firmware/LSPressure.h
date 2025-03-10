@@ -86,7 +86,8 @@ class LSPressure {
     float getAmbientPressure();                         // Get last reference pressure from pressure buffer
     float getSapPressure();                             // Get the Pressure Difference sapPressure = (sapPressureAbs- ambientPressure- offsetPressure)
     pressureStruct getAllPressure();                    // Get the latest pressure values 
-    inputStateStruct getState();                        // Get the latest sip and puff state  
+    inputStateStruct getState();                        // Get the latest sip and puff state
+    bool isSipPuffActive();                             // Get whether current sip or puff is activated  
 
   private: 
       Adafruit_LPS35HW _lps35hw = Adafruit_LPS35HW();     // Create an object of Adafruit_LPS35HW class for Sip and Puff pressure
@@ -109,6 +110,8 @@ class LSPressure {
       float _sipThreshold;                                 // Sip Threshold 
       float _puffThreshold;                                // Puff Threshold 
       int _sapMainState;                                   // The value which represents the current main state (example: PRESS_SAP_MAIN_STATE_PUFF) 
+      bool _sipActive;
+      bool _puffActive;
 };
 
 
@@ -488,7 +491,7 @@ void LSPressure::updatePressure()
 // 
 // Return     : void
 //*********************************//
-void LSPressure::updateState()  //  TODO 2025-Feb-22 This code should be abstracted out as inputHandler as it is repeated for buttons and switches
+void LSPressure::updateState()  //  TODO 2025-Feb-22 This code should be abstracted out as inputHandler as it is duplicated for buttons and switches
 {
   _sapStateTimer.run();                       // Update main state timer
   _sapPrevState = _sapBuffer.getLastElement();  // Get the previous state
@@ -498,13 +501,17 @@ void LSPressure::updateState()  //  TODO 2025-Feb-22 This code should be abstrac
   // check for sip and puff conditions
   if (pressureValue > _puffThreshold) {
     _sapMainState = PRESS_SAP_MAIN_STATE_PUFF; // Puff detected
+    _puffActive = true;
   }
   else if (pressureValue < -1 * _sipThreshold) {
 
     _sapMainState = PRESS_SAP_MAIN_STATE_SIP; // Sip detected
+    _sipActive = true;
   }
   else {                                      // Neither sip nor puff detected
     _sapMainState = PRESS_SAP_MAIN_STATE_NONE;
+    _sipActive = false;
+    _puffActive = false;
   }
 
   // Update the state using logic
@@ -617,6 +624,25 @@ pressureStruct LSPressure::getAllPressure()
 inputStateStruct LSPressure::getState()
 {
   return _sapBuffer.getLastElement();
+}
+
+
+//*********************************//
+// Function   : isSipPuffActive 
+// 
+// Description: Returns true when sip or puff active
+//
+// Arguments :  void
+// 
+// Return     : bool : sipPuffActive : Whether sip or puff is currently active
+//*********************************//
+bool isSipPuffActive() {
+  if (_sipActive || _puffActive) {
+    return true;
+  } else {
+    return false;
+  }
+  
 }
 
 
