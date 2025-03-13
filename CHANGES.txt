@@ -1,7 +1,7 @@
 Version 4.1.0 | 2025-Jan-27
 - Software bug fixes and added features 
 	- TinyUSB Library bug fixed, now works with latest version (3.4.2) of the library
-	- Changes to full calibration
+	- Full calibration changes
 		- Moved to "More" menu to prevent Full Calibration from being selected when not necessary
 		- Added warning message and confirmation page
 		- Added error checking, if joystick was not moved enough during full calibration, use default value instead
@@ -10,6 +10,16 @@ Version 4.1.0 | 2025-Jan-27
 		- Now, if no USB is detected, the screen displays an error message and buzzer plays an error tone, but continues to try to connect in the background
 		- To change modes, the menu can now be used even if no USB is mounted.
 	- i2c error checking
+	- Light Brightness can now be adjusted through Hub menu or API
+	- Scroll speed can now be adjusted through Hub menu
+	- Scroll is now calculated differently, at a higher poll rate but not performed every loop, depending on the scroll speed
+	- Fixed bug where scroll speed was dependent on cursor speed
+	- Fixed bug in timers, so timer offset now works properly
+	- Deadzone changes
+		- Outer deadzone has its own variable and is independent of inner deadzone
+		- Output now starts at 0% at the end of the innder deadzone, and goes to 100% at the edge of the outer deadzone
+	- Added additional sounds for startup, powering off, and errors
+	- Added watchdog implementation
 - Documentation updates
 	- Maker Guide
 		- TinyUSB library - can now use latest version (3.4.2)
