@@ -573,7 +573,7 @@ void readyToUse(void) {
 
   errorCheck();  // Check for errors
 
-  if (readyToUseFirstTime && g_resetCenterComplete) {
+  if (readyToUseFirstTime && g_resetCenterComplete && !g_safeModeEnabled) {
 
     if (g_errorCode == CONF_ERROR_NONE) {
       buzzer.playReadySound();
