@@ -106,7 +106,7 @@ void LSMemory::initialize(String fileString, String jsonString) {
     buffer[readlen] = 0;
     file.close();
     delay(5);
-  }else
+  } else
   {
     if( file.open(fileName, FILE_O_WRITE) )
     {

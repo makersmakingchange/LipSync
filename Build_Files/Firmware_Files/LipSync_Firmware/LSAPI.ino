@@ -530,7 +530,7 @@ void setOperatingMode(bool responseEnabled, bool apiEnabled, int inputOperatingM
     mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputOperatingMode);
     printResponseInt(responseEnabled, apiEnabled, true, 0, "OM,1", true, inputOperatingMode);
     g_operatingMode = inputOperatingMode;
-    //changeOperatingMode(inputOperatingMode);
+    changeOperatingMode(inputOperatingMode);
   }
   else {
     printResponseInt(responseEnabled, apiEnabled, false, 3, "OM,1", true, inputOperatingMode);
@@ -2414,7 +2414,10 @@ void doFactoryReset(bool responseEnabled, bool apiEnabled) {
   performLedAction(ledCurrentState);  
 
   // Factory reset process 
-  resetMemory();
+  Serial.println("FACTORY RESET TRIGGERED");
+  
+  resetMemory();  // Format and reinitialize internal file system 
+
   setCommunicationMode(false, false, CONF_COM_MODE_DEFAULT);
   setOperatingMode(false, false, CONF_COM_MODE_DEFAULT);
   setDebugMode(false, false, CONF_DEBUG_MODE_DEFAULT);
@@ -2429,8 +2432,10 @@ void doFactoryReset(bool responseEnabled, bool apiEnabled) {
   printResponseInt(responseEnabled, apiEnabled, true, 0, "FR,1", true, 1);
 
   // Clear all LEDs to indicate factory reset process is finished 
-  setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0,CONF_LED_BRIGHTNESS_MAX);                           
+  setLedState(LED_ACTION_OFF, LED_CLR_NONE, CONF_JOY_CALIB_LED_NUMBER, 0, 0, CONF_LED_BRIGHTNESS_MAX);                           
   performLedAction(ledCurrentState);  
+
+  Serial.println("Activating software reset");
 
   softwareReset();
 
