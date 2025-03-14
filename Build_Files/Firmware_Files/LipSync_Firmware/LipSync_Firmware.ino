@@ -2560,10 +2560,3 @@ void softwareReset() {
   screen.clear();
 }
 
-void printlnToSerial(String toPrint) {
-  Serial.println(toPrint);
-}
-
-void printToSerial(String toPrint) {
-  Serial.print(toPrint);
-}
