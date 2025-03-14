@@ -216,7 +216,7 @@ const String lipsyncVersionStr = String(CONF_LIPSYNC_VERSION_MAJOR) + "." + Stri
 
 
 // Joystick values 
-#define CONF_JOY_CURSOR_SPEED_LEVEL_MIN 0
+#define CONF_JOY_CURSOR_SPEED_LEVEL_MIN 1
 #define CONF_JOY_CURSOR_SPEED_LEVEL_MAX 10
 
 
