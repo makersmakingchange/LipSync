@@ -129,6 +129,7 @@ private:
   int _prevMenu = -1;
   int _currentSelection = 0;
   int _selectedLine;
+  int _cursorPos;
 
   int _operatingMode;
   int _tempOperatingMode;
@@ -467,13 +468,14 @@ void LSScreen::nextMenuItem() {
   if (_currentSelection >= _currentMenuLength) { // if 
     _currentSelection = 0;
     _countMenuScroll = 0;
-    displayMenu();  //  Print items in current menu
+    displayMenu();  //  Print items in current menu and display cursor
   } else if (_currentSelection + _cursorStart > TEXT_ROWS - 1) {
     _countMenuScroll++;
-    displayMenu();  //  Print items in current menu
+    displayMenu();  //  Print items in current menu and display cursor
+  } else {
+    displayCursor();
   }
 
-  displayCursor();
 }
 
 
@@ -925,11 +927,11 @@ void LSScreen::displayMenu() {
 // Return     : void
 //*********************************//
 void LSScreen::displayCursor() {
-  int cursorPos;
+
   if (_currentSelection + _cursorStart > TEXT_ROWS - 1) {
-    cursorPos = TEXT_ROWS - 1;
+    _cursorPos = TEXT_ROWS - 1;
   } else {
-    cursorPos = _currentSelection;
+    _cursorPos = _currentSelection;
   }
 
   _display.setTextSize(2);                              // 2x scale text
@@ -938,7 +940,7 @@ void LSScreen::displayCursor() {
   // Show cursor on text line of selection index, erase previous cursor
   _display.setCursor(0, 16 * _cursorStart);
   for (int i = 0; i < _currentMenuLength; i++) {
-    if (i == cursorPos) {
+    if (i == _cursorPos) {
       _display.println(">");
     } else {
       _display.println(" ");
@@ -982,14 +984,14 @@ void LSScreen::scrollLongText() {
     _scrollDelayTimer = millis();
 
     // Clear previous text by writing over it with blank text
-    _display.setCursor(0, _selectedLine * CHAR_PIXEL_HEIGHT_S2);
+    _display.setCursor(0, _cursorPos * CHAR_PIXEL_HEIGHT_S2);
     _display.print("                                   ");
 
     // Display text in new position to simulate scrolling
-    _display.setCursor(_scrollPos, _selectedLine * CHAR_PIXEL_HEIGHT_S2);
+    _display.setCursor(_scrollPos, _cursorPos * CHAR_PIXEL_HEIGHT_S2);
     _display.print(_selectedText);
 
-    _display.setCursor(0, _selectedLine * CHAR_PIXEL_HEIGHT_S2);
+    _display.setCursor(0, _cursorPos * CHAR_PIXEL_HEIGHT_S2);
     _display.print(">");
     _display.display();
 
