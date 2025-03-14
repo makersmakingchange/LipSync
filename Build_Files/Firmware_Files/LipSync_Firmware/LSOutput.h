@@ -216,8 +216,10 @@ int LSOutput::getLedBrightness() {
 // Return     : void
 //*********************************//
 void LSOutput::setLedBrightness(int ledBrightness) {
+  if (USB_DEBUG) { Serial.print("USBDEBUG: LSOutput::setLedBrightness("); Serial.print(ledBrightness); Serial.println(")"); }
+  
   _ledBrightness = constrain(ledBrightness, 0, CONF_LED_BRIGHTNESS_MAX);
-  Serial.println(_ledBrightness);
+  
 }
 
 //***GET RGB LED BRIGHTNESS LEVEL FUNCTION***//
