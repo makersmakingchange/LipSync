@@ -2416,7 +2416,7 @@ void doFactoryReset(bool responseEnabled, bool apiEnabled) {
   // Factory reset process 
   resetMemory();
   setCommunicationMode(false, false, CONF_COM_MODE_DEFAULT);
-  setOperatingMode(false, false, CONF_COM_MODE_DEFAULT);
+  setOperatingMode(false, false, CONF_OPERATING_MODE_DEFAULT);
   setDebugMode(false, false, CONF_DEBUG_MODE_DEFAULT);
   setJoystickInnerDeadzone(false, false, CONF_JOY_DEADZONE_INNER_DEFAULT);
   setJoystickOuterDeadzone(false, false, CONF_JOY_DEADZONE_OUTER_DEFAULT);
