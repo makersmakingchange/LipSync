@@ -1765,6 +1765,8 @@ void performJoystickCalibration(int* args) {
 
   if (stepNumber == 0) {                     // STEP 0: Calibration started
     pollTimer.disable(CONF_TIMER_JOYSTICK);  // Temporarily disable joystick data polling timer
+    pollTimer.disable(CONF_TIMER_INPUT);
+    pollTimer.disable(CONF_TIMER_PRESSURE);
     setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_START_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY, led.getLedBrightness());
     performLedAction(ledCurrentState);
     ++stepNumber;
@@ -1799,6 +1801,8 @@ void performJoystickCalibration(int* args) {
     g_resetCenterComplete = true;
     pollTimer.enable(CONF_TIMER_JOYSTICK);     // Re-Enable joystick data polling
     pollTimer.enable(CONF_TIMER_SCROLL);       // Re-enable scroll data polling
+    pollTimer.enable(CONF_TIMER_INPUT);
+    pollTimer.enable(CONF_TIMER_PRESSURE);
     screen.fullCalibrationPrompt(stepNumber);  // update
     g_calibrationError = false;
   }
