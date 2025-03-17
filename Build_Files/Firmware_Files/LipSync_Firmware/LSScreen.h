@@ -834,7 +834,7 @@ void LSScreen::selectMenuItem() {
     case FACTORY_RESET_CONFIRM2_PAGE:
       switch (_currentSelection) {
         case 0:  // Perform factory reset
-          restartPage();
+          factoryResetPage();
           doFactoryReset(false, false);
           break;
         case 1:  // Back
