@@ -176,10 +176,19 @@ void setup() {
 
   checkSafeMode();  // Check to see if we need to boot in safe mode.
 
+  checkI2C();  // Check that I2C devices are connected
+
+  if (g_displayConnected) {
+    initScreen();
+  }
+
   if (USB_DEBUG) {
     unsigned long startSerialWaitTime = millis();
     unsigned long currentSerialWaitTime = millis();
     const unsigned long SERIAL_WAIT_TIMEOUT = 30000;
+    if (g_displayConnected && !Serial) {
+      screen.print4LineString("Waiting", "for serial", "connection", "...");
+    }
     while (!Serial) {  //wait for serial connection to establish
       delay(1);
       currentSerialWaitTime = millis();
@@ -188,12 +197,13 @@ void setup() {
       }
     }
     Serial.println("USBDEBUG: Serial Connected");
+    if (g_displayConnected) {
+      screen.print4LineString(" ", "Serial", "connected.", " ");
+    }
   }
 
-  checkI2C();  // Check that I2C devices are connected
-
   if (g_displayConnected) {
-    initScreen();  // Initialize screen
+    screen.splashScreen();
   }
 
   if (g_mouthpiecePressureSensorConnected && g_ambientPressureSensorConnected) {
@@ -699,7 +709,7 @@ const char* readUID() {
 void initScreen() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: initScreen()"); }
   screen.begin();         // Begin screen module
-  screen.splashScreen();  // Show splash screen
+  //screen.splashScreen();  // Show splash screen
 }
 
 //***CLEAR MENU SCREEN FUNCTION***//
