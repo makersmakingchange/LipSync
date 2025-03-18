@@ -56,7 +56,6 @@ _functionList setScrollLevelFunction =            {"SL", "1", "",  &setScrollLev
 _functionList getPressureValueFunction =          {"PV", "0", "0", &getPressureValue};
 _functionList getPressureModeFunction =           {"PM", "0", "0", &getPressureMode};
 _functionList setPressureModeFunction =           {"PM", "1", "",  &setPressureMode};
-_functionList getPressureThresholdFunction =      {"DT", "0", "0", &getPressureThreshold};
 _functionList getSipPressureThresholdFunction =   {"ST", "0", "0", &getSipPressureThreshold};
 _functionList setSipPressureThresholdFunction =   {"ST", "1", "",  &setSipPressureThreshold};
 _functionList getPuffPressureThresholdFunction =  {"PT", "0", "0", &getPuffPressureThreshold};
@@ -105,7 +104,6 @@ _functionList apiFunction[] = { //Let compiler determine number of functions
   getPressureModeFunction,
   setPressureModeFunction,
   getPressureValueFunction,
-  getPressureThresholdFunction,
   getSipPressureThresholdFunction,
   setSipPressureThresholdFunction,
   getPuffPressureThresholdFunction,
@@ -1337,54 +1335,6 @@ void setPressureMode(bool responseEnabled, bool apiEnabled, String optionalParam
   setPressureMode(responseEnabled, apiEnabled, optionalParameter.toInt());
 }
 
-//***GET PRESSURE THRESHOLD FUNCTION***//
-// Function   : getPressureThreshold
-//
-// Description: This function returns the pressure thresholds.
-//
-// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
-//                                        The serial printing is ignored if it's set to false.
-//               apiEnabled : bool : The api response is sent if it's set to true.
-//                                   Manual response is sent if it's set to false.
-//
-// Return     : void
-//*********************************//
-void getPressureThreshold(bool responseEnabled, bool apiEnabled) {
-
-  const int outputArraySize = 2;
-  float tempPressureThreshold[outputArraySize];
-  tempPressureThreshold[0] = getSipPressureThreshold(false, false);
-  tempPressureThreshold[1] = getPuffPressureThreshold(false, false);
-
-  printResponseFloatArray(responseEnabled, // Pass through whether response should be output to serial
-                          apiEnabled, // Pass through whether api response should be sent 
-                          true, // Success response status 
-                          0, //  Success response number
-                          "PT,0", // End-point command string
-                          true, // Output parameter
-                          "", // Response string prefix
-                          outputArraySize, // Size of response parameter
-                          ',', // Response parameter string delimiter
-                          tempPressureThreshold); // Response parameter
-}
-
-//***GET PRESSURE VALUE API FUNCTION***//
-// Function   : getPressureThreshold
-//
-// Description: This function is redefinition of main getPressureThreshold function to match the types of API function arguments.
-//
-// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
-//                                        The serial printing is ignored if it's set to false.
-//               apiEnabled : bool : The api response is sent if it's set to true.
-//                                   Manual response is sent if it's set to false.
-//               optionalParameter : String : The input parameter string should contain one element with value of zero.
-//
-// Return     : void
-void getPressureThreshold(bool responseEnabled, bool apiEnabled, String optionalParameter) {
-  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
-    getPressureThreshold(responseEnabled, apiEnabled);
-  }
-}
 
 //***GET SIP PRESSURE THRESHOLD FUNCTION***//
 // Function   : getSipPressureThreshold
@@ -1415,7 +1365,7 @@ float getSipPressureThreshold(bool responseEnabled, bool apiEnabled) {
 //***GET PRESSURE THRESHOLD API FUNCTION***//
 // Function   : getSipPressureThreshold
 //
-// Description: This function is redefinition of main getPressureThreshold function to match the types of API function arguments.
+// Description: This function is redefinition of main getSipPressureThreshold function to match the types of API function arguments.
 //
 // Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
 //                                        The serial printing is ignored if it's set to false.
