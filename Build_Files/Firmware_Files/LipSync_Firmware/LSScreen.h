@@ -643,8 +643,8 @@ void LSScreen::selectMenuItem() {
           soundMenu();
           break;
         case 1:  // Back
-          _currentMenu = MAIN_MENU;
-          mainMenu();
+          _currentMenu = MORE_MENU;
+          moreMenu();
       }
       break;
 
@@ -671,8 +671,8 @@ void LSScreen::selectMenuItem() {
           _display.display();
           break;
         case 2:  // Back
-          _currentMenu = MAIN_MENU;
-          mainMenu();
+          _currentMenu = MORE_MENU;
+          moreMenu();
           break;
       }
 
@@ -701,8 +701,8 @@ void LSScreen::selectMenuItem() {
           _display.display();
           break;
         case 2:  // Back
-          _currentMenu = MAIN_MENU;
-          mainMenu();
+          _currentMenu = MORE_MENU;
+          moreMenu();
           break;
       }
 
@@ -788,8 +788,8 @@ void LSScreen::selectMenuItem() {
           fullCalibrationPage();
           break;
         case 1:  // Back
-          _currentMenu = MAIN_MENU;
-          mainMenu();
+          _currentMenu = MORE_MENU;
+          moreMenu();
           break;
       }
       break;
