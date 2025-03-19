@@ -931,17 +931,20 @@ void LSScreen::displayCursor() {
   if (_currentSelection + _cursorStart > TEXT_ROWS - 1) {
     _cursorPos = TEXT_ROWS - 1;
   } else {
-    _cursorPos = _currentSelection;
+    _cursorPos = _currentSelection + _cursorStart;
   }
 
   _display.setTextSize(2);                              // 2x scale text
   _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);  // Draw white text on solid black background
 
   // Show cursor on text line of selection index, erase previous cursor
-  _display.setCursor(0, 16 * _cursorStart);
-  for (int i = 0; i < _currentMenuLength; i++) {
+  //_display.setCursor(0, 16 * _cursorStart);           // Start at the line where the cursor should start 
+  _display.setCursor(0, 0);           // Start at position 0,0
+  for (int i = 0; i < TEXT_ROWS; i++) {
     if (i == _cursorPos) {
       _display.println(">");
+    } else if (i < _cursorStart){
+      _display.println("");
     } else {
       _display.println(" ");
     }
