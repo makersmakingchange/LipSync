@@ -525,10 +525,14 @@ void setOperatingMode(bool responseEnabled, bool apiEnabled, int inputOperatingM
   String commandKey = "OM";
 
   if ((inputOperatingMode >= CONF_OPERATING_MODE_MIN) && (inputOperatingMode <= CONF_OPERATING_MODE_MAX)) {   
-    mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputOperatingMode);
-    printResponseInt(responseEnabled, apiEnabled, true, 0, "OM,1", true, inputOperatingMode);
-    g_operatingMode = inputOperatingMode;
-    //changeOperatingMode(inputOperatingMode);
+    if ((g_comMode == CONF_COM_MODE_BLE) && (inputOperatingMode == CONF_OPERATING_MODE_GAMEPAD)){
+      printResponseInt(responseEnabled, apiEnabled, false, 3, "OM,1", true, inputOperatingMode);    // Return error if user tries to change to Bluetooth mode while in Gamepad mode
+    } else {
+      mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputOperatingMode);
+      printResponseInt(responseEnabled, apiEnabled, true, 0, "OM,1", true, inputOperatingMode);
+      g_operatingMode = inputOperatingMode;
+      changeOperatingMode(inputOperatingMode);
+    }
   }
   else {
     printResponseInt(responseEnabled, apiEnabled, false, 3, "OM,1", true, inputOperatingMode);
@@ -1718,11 +1722,15 @@ void setCommunicationMode(bool responseEnabled, bool apiEnabled, int inputCommun
   String commandKey = "CM";
   
   if ((inputCommunicationMode >= CONF_COM_MODE_MIN) && (inputCommunicationMode <= CONF_COM_MODE_MAX)) {
-    g_comMode = inputCommunicationMode;
-    setCommunicationModeLed(g_comMode);
-    setLedDefault();
-    mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputCommunicationMode);
-    printResponseInt(responseEnabled, apiEnabled, true, 0, "CM,1", true, inputCommunicationMode);
+    if ((inputCommunicationMode == CONF_COM_MODE_BLE) && (g_operatingMode == CONF_OPERATING_MODE_GAMEPAD)){
+      printResponseInt(responseEnabled, apiEnabled, false, 3, "CM,1", true, inputCommunicationMode);    // Return error if user tries to change to Bluetooth mode while in Gamepad mode
+    } else {
+      g_comMode = inputCommunicationMode;
+      setCommunicationModeLed(g_comMode);
+      setLedDefault();
+      mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputCommunicationMode);
+      printResponseInt(responseEnabled, apiEnabled, true, 0, "CM,1", true, inputCommunicationMode);
+    }
 
     // TODO: move this?
     releaseOutputAction();
