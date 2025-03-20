@@ -79,6 +79,7 @@ extern bool g_displayConnected;                   // Display connection state
 extern bool g_joystickSensorConnected;            // Joystick sensor connection state
 extern bool g_mouthpiecePressureSensorConnected;  // Mouthpiece pressure sensor connection state
 extern bool g_ambientPressureSensorConnected;     // Ambient pressure sensor connection state
+extern int g_safeModeReason;                      // Reason safe mode is triggered.
 
 class LSScreen {
 
@@ -1690,18 +1691,17 @@ void LSScreen::hardwareErrorPage() {
     _display.println(" CABLE");
     _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::errorPageCable, this);
   } else {
-      _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::errorPageI2C, this);
-      if (!g_joystickSensorConnected)
-        _display.println(" JOYSTICK");
-      if (!g_mouthpiecePressureSensorConnected)
-        _display.println(" PRESSURE");
-      if (!g_ambientPressureSensorConnected)
-        _display.println(" AMBIENT");
+    _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::errorPageI2C, this);
+    if (!g_joystickSensorConnected)
+      _display.println(" JOYSTICK");
+    if (!g_mouthpiecePressureSensorConnected)
+      _display.println(" PRESSURE");
+    if (!g_ambientPressureSensorConnected)
+      _display.println(" AMBIENT");
   }
 
   _display.display();
-  
-  
+    
 }
 
 
@@ -1721,7 +1721,7 @@ void LSScreen::errorPageI2C() {
   _display.println("ERROR: ");
   _display.println("Sensor not");
   _display.println("detected.");
-  _display.println("Contact Maker.");
+  //_display.println("Contact Maker.");
   
   _display.display();
 
