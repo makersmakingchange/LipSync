@@ -477,7 +477,7 @@ int LSTimer<T>::deleteTimer(int timerId) {
 
     // Don't delete if no timers are in use
     if (numTimers == 0) {
-        Serial.print("ERROR: Not timers are in use.");
+        Serial.print("ERROR: No timers are in use.");
         Serial.println(timerId);
         return -1;
     }
