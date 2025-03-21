@@ -535,6 +535,7 @@ void toggleSafeMode(bool safeModeEnabled) {
         break;
       }
       case CONF_SAFE_MODE_REASON_HARDWARE:
+      {
         Serial.println("WARNING: SAFE MODE ENABLED - Hardware");
         break;
       }
