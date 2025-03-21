@@ -161,6 +161,8 @@ private:
 
   unsigned long _lastActivityMillis;
 
+  uint8_t _hardwareErrorCode = 0; 
+
   void displayMenu();
   void displayCursor();
   void scrollLongText();
@@ -190,6 +192,8 @@ private:
   void factoryResetConfirm2Page();
   void factoryResetPage();
   void hardwareErrorPage();
+
+  String _safeModeReasonText = "<Reason>";
 
   String _mainMenuText[5] = { "Exit Menu", "Center Reset", "Mode", "Cursor Speed", "More" };
   String _exitConfirmText[4] = { "Exit", "settings?", "Confirm", "... Back" };
@@ -1700,6 +1704,19 @@ void LSScreen::hardwareErrorPage() {
       _display.println(" AMBIENT");
   }
 
+  if (!g_joystickSensorConnected)
+    _hardwareErrorCode |= 1 << 0;
+  if (!g_mouthpiecePressureSensorConnected)
+    _hardwareErrorCode |= 1 << 1;
+  if (!g_ambientPressureSensorConnected)
+    _hardwareErrorCode |= 1 << 2;
+  if (!g_displayConnected)
+    _hardwareErrorCode |= 1 << 3;
+
+  char buffer[10];
+  sprintf(buffer, "ERROR-%03u", _hardwareErrorCode);
+  _safeModeReasonText = String(buffer);
+
   _display.display();
     
 }
@@ -1876,6 +1893,7 @@ void LSScreen::safeModePage(int safeModeReason) {
         {
           _display.println(" Hub");
           _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::safeModeMenu, this);
+          _safeModeReasonText = "Hub";
           
           break;
         }
@@ -1883,12 +1901,14 @@ void LSScreen::safeModePage(int safeModeReason) {
         {
           _display.println(" Watchdog");
           _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::safeModeMenu, this);
+          _safeModeReasonText = "Watchdog";
           break;
         }
         case CONF_SAFE_MODE_REASON_HARDWARE:
         {
           _display.println(" Hardware");
-          _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::hardwareErrorPage, this);         
+          _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::hardwareErrorPage, this);    
+          _safeModeReasonText = "Error";     
           break;
         }
         default:
@@ -1914,6 +1934,8 @@ void LSScreen::safeModePage(int safeModeReason) {
 
 void LSScreen::safeModeMenu(void) {
   if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::safeModeMenu()"); }
+
+  _safeModeMenuText[1] = _safeModeReasonText;
 
   _currentMenu = SAFEMODE_MENU;
   _currentMenuLength = _safeModeMenuLen;
