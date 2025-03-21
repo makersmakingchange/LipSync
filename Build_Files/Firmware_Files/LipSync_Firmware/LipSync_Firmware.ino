@@ -534,7 +534,7 @@ void toggleSafeMode(bool safeModeEnabled) {
         Serial.println("WARNING: SAFE MODE ENABLED - Watchdog"); 
         break;
       }
-      case CONF_SAFE_MODE_REASON_WATCHDOG:
+      case CONF_SAFE_MODE_REASON_HARDWARE:
         Serial.println("WARNING: SAFE MODE ENABLED - Hardware");
         break;
       }
