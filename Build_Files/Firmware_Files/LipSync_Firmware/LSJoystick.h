@@ -196,7 +196,7 @@ void LSJoystick::clear() {
   _magnetInputCalibration[4] = {0.00, 0.00};
 
 
-  _joystickRawBuffer.pushElement({0.0,0.0});           // Initialize _joystickRawBuffer
+  _joystickRawBuffer.pushElement({0.0, 0.0});           // Initialize _joystickRawBuffer
   _joystickInputBuffer.pushElement({0, 0});            // Initialize _joystickInputBuffer
   _joystickOutputBuffer.pushElement({0, 0});           // Initialize _joystickOutputBuffer
   

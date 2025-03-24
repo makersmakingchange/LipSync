@@ -2574,8 +2574,10 @@ void softwareReset() {
   gamepad.end();
   btmouse.end();
 
-  NVIC_SystemReset();
   delay(3000);
   screen.clear();
+  
+  NVIC_SystemReset();
+  
 }
 

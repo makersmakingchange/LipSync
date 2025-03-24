@@ -20,7 +20,7 @@
 #include "LSUtils.h"
 
 // Debugging
-#define USB_DEBUG  0 // Set this to 0 for best performance
+#define USB_DEBUG  1 // Set this to 0 for best performance
 #define SHOW_CONNECTION_TIME 0 // Set to 0 for production
 
 #define CONF_ENABLE_WATCHDOG 1 // Set to 1 to enable hardware watchdog
