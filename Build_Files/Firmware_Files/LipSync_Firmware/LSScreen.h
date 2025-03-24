@@ -1683,10 +1683,10 @@ void LSScreen::noUsbPage(void) {
   if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::noUsbPage()"); }
 
   setupDisplay();
-  _display.println("No USB");
+  _display.println("No USB.");
   _display.println("Use menu");
   _display.println("to change");
-  _display.println("modes");
+  _display.println("modes.");
   _display.display();
 }
 
