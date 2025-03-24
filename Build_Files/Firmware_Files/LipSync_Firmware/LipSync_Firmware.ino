@@ -176,10 +176,19 @@ void setup() {
 
   checkSafeMode();  // Check to see if we need to boot in safe mode.
 
+  checkI2C();  // Check that I2C devices are connected
+
+  if (g_displayConnected) {
+    initScreen();
+  }
+
   if (USB_DEBUG) {
     unsigned long startSerialWaitTime = millis();
     unsigned long currentSerialWaitTime = millis();
     const unsigned long SERIAL_WAIT_TIMEOUT = 30000;
+    if (g_displayConnected && !Serial) {
+      screen.print4LineString("Waiting", "for serial", "connection", "...");
+    }
     while (!Serial) {  //wait for serial connection to establish
       delay(1);
       currentSerialWaitTime = millis();
@@ -188,12 +197,13 @@ void setup() {
       }
     }
     Serial.println("USBDEBUG: Serial Connected");
+    if (g_displayConnected) {
+      screen.print4LineString(" ", "Serial", "connected.", " ");
+    }
   }
 
-  checkI2C();  // Check that I2C devices are connected
-
   if (g_displayConnected) {
-    initScreen();  // Initialize screen
+    screen.splashScreen();
   }
 
   if (g_mouthpiecePressureSensorConnected && g_ambientPressureSensorConnected) {
@@ -524,6 +534,11 @@ void toggleSafeMode(bool safeModeEnabled) {
         Serial.println("WARNING: SAFE MODE ENABLED - Watchdog"); 
         break;
       }
+      case CONF_SAFE_MODE_REASON_HARDWARE:
+      {
+        Serial.println("WARNING: SAFE MODE ENABLED - Hardware");
+        break;
+      }
       default:
       {
         Serial.println("WARNING: SAFE MODE ENABLED"); 
@@ -573,7 +588,7 @@ void readyToUse(void) {
 
   errorCheck();  // Check for errors
 
-  if (readyToUseFirstTime && g_resetCenterComplete) {
+  if (readyToUseFirstTime && g_resetCenterComplete && !g_safeModeEnabled) {
 
     if (g_errorCode == CONF_ERROR_NONE) {
       buzzer.playReadySound();
@@ -699,7 +714,7 @@ const char* readUID() {
 void initScreen() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: initScreen()"); }
   screen.begin();         // Begin screen module
-  screen.splashScreen();  // Show splash screen
+  //screen.splashScreen();  // Show splash screen
 }
 
 //***CLEAR MENU SCREEN FUNCTION***//
@@ -1765,6 +1780,8 @@ void performJoystickCalibration(int* args) {
 
   if (stepNumber == 0) {                     // STEP 0: Calibration started
     pollTimer.disable(CONF_TIMER_JOYSTICK);  // Temporarily disable joystick data polling timer
+    pollTimer.disable(CONF_TIMER_INPUT);
+    pollTimer.disable(CONF_TIMER_PRESSURE);
     setLedState(LED_ACTION_BLINK, CONF_JOY_CALIB_START_LED_COLOR, CONF_JOY_CALIB_LED_NUMBER, CONF_JOY_CALIB_STEP_BLINK, CONF_JOY_CALIB_STEP_BLINK_DELAY, led.getLedBrightness());
     performLedAction(ledCurrentState);
     ++stepNumber;
@@ -1799,6 +1816,8 @@ void performJoystickCalibration(int* args) {
     g_resetCenterComplete = true;
     pollTimer.enable(CONF_TIMER_JOYSTICK);     // Re-Enable joystick data polling
     pollTimer.enable(CONF_TIMER_SCROLL);       // Re-enable scroll data polling
+    pollTimer.enable(CONF_TIMER_INPUT);
+    pollTimer.enable(CONF_TIMER_PRESSURE);
     screen.fullCalibrationPrompt(stepNumber);  // update
     g_calibrationError = false;
   }
@@ -2562,10 +2581,3 @@ void softwareReset() {
   
 }
 
-void printlnToSerial(String toPrint) {
-  Serial.println(toPrint);
-}
-
-void printToSerial(String toPrint) {
-  Serial.print(toPrint);
-}

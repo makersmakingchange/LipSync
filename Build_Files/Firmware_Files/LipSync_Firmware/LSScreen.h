@@ -79,6 +79,7 @@ extern bool g_displayConnected;                   // Display connection state
 extern bool g_joystickSensorConnected;            // Joystick sensor connection state
 extern bool g_mouthpiecePressureSensorConnected;  // Mouthpiece pressure sensor connection state
 extern bool g_ambientPressureSensorConnected;     // Ambient pressure sensor connection state
+extern int g_safeModeReason;                      // Reason safe mode is triggered.
 
 class LSScreen {
 
@@ -129,6 +130,7 @@ private:
   int _prevMenu = -1;
   int _currentSelection = 0;
   int _selectedLine;
+  int _cursorPos;
 
   int _operatingMode;
   int _tempOperatingMode;
@@ -159,6 +161,8 @@ private:
 
   unsigned long _lastActivityMillis;
 
+  uint8_t _hardwareErrorCode = 0; 
+
   void displayMenu();
   void displayCursor();
   void scrollLongText();
@@ -188,6 +192,8 @@ private:
   void factoryResetConfirm2Page();
   void factoryResetPage();
   void hardwareErrorPage();
+
+  String _safeModeReasonText = "<Reason>";
 
   String _mainMenuText[5] = { "Exit Menu", "Center Reset", "Mode", "Cursor Speed", "More" };
   String _exitConfirmText[4] = { "Exit", "settings?", "Confirm", "... Back" };
@@ -467,13 +473,14 @@ void LSScreen::nextMenuItem() {
   if (_currentSelection >= _currentMenuLength) { // if 
     _currentSelection = 0;
     _countMenuScroll = 0;
-    displayMenu();  //  Print items in current menu
+    displayMenu();  //  Print items in current menu and display cursor
   } else if (_currentSelection + _cursorStart > TEXT_ROWS - 1) {
     _countMenuScroll++;
-    displayMenu();  //  Print items in current menu
+    displayMenu();  //  Print items in current menu and display cursor
+  } else {
+    displayCursor();
   }
 
-  displayCursor();
 }
 
 
@@ -641,8 +648,8 @@ void LSScreen::selectMenuItem() {
           soundMenu();
           break;
         case 1:  // Back
-          _currentMenu = MAIN_MENU;
-          mainMenu();
+          _currentMenu = MORE_MENU;
+          moreMenu();
       }
       break;
 
@@ -669,8 +676,8 @@ void LSScreen::selectMenuItem() {
           _display.display();
           break;
         case 2:  // Back
-          _currentMenu = MAIN_MENU;
-          mainMenu();
+          _currentMenu = MORE_MENU;
+          moreMenu();
           break;
       }
 
@@ -699,8 +706,8 @@ void LSScreen::selectMenuItem() {
           _display.display();
           break;
         case 2:  // Back
-          _currentMenu = MAIN_MENU;
-          mainMenu();
+          _currentMenu = MORE_MENU;
+          moreMenu();
           break;
       }
 
@@ -786,8 +793,8 @@ void LSScreen::selectMenuItem() {
           fullCalibrationPage();
           break;
         case 1:  // Back
-          _currentMenu = MAIN_MENU;
-          mainMenu();
+          _currentMenu = MORE_MENU;
+          moreMenu();
           break;
       }
       break;
@@ -832,7 +839,7 @@ void LSScreen::selectMenuItem() {
     case FACTORY_RESET_CONFIRM2_PAGE:
       switch (_currentSelection) {
         case 0:  // Perform factory reset
-          restartPage();
+          factoryResetPage();
           doFactoryReset(false, false);
           break;
         case 1:  // Back
@@ -925,21 +932,24 @@ void LSScreen::displayMenu() {
 // Return     : void
 //*********************************//
 void LSScreen::displayCursor() {
-  int cursorPos;
+
   if (_currentSelection + _cursorStart > TEXT_ROWS - 1) {
-    cursorPos = TEXT_ROWS - 1;
+    _cursorPos = TEXT_ROWS - 1;
   } else {
-    cursorPos = _currentSelection;
+    _cursorPos = _currentSelection + _cursorStart;
   }
 
   _display.setTextSize(2);                              // 2x scale text
   _display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);  // Draw white text on solid black background
 
   // Show cursor on text line of selection index, erase previous cursor
-  _display.setCursor(0, 16 * _cursorStart);
-  for (int i = 0; i < _currentMenuLength; i++) {
-    if (i == cursorPos) {
+  //_display.setCursor(0, 16 * _cursorStart);           // Start at the line where the cursor should start 
+  _display.setCursor(0, 0);           // Start at position 0,0
+  for (int i = 0; i < TEXT_ROWS; i++) {
+    if (i == _cursorPos) {
       _display.println(">");
+    } else if (i < _cursorStart){
+      _display.println("");
     } else {
       _display.println(" ");
     }
@@ -982,14 +992,14 @@ void LSScreen::scrollLongText() {
     _scrollDelayTimer = millis();
 
     // Clear previous text by writing over it with blank text
-    _display.setCursor(0, _selectedLine * CHAR_PIXEL_HEIGHT_S2);
+    _display.setCursor(0, _cursorPos * CHAR_PIXEL_HEIGHT_S2);
     _display.print("                                   ");
 
     // Display text in new position to simulate scrolling
-    _display.setCursor(_scrollPos, _selectedLine * CHAR_PIXEL_HEIGHT_S2);
+    _display.setCursor(_scrollPos, _cursorPos * CHAR_PIXEL_HEIGHT_S2);
     _display.print(_selectedText);
 
-    _display.setCursor(0, _selectedLine * CHAR_PIXEL_HEIGHT_S2);
+    _display.setCursor(0, _cursorPos * CHAR_PIXEL_HEIGHT_S2);
     _display.print(">");
     _display.display();
 
@@ -1685,18 +1695,30 @@ void LSScreen::hardwareErrorPage() {
     _display.println(" CABLE");
     _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::errorPageCable, this);
   } else {
-      _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::errorPageI2C, this);
-      if (!g_joystickSensorConnected)
-        _display.println(" JOYSTICK");
-      if (!g_mouthpiecePressureSensorConnected)
-        _display.println(" PRESSURE");
-      if (!g_ambientPressureSensorConnected)
-        _display.println(" AMBIENT");
+    _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::errorPageI2C, this);
+    if (!g_joystickSensorConnected)
+      _display.println(" JOYSTICK");
+    if (!g_mouthpiecePressureSensorConnected)
+      _display.println(" PRESSURE");
+    if (!g_ambientPressureSensorConnected)
+      _display.println(" AMBIENT");
   }
 
+  if (!g_joystickSensorConnected)
+    _hardwareErrorCode |= 1 << 0;
+  if (!g_mouthpiecePressureSensorConnected)
+    _hardwareErrorCode |= 1 << 1;
+  if (!g_ambientPressureSensorConnected)
+    _hardwareErrorCode |= 1 << 2;
+  if (!g_displayConnected)
+    _hardwareErrorCode |= 1 << 3;
+
+  char buffer[10];
+  sprintf(buffer, "ERROR-%03u", _hardwareErrorCode);
+  _safeModeReasonText = String(buffer);
+
   _display.display();
-  
-  
+    
 }
 
 
@@ -1716,7 +1738,7 @@ void LSScreen::errorPageI2C() {
   _display.println("ERROR: ");
   _display.println("Sensor not");
   _display.println("detected.");
-  _display.println("Contact Maker.");
+  //_display.println("Contact Maker.");
   
   _display.display();
 
@@ -1871,6 +1893,7 @@ void LSScreen::safeModePage(int safeModeReason) {
         {
           _display.println(" Hub");
           _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::safeModeMenu, this);
+          _safeModeReasonText = "Hub";
           
           break;
         }
@@ -1878,12 +1901,14 @@ void LSScreen::safeModePage(int safeModeReason) {
         {
           _display.println(" Watchdog");
           _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::safeModeMenu, this);
+          _safeModeReasonText = "Watchdog";
           break;
         }
         case CONF_SAFE_MODE_REASON_HARDWARE:
         {
           _display.println(" Hardware");
-          _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::hardwareErrorPage, this);         
+          _screenStateTimerId = _screenStateTimer.setTimeout(CONF_SAFEMODE_MENU_TIMEOUT, &LSScreen::hardwareErrorPage, this);    
+          _safeModeReasonText = "Error";     
           break;
         }
         default:
@@ -1909,6 +1934,8 @@ void LSScreen::safeModePage(int safeModeReason) {
 
 void LSScreen::safeModeMenu(void) {
   if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::safeModeMenu()"); }
+
+  _safeModeMenuText[1] = _safeModeReasonText;
 
   _currentMenu = SAFEMODE_MENU;
   _currentMenuLength = _safeModeMenuLen;

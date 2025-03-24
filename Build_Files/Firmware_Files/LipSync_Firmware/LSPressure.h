@@ -304,7 +304,7 @@ float LSPressure::measureOffsetPressure()
       tempAmbientPressure = _lps22Pressure.pressure;
       pressureReadingTime = millis();
       if (pressureReadingTime - pressureReadingStartTime > PRESS_SAP_SENSOR_TIMEOUT){
-        Serial.print("ERROR: Mouthpiece pressure sensor timeout");
+        Serial.println("ERROR: Mouthpiece pressure sensor timeout");
         // TODO 2025-Feb-24 Throw error
         break;
       }
@@ -320,7 +320,7 @@ float LSPressure::measureOffsetPressure()
       tempSapPressureAbs = _lps35hw.readPressure();
       pressureReadingTime = millis();
       if (pressureReadingTime - pressureReadingStartTime > PRESS_SAP_SENSOR_TIMEOUT){
-        Serial.print("ERROR: Ambient pressure sensor timeout");
+        Serial.println("ERROR: Ambient pressure sensor timeout");
         // TODO 2025-Feb-24 Throw error
         break;
       }
