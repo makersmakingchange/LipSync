@@ -327,6 +327,7 @@ void LSScreen::update() {
 void LSScreen::activateMenu() {
   _lastActivityMillis = millis();
   _isActive = true;
+  _countMenuScroll = 0;
   _operatingMode = getOperatingMode(false, false);
   
   mainMenu();
@@ -1049,6 +1050,7 @@ void LSScreen::mainMenu(void) {
   _currentMenuText = _mainMenuText;
   _cursorStart = 0;
   _currentSelection = 0;
+  _countMenuScroll = 0;
 
   displayMenu();  //  Print items in current menu
   //}
@@ -1070,6 +1072,7 @@ void LSScreen::exitConfirmMenu() {
   _currentMenuLength = 2;
   _cursorStart = 2;
   _currentSelection = 0;
+  _countMenuScroll = 0;
   displayMenu();  //  Print items in current menu
 }
 
@@ -1080,6 +1083,7 @@ void LSScreen::calibMenu(void) {
     _currentMenuText = _calibMenuText;
     _cursorStart = 0;
     _currentSelection = 0;
+    _countMenuScroll = 0;
 
     displayMenu();  //  Print items in current menu
   }
@@ -1102,6 +1106,7 @@ void LSScreen::modeMenu(void) {
   _currentMenuText = _modeMenuText;
   _cursorStart = 0;
   _currentSelection = 0;
+  _countMenuScroll = 0;
 
   displayMenu();  //  Print items in current menu
 
@@ -1152,6 +1157,7 @@ void LSScreen::confirmModeChange() {
   _currentMenuLength = 2;
   _cursorStart = 2;
   _currentSelection = 0;
+  _countMenuScroll = 0;
   displayMenu();  //  Print items in current menu
 }
 
@@ -1210,6 +1216,7 @@ void LSScreen::cursorSpeedMenu(void) {
   _currentMenuText = _cursorSpMenuText;
   _cursorStart = 1;
   _currentSelection = 0;
+  _countMenuScroll = 0;
 
   displayMenu();  //  Print items in current menu
 }
@@ -1253,6 +1260,7 @@ void LSScreen::moreMenu() {
   _currentMenuText = _moreMenuText;
   _cursorStart = 0;
   _currentSelection = 0;
+  _countMenuScroll = 0;
 
   displayMenu();  //  Print items in current menu
 }
@@ -1445,6 +1453,7 @@ void LSScreen::lightBrightMenu(void) {
   _currentMenuText = _lightBrightMenuText;
   _cursorStart = 1;
   _currentSelection = 0;
+  _countMenuScroll = 0;
 
   displayMenu();  //  Print items in current menu
 }
@@ -1465,6 +1474,7 @@ void LSScreen::sipPuffThreshMenu(void) {
   _currentMenuText = _sipPuffThreshMenuText;
   _cursorStart = 0;
   _currentSelection = 0;
+  _countMenuScroll = 0;
 
   displayMenu();  //  Print items in current menu
 }
@@ -1488,6 +1498,7 @@ void LSScreen::adjustSipThreshMenu(void) {
   _currentMenuText = _adjustSipThreshMenuText;
   _cursorStart = 1;
   _currentSelection = 0;
+  _countMenuScroll = 0;
 
   displayMenu();  //  Print items in current menu
 }
@@ -1511,6 +1522,7 @@ void LSScreen::adjustPuffThreshMenu(void) {
   _currentMenuText = _adjustPuffThreshMenuText;
   _cursorStart = 1;
   _currentSelection = 0;
+  _countMenuScroll = 0;
 
   displayMenu();  //  Print items in current menu
 }
@@ -1539,6 +1551,7 @@ void LSScreen::fullCalibrationConfirmPage(void) {
   _currentMenuText = _fullCalibrationConfirmText;
   _cursorStart = 2;
   _currentSelection = 0;
+  _countMenuScroll = 0;
 
   displayMenu();  //  Print items in current menu
 }
@@ -1560,6 +1573,7 @@ void LSScreen::restartConfirmPage(void) {
   _currentMenuText = _restartConfirmText;
   _cursorStart = 2;
   _currentSelection = 0;
+  _countMenuScroll = 0;
 
   displayMenu();  //  Print items in current menu
 }
@@ -1582,6 +1596,7 @@ void LSScreen::factoryResetConfirm1Page(void) {
   _currentMenuText = _factoryResetConfirm1Text;
   _cursorStart = 2;
   _currentSelection = 0;
+  _countMenuScroll = 0;
 
   displayMenu();  //  Print items in current menu
 }
@@ -1942,6 +1957,7 @@ void LSScreen::safeModeMenu(void) {
   _currentMenuText = _safeModeMenuText;
   _cursorStart = 2;
   _currentSelection = 0;
+  _countMenuScroll = 0;
 
   displayMenu();  //  Print items in current menu
 }
