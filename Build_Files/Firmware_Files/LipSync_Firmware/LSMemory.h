@@ -217,14 +217,14 @@ void LSMemory::writeAll(String fileString, String jsonString){
 //*********************************//
 JsonObject LSMemory::readObject(String fileString){
   
-  uint32_t readLenght;
+  uint32_t readLength;
   const char* fileName = fileString.c_str();
   char buffer[BUFFER_SIZE] = { 0 };
   file.open(fileName, FILE_O_READ);
   delay(1);
-  readLenght = file.read(buffer, sizeof(buffer));
+  readLength = file.read(buffer, sizeof(buffer));
   delay(1);
-  buffer[readLenght] = 0;
+  buffer[readLength] = 0;
   deserializeJson(doc, String(buffer));
   JsonObject obj = doc.as<JsonObject>();
   return obj;
