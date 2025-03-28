@@ -219,13 +219,22 @@ JsonObject LSMemory::readObject(String fileString){
   
   uint32_t readLength;
   const char* fileName = fileString.c_str();
-  char buffer[BUFFER_SIZE] = { 0 };
+  char jsonBuffer[BUFFER_SIZE] = { 0 };
   file.open(fileName, FILE_O_READ);
   delay(1);
-  readLength = file.read(buffer, sizeof(buffer));
+  readLength = file.read(jsonBuffer, sizeof(jsonBuffer));
   delay(1);
-  buffer[readLength] = 0;
-  deserializeJson(doc, String(buffer));
+  jsonBuffer[readLength] = 0;
+
+  // Deserialize he JSON documetn
+  DeserializationError deserializationError = deserializeJson(doc, String(jsonBuffer));
+
+  // Test is parsing suceeds
+  if (deserializationError) {
+    Serial.print("ERROR: deserializeJson() failed: ");
+    Serial.println(deserializationError.f_str());
+  }
+
   JsonObject obj = doc.as<JsonObject>();
   return obj;
 }
