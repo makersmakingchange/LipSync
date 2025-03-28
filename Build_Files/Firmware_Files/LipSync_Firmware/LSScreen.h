@@ -378,7 +378,7 @@ void LSScreen::splashScreen() {
   drawCentreString("LipSync", 12);
 
   _display.setTextSize(1);
-  drawCentreString(lipsyncVersionStr, 32);
+  drawCentreString(CONF_LIPSYNC_VERSION_STRING, 32);
   drawCentreString("Makers Making Change", 54);
 
   _display.display();
