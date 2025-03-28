@@ -653,8 +653,10 @@ void enablePoll(bool isEnabled) {
 void initMemory() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: initMemory()"); }
   mem.begin();  // Begin memory
-  //mem.format();    // DON'T UNCOMMENT - use a factory reset through the serial if need to wipe memory (FR,1:1)
-  mem.initialize(CONF_SETTINGS_FILE, CONF_SETTINGS_JSON);  // Initialize flash memory to store settings
+  
+  // Open settings file (CONF_SETTINGS_FILE) from flash memory.
+  // If not present, create file based on defaults in CONF_SETTINGS_JSON
+  mem.initialize(CONF_SETTINGS_FILE, CONF_SETTINGS_JSON);  
 }
 
 //***RESET MEMORY FUNCTION***//
@@ -1137,9 +1139,9 @@ void inputLoop() {
 void initSipAndPuff() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Sip and Puff"); }
   ps.begin();                                                             // Begin sip and puff
-  getPressureMode(false, false);                                           // Get the pressure mode stored in flash memory ( 1 = Absolute , 2 = Differential )
-  getSipPressureThreshold(false, false);                                   // Get sip  pressure thresholds stored in flash memory
-  getPuffPressureThreshold(false, false);                                  // Get puff pressure thresholds stored in flash memory
+  getPressureMode(false, false);                                          // Get the pressure mode stored in flash memory ( 1 = Absolute , 2 = Differential )
+  getSipPressureThreshold(false, false);                                  // Get sip  pressure thresholds stored in flash memory
+  getPuffPressureThreshold(false, false);                                 // Get puff pressure thresholds stored in flash memory
   sapActionSize = sizeof(sapActionProperty) / sizeof(inputActionStruct);  // Size of total available sip and puff actions
   sapActionMaxTime = getActionMaxTime(sapActionSize, sapActionProperty);  // Maximum end action time
 }
