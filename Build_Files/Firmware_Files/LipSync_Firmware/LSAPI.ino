@@ -54,8 +54,6 @@ _functionList getScrollLevelFunction =            {"SL", "0", "0", &getScrollLev
 _functionList setScrollLevelFunction =            {"SL", "1", "",  &setScrollLevel};
 
 _functionList getPressureValueFunction =          {"PV", "0", "0", &getPressureValue};
-_functionList getPressureModeFunction =           {"PM", "0", "0", &getPressureMode};
-_functionList setPressureModeFunction =           {"PM", "1", "",  &setPressureMode};
 _functionList getSipPressureThresholdFunction =   {"ST", "0", "0", &getSipPressureThreshold};
 _functionList setSipPressureThresholdFunction =   {"ST", "1", "",  &setSipPressureThreshold};
 _functionList getPuffPressureThresholdFunction =  {"PT", "0", "0", &getPuffPressureThreshold};
@@ -101,8 +99,6 @@ _functionList apiFunction[] = { //Let compiler determine number of functions
   getScrollLevelFunction,
   setScrollLevelFunction,
   getJoystickValueFunction,
-  getPressureModeFunction,
-  setPressureModeFunction,
   getPressureValueFunction,
   getSipPressureThresholdFunction,
   setSipPressureThresholdFunction,
@@ -1248,97 +1244,6 @@ void getPressureValue(bool responseEnabled, bool apiEnabled, String optionalPara
     getPressureValue(responseEnabled, apiEnabled);
   }
 }
-
-//***GET PRESSURE MODE FUNCTION***//
-// Function   : getPressureMode
-//
-// Description: This function retrieves the state of pressure mode.
-//
-// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
-//                                        The serial printing is ignored if it's set to false.
-//               apiEnabled : bool : The api response is sent if it's set to true.
-//                                   Manual response is sent if it's set to false.
-//
-// Return     : PressureMode : int : The current state of pressure mode.
-//*********************************//
-int getPressureMode(bool responseEnabled, bool apiEnabled) {
-  String commandKey = "PM";
-  int tempPressureMode;
-  tempPressureMode = mem.readInt(CONF_SETTINGS_FILE, commandKey);
-
-  if ((tempPressureMode < PRESS_MODE_MIN) || (tempPressureMode > PRESS_MODE_MAX)) {
-    tempPressureMode = CONF_PRESS_MODE_DEFAULT;
-    mem.writeInt(CONF_SETTINGS_FILE, commandKey, tempPressureMode);
-  }
-  ps.setPressureMode(tempPressureMode);
-
-  printResponseInt(responseEnabled, apiEnabled, true, 0, "PM,0", true, tempPressureMode);
-
-  return tempPressureMode;
-}
-
-//***GET PRESSURE MODE API FUNCTION***//
-// Function   : getPressureMode
-//
-// Description: This function is redefinition of main getPressureMode function to match the types of API function arguments.
-//
-// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
-//                                        The serial printing is ignored if it's set to false.
-//               apiEnabled : bool : The api response is sent if it's set to true.
-//                                   Manual response is sent if it's set to false.
-//               optionalParameter : String : The input parameter string should contain one element with value of zero.
-//
-// Return     : void
-void getPressureMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
-  if (optionalParameter.length() == 1 && optionalParameter.toInt() == 0) {
-    getPressureMode(responseEnabled, apiEnabled);
-  }
-}
-
-//***SET PRESSURE MODE FUNCTION***//
-// Function   : setPressureMode
-//
-// Description: This function sets the state of Pressure mode.
-//
-// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
-//                                        The serial printing is ignored if it's set to false.
-//               apiEnabled : bool : The api response is sent if it's set to true.
-//                                   Manual response is sent if it's set to false.
-//               inputPressureMode : int : The new pressure mode state ( 0 = None, 1 = Abs , 2 = Diff )
-//
-// Return     : void
-//*********************************//
-void setPressureMode(bool responseEnabled, bool apiEnabled, int inputPressureMode) {
-  String commandKey = "PM";
-  if ((inputPressureMode >= PRESS_MODE_MIN) && (inputPressureMode <= PRESS_MODE_MAX)) {
-    //g_comMode = inputPressureMode;  // TODO: fix
-    mem.writeInt(CONF_SETTINGS_FILE, commandKey, inputPressureMode);
-    printResponseInt(responseEnabled, apiEnabled, true, 0, "PM,1", true, inputPressureMode);
-  ps.setPressureMode(inputPressureMode);
-  }
-  else {
-    printResponseInt(responseEnabled, apiEnabled, false, 3, "PM,1", true, inputPressureMode);
-
-  }
-
-}
-
-//***SET PRESSURE MODE API FUNCTION***//
-// Function   : setPressureMode
-//
-// Description: This function is redefinition of main setPressureMode function to match the types of API function arguments.
-//
-// Parameters :  responseEnabled : bool : The response for serial printing is enabled if it's set to true.
-//                                        The serial printing is ignored if it's set to false.
-//               apiEnabled : bool : The api response is sent if it's set to true.
-//                                   Manual response is sent if it's set to false.
-//               optionalParameter : String : The input parameter string should contain one element with value of zero.
-//
-// Return     : void
-void setPressureMode(bool responseEnabled, bool apiEnabled, String optionalParameter) {
-  setPressureMode(responseEnabled, apiEnabled, optionalParameter.toInt());
-}
-
 
 //***GET SIP PRESSURE THRESHOLD FUNCTION***//
 // Function   : getSipPressureThreshold

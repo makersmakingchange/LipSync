@@ -1139,7 +1139,6 @@ void inputLoop() {
 void initSipAndPuff() {
   if (USB_DEBUG) { Serial.println("USBDEBUG: Initializing Sip and Puff"); }
   ps.begin();                                                             // Begin sip and puff
-  getPressureMode(false, false);                                          // Get the pressure mode stored in flash memory ( 1 = Absolute , 2 = Differential )
   getSipPressureThreshold(false, false);                                  // Get sip  pressure thresholds stored in flash memory
   getPuffPressureThreshold(false, false);                                 // Get puff pressure thresholds stored in flash memory
   sapActionSize = sizeof(sapActionProperty) / sizeof(inputActionStruct);  // Size of total available sip and puff actions

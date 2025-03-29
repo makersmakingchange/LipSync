@@ -159,7 +159,7 @@ const String CONF_LIPSYNC_VERSION_STRING = String(CONF_LIPSYNC_VERSION_MAJOR) + 
 
 // Flash Memory settings - Don't change  
 #define CONF_SETTINGS_FILE    "/settings.txt"
-#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN1\":4,\"VN2\":1,\"VN3\":0,\"ID\":0,\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"PM\":2,\"ST\":3.0,\"PT\":3.0,\"AV\":0,\"IZ\":0.07,\"OZ\":0.95,\"CA0\":[0.0,0.0],\"CA1\":[-13.0,13.0],\"CA2\":[13.0,13.0],\"CA3\":[13.0,-13.0],\"CA4\":[-13.0,-13.0],\"SM\":1,\"LM\":1,\"LL\":5,\"DM\":0}"
+#define CONF_SETTINGS_JSON    "{\"MN\":0,\"VN1\":4,\"VN2\":1,\"VN3\":0,\"ID\":0,\"OM\":1,\"CM\":1,\"SS\":5,\"SL\":5,\"ST\":3.0,\"PT\":3.0,\"AV\":0,\"IZ\":0.07,\"OZ\":0.95,\"CA0\":[0.0,0.0],\"CA1\":[-13.0,13.0],\"CA2\":[13.0,13.0],\"CA3\":[13.0,-13.0],\"CA4\":[-13.0,-13.0],\"SM\":1,\"LM\":1,\"LL\":5,\"DM\":0}"
 
 // Polling rates for each module
 #define CONF_JOYSTICK_POLL_RATE 20          // 20 ms 
@@ -354,18 +354,12 @@ const String CONF_LIPSYNC_VERSION_STRING = String(CONF_LIPSYNC_VERSION_MAJOR) + 
 #define CONF_JOY_ACCELERATION_LEVEL_MIN -10
 #define CONF_JOY_ACCELERATION_LEVEL_DEFAULT 0
 
-
 // Sip and Puff Default settings
 #define CONF_SIP_THRESHOLD 3.0                    // hPa
 #define CONF_PUFF_THRESHOLD 3.0                   // hPa
 #define CONF_PRESS_MIN_THRESHOLD 2.0              // hPa
 #define CONF_PRESS_MAX_THRESHOLD 150.0            // hPa
-#define CONF_PRESS_MODE_DEFAULT 1                 // Default pressure mode state = 2 
-                                                  //  0 = None or PRESS_MODE_NONE
-                                                  //  1 = Absolute or PRESS_MODE_ABS
-                                                  //  2 = Differential or PRESS_MODE_DIFF
-                                                  
-                                                  
+                                                                                      
 // Sip and puff main states 
 #define PRESS_SAP_MAIN_STATE_NONE 0   // No action 
 #define PRESS_SAP_MAIN_STATE_SIP 1    // Sip action sapPressure < -sip threshold

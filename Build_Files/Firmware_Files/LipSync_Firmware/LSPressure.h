@@ -311,7 +311,7 @@ float LSPressure::measureOffsetPressure()
     } while (tempSapPressureAbs <= 0.00 || tempAmbientPressure <= 0.00 );
     
     tempOffsetPressure = tempSapPressureAbs - tempAmbientPressure;    // Calculate offset value which is the difference between main and reference pressure sensors
-  } else if(_pressureMode == PRESS_MODE_ABS){// If pressure mode is absolute 
+  } else if(_pressureMode == PRESS_MODE_ABS){// If pressure mode is absolute //TODO 2025-Mar-28 Remove ambient pressure
     
     // Keep reading until we have a valid main pressure > 0.00
     pressureReadingStartTime = millis();
