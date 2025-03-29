@@ -75,6 +75,7 @@ const int TEXT_ROWS = CONF_SCREEN_HEIGHT / CHAR_PIXEL_HEIGHT_S2;
 
 int scrollPixelsPerLoop = 4;
 
+// Define globals
 extern bool g_displayConnected;                   // Display connection state
 extern bool g_joystickSensorConnected;            // Joystick sensor connection state
 extern bool g_mouthpiecePressureSensorConnected;  // Mouthpiece pressure sensor connection state
@@ -1130,6 +1131,16 @@ void LSScreen::modeMenu(void) {
   modeMenuHighlight();
 }
 
+
+//*********************************//
+// Function   : modeMenuHighlight
+//
+// Description: Format and display Operating Mode Menu
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
 void LSScreen::modeMenuHighlight() {
 
   _display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);  // Draw 'inverse' coloured text
@@ -1761,6 +1772,7 @@ void LSScreen::hardwareErrorPage() {
       _display.println(" AMBIENT");
   }
 
+// Format error code using binary representation of whether sensors are connected
   if (!g_joystickSensorConnected)
     _hardwareErrorCode |= 1 << 0;
   if (!g_mouthpiecePressureSensorConnected)

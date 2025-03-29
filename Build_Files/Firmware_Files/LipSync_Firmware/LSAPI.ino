@@ -370,7 +370,7 @@ void getVersionNumber(bool responseEnabled, bool apiEnabled) {
   
   int tempMajorVersionNumber = mem.readInt(CONF_SETTINGS_FILE, "VN1");
   int tempMinorVersionNumber = mem.readInt(CONF_SETTINGS_FILE, "VN2");
-  int tempRevVersionNumber = mem.readInt(CONF_SETTINGS_FILE, "VN3");
+  int tempRevVersionNumber   = mem.readInt(CONF_SETTINGS_FILE, "VN3");
   
   if (tempMajorVersionNumber != CONF_LIPSYNC_VERSION_MAJOR) {                          // If the previous firmware was different version then reset the settings
     // could add factory reset here if version number saved in memory is different
