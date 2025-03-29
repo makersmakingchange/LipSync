@@ -57,7 +57,7 @@
 #define RESTART_PAGE 56
 #define FACTORY_RESET_PAGE 57
 #define FACTORY_RESET_CONFIRM2_PAGE 571
-#define INFO_PAGE 58
+#define INFO_MENU 58
 
 #define SCROLL_DELAY_MILLIS 100 // [ms] This controls the scroll speed of long menu items //TODO 2025-Feb-28 Make this user adjustable
 
@@ -80,6 +80,7 @@ extern bool g_joystickSensorConnected;            // Joystick sensor connection 
 extern bool g_mouthpiecePressureSensorConnected;  // Mouthpiece pressure sensor connection state
 extern bool g_ambientPressureSensorConnected;     // Ambient pressure sensor connection state
 extern int g_safeModeReason;                      // Reason safe mode is triggered.
+extern String g_deviceUID;                        // Unique Device ID
 
 class LSScreen {
 
@@ -102,6 +103,7 @@ public:
   void centerResetPage();
   void centerResetCompletePage();
   void fullCalibrationPrompt(int stepNum);
+  void infoMenu();
   void testPage(unsigned int usbConnectDelay);
   void noUsbPage();
   void errorPageI2C();
@@ -127,7 +129,8 @@ private:
   bool _isActive = false;
   bool _menuTimeoutEnabled = true;
   int _currentMenu = 0;
-  int _prevMenu = -1;
+  int _prevMenu = -1; // keep track of previous menu
+  int _prevSelection = -1; // Keep track of previous menu selection
   int _currentSelection = 0;
   int _selectedLine;
   int _cursorPos;
@@ -201,7 +204,7 @@ private:
   String _modeMenuText[4] = { "MOUSE USB", "MOUSE BT", "GAMEPAD ", "... Back" };
   String _modeConfirmText[4] = { "Change", "mode?", "Confirm", "... Back" };
   String _cursorSpMenuText[4] = { "Speed: ", "Increase", "Decrease", "... Back" };
-  String _moreMenuText[8] = {  "Sound",  "Light Brightness", "Scroll Speed",   "Sip & Puff",  "Full Calibration",   "Restart LipSync",  "Factory Reset",  "... Back",  };
+  String _moreMenuText[9] = { "Sound",  "Light Brightness", "Scroll Speed",   "Sip & Puff",  "Full Calibration",   "Restart LipSync",  "Factory Reset",  "Info", "... Back",  };
   String _soundMenuText[4] = { "Sound:", "<>", "Turn <>", "... Back" };
   String _lightBrightMenuText[4] = { "Lights: ", "Increase", "Decrease", "... Back" };
   String _scrollSpMenuText[4] = { "Speed: ", "Increase", "Decrease", "... Back" };
@@ -212,6 +215,7 @@ private:
   String _factoryResetConfirm1Text[4] = { "Reset to", "defaults?", "Confirm", "... Back" };
   String _factoryResetConfirm2Text[4] = { "Are you", "sure?", "Confirm", "... Back" };
   String _fullCalibrationConfirmText[4] = { "Are you", "sure?", "Confirm", "... Back" };
+  String _infoMenuText[4] = {"Info", "Version","ID","... Back"};
   String _safeModeMenuText[4] = {"SAFE MODE", "Options:", "Restart", "Factory Reset"};
 
   // Number of selectable options in each menu
@@ -220,7 +224,7 @@ private:
   const int _calibMenuLen = 2;
   const int _modeMenuLen = 4;
   const int _cursorSpMenuLen = 3;
-  const int _moreMenuLen = 8;
+  const int _moreMenuLen = 9;
   const int _soundMenuLen = 2;
   const int _lightBrightMenuLen = 3;
   const int _scrollSpMenuLen = 3;
@@ -232,6 +236,7 @@ private:
   const int _factoryResetConfirm2Len = 2;
   const int _fullCalibrationConfirmLen = 2;
   const int _safeModeMenuLen = 2;
+  const int _infoMenuLen = 1;
 };
 
 
@@ -628,7 +633,10 @@ void LSScreen::selectMenuItem() {
         case 6: // Factory Reset
           factoryResetConfirm1Page();
           break;
-        case 7: // Back
+        case 7: // Info
+          infoMenu();
+          break;
+        case 8: // Back
           mainMenu();
           break;
       }
@@ -850,6 +858,15 @@ void LSScreen::selectMenuItem() {
           else if (_prevMenu == SAFEMODE_MENU ) {
             safeModeMenu();
           } 
+          break;
+      }
+      break;
+    case INFO_MENU:
+      switch(_currentSelection) {
+        case 0: // Back
+          _currentMenu = MORE_MENU;
+          moreMenu();
+
           break;
       }
       break;
@@ -1627,6 +1644,31 @@ void LSScreen::factoryResetConfirm2Page(void) {
   _currentMenuText = _factoryResetConfirm2Text;
   _cursorStart = 2;
   _currentSelection = 0;
+
+  displayMenu();  //  Print items in current menu
+}
+
+//*********************************//
+// Function   : infoMenu
+//
+// Description: Format and display an information page
+//
+// Arguments :  void
+//
+// Return     : void
+//*********************************//
+void LSScreen::infoMenu(void) {
+  if (USB_DEBUG) { Serial.println("USBDEBUG: LSScreen::infoPage()"); }
+
+  _infoMenuText[1] = "V"+CONF_LIPSYNC_VERSION_STRING;
+  _infoMenuText[2] = "LS_"+g_deviceUID;
+
+  _currentMenu = INFO_MENU;
+  _currentMenuLength = _infoMenuLen;
+  _currentMenuText = _infoMenuText;
+  _cursorStart = 3;
+  _currentSelection = 0;
+  _countMenuScroll = 0;
 
   displayMenu();  //  Print items in current menu
 }
