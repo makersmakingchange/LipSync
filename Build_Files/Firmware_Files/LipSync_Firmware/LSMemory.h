@@ -2,10 +2,10 @@
 * File: LSMemory.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.1 (01 May 2024)
+* Version: v4.1 (28 March 2025)
   License: GPL v3.0 or later
 
-  Copyright (C) 2024 Neil Squire Society
+  Copyright (C) 2024 - 2025 Neil Squire Society
   This program is free software: you can redistribute it and/or modify it under the terms of
   the GNU General Public License as published by the Free Software Foundation,
   either version 3 of the License, or (at your option) any later version.
@@ -16,7 +16,7 @@
   If not, see <http://www.gnu.org/licenses/>
 */
 
-//Header definition
+// Header definition
 #ifndef _LSMEMORY_H
 #define _LSMEMORY_H
 
@@ -106,7 +106,7 @@ void LSMemory::initialize(String fileString, String jsonString) {
     buffer[readlen] = 0;
     file.close();
     delay(5);
-  }else
+  } else
   {
     if( file.open(fileName, FILE_O_WRITE) )
     {
@@ -217,15 +217,24 @@ void LSMemory::writeAll(String fileString, String jsonString){
 //*********************************//
 JsonObject LSMemory::readObject(String fileString){
   
-  uint32_t readLenght;
+  uint32_t readLength;
   const char* fileName = fileString.c_str();
-  char buffer[BUFFER_SIZE] = { 0 };
+  char jsonBuffer[BUFFER_SIZE] = { 0 };
   file.open(fileName, FILE_O_READ);
   delay(1);
-  readLenght = file.read(buffer, sizeof(buffer));
+  readLength = file.read(jsonBuffer, sizeof(jsonBuffer));
   delay(1);
-  buffer[readLenght] = 0;
-  deserializeJson(doc, String(buffer));
+  jsonBuffer[readLength] = 0;
+
+  // Deserialize he JSON documetn
+  DeserializationError deserializationError = deserializeJson(doc, String(jsonBuffer));
+
+  // Test is parsing suceeds
+  if (deserializationError) {
+    Serial.print("ERROR: deserializeJson() failed: ");
+    Serial.println(deserializationError.f_str());
+  }
+
   JsonObject obj = doc.as<JsonObject>();
   return obj;
 }

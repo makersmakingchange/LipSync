@@ -2,10 +2,10 @@
 * File: LSBLE.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.1 (29 April 2024)
+* Version: v4.1 (28 March 2025)
   License: GPL v3.0 or later
 
-  Copyright (C) 2024 Neil Squire Society
+  Copyright (C) 2024 - 2025 Neil Squire Society
   This program is free software: you can redistribute it and/or modify it under the terms of
   the GNU General Public License as published by the Free Software Foundation,
   either version 3 of the License, or (at your option) any later version.
@@ -27,8 +27,7 @@ BLEHidAdafruit blehid;
 bool needsInitialization = true;
 
 class LSBLEMouse {
-  private:
-    void mouseReport(signed char b, signed char x, signed char y, signed char wheel = 0, signed char pan = 0);
+
   public:
     inline LSBLEMouse(void);
     inline void begin(const char* s = "LipSync");
@@ -45,6 +44,8 @@ class LSBLEMouse {
   protected:
     uint8_t _buttons;
     void buttons(uint8_t b);
+  private:
+    void mouseReport(signed char b, signed char x, signed char y, signed char wheel = 0, signed char pan = 0);
 };
 
 typedef struct
@@ -94,7 +95,7 @@ void initializeBluefruit(const char* s) {
   Bluefruit.Advertising.setFastTimeout(30);      // number of seconds in fast mode
   Bluefruit.Advertising.start(0);                // 0 = Don't stop advertising after n seconds
 
-  //Serial.println("Initializing Bluetooth");
+  // Serial.println("Initializing Bluetooth");
   if (USB_DEBUG) { Serial.println("Initializing Bluetooth");}
 }
 
@@ -218,7 +219,7 @@ size_t LSBLEKeyboard::press(uint8_t m, uint8_t k)
   uint8_t i;
   _keyReport.modifiers = m;
 
-  //Add key if the it's not already present and if there is an empty spot.
+  // Add key if the it's not already present and if there is an empty spot.
   if (_keyReport.keys[0] != k && _keyReport.keys[1] != k &&
       _keyReport.keys[2] != k && _keyReport.keys[3] != k &&
       _keyReport.keys[4] != k && _keyReport.keys[5] != k) {
@@ -243,7 +244,7 @@ size_t LSBLEKeyboard::release(uint8_t m, uint8_t k)
 {
   uint8_t i;
   _keyReport.modifiers = 0x00;
-  //Check to see if the key is present and clear it if it exists.
+  // Check to see if the key is present and clear it if it exists.
   for (i = 0; i < 6; i++) {
     if (0 != k && _keyReport.keys[i] == k) {
       _keyReport.keys[i] = 0x00;

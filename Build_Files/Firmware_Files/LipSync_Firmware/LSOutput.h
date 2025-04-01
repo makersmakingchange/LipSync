@@ -2,10 +2,10 @@
 * File: LSOutput.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.0.1 (29 April 2024)
+* Version: v4.1 (28 March 2025)
   License: GPL v3.0 or later
 
-  Copyright (C) 2024 Neil Squire Society
+  Copyright (C) 2024 - 2025 Neil Squire Society
   This program is free software: you can redistribute it and/or modify it under the terms of
   the GNU General Public License as published by the Free Software Foundation,
   either version 3 of the License, or (at your option) any later version.
@@ -16,13 +16,13 @@
   If not, see <http://www.gnu.org/licenses/>
 */
 
-//Header definition
+// Header definition
 #ifndef _LSOUTPUT_H
 #define _LSOUTPUT_H
 
 #define OUTPUT_LED_NUM 4   // Total number of leds
 #define OUTPUT_MONO_LED_NUM 3  // Number of monocolor leds
-#define OUTPUT_RGB_LED_NUM 1   //Number of RGB leds
+#define OUTPUT_RGB_LED_NUM 1   // Number of RGB leds
 
 
 struct rgbStruct {
@@ -31,14 +31,14 @@ struct rgbStruct {
   int b;  // blue value
 };
 
-//Color structure
+// Color structure
 typedef struct {
   uint8_t colorNumber;
   String colorName;
   rgbStruct colorCode;
 } colorStruct;
 
-//Color properties
+// Color properties
 /*
 const colorStruct colorProperty[]{
   { LED_CLR_NONE, "None", { 0, 0, 0 } },
@@ -56,7 +56,7 @@ const colorStruct colorProperty[]{
 */
 
 /*
-//Color properties - IBM COLORBLIND FRIENDLY PALETTE
+// Color properties - IBM COLORBLIND FRIENDLY PALETTE
 const colorStruct colorProperty[]{
   { LED_CLR_NONE,   "None",     {   0,   0,   0 } },
   { LED_CLR_BLUE,   "Blue",     { 100, 143, 255 } },
@@ -68,7 +68,7 @@ const colorStruct colorProperty[]{
 };
 */
 
-//Color properties
+// Color properties
 const colorStruct colorProperty[]{
   { LED_CLR_NONE,   "None",     {   0,   0,   0 } },
   { LED_CLR_BLUE,   "Blue",     {   0,   0, 255 } },
@@ -85,30 +85,48 @@ const colorStruct colorProperty[]{
 
 
 class LSOutput {
-private:
-  int _ledBrightness = 255; //TODO Jake 2024-01-24. This currently doesn't do anything without Neopixels
-  int _lightModeLevel = 1;  
-
 public:
   LSOutput();
   void begin();
   void clearLedAll();
   void clearLed(int ledNumber);
   uint32_t getLedColor(int ledNumber);
-  uint8_t getLedBrightness();
+  int getLedBrightness();                   // get brightness value from 0 to 255
   void setLedBrightness(int ledBrightness);
+  int getLedBrightnessLevel();              // get brightness level from 1-10
+  void setLedBrightnessLevel(int ledBrightnessLevel);
   void setLedColor(int ledNumber, int ledColorNumber, int ledBrightness);
   void show();
   void setLightModeLevel(int lightModeLevel);
   int getLightModeLevel();
 
+private:
+  int _ledBrightness;
+  int _ledBrightnessLevel;
+  int _lightModeLevel;
 };
 
-
-
+//*********************************//
+// Function   : LSOutput 
+// 
+// Description: LSOutput constructor
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 LSOutput::LSOutput() {
 }
 
+//*********************************//
+// Function   : begin 
+// 
+// Description: Initialize LSOutput 
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSOutput::begin() {
 
   // Hub LEDs
@@ -121,61 +139,138 @@ void LSOutput::begin() {
   pinMode(LED_GREEN, OUTPUT);
   pinMode(LED_BLUE, OUTPUT);
 
-  //ledPixels.begin();
   clearLedAll();
 }
 
 
 //***CLEAR ALL RGB LED FUNCTION***//
-
-void LSOutput::clearLedAll() { // turn off all LEDs
-  digitalWrite(CONF_LED_LEFT_PIN, LOW);
-  digitalWrite(CONF_LED_MIDDLE_PIN, LOW);
-  digitalWrite(CONF_LED_RIGHT_PIN, LOW);
-
-  
-  // Turn off micro leds
-  digitalWrite(LED_RED, HIGH);
-  digitalWrite(LED_GREEN, HIGH);
-  digitalWrite(LED_BLUE, HIGH);
+//*********************************//
+// Function   : clearLedAll 
+// 
+// Description: Turn off all LEDs
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSOutput::clearLedAll() { 
+  clearLed(CONF_LED_ALL); // Turn off all LEDs
 }
 
 //***CLEAR RGB LED FUNCTION***//
-
+//*********************************//
+// Function   : clearLed 
+// 
+// Description: Turn off a particular LED based on the input
+// 
+// Arguments :  int : ledNumber : Index of the LED to turn off
+// 
+// Return     : void
+//*********************************//
 void LSOutput::clearLed(int ledNumber) {
-  setLedColor(ledNumber, LED_CLR_NONE, 255);
+  setLedColor(ledNumber, LED_CLR_NONE, 0);
 }
 
 
 //***GET RGB LED COLOR FUNCTION***//
-
+//*********************************//
+// Function   : getLedColor 
+// 
+// Description: Get the color or a particular LED
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 uint32_t LSOutput::getLedColor(int ledNumber) {
 
   //uint32_t colorValue = ledPixels.getPixelColor(ledNumber-1);
-
   return 0;
-  //return colorValue;
 }
 
 
 //***GET RGB LED BRIGHTNESS FUNCTION***//
-
-uint8_t LSOutput::getLedBrightness() {
-  return _ledBrightness;
+//*********************************//
+// Function   : getLedBrightness 
+// 
+// Description: Get the brightness of the LEDs
+// 
+// Arguments :  void
+// 
+// Return     : int : _ledBrightness : the led brightness from 0 to 255
+//*********************************//
+int LSOutput::getLedBrightness() {
   //  return (ledPixels.getBrightness());
+  return _ledBrightness;
 }
-
 
 
 //***SET RGB LED BRIGHTNESS FUNCTION***//
-
+//*********************************//
+// Function   : setLedBrightness 
+// 
+// Description: Set the brightness of the LEDs
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSOutput::setLedBrightness(int ledBrightness) {
-  _ledBrightness = ledBrightness;
-  //show();
+  if (USB_DEBUG) { Serial.print("USBDEBUG: LSOutput::setLedBrightness("); Serial.print(ledBrightness); Serial.println(")"); }
+  
+  _ledBrightness = constrain(ledBrightness, 0, CONF_LED_BRIGHTNESS_MAX);
+  
+}
 
+//***GET RGB LED BRIGHTNESS LEVEL FUNCTION***//
+//*********************************//
+// Function   : getLedBrightnessLevel 
+// 
+// Description: Get the brightness of the LEDs
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+int LSOutput::getLedBrightnessLevel() {
+
+  return _ledBrightnessLevel;
 }
 
 
+//***SET RGB LED BRIGHTNESS LEVEL FUNCTION***//
+//*********************************//
+// Function   : setLedBrightnessLevel 
+// 
+// Description: Set the brightness of the LEDs
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
+void LSOutput::setLedBrightnessLevel(int ledBrightnessLevel) {
+  _ledBrightnessLevel = constrain(ledBrightnessLevel, CONF_LED_BRIGHTNESS_LEVEL_MIN, CONF_LED_BRIGHTNESS_LEVEL_MAX);
+
+  int ledBrightness;
+
+  if (_ledBrightnessLevel == CONF_LED_BRIGHTNESS_LEVEL_MIN){
+    ledBrightness = 0;
+  } else {
+    ledBrightness = round(pow((float(_ledBrightnessLevel)/CONF_LED_BRIGHTNESS_LEVEL_MAX), 2.2) * CONF_LED_BRIGHTNESS_MAX);
+  }
+
+  setLedBrightness(ledBrightness);
+}
+
+//*********************************//
+// Function   : setLightModeLevel 
+// 
+// Description: Set light mode level
+// 
+// Arguments :  void
+// 
+// Return     : void
+//*********************************//
 void LSOutput::setLightModeLevel(int lightModeLevel)
 {
   _lightModeLevel = lightModeLevel;
@@ -197,9 +292,20 @@ int LSOutput::getLightModeLevel(void)
 
 
 //***SET RGB LED COLOR FUNCTION***//
-
+//*********************************//
+// Function   : setLedColor 
+// 
+// Description: LSOutput constructor
+// 
+// Arguments :  int : ledNumber : index of LED (CONF_LED_LEFT, CONF_LED_RIGHT, CONF_LED_MIDDLE, CONF_LED_MICRO, CONF_LED_ALL)
+//              int : ledColorNumber : color index
+//              int : ledBrightness : 
+// 
+// Return     : void
+//*********************************//
 void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness) {
 
+  // Extract color components from color
   int r = colorProperty[ledColorNumber].colorCode.r;
   int g = colorProperty[ledColorNumber].colorCode.g;
   int b = colorProperty[ledColorNumber].colorCode.b;
@@ -211,10 +317,9 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
       {
         if (someLight && _lightModeLevel > 0) 
         {
-          // analogWrite(CONF_LED_LEFT_PIN, ledBrightness);
-          digitalWrite(CONF_LED_LEFT_PIN, HIGH);
+          analogWrite(CONF_LED_LEFT_PIN, ledBrightness);
         } else {
-          digitalWrite(CONF_LED_LEFT_PIN, LOW);
+          analogWrite(CONF_LED_LEFT_PIN, 0);
         }
         break;
       }
@@ -222,10 +327,9 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
       {
         if (someLight && _lightModeLevel > 0) 
         {
-          // analogWrite(CONF_LED_MIDDLE_PIN, ledBrightness); //TODO JAKE 2024-Jan-24 Test is analog write is not working properly.
-          digitalWrite(CONF_LED_MIDDLE_PIN, HIGH);
+          analogWrite(CONF_LED_MIDDLE_PIN, ledBrightness);
         } else {
-          digitalWrite(CONF_LED_MIDDLE_PIN, LOW);
+          analogWrite(CONF_LED_MIDDLE_PIN, 0);
         }
         break;
       }
@@ -233,36 +337,31 @@ void LSOutput::setLedColor(int ledNumber, int ledColorNumber, int ledBrightness)
       {
         if (someLight && _lightModeLevel > 0) 
         {
-          // analogWrite(CONF_LED_RIGHT_PIN, ledBrightness);
-          digitalWrite(CONF_LED_RIGHT_PIN, HIGH);
+          analogWrite(CONF_LED_RIGHT_PIN, ledBrightness);
         } else {
-          digitalWrite(CONF_LED_RIGHT_PIN, LOW);
+          analogWrite(CONF_LED_RIGHT_PIN, 0);
         }
         break;
       }
     case CONF_LED_MICRO:
       {
-        analogWrite(LED_RED, 255 - r);
-        analogWrite(LED_GREEN, 255 - g);
-        analogWrite(LED_BLUE, 255 - b);
+        analogWrite(LED_RED,   (255 - r*ledBrightness/255) );
+        analogWrite(LED_GREEN, (255 - g*ledBrightness/255) );
+        analogWrite(LED_BLUE,  (255 - b*ledBrightness/255) );
         break;
       }
 
       case CONF_LED_ALL:
       {
-       setLedColor(CONF_LED_LEFT,ledColorNumber,ledBrightness);
-       setLedColor(CONF_LED_MIDDLE,ledColorNumber,ledBrightness);
-       setLedColor(CONF_LED_RIGHT,ledColorNumber,ledBrightness);
-       setLedColor(CONF_LED_MICRO,ledColorNumber,ledBrightness);
+       setLedColor(CONF_LED_LEFT, ledColorNumber, ledBrightness);
+       setLedColor(CONF_LED_MIDDLE, ledColorNumber, ledBrightness);
+       setLedColor(CONF_LED_RIGHT, ledColorNumber, ledBrightness);
+       setLedColor(CONF_LED_MICRO, ledColorNumber, ledBrightness);
        break;
       }
 
-  }  //end switch
+  }  // end switch
 
-
-}
-
-
-
+} // end LSOutput::setLedColor
 
 #endif
