@@ -1,4 +1,4 @@
-Version 4.1.0 | 2025-Jan-27
+Version 4.1.0 | 2025-March-31
 - Software bug fixes and added features 
 	- TinyUSB Library bug fixed, now works with latest version (3.4.2) of the library
 	- Full calibration changes
@@ -20,11 +20,20 @@ Version 4.1.0 | 2025-Jan-27
 		- Output now starts at 0% at the end of the innder deadzone, and goes to 100% at the edge of the outer deadzone
 	- Added additional sounds for startup, powering off, and errors
 	- Added watchdog implementation
+	- Added safe mode accessible by Hub Buttons, or triggered during hardware error or watchdog
+- Hardware changes
+	- Ribs were added to the screw bosses on the LipSync Hub Top and LipSync Hub Bottom to increase strength
+	- LipSync Mouthpiece was simplified
+		- The updated mouthpiece is comprised of the same hydrophobic syringe filter, a Luer adapter, and a large silicone straw. This simplified design is easier to assemble, easier to clean, and has the added benefit of reducing the overall cost.
 - Documentation updates
 	- Maker Guide
 		- TinyUSB library - can now use latest version (3.4.2)
+		- Added additional assembly step to test joystick components before assembly into Joystick Gimbal and housing
 	- User Guide
 		- Updated to reflect changes to menu structure and full calibration process
+		- Expanded troubleshooting with error messages
+	- Created LipSync Firmware Upgrade Guide
+	- Created LipSync Information Sheet
 
 
 Version 4.0.2 | 2024-Dec-10
