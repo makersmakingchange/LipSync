@@ -2,7 +2,7 @@
 
 The LipSync is a mouth-operated sip-and-puff joystick that can emulate a mouse, wireless Bluetooth mouse, or gamepad. It enables people with disabilities that limit their mobility to control a computer, gaming console, smart phone, or tablet.
 
-This most recent version, the LipSync 4.0, is made up of the LipSync Joystick and LipSync Hub. The Joystick is the primary user interface, and contains a low-force Hall-Effect joystick and sip and puff sensors. The Hub has a display that provides a graphical interface for independently adjusting settings, as well as it provides the connection to the host device and up to three external assistive switches with 3.5 mm jacks.
+This most recent version, the LipSync 4.1, is made up of the LipSync Joystick and LipSync Hub. The Joystick is the primary user interface, and contains a low-force Hall-Effect joystick and sip and puff sensors. The Hub has a display that provides a graphical interface for independently adjusting settings, as well as it provides the connection to the host device and up to three external assistive switches with 3.5 mm jacks.
 
 The device is comprised of off-the-shelf electronics and hardware, a custom PCB and 3D printed parts. The overall cost of materials (including materials required in bulk) for a single build is about $325 (plus shipping). In larger quantities, the cost of materials is closer to $175.
 
@@ -12,7 +12,7 @@ The LipSync is Open Assistive Technology (OpenAT) and is certified as Open Sourc
 
 Older versions of the LipSync are now obsolete. Documentation and design files are still available at the [LipSync Classic Repository.](https://github.com/makersmakingchange/OldLipSync)
 
-Last updated: 2024-Apr-24
+Last updated: 2025-Mar-31
 
 <img src="Photos/LipSync-4.jpg" width="500" alt="Picture of LipSync.">
 
@@ -65,12 +65,12 @@ As open source assistive technology, you are welcomed and encouraged to improve 
 ### Documentation
 | Document             | Version | Link                                                                     | Notes             |
 |----------------------|---------|--------------------------------------------------------------------------|-------------------|
-| Design Rationale     | 4.0     | [LipSync_Design_Rationale](/Documentation/LipSync_Design_Rationale.pdf)  |                   |
-| Maker Guide          | 4.0.1   | [LipSync_Maker_Guide](/Documentation/LipSync_Maker_Guide.pdf)            |                   |
-| Bill of Materials    | 4.0     | [LipSync_Bill_of_Materials](/Documentation/LipSync_BOM.csv)              |                   |
-| User Guide           | 4.0     | [LipSync_User_Guide](/Documentation/LipSync_User_Guide.pdf)              |                   |
-| Quickstart Guide     | 4.0     | [LipSync_Quickstart_Guide](/Documentation/LipSync_Quickstart_Guide.pdf)  |                   |
-| Changelog            | 4.0     | [LipSync_Changelog](CHANGES.txt)                                         |                   |
+| Design Rationale     | 4.1     | [LipSync_Design_Rationale](/Documentation/LipSync_Design_Rationale.pdf)  |                   |
+| Maker Guide          | 4.1   | [LipSync_Maker_Guide](/Documentation/LipSync_Maker_Guide.pdf)            |                   |
+| Bill of Materials    | 4.1     | [LipSync_Bill_of_Materials](/Documentation/LipSync_BOM.csv)              |                   |
+| User Guide           | 4.1     | [LipSync_User_Guide](/Documentation/LipSync_User_Guide.pdf)              |                   |
+| Quickstart Guide     | 4.1     | [LipSync_Quickstart_Guide](/Documentation/LipSync_Quickstart_Guide.pdf)  |                   |
+| Changelog            | 4.1     | [LipSync_Changelog](CHANGES.txt)                                         |                   |
 
 ### Design Files
  - [CAD Files](/Design_Files/CAD_Design_Files)
@@ -83,7 +83,7 @@ As open source assistive technology, you are welcomed and encouraged to improve 
 
 
 ## License
-Copyright (c) 2024 Neil Squire / Makers Making Change.
+Copyright (c) 2024-2025 Neil Squire / Makers Making Change.
 
 This repository describes Open Hardware:
  - Everything needed or used to design, make, test, or prepare the LipSync is licensed under the [CERN 2.0 Weakly Reciprocal license (CERN-OHL-W v2) or later](https://cern.ch/cern-ohl ) .
@@ -133,7 +133,7 @@ Designers:
  - Tyler Fentie, Neil Squire Society / Makers Making Change.
  - Milad Hajihassan, Neil Squire Society / Makers Making Change.
  - Jake McIvor, Neil Squire Society / Makers Making Change.
-  - Stephen Moyer, Neil Squire Society / Makers Making Change.
+ - Stephen Moyer, Neil Squire Society / Makers Making Change.
  - Brad Wellington, Neil Squire Society / Makers Making Change.
  - Josie Versloot, Neil Squire Society / Makers Making Change.
  
