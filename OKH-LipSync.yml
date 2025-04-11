@@ -1,0 +1,83 @@
+title: LipSync
+description: "The LipSync is a mouth-operated sip-and-puff joystick that can emulate a mouse, wireless mouse, or gamepad. It enables people with disabilities that have limited upper body mobility to control a computer, gaming console, smart phone, or tablet. "
+intended-use: The LipSync is intended for use by people with disabilities as an alternative
+  input device for computers, mobile devices, and gaming consoles.
+keywords:
+  - openAT
+  - computer-access
+  - sip-and-puff
+  - disability
+  - accessibility
+project-link: https://github.com/makersmakingchange/LipSync
+image: https://github.com/makersmakingchange/LipSync/blob/main/Photos/LipSync.jpg
+made: true
+made-independently: true
+license:
+  hardware: CERN-OHL-W-2.0
+  documentation: CC-BY-SA-4.0
+  software: GPL-3.0-or-later
+licensor:
+  name: Jacob McIvor
+  affiliation: Neil Squire Society
+  email: jakem@neilsquire.ca
+okh-manifest-version: 1.0.0
+date-created: 2024-01-10
+date-updated: 2024-01-10
+manifest-author:
+  name: Jacob McIvor
+  affiliation: Neil Squire Society
+  email: jakem@neilsquire.ca
+manifest-language: en-CA
+contact:
+  name: Makers Making Change
+  affiliation: Neil Squire Society
+  email: info@makersmakingchange.com
+  social:
+    - platform: Instagram
+      user-handle: "@makermakingchange"
+    - platform: Twitter
+      user-handle: "@makermakechange"
+contributors:
+  - name: Jacob McIvor
+    affiliation: Neil Squire Society
+    email: jakem@neilsquire.ca
+  - name: Josie Versloot
+    affiliation: Neil Squire Society
+    email: josiev@neilsquire.ca
+  - name: Stephen Moyer
+    affiliation: Neil Squire Society
+    email: stephenm@neilsquire.ca
+  - name: Milad Hajihassan
+    affiliation: Neil Squire Society
+    email: miladh@neilsquire.ca
+  - name: Derrick Andrews
+    affiliation: Neil Squire Society
+    email: derricka@neilsquire.ca
+  - name: Brad Wellington
+    affiliation: Neil Squire Society
+    email: bradw@neilsquire.ca 
+  - name: Stephan Dobri
+    affiliation: Neil Squire Society
+    email: stephand@neilsquire.ca
+version: "4.0"
+development-stage: product
+documentation-home: https://github.com/makersmakingchange/LipSync
+archive-download: https://github.com/makersmakingchange/LipSync/archive/refs/heads/main.zip
+design-files:
+  - path: https://github.com/makersmakingchange/LipSync/tree/master/Design_Files/CAD_Design_Files
+    title: LipSync CAD Files
+bom: https://github.com/makersmakingchange/LipSync/tree/master/Documentation/LipSync_BOM.xlsx
+making-instructions:
+  - path: https://github.com/makersmakingchange/LipSync/tree/master/Documentation/LipSync_Maker_Guide.pdf
+    title: LipSync Maker Guide
+manufacturing-files:
+  - path: https://github.com/makersmakingchange/LipSync/tree/master/Build_Files/3D_Printing_Files
+    title: 3D Printing Files
+  - path: https://github.com/makersmakingchange/LipSync/tree/master/Build_Files/PCB_Build_Files
+    title: PCB Build Files
+operating-instructions:
+  - path: https://github.com/makersmakingchange/LipSync/tree/master/Documentation/LipSync_User_Guide.pdf
+    title: LipSync User Guide
+software:
+  - path: https://github.com/makersmakingchange/LipSync/tree/master/Build_Files/Firmware_Files
+    title: LipSync Firmware
