@@ -12,7 +12,9 @@ The LipSync is Open Assistive Technology (OpenAT) and is certified as Open Sourc
 
 Older versions of the LipSync are now obsolete. Documentation and design files are still available at the [LipSync Classic Repository.](https://github.com/makersmakingchange/OldLipSync)
 
-Last updated: 2025-Mar-31
+The existing LipSync Interface Cable options in the BOM are not in stock. We are working on sourcing suitable alternatives.
+
+Last updated: 2025-Jun-10
 
 <img src="Photos/LipSync-4.jpg" width="500" alt="Picture of LipSync.">
 
