@@ -79,9 +79,9 @@ As open source assistive technology, you are welcomed and encouraged to improve 
  - [PCB Files](/Design_Files/PCB_Design_Files)
 
 ### Build Files
- - [3D Printing Files](/Build_Files/3D_Printing_Files)
- - [PCB Files](/PCB_Build_Files/)
- - [Firmware Files](Build_Files/Firmware_Files)
+ - [3D Printing Files](/Build_Files/3D_Printing_Files/)
+ - [PCB Files](/Build_Files/PCB_Build_Files/)
+ - [Firmware Files](/Build_Files/Firmware_Files)
 
 
 ## License
