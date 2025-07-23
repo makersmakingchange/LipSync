@@ -14,7 +14,7 @@ Older versions of the LipSync are now obsolete. Documentation and design files a
 
 The existing LipSync Interface Cable options in the BOM are not in stock. We are working on sourcing suitable alternatives.
 
-Last updated: 2025-Jun-10
+Last updated: 2025-Jul-22
 
 <img src="Photos/LipSync-4.jpg" width="500" alt="A green 3D-printed LipSync joystick with a pink sip-and-puff tube is mounted on an adjustable black arm. In front of it sits the LipSync Hub, a black and green control box with a small display screen, labeled buttons ('NEXT' and 'SEL'), indicator lights, and a USB cable connected at the bottom. Both devices are placed on a light wooden surface against a plain light gray wall.">
 
@@ -43,15 +43,13 @@ If you have the skills and equipment to build this device, and would like to don
 
 The [Maker Guide](/Documentation/LipSync_Maker_Guide.pdf) contains all the necessary information to build this device, including tool lists, assembly instructions, programming instructions and testing instructions.
 
-
-
 ### 2. Order the Off-The-Shelf Components
 
-The [Bill of Materials](/Documentation/LipSync_BOM.xlsx) lists all of the parts and components required to build the device. 
+The [Bill of Materials](/Documentation/LipSync_BOM.csv) lists all of the parts and components required to build the device. 
 
 ### 3. Print the 3D Printable components
 
-All of the files and individual print files can be in the [/Build_Files/3D_Printing_Files](/Build_Files/3D_Printing/) folder.
+All of the files and individual print files can be in the [/Build_Files/3D_Printing_Files](/Build_Files/3D_Printing_Files/) folder.
 
 
 ### 4. Assemble the LipSync
@@ -68,7 +66,7 @@ As open source assistive technology, you are welcomed and encouraged to improve 
 | Document             | Version | Link                                                                     | Notes             |
 |----------------------|---------|--------------------------------------------------------------------------|-------------------|
 | Design Rationale     | 4.1     | [LipSync_Design_Rationale](/Documentation/LipSync_Design_Rationale.pdf)  |                   |
-| Maker Guide          | 4.1   | [LipSync_Maker_Guide](/Documentation/LipSync_Maker_Guide.pdf)            |                   |
+| Maker Guide          | 4.1     | [LipSync_Maker_Guide](/Documentation/LipSync_Maker_Guide.pdf)            |                   |
 | Bill of Materials    | 4.1     | [LipSync_Bill_of_Materials](/Documentation/LipSync_BOM.csv)              |                   |
 | User Guide           | 4.1     | [LipSync_User_Guide](/Documentation/LipSync_User_Guide.pdf)              |                   |
 | Quickstart Guide     | 4.1     | [LipSync_Quickstart_Guide](/Documentation/LipSync_Quickstart_Guide.pdf)  |                   |
