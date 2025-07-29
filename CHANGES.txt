@@ -1,3 +1,12 @@
+Version 4.1.1 | 2025-July-24
+- Added CSV version of BOM to documentation folder to make it easier to see via GitHub
+- Added copy of TLV493D-A1B6 library to repository
+- Updated Maker Guide
+  - Added instructions for manually adding TLV493D-A1B6 library
+  - Added troubleshooting instructions for Seeeduino missing Python error
+  - Added additional 3D printing instructions around tolerance and other processes
+
+
 Version 4.1.0 | 2025-March-31
 - Software bug fixes and added features 
 	- TinyUSB Library bug fixed, now works with latest version (3.4.2) of the library
