@@ -64,20 +64,20 @@ development-stage: product
 documentation-home: https://github.com/makersmakingchange/LipSync
 archive-download: https://github.com/makersmakingchange/LipSync/archive/refs/heads/main.zip
 design-files:
-  - path: https://github.com/makersmakingchange/LipSync/tree/master/Design_Files/CAD_Design_Files
+  - path: https://github.com/makersmakingchange/LipSync/tree/main/Design_Files/CAD_Design_Files
     title: LipSync CAD Files
-bom: https://github.com/makersmakingchange/LipSync/tree/master/Documentation/LipSync_BOM.xlsx
+bom: https://github.com/makersmakingchange/LipSync/tree/main/Documentation/LipSync_BOM.xlsx
 making-instructions:
-  - path: https://github.com/makersmakingchange/LipSync/tree/master/Documentation/LipSync_Maker_Guide.pdf
+  - path: https://github.com/makersmakingchange/LipSync/tree/main/Documentation/LipSync_Maker_Guide.pdf
     title: LipSync Maker Guide
 manufacturing-files:
-  - path: https://github.com/makersmakingchange/LipSync/tree/master/Build_Files/3D_Printing_Files
+  - path: https://github.com/makersmakingchange/LipSync/tree/main/Build_Files/3D_Printing_Files
     title: 3D Printing Files
-  - path: https://github.com/makersmakingchange/LipSync/tree/master/Build_Files/PCB_Build_Files
+  - path: https://github.com/makersmakingchange/LipSync/tree/main/Build_Files/PCB_Build_Files
     title: PCB Build Files
 operating-instructions:
-  - path: https://github.com/makersmakingchange/LipSync/tree/master/Documentation/LipSync_User_Guide.pdf
+  - path: https://github.com/makersmakingchange/LipSync/tree/main/Documentation/LipSync_User_Guide.pdf
     title: LipSync User Guide
 software:
-  - path: https://github.com/makersmakingchange/LipSync/tree/master/Build_Files/Firmware_Files
+  - path: https://github.com/makersmakingchange/LipSync/tree/main/Build_Files/Firmware_Files
     title: LipSync Firmware
