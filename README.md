@@ -133,7 +133,7 @@ Designers:
  - Tyler Fentie, Neil Squire Society / Makers Making Change.
  - Milad Hajihassan, Neil Squire Society / Makers Making Change.
  - Jake McIvor, Neil Squire Society / Makers Making Change.
- - Stephan Moyer, Neil Squire Society / Makers Making Change.
+ - Stephen Moyer, Neil Squire Society / Makers Making Change.
  - Brad Wellington, Neil Squire Society / Makers Making Change.
  - Josie Versloot, Neil Squire Society / Makers Making Change.
  
