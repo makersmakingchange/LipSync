@@ -105,12 +105,12 @@ The LipSync was designed by Neil Squire Society / Makers Making Change. The init
 The latest design (V4.0) incorporates feedback and suggestions from numerous users, clinicians, and volunteer makers. In particular, 4.0.AlphaII was tested by the following users: Omar Al-azawi, Don Danbrook, Ean Price, Jim Ryan and Kaileen Selig.
 
 V4.0 incorporates several commercially available open source hardware components:
- - [Adafruit TLV493D Triple-Axis Magnetometer - STEMMA QT / Qwiic](https://www.adafruit.com/product/4366). The PCB design is available under a CC-BY-SA 4.0 license at https://github.com/adafruit/Adafruit-TLV493D-PCB. 
- - [Adafruit LPS33HW Water Resistant Pressure Sensor - STEMMA QT](https://www.adafruit.com/product/4414). The PCB design is available under a CC-BY-SA 4.0 license at https://github.com/adafruit/Adafruit-LPS3X-PCB. 
- - [Adafruit LPS22 Pressure Sensor - STEMMA QT / Qwiic - LPS22HB](https://www.adafruit.com/product/4633). The PCB design is available under a CC-BY-SA 4.0 license at https://github.com/adafruit/Adafruit-LPS2X-PCB. 
- - [Adafruit 128X64 monochrome OLED Display Board](https://www.adafruit.com/product/938). The PCB design is available under a CC-BY-SA 4.0 license at https://github.com/adafruit/Adafruit-128x64-Monochrome-OLED-PCB.
+ - [Adafruit TLV493D Triple-Axis Magnetometer - STEMMA QT / Qwiic](https://www.adafruit.com/product/4366). The PCB design is available under a CC-BY-SA 3.0 license at https://github.com/adafruit/Adafruit-TLV493D-PCB. 
+ - [Adafruit LPS33HW Water Resistant Pressure Sensor - STEMMA QT](https://www.adafruit.com/product/4414). The PCB design is available under a CC-BY-SA 3.0 license at https://github.com/adafruit/Adafruit-LPS3X-PCB. 
+ - [Adafruit LPS22 Pressure Sensor - STEMMA QT / Qwiic - LPS22HB](https://www.adafruit.com/product/4633). The PCB design is available under a CC-BY-SA 3.0 license at https://github.com/adafruit/Adafruit-LPS2X-PCB. 
+ - [Adafruit 128X64 monochrome OLED Display Board](https://www.adafruit.com/product/938). The PCB design is available under a CC-BY-SA 3.0 license at https://github.com/adafruit/Adafruit-128x64-Monochrome-OLED-PCB.
  - [SparkFun Qwiic Adapter Board (DEV-14495)](https://www.sparkfun.com/products/14495). The PCB design is available under a CC-BY-SA 4.0 license at https://github.com/sparkfun/Qwiic_Adapter.   
- - [SparkFun RJ11 Breakout Board (BOB-14021)](https://www.sparkfun.com/products/14021). The PCB design is available under a CC-BY-SA 4.0 license at https://github.com/sparkfun/RJ11_Breakout. 
+ - [SparkFun RJ11 Breakout Board (BOB-14021)](https://www.sparkfun.com/products/14021). The PCB design is available under a CC-BY-SA 3.0 license at https://github.com/sparkfun/RJ11_Breakout. 
 
 The LipSync firmware utilizes the Arduino development platform, an open-source electronics platform based on easy-to-use hardware and software. Arduino is developed and maintained by the Arduino community, and the project wouldn't be possible without their contributions.
 Arduino is a registered trademark of Arduino AG. For more information about Arduino and to contribute to the community, visit the official Arduino website at www.arduino.cc.
@@ -146,6 +146,7 @@ The LipSync has been certified as open source hardware by the Open Source Hardwa
 ---
 
 
+<!-- ABOUT MMC START -->
 ## About Makers Making Change
 [<img src="https://raw.githubusercontent.com/makersmakingchange/makersmakingchange/main/img/mmc_logo.svg" width="500" alt="Makers Making Change Logo">](https://www.makersmakingchange.com/)
 
@@ -155,7 +156,7 @@ Makers Making Change leverages the capacity of community based Makers, Disabilit
 
  - Website: [www.MakersMakingChange.com](https://www.makersmakingchange.com/)
  - GitHub: [makersmakingchange](https://github.com/makersmakingchange)
- - Twitter: [@makermakechange](https://twitter.com/makermakechange)
+ - Bluesky: [@makersmakingchange.bsky.social](https://bsky.app/profile/makersmakingchange.bsky.social)
  - Instagram: [@makersmakingchange](https://www.instagram.com/makersmakingchange)
  - Facebook: [makersmakechange](https://www.facebook.com/makersmakechange)
  - LinkedIn: [Neil Squire Society](https://www.linkedin.com/company/neil-squire-society/)
@@ -164,3 +165,4 @@ Makers Making Change leverages the capacity of community based Makers, Disabilit
 
 ### Contact Us
 For technical questions, to get involved, or to share your experience we encourage you to [visit our website](https://www.makersmakingchange.com/) or [contact us](https://www.makersmakingchange.com/s/contact).
+<!-- ABOUT MMC END -->
