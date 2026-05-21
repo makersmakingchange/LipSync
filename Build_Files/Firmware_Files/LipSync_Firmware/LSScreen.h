@@ -2,7 +2,7 @@
 * File: LSScreen.h
 * Firmware: LipSync
 * Developed by: MakersMakingChange
-* Version: v4.1 (28 March 2025)
+* Version: v4.1.2 (21 May 2026)
   License: GPL v3.0 or later
 
   Copyright (C) 2024 - 2025 Neil Squire Society
@@ -1773,6 +1773,23 @@ void LSScreen::hardwareErrorPage() {
   }
 
 // Format error code using binary representation of whether sensors are connected
+// ERROR-000 - No error
+// ERROR-001 - Joystick Sensor
+// ERROR-002 - Mouthpiece Sensor
+// ERROR-003 - Mouthpiece Sensor and Joystick Sensor
+// ERROR-004 - Ambient Pressure Sensor
+// ERROR-005 - Ambient Pressure Sensor and Joystick Sensor
+// ERROR-006 - Ambient Pressure Sensor and Mouthpiece Sensor
+// ERROR-007 - Ambient, Mouthpiece, Joystick (All Joystick Sensors)
+// ERROR-008 - Display
+// ERROR-009 - Display, Joystick
+// ERROR-010 - Display, Mouthpiece,
+// ERROR-011 - Display, Mouthpiece, Joystick
+// ERROR-012 - Display, Ambient
+// ERROR-013 - Display, Ambient, Joystick
+// ERROR-014 - Display, Ambient, Mouthpiece
+// ERROR-015 - Display, Ambient, Mouthpiece, Joystick
+
   if (!g_joystickSensorConnected)
     _hardwareErrorCode |= 1 << 0;
   if (!g_mouthpiecePressureSensorConnected)
